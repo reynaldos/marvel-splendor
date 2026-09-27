@@ -47,10 +47,9 @@ function seatLabel(seat: number, players: Array<{ seat: number; name: string }>,
   return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
 }
 
-/** Card ids double as the display label — the dataset has no `name` field (see ARCHITECTURE.md's dataset caveat). */
 function cardLabel(cardId: string): string {
   const card = getCard(cardId);
-  return `${cardId} (Lv${card.level})`;
+  return `${card.name} (Lv${card.level})`;
 }
 
 function describeMove(

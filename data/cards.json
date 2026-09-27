@@ -2,11 +2,13 @@
   "_meta": {
     "source": "Base Splendor 90-card table from bouk/splendimax 'Splendor Cards.csv' (github.com/bouk/splendimax), cross-verified card-for-card against seal256/splendor 'assets/cards.csv' (github.com/seal256/splendor). Gem-to-stone mapping: diamond/white->mind, sapphire/blue->space, emerald/green->soul, ruby/red->reality, onyx/black->power.",
     "tagRule": "Level 1: tag=1 on the five 1-point cards, else 0. Level 3: tag=2 on 5-point cards, tag=1 on 4-point cards, 0 on 3-point cards. Level 2: all 0 -- the base list has fifteen 2-point level-2 cards, so tagging them (as a naive points-based rule would) yields 40 tags; dropping level-2 tags lands the deck at exactly 25 total Avengers tags, within the ~20-25 target.",
+    "names": "Placeholder names: real Marvel characters, NOT matched card-for-card to the physical deck. Avengers names sit on tagged cards.",
     "note": "costs mirror base Splendor pending verification against physical Marvel copy"
   },
   "cards": [
     {
       "id": "c1-01",
+      "name": "Killmonger",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -20,6 +22,7 @@
     },
     {
       "id": "c1-02",
+      "name": "Vulture",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -33,6 +36,7 @@
     },
     {
       "id": "c1-03",
+      "name": "Mysterio",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -45,6 +49,7 @@
     },
     {
       "id": "c1-04",
+      "name": "Green Goblin",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -57,6 +62,7 @@
     },
     {
       "id": "c1-05",
+      "name": "Doctor Octopus",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -68,6 +74,7 @@
     },
     {
       "id": "c1-06",
+      "name": "Venom",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -79,6 +86,7 @@
     },
     {
       "id": "c1-07",
+      "name": "Electro",
       "level": 1,
       "bonus": "power",
       "points": 0,
@@ -89,6 +97,7 @@
     },
     {
       "id": "c1-08",
+      "name": "Wasp",
       "level": 1,
       "bonus": "power",
       "points": 1,
@@ -99,6 +108,7 @@
     },
     {
       "id": "c1-09",
+      "name": "Sandman",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -112,6 +122,7 @@
     },
     {
       "id": "c1-10",
+      "name": "Lizard",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -125,6 +136,7 @@
     },
     {
       "id": "c1-11",
+      "name": "Kingpin",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -137,6 +149,7 @@
     },
     {
       "id": "c1-12",
+      "name": "Bullseye",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -149,6 +162,7 @@
     },
     {
       "id": "c1-13",
+      "name": "Crossbones",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -160,6 +174,7 @@
     },
     {
       "id": "c1-14",
+      "name": "Baron Zemo",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -171,6 +186,7 @@
     },
     {
       "id": "c1-15",
+      "name": "Ronan",
       "level": 1,
       "bonus": "space",
       "points": 0,
@@ -181,6 +197,7 @@
     },
     {
       "id": "c1-16",
+      "name": "Quicksilver",
       "level": 1,
       "bonus": "space",
       "points": 1,
@@ -191,6 +208,7 @@
     },
     {
       "id": "c1-17",
+      "name": "Ego",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -204,6 +222,7 @@
     },
     {
       "id": "c1-18",
+      "name": "Ebony Maw",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -217,6 +236,7 @@
     },
     {
       "id": "c1-19",
+      "name": "Proxima Midnight",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -229,6 +249,7 @@
     },
     {
       "id": "c1-20",
+      "name": "Corvus Glaive",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -241,6 +262,7 @@
     },
     {
       "id": "c1-21",
+      "name": "Cull Obsidian",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -252,6 +274,7 @@
     },
     {
       "id": "c1-22",
+      "name": "Dormammu",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -263,6 +286,7 @@
     },
     {
       "id": "c1-23",
+      "name": "Kaecilius",
       "level": 1,
       "bonus": "mind",
       "points": 0,
@@ -273,6 +297,7 @@
     },
     {
       "id": "c1-24",
+      "name": "Winter Soldier",
       "level": 1,
       "bonus": "mind",
       "points": 1,
@@ -283,6 +308,7 @@
     },
     {
       "id": "c1-25",
+      "name": "Mordo",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -296,6 +322,7 @@
     },
     {
       "id": "c1-26",
+      "name": "Ghost",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -309,6 +336,7 @@
     },
     {
       "id": "c1-27",
+      "name": "Yellowjacket",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -321,6 +349,7 @@
     },
     {
       "id": "c1-28",
+      "name": "Abomination",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -333,6 +362,7 @@
     },
     {
       "id": "c1-29",
+      "name": "Whiplash",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -344,6 +374,7 @@
     },
     {
       "id": "c1-30",
+      "name": "Mandarin",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -355,6 +386,7 @@
     },
     {
       "id": "c1-31",
+      "name": "Taskmaster",
       "level": 1,
       "bonus": "soul",
       "points": 0,
@@ -365,6 +397,7 @@
     },
     {
       "id": "c1-32",
+      "name": "Okoye",
       "level": 1,
       "bonus": "soul",
       "points": 1,
@@ -375,6 +408,7 @@
     },
     {
       "id": "c1-33",
+      "name": "Malekith",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -388,6 +422,7 @@
     },
     {
       "id": "c1-34",
+      "name": "Surtur",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -401,6 +436,7 @@
     },
     {
       "id": "c1-35",
+      "name": "Grandmaster",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -413,6 +449,7 @@
     },
     {
       "id": "c1-36",
+      "name": "Collector",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -425,6 +462,7 @@
     },
     {
       "id": "c1-37",
+      "name": "Ulysses Klaue",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -436,6 +474,7 @@
     },
     {
       "id": "c1-38",
+      "name": "Aldrich Killian",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -447,6 +486,7 @@
     },
     {
       "id": "c1-39",
+      "name": "Justin Hammer",
       "level": 1,
       "bonus": "reality",
       "points": 0,
@@ -457,6 +497,7 @@
     },
     {
       "id": "c1-40",
+      "name": "Valkyrie",
       "level": 1,
       "bonus": "reality",
       "points": 1,
@@ -467,6 +508,7 @@
     },
     {
       "id": "c2-01",
+      "name": "Star-Lord",
       "level": 2,
       "bonus": "power",
       "points": 1,
@@ -479,6 +521,7 @@
     },
     {
       "id": "c2-02",
+      "name": "Gamora",
       "level": 2,
       "bonus": "power",
       "points": 1,
@@ -491,6 +534,7 @@
     },
     {
       "id": "c2-03",
+      "name": "Drax",
       "level": 2,
       "bonus": "power",
       "points": 2,
@@ -503,6 +547,7 @@
     },
     {
       "id": "c2-04",
+      "name": "Rocket",
       "level": 2,
       "bonus": "power",
       "points": 2,
@@ -514,6 +559,7 @@
     },
     {
       "id": "c2-05",
+      "name": "Groot",
       "level": 2,
       "bonus": "power",
       "points": 2,
@@ -524,6 +570,7 @@
     },
     {
       "id": "c2-06",
+      "name": "Nebula",
       "level": 2,
       "bonus": "power",
       "points": 3,
@@ -534,6 +581,7 @@
     },
     {
       "id": "c2-07",
+      "name": "Mantis",
       "level": 2,
       "bonus": "space",
       "points": 1,
@@ -546,6 +594,7 @@
     },
     {
       "id": "c2-08",
+      "name": "Shuri",
       "level": 2,
       "bonus": "space",
       "points": 1,
@@ -558,6 +607,7 @@
     },
     {
       "id": "c2-09",
+      "name": "Nakia",
       "level": 2,
       "bonus": "space",
       "points": 2,
@@ -569,6 +619,7 @@
     },
     {
       "id": "c2-10",
+      "name": "M'Baku",
       "level": 2,
       "bonus": "space",
       "points": 2,
@@ -581,6 +632,7 @@
     },
     {
       "id": "c2-11",
+      "name": "Wong",
       "level": 2,
       "bonus": "space",
       "points": 2,
@@ -591,6 +643,7 @@
     },
     {
       "id": "c2-12",
+      "name": "Nick Fury",
       "level": 2,
       "bonus": "space",
       "points": 3,
@@ -601,6 +654,7 @@
     },
     {
       "id": "c2-13",
+      "name": "Maria Hill",
       "level": 2,
       "bonus": "mind",
       "points": 1,
@@ -613,6 +667,7 @@
     },
     {
       "id": "c2-14",
+      "name": "Agent Coulson",
       "level": 2,
       "bonus": "mind",
       "points": 1,
@@ -625,6 +680,7 @@
     },
     {
       "id": "c2-15",
+      "name": "Peggy Carter",
       "level": 2,
       "bonus": "mind",
       "points": 2,
@@ -637,6 +693,7 @@
     },
     {
       "id": "c2-16",
+      "name": "Sif",
       "level": 2,
       "bonus": "mind",
       "points": 2,
@@ -648,6 +705,7 @@
     },
     {
       "id": "c2-17",
+      "name": "Heimdall",
       "level": 2,
       "bonus": "mind",
       "points": 2,
@@ -658,6 +716,7 @@
     },
     {
       "id": "c2-18",
+      "name": "Odin",
       "level": 2,
       "bonus": "mind",
       "points": 3,
@@ -668,6 +727,7 @@
     },
     {
       "id": "c2-19",
+      "name": "Korg",
       "level": 2,
       "bonus": "soul",
       "points": 1,
@@ -680,6 +740,7 @@
     },
     {
       "id": "c2-20",
+      "name": "Yondu",
       "level": 2,
       "bonus": "soul",
       "points": 1,
@@ -692,6 +753,7 @@
     },
     {
       "id": "c2-21",
+      "name": "Daredevil",
       "level": 2,
       "bonus": "soul",
       "points": 2,
@@ -704,6 +766,7 @@
     },
     {
       "id": "c2-22",
+      "name": "Luke Cage",
       "level": 2,
       "bonus": "soul",
       "points": 2,
@@ -715,6 +778,7 @@
     },
     {
       "id": "c2-23",
+      "name": "Jessica Jones",
       "level": 2,
       "bonus": "soul",
       "points": 2,
@@ -725,6 +789,7 @@
     },
     {
       "id": "c2-24",
+      "name": "Iron Fist",
       "level": 2,
       "bonus": "soul",
       "points": 3,
@@ -735,6 +800,7 @@
     },
     {
       "id": "c2-25",
+      "name": "Punisher",
       "level": 2,
       "bonus": "reality",
       "points": 1,
@@ -747,6 +813,7 @@
     },
     {
       "id": "c2-26",
+      "name": "Elektra",
       "level": 2,
       "bonus": "reality",
       "points": 1,
@@ -759,6 +826,7 @@
     },
     {
       "id": "c2-27",
+      "name": "Moon Knight",
       "level": 2,
       "bonus": "reality",
       "points": 2,
@@ -771,6 +839,7 @@
     },
     {
       "id": "c2-28",
+      "name": "She-Hulk",
       "level": 2,
       "bonus": "reality",
       "points": 2,
@@ -782,6 +851,7 @@
     },
     {
       "id": "c2-29",
+      "name": "Ms. Marvel",
       "level": 2,
       "bonus": "reality",
       "points": 2,
@@ -792,6 +862,7 @@
     },
     {
       "id": "c2-30",
+      "name": "Nova",
       "level": 2,
       "bonus": "reality",
       "points": 3,
@@ -802,6 +873,7 @@
     },
     {
       "id": "c3-01",
+      "name": "Thanos",
       "level": 3,
       "bonus": "power",
       "points": 3,
@@ -815,6 +887,7 @@
     },
     {
       "id": "c3-02",
+      "name": "Hawkeye",
       "level": 3,
       "bonus": "power",
       "points": 4,
@@ -825,6 +898,7 @@
     },
     {
       "id": "c3-03",
+      "name": "Vision",
       "level": 3,
       "bonus": "power",
       "points": 4,
@@ -837,6 +911,7 @@
     },
     {
       "id": "c3-04",
+      "name": "Iron Man",
       "level": 3,
       "bonus": "power",
       "points": 5,
@@ -848,6 +923,7 @@
     },
     {
       "id": "c3-05",
+      "name": "Ultron",
       "level": 3,
       "bonus": "space",
       "points": 3,
@@ -861,6 +937,7 @@
     },
     {
       "id": "c3-06",
+      "name": "Scarlet Witch",
       "level": 3,
       "bonus": "space",
       "points": 4,
@@ -871,6 +948,7 @@
     },
     {
       "id": "c3-07",
+      "name": "Captain Marvel",
       "level": 3,
       "bonus": "space",
       "points": 4,
@@ -883,6 +961,7 @@
     },
     {
       "id": "c3-08",
+      "name": "Captain America",
       "level": 3,
       "bonus": "space",
       "points": 5,
@@ -894,6 +973,7 @@
     },
     {
       "id": "c3-09",
+      "name": "Loki",
       "level": 3,
       "bonus": "mind",
       "points": 3,
@@ -907,6 +987,7 @@
     },
     {
       "id": "c3-10",
+      "name": "Black Panther",
       "level": 3,
       "bonus": "mind",
       "points": 4,
@@ -917,6 +998,7 @@
     },
     {
       "id": "c3-11",
+      "name": "Doctor Strange",
       "level": 3,
       "bonus": "mind",
       "points": 4,
@@ -929,6 +1011,7 @@
     },
     {
       "id": "c3-12",
+      "name": "Thor",
       "level": 3,
       "bonus": "mind",
       "points": 5,
@@ -940,6 +1023,7 @@
     },
     {
       "id": "c3-13",
+      "name": "Hela",
       "level": 3,
       "bonus": "soul",
       "points": 3,
@@ -953,6 +1037,7 @@
     },
     {
       "id": "c3-14",
+      "name": "Spider-Man",
       "level": 3,
       "bonus": "soul",
       "points": 4,
@@ -963,6 +1048,7 @@
     },
     {
       "id": "c3-15",
+      "name": "Ant-Man",
       "level": 3,
       "bonus": "soul",
       "points": 4,
@@ -975,6 +1061,7 @@
     },
     {
       "id": "c3-16",
+      "name": "Hulk",
       "level": 3,
       "bonus": "soul",
       "points": 5,
@@ -986,6 +1073,7 @@
     },
     {
       "id": "c3-17",
+      "name": "Red Skull",
       "level": 3,
       "bonus": "reality",
       "points": 3,
@@ -999,6 +1087,7 @@
     },
     {
       "id": "c3-18",
+      "name": "War Machine",
       "level": 3,
       "bonus": "reality",
       "points": 4,
@@ -1009,6 +1098,7 @@
     },
     {
       "id": "c3-19",
+      "name": "Falcon",
       "level": 3,
       "bonus": "reality",
       "points": 4,
@@ -1021,6 +1111,7 @@
     },
     {
       "id": "c3-20",
+      "name": "Black Widow",
       "level": 3,
       "bonus": "reality",
       "points": 5,

@@ -19,6 +19,10 @@ export type CardLevel = 1 | 2 | 3;
 
 export interface Card {
   id: string;
+  /** Display name (placeholder dataset — see data/cards.json `_meta.names`). */
+  name: string;
+  /** Full-card art path/URL; when absent the UI draws a placeholder card. */
+  image?: string;
   level: CardLevel;
   bonus: Stone;
   points: number;

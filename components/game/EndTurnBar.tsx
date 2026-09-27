@@ -43,17 +43,10 @@ function describeStaged(staged: StagedAction): string {
       return `Take ${staged.colors.map((c) => tokenMeta(c).label).join(", ")}`;
     case "reserve":
       return staged.from === "market"
-        ? `Reserve ${cardLabel(staged.cardId)} (Lv${staged.level})`
+        ? `Reserve ${getCard(staged.cardId).name} (Lv${staged.level})`
         : `Reserve blind from the Level ${staged.level} deck`;
     case "recruit":
-      return `Recruit ${cardLabel(staged.cardId)}`;
+      return `Recruit ${getCard(staged.cardId).name}`;
   }
 }
 
-/** Cards have no display name (ARCHITECTURE.md dataset caveat) — fall back
- * to the id, after confirming it resolves so a bad id fails loudly here
- * rather than surfacing a confusing label. */
-function cardLabel(cardId: string): string {
-  getCard(cardId);
-  return cardId;
-}
