@@ -69,7 +69,7 @@ function TeamRow({ cards }: { cards: Card[] }) {
         cards.map((card) => (
           // A margin, not a gap, so every copy is exactly the same width.
           <span key={`${copy}-${card.id}`} aria-hidden={copy !== (looping ? 1 : 0)} className="mx-2 shrink-0">
-            <CardView card={card} className="h-52 w-38 rounded-xl" />
+            <CardView card={card} className="w-38 rounded-xl" />
           </span>
         )),
       )}

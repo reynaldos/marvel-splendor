@@ -60,30 +60,31 @@ export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className 
         </TeamView>
       </div>
       <span className="h-12 w-px bg-border" />
-      <div className="flex gap-1">
+      <div className="flex gap-2">
         {TOKEN_COLORS.map((color) => {
           const meta = tokenMeta(color);
           const filled = cn(meta.swatch, meta.onSwatch);
           const bonus = STONES.includes(color as Stone) ? bonuses[color as Stone] : null;
           return (
-            <div key={color} className="relative h-13 w-8">
+            <div key={color} className="relative h-13 w-7">
               {bonus !== null ? (
                 <span
                   title={`${meta.label} cards`}
-                  // Centered in the part of the square the token doesn't cover.
-                  className={cn(SLOT, "top-0 left-0 rounded-md pb-1 leading-none", bonus > 0 ? filled : EMPTY)}
+                  // Sits a little above center, clear of the stone over the bottom edge.
+                  className={cn(SLOT, "top-1 left-0 rounded-md pb-1 leading-none", bonus > 0 ? filled : EMPTY)}
                 >
                   {bonus > 0 ? bonus : null}
                 </span>
               ) : null}
-              <span title={`${meta.label} tokens`} className="absolute right-0 bottom-0 size-7">
-                {/* Held tokens show the stone itself; a faded one marks the empty slot. */}
+              <span title={`${meta.label} tokens`} className="absolute bottom-0 left-0 size-7">
+                {/* Held tokens show the stone itself; a dark grey one marks the empty slot.
+                    Darkened, not see-through, so the square behind never shows through it. */}
                 <TokenChip
                   color={color}
-                  className={cn("size-full ring-2 ring-card", tokens[color] === 0 && "opacity-25 grayscale")}
+                  className={cn("size-full ring-2 ring-card", tokens[color] === 0 && "brightness-[.3] grayscale")}
                 />
                 {tokens[color] > 0 ? (
-                  <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-white fs-2xs leading-none font-black text-black tabular-nums ring-1 ring-black">
+                  <span className="absolute -right-1.5 -bottom-1.5 flex size-4 items-center justify-center rounded-full bg-white fs-2xs leading-none font-black text-black tabular-nums ring-1 ring-black">
                     {tokens[color]}
                   </span>
                 ) : null}

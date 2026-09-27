@@ -27,7 +27,7 @@ interface CardProps {
   disabled?: boolean;
   reserveAction?: CardActionProps;
   recruitAction?: CardActionProps;
-  /** Pass `h-* w-*` here to resize; the face scales with the card's width. */
+  /** Pass a width (`w-*`) to resize; the height follows and the face scales with it. */
   className?: string;
 }
 
@@ -61,7 +61,7 @@ export function Card({
     return (
       <div
         className={cn(
-          "flex h-22 w-16 shrink-0 items-center justify-center rounded-md bg-muted ring-1 ring-foreground/10",
+          "flex aspect-card w-16 shrink-0 items-center justify-center rounded-md bg-muted ring-1 ring-foreground/10",
           className,
         )}
         aria-label="Face-down card"
@@ -82,7 +82,7 @@ export function Card({
 
   return (
     <div
-      className={cn("relative h-22 w-16 shrink-0", expanded && "z-50", className)}
+      className={cn("relative aspect-card w-16 shrink-0", expanded && "z-50", className)}
       onKeyDown={(e) => {
         if (e.key === "Escape") close();
       }}
@@ -151,7 +151,7 @@ export function Card({
           onClick={close}
           className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none backdrop-blur-xs"
         >
-          <CardView card={card} className="h-84 w-61 rounded-xl" />
+          <CardView card={card} className="w-61 rounded-xl" />
         </button>
       ) : null}
     </div>
@@ -172,7 +172,7 @@ export function CardView({
     <span
       style={style}
       className={cn(
-        "@container relative block h-22 w-16 shrink-0 overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10",
+        "@container relative block aspect-card w-16 shrink-0 overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10",
         className,
       )}
     >

@@ -94,6 +94,10 @@ body {
 }
 
 /* Tiny text sizes expressed in spacing steps so they scale with the game board. */
+/* A character card's proportions: the average of the card art's. Give the card a width. */
+@utility aspect-card {
+  aspect-ratio: 1 / 1.411;
+}
 @utility fs-2xs {
   font-size: calc(var(--spacing) * 2.5);
   line-height: 1.3;
