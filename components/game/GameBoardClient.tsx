@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
 import { useGameUpdates } from "@/components/game/use-game-updates";
+import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
-import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
+import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, type StagedAction } from "@/components/game/staged-action";
@@ -419,19 +418,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           submitting={submitting}
           banterBySeat={banterBySeat}
           menu={
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button type="button" variant="outline" size="icon" aria-label="Menu">
-                  <Menu />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90dvh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Move log</DialogTitle>
-                </DialogHeader>
-                <MoveLog entries={moveLog} players={players} viewerSeat={view.viewerSeat} />
-              </DialogContent>
-            </Dialog>
+            <GameMenu
+              moveLog={moveLog}
+              players={players}
+              viewerSeat={view.viewerSeat}
+              settings={view.settings}
+              finished={view.status === "finished"}
+              busy={submitting || botPlaying}
+              onForfeit={() => void submitMove({ type: "FORFEIT" })}
+            />
           }
           onStageTokenColor={stageTokenColor}
           onUnstageTokenColor={unstageTokenColor}

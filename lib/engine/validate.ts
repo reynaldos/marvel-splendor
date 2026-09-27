@@ -26,6 +26,8 @@ export function validateMove(state: GameState, seat: number, move: Move): Valida
     return fail("Invalid seat.");
   }
 
+  if (move.type === "FORFEIT") return OK;
+
   const isServerMove = move.type === "TIMEOUT_SKIP" || move.type === "END_BY_CLOCK";
   if (!isServerMove && seat !== state.currentSeat) {
     return fail("It is not this seat's turn.");

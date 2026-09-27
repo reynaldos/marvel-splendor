@@ -70,7 +70,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
   const seat = move.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
 
-  if (seat !== state.currentSeat) {
+  // Forfeiting doesn't wait for your turn.
+  if (move.type !== "FORFEIT" && seat !== state.currentSeat) {
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
   }
 
