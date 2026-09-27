@@ -53,7 +53,9 @@ export function PlayerPlaque({
       className={cn(
         "relative flex w-50 flex-col gap-1 rounded-lg bg-card p-1.5 ring-1 ring-foreground/10 transition-shadow",
         className,
-        isCurrentTurn && "ring-2 ring-primary",
+        // The glow is what picks out whose turn it is from across the table.
+        isCurrentTurn &&
+          "shadow-[0_0_calc(var(--spacing)*4)_calc(var(--spacing)*0.5)_rgb(255_255_255/0.55)] ring-2 ring-primary",
       )}
     >
       <div className="flex h-6 items-center gap-1 pr-6">

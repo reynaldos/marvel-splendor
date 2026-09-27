@@ -164,13 +164,13 @@ export function Board({
             avengersHolder={view.avengersHolder}
             players={view.players}
             nameForSeat={nameForSeat}
-            height={70 - headerHeight}
+            height={74 - headerHeight}
           />
         </div>
       </div>
 
       {/* Panels run off the bottom edge, like a physical tray. */}
-      <div className="flex h-24 shrink-0 items-stretch gap-2">
+      <div className="flex h-20 shrink-0 items-stretch gap-2">
         <PlayerPlaque
           player={viewer}
           name={nameForSeat(viewerSeat)}

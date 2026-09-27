@@ -53,7 +53,7 @@ export function ReservedCards({
             key={card.id}
             card={card}
             className={cn(
-              "absolute top-2 h-20 w-14 origin-bottom shadow-md",
+              "absolute top-1.5 h-20 w-14 origin-bottom shadow-md",
               selected && "ring-2 ring-primary",
             )}
             // Fan out around the middle card.
