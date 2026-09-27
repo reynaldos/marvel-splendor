@@ -1,0 +1,1034 @@
+{
+  "_meta": {
+    "source": "Base Splendor 90-card table from bouk/splendimax 'Splendor Cards.csv' (github.com/bouk/splendimax), cross-verified card-for-card against seal256/splendor 'assets/cards.csv' (github.com/seal256/splendor). Gem-to-stone mapping: diamond/white->mind, sapphire/blue->space, emerald/green->soul, ruby/red->reality, onyx/black->power.",
+    "tagRule": "Level 1: tag=1 on the five 1-point cards, else 0. Level 3: tag=2 on 5-point cards, tag=1 on 4-point cards, 0 on 3-point cards. Level 2: all 0 -- the base list has fifteen 2-point level-2 cards, so tagging them (as a naive points-based rule would) yields 40 tags; dropping level-2 tags lands the deck at exactly 25 total Avengers tags, within the ~20-25 target.",
+    "note": "costs mirror base Splendor pending verification against physical Marvel copy"
+  },
+  "cards": [
+    {
+      "id": "c1-01",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-02",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 2,
+        "soul": 1,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-03",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 2,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-04",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "soul": 1,
+        "reality": 3,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-05",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "soul": 2,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-06",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "soul": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-07",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-08",
+      "level": 1,
+      "bonus": "power",
+      "points": 1,
+      "cost": {
+        "space": 4
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-09",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "soul": 1,
+        "reality": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-10",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "soul": 1,
+        "reality": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-11",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "soul": 2,
+        "reality": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-12",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 3,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-13",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-14",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "soul": 2,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-15",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-16",
+      "level": 1,
+      "bonus": "space",
+      "points": 1,
+      "cost": {
+        "reality": 4
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-17",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 1,
+        "reality": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-18",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 2,
+        "reality": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-19",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-20",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "mind": 3,
+        "space": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-21",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "reality": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-22",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-23",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-24",
+      "level": 1,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "soul": 4
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-25",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "reality": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-26",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "reality": 1,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-27",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "reality": 2,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-28",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 3,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-29",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-30",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "reality": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-31",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-32",
+      "level": 1,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "power": 4
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-33",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-34",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 1,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-35",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "soul": 1,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-36",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "reality": 1,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-37",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-38",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "reality": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-39",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-40",
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "mind": 4
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-01",
+      "level": 2,
+      "bonus": "power",
+      "points": 1,
+      "cost": {
+        "mind": 3,
+        "space": 2,
+        "soul": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-02",
+      "level": 2,
+      "bonus": "power",
+      "points": 1,
+      "cost": {
+        "mind": 3,
+        "soul": 3,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-03",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "space": 1,
+        "soul": 4,
+        "reality": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-04",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "soul": 5,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-05",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "mind": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-06",
+      "level": 2,
+      "bonus": "power",
+      "points": 3,
+      "cost": {
+        "power": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-07",
+      "level": 2,
+      "bonus": "space",
+      "points": 1,
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-08",
+      "level": 2,
+      "bonus": "space",
+      "points": 1,
+      "cost": {
+        "space": 2,
+        "soul": 3,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-09",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "mind": 5,
+        "space": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-10",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "mind": 2,
+        "reality": 1,
+        "power": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-11",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "space": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-12",
+      "level": 2,
+      "bonus": "space",
+      "points": 3,
+      "cost": {
+        "space": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-13",
+      "level": 2,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "soul": 3,
+        "reality": 2,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-14",
+      "level": 2,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "mind": 2,
+        "space": 3,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-15",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "soul": 1,
+        "reality": 4,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-16",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "reality": 5,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-17",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "reality": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-18",
+      "level": 2,
+      "bonus": "mind",
+      "points": 3,
+      "cost": {
+        "mind": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-19",
+      "level": 2,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "mind": 3,
+        "soul": 2,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-20",
+      "level": 2,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "mind": 2,
+        "space": 3,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-21",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "mind": 4,
+        "space": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-22",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "space": 5,
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-23",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "soul": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-24",
+      "level": 2,
+      "bonus": "soul",
+      "points": 3,
+      "cost": {
+        "soul": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-25",
+      "level": 2,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "mind": 2,
+        "reality": 2,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-26",
+      "level": 2,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "space": 3,
+        "reality": 2,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-27",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "mind": 1,
+        "space": 4,
+        "soul": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-28",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "mind": 3,
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-29",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-30",
+      "level": 2,
+      "bonus": "reality",
+      "points": 3,
+      "cost": {
+        "reality": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-01",
+      "level": 3,
+      "bonus": "power",
+      "points": 3,
+      "cost": {
+        "mind": 3,
+        "space": 3,
+        "soul": 5,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-02",
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "reality": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-03",
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "soul": 3,
+        "reality": 6,
+        "power": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-04",
+      "level": 3,
+      "bonus": "power",
+      "points": 5,
+      "cost": {
+        "reality": 7,
+        "power": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-05",
+      "level": 3,
+      "bonus": "space",
+      "points": 3,
+      "cost": {
+        "mind": 3,
+        "soul": 3,
+        "reality": 3,
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-06",
+      "level": 3,
+      "bonus": "space",
+      "points": 4,
+      "cost": {
+        "mind": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-07",
+      "level": 3,
+      "bonus": "space",
+      "points": 4,
+      "cost": {
+        "mind": 6,
+        "space": 3,
+        "power": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-08",
+      "level": 3,
+      "bonus": "space",
+      "points": 5,
+      "cost": {
+        "mind": 7,
+        "space": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-09",
+      "level": 3,
+      "bonus": "mind",
+      "points": 3,
+      "cost": {
+        "space": 3,
+        "soul": 3,
+        "reality": 5,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-10",
+      "level": 3,
+      "bonus": "mind",
+      "points": 4,
+      "cost": {
+        "power": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-11",
+      "level": 3,
+      "bonus": "mind",
+      "points": 4,
+      "cost": {
+        "mind": 3,
+        "reality": 3,
+        "power": 6
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-12",
+      "level": 3,
+      "bonus": "mind",
+      "points": 5,
+      "cost": {
+        "mind": 3,
+        "power": 7
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-13",
+      "level": 3,
+      "bonus": "soul",
+      "points": 3,
+      "cost": {
+        "mind": 5,
+        "space": 3,
+        "reality": 3,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-14",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "space": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-15",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "mind": 3,
+        "space": 6,
+        "soul": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-16",
+      "level": 3,
+      "bonus": "soul",
+      "points": 5,
+      "cost": {
+        "space": 7,
+        "soul": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-17",
+      "level": 3,
+      "bonus": "reality",
+      "points": 3,
+      "cost": {
+        "mind": 3,
+        "space": 5,
+        "soul": 3,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-18",
+      "level": 3,
+      "bonus": "reality",
+      "points": 4,
+      "cost": {
+        "soul": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-19",
+      "level": 3,
+      "bonus": "reality",
+      "points": 4,
+      "cost": {
+        "space": 3,
+        "soul": 6,
+        "reality": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-20",
+      "level": 3,
+      "bonus": "reality",
+      "points": 5,
+      "cost": {
+        "soul": 7,
+        "reality": 3
+      },
+      "tags": 2
+    }
+  ]
+}

@@ -1,0 +1,290 @@
+# Marvel Splendor — Architecture
+
+A web implementation of **Splendor: Marvel Edition** (Space Cowboys / Marc André). Play vs. a computer opponent or host a live game session friends join with a share code. Signed-in users get a persistent profile with stats and an avatar. Games are configurable (turn timer, game clock, target points) and include in-game chat and emoji reactions.
+
+**Product inspiration:** [Ephod](https://the-ephod.com/) (iOS/Android) — a Splendor-mechanism mobile game with real-time multiplayer, private games, and rankings. The approved game-screen layout reference is an Ephod screenshot.
+
+> Status: **awaiting approval** — no code has been written against this doc yet.
+
+---
+
+## 1. Game rules reference (verified against the official rulebook)
+
+Source: official Space Cowboys rulebook PDF, cross-checked with BoardGameGeek and multiple reviews. These rules drive the engine; the Marvel edition is **not** a pure reskin of base Splendor.
+
+### Components
+| Component | Count | Notes |
+|---|---|---|
+| Character cards (dev cards) | 90 | Level 1: 40 · Level 2: 30 · Level 3: 20 |
+| Infinity Stone tokens (basic) | 7 each | Mind (yellow), Space (blue), Soul (orange), Power (purple), Reality (red) |
+| Time Stone tokens (green) | 4 | Special — see below |
+| S.H.I.E.L.D. tokens (gray) | 5 | Wildcard, gold-equivalent; only obtainable by reserving |
+| Location tiles (nobles) | 4 | Random `playerCount` tiles used per game; 3 pts each |
+| Avengers Assemble tile | 1 | Contested; 3 pts; stealable |
+
+Setup token supply: 2p → 4 of each basic + 2 green; 3p → 5 of each basic + 3 green; 4p → 7 of each basic + 4 green. Gray always 5. Market: 4 face-up cards per level, refilled immediately.
+
+### Card anatomy
+Cost (basic colors only) · bonus color granted (one of the 5 basic colors) · Infinity Points (0+) · 0–2 **Avengers tags** · all Level 3 cards bear the Time Stone icon.
+
+### Turn: exactly one action
+1. **Take 3 tokens of different basic colors** (fewer if fewer colors available). Green/gray never takeable this way.
+2. **Take 2 tokens of one basic color** — only if that stack has ≥ 4 before taking.
+3. **Reserve a card** (face-up, or blind top-of-deck) + take 1 gray token if any remain. Max 3 reserved; reserved cards can never be discarded.
+4. **Recruit a card** (from market or own reserve). Pay cost minus 1 per matching owned bonus; gray is wild. Green is never spent.
+
+End-of-turn automatic effects, in order:
+- **Time Stone**: first time a player recruits any Level 3 card, they take 1 green token (max 1 per player, ever; cannot be returned or spent).
+- **Avengers Assemble tile**: if the player's total Avengers tags now **strictly exceeds** the current holder's (or reaches ≥ 3 when unclaimed), the tile moves to them.
+- **Location tiles**: player automatically claims **at most one** Location whose bonus requirement they meet (their choice if several qualify).
+- **Hand limit**: if over 10 tokens (all colors counted), return down to 10, player's choice — but green can never be returned.
+
+### Win condition & endgame
+End trigger: a player has **≥ 16 Infinity Points AND ≥ 1 bonus of each of the 5 basic colors AND the green Time Stone**. Finish the round (equal turns). Among qualifying players: (1) most points; (2) Avengers Assemble tile holder; (3) fewest character cards; (4) shared victory. Edge case: if the trigger-er loses the Avengers tile (dropping below 16) before the round ends, the game continues.
+
+Players: 2–4. Turn order clockwise from a random starter.
+
+### Card dataset caveat
+The official 90-card cost table is not published as data. We ship a `cards.json` dataset mirroring base Splendor's well-known cost distribution per level, with points and Avengers tags assigned to match the Marvel edition's counts. Marked clearly in the repo so it can be corrected card-by-card against a physical copy later. Game asset images are supplied by the project owner.
+
+### Extensibility guarantee
+The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated.
+
+---
+
+## 2. Stack
+
+| Concern | Choice |
+|---|---|
+| Framework | Next.js (App Router, TypeScript, **no `src/` folder**) |
+| Styling / components | Tailwind CSS + shadcn/ui (Radix primitives) + Lucide icons |
+| Drag & drop | dnd-kit (token taking, card purchase/reserve) with click fallbacks |
+| ORM / DB | Prisma + Neon Postgres |
+| Auth | Auth0 (`@auth0/nextjs-auth0`); guests allowed for joining games |
+| Realtime | **Pusher Channels** (presence channels for lobby/seats; server broadcasts state) |
+| Storage | Cloudflare R2 (S3 API) for profile avatars |
+| AI flavor | OpenAI — bot table-talk/banter only (moves are rules-based) |
+| Hosting | Vercel · Package manager: pnpm |
+
+---
+
+## 3. High-level architecture
+
+```
+Browser (Next.js client)
+ │  actions: POST /api/games/[id]/moves  ── validate → apply → persist
+ │  reads:   RSC initial load + Pusher `game-{id}` events for live updates
+ ▼
+Next.js route handlers (Vercel serverless)  ←→  Pusher Channels (broadcast)
+ │
+ ├── lib/engine/*  — pure TS game engine (no I/O)
+ ├── lib/bot/*     — deterministic bot policy over the engine
+ ├── Prisma → Neon Postgres (authoritative game state, users, stats)
+ ├── R2 (avatars, presigned upload)
+ └── OpenAI (bot banter, fire-and-forget)
+```
+
+**Server-authoritative, event-sourced-lite.** The client never mutates state; it submits a `Move`. The server loads the game, validates via the pure engine, appends the move to a `Move` log, stores the new state snapshot, and broadcasts. Optimistic concurrency via a `version` int on `Game` prevents double-submits and race conditions between serverless invocations.
+
+### The engine (`lib/engine/`)
+Pure, framework-free TypeScript — the heart of the project and fully unit-testable:
+
+- `types.ts` — `GameState`, `PlayerState`, `Move` (discriminated union: `TAKE_THREE`, `TAKE_TWO`, `RESERVE`, `RECRUIT`, `RETURN_TOKENS`, `CHOOSE_LOCATION`), `Color` enum (5 basic + `TIME` + `SHIELD`).
+- `setup.ts` — seeded-RNG game creation (shuffles reproducible from stored seed).
+- `validate.ts` — `legalMoves(state, playerId)` and `validateMove(state, move)`.
+- `apply.ts` — `applyMove(state, move) → GameState` including all end-of-turn automatics (Time Stone grant, Avengers tile movement, Location claims, hand-limit sub-turn, end-trigger detection, final tiebreak).
+- `view.ts` — `redact(state, viewerId)` hides deck order, opponents' blind-reserved cards, and remaining deck contents from clients.
+
+Some turns need a follow-up decision (return tokens over 10; choose between multiple earned Locations). These are modeled as **pending sub-moves**: the state carries `pendingAction`, and only that player may resolve it before play advances. The bot resolves them inline.
+
+### The bot (`lib/bot/`)
+Deterministic heuristic policy (no LLM in the loop): greedy scoring over `legalMoves` — weighted by progress toward affordable high-value cards, color-set completion (win condition needs all 5 bonuses), Time Stone acquisition, Avengers-tag races, and token efficiency. Difficulty tiers adjust lookahead/weights. Bot turns run server-side immediately after a human move in the same request (or a follow-up invocation), so vs-computer games need no realtime infra at all. OpenAI generates an in-character quip about the move it just made (non-blocking; failures are silent).
+
+---
+
+## 4. Data model (Prisma sketch)
+
+```prisma
+model User {          // Auth0-linked profile
+  id            String   @id @default(cuid())
+  auth0Sub      String   @unique
+  username      String   @unique
+  avatarKey     String?              // R2 object key
+  createdAt     DateTime @default(now())
+  players       GamePlayer[]
+  stats         UserStats?
+}
+
+model UserStats {
+  userId        String  @id
+  user          User    @relation(fields: [userId], references: [id])
+  gamesPlayed   Int @default(0)
+  wins          Int @default(0)
+  vsBotWins     Int @default(0)
+  bestPoints    Int @default(0)
+  fastestWinTurns Int?
+  avengersTilesWon Int @default(0)
+  locationsClaimed Int @default(0)
+}
+
+model Game {
+  id          String     @id @default(cuid())
+  joinCode    String     @unique      // 6-char human-friendly code
+  status      GameStatus               // LOBBY | ACTIVE | FINISHED | ABANDONED
+  mode        GameMode                 // VS_BOT | MULTIPLAYER
+  seed        String                   // reproducible shuffle
+  settings    Json                     // GameSettings (see below), frozen at start
+  state       Json                     // current GameState snapshot
+  version     Int        @default(0)   // optimistic concurrency
+  winnerSeat  Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  players     GamePlayer[]
+  moves       Move[]
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  gameId    String
+  seat      Int
+  kind      ChatKind                  // TEXT | REACTION
+  body      String                    // text (length-capped) or reaction emote id
+  createdAt DateTime @default(now())
+  @@index([gameId, createdAt])
+}
+
+model GamePlayer {
+  id          String  @id @default(cuid())
+  gameId      String
+  seat        Int                       // 0..3, turn order
+  userId      String?                   // null for guests & bots
+  guestName   String?
+  isBot       Boolean @default(false)
+  guestToken  String?                   // httpOnly-cookie secret for guest identity
+  @@unique([gameId, seat])
+}
+
+model Move {
+  id        String   @id @default(cuid())
+  gameId    String
+  ordinal   Int                         // move sequence number
+  seat      Int
+  payload   Json                        // the Move union
+  createdAt DateTime @default(now())
+  @@unique([gameId, ordinal])
+}
+```
+
+The `Move` log + `seed` makes every game replayable/auditable; `state` is a materialized snapshot so reads are cheap.
+
+### GameSettings (chosen by the host at creation, editable in lobby, frozen at start)
+
+```ts
+type GameSettings = {
+  turnTimeSeconds:  15 | 30 | 60 | 120 | null;  // null = untimed turns
+  gameTimeMinutes:  10 | 20 | 30 | null;        // optional overall game clock
+  targetPoints:     number;                      // default 16 (rulebook); host may raise/lower
+  botDifficulty?:   'easy' | 'normal' | 'hard';  // vs-bot games
+};
+```
+
+`targetPoints` only changes the point threshold — the full-color-set and Time Stone requirements of the compound win condition stay fixed. If the game clock expires before anyone triggers the end condition, the round finishes and standings are decided by the normal tiebreak order.
+
+---
+
+## 5. Realtime & session flow (Pusher)
+
+- **Create game** → row in `LOBBY` status with generated `joinCode`; host shares the code/link (`/join/CODE`).
+- **Join** → signed-in users join as themselves; guests pick a display name and get an httpOnly `guestToken` cookie tied to their `GamePlayer` row.
+- **Lobby** → presence channel `presence-game-{id}` shows seats filling live; host starts the game (2–4 seats, bots can fill empty seats).
+- **In game** → moves POST to the server; on success the server triggers `move-applied` on private channel `private-game-{id}` with `{ordinal, redactedStatePerSeat…}` (per-seat redaction handled by clients fetching their own view, event carries the public delta). Pusher auth endpoint verifies session/guest cookie before channel subscription.
+- **Reconnect** → client refetches `GET /api/games/[id]/view` (redacted for the viewer) and resumes from the live channel; missed events are irrelevant because state is snapshot-based.
+- **Chat & reactions** → `POST /api/games/[id]/chat` persists a `ChatMessage` (text length-capped, basic rate-limited per seat) and triggers `chat` on the game channel. Reactions are the same pipeline with `kind: REACTION` and a curated emote set (Marvel-flavored quick reactions), rendered as transient bubbles over the sender's plaque. Chat history loads with the game view so reconnects/spectators see context.
+- **Turn timer enforcement (serverless-safe)** → when a move is applied, the server stamps `turnDeadline` into the state and broadcast. The active player's client shows the countdown and auto-submits a timeout locally at zero; as backstop, **any** participant can `POST /api/games/[id]/claim-timeout` after the deadline — the server verifies wall-clock vs. `turnDeadline` and applies a `TIMEOUT_SKIP` move (resolving any pending sub-move with a default, e.g. auto-return highest-count tokens). Three consecutive timeouts marks the seat inactive and a bot takes it over. The optional game clock works the same way: deadline stored at start, checked lazily on every move.
+- **Timeouts/abandonment** → a stale `ACTIVE` game past a TTL can be marked `ABANDONED` (checked lazily on access — no cron needed for v1).
+
+vs-Bot games skip Pusher entirely: the move POST response contains the bot's reply move(s) and new view.
+
+---
+
+## 6. App structure & routes
+
+```
+app/
+  layout.tsx, page.tsx           # landing: Play vs Computer / Create / Join
+  play/[gameId]/page.tsx         # game board (both modes)
+  join/[code]/page.tsx           # join flow (auth or guest name)
+  lobby/[gameId]/page.tsx        # pre-game lobby
+  profile/[username]/page.tsx    # public profile + stats
+  settings/page.tsx              # own profile edit, avatar upload
+  api/
+    auth/[auth0]/route.ts        # Auth0 handlers
+    games/route.ts               # POST create
+    games/[id]/route.ts          # GET view (redacted)
+    games/[id]/moves/route.ts    # POST move
+    games/[id]/join/route.ts     # POST join by code
+    games/[id]/start/route.ts    # POST host starts
+    games/[id]/chat/route.ts     # POST chat message / reaction
+    games/[id]/claim-timeout/route.ts  # POST timeout backstop
+    pusher/auth/route.ts         # channel auth
+    avatar/upload/route.ts       # presigned R2 PUT + confirm
+components/
+  game/  (Board, CardMarket, Card, TokenBank, TokenChip, PlayerPlaque,
+          LocationTile, AvengersTile, ReserveTray, HandTray, EndTurnBar,
+          MoveLog, BanterBubble, GameOverDialog, TurnTimer,
+          ChatPanel, ReactionPicker, ReactionBubble)
+  lobby/ (SettingsForm, SeatList, ShareCode)
+  ui/    (shadcn/ui generated)
+lib/
+  engine/  bot/  db.ts  pusher.ts  r2.ts  auth.ts  openai.ts
+data/
+  cards.json  locations.json
+prisma/schema.prisma
+```
+
+### Game screen (per the approved UI reference)
+Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: six token stacks with counts + Location tiles + Avengers tile. Player plaques top/bottom-left: avatar, name, points, bonus/token strips, active-turn glow, turn timer. Bottom-center: personal token tray with `n/10` limit indicator. Bottom-right: End Turn. dnd-kit powers drag-token-to-tray and drag-card-to-tray (recruit) / to-reserve-slot (reserve); every drag has an equivalent click/tap interaction for accessibility and mobile.
+
+---
+
+## 7. Auth, profiles, storage
+
+- **Auth0**: Universal Login; `auth0Sub → User` upsert on first login with a username-picker step. Session via the Auth0 Next.js SDK.
+- **Guests**: no account; identified per-game by `guestToken` cookie; their stats are not recorded. A guest can later sign up, but v1 does not migrate past guest games.
+- **Avatars**: client requests a presigned R2 PUT (size/type-limited), uploads directly, confirms; we store the object key and serve via R2 public bucket/custom domain. OpenAI avatar generation is out of scope for v1 (deferred).
+- **Stats**: updated transactionally when a game reaches `FINISHED` — games played, wins, best points, fastest win, Avengers tiles won, Locations claimed.
+
+---
+
+## 8. Delivery phases
+
+**Phase 1 — Engine + vs Computer + Profiles**
+1. Scaffold (Next.js, Tailwind, shadcn/ui, Prisma/Neon, Auth0, pnpm).
+2. Pure engine with exhaustive unit tests (Vitest) — every rule above, especially Time Stone, Avengers tile stealing, compound win condition, pending sub-moves. Engine honors `GameSettings` (target points, timers as data).
+3. Card/location datasets.
+4. Bot policy + tests (bot vs bot simulations must always terminate legally).
+5. Game setup screen (settings form: target points, bot difficulty) + game UI (board, dnd-kit interactions, animations) wired to vs-bot API.
+6. Auth0 profiles, R2 avatar upload, stats recording, profile pages.
+7. OpenAI banter bubbles.
+
+**Phase 2 — Live multiplayer**
+8. Game creation/join-code flow, lobby with presence, guest identity, full settings form (turn timer, game clock).
+9. Pusher integration, per-seat redacted views, reconnect handling.
+10. In-game chat + emoji reactions.
+11. Turn-timer/game-clock enforcement (client countdown + claim-timeout backstop, bot takeover on repeated timeouts).
+12. Mixed games (humans + bot fill), abandonment handling, multiplayer stats.
+
+**Phase 3 — polish (post-v1 candidates)**: spectators, rematch, game history/replay viewer (we already store the move log), leaderboards, OpenAI post-game recaps and AI avatars.
+
+## 9. Testing & correctness strategy
+
+- Engine: property-style tests (token conservation invariants — supply + hands + spent always equals initial counts), scenario tests for every rulebook clause, full bot-vs-bot fuzz games from random seeds asserting no illegal state.
+- API: integration tests for move validation, concurrency (stale `version` rejected), redaction (a client can never see deck order or hidden reserves).
+- E2E happy paths (Playwright, later): create → join → play → finish.
+
+## 10. Risks & notes
+
+- **IP**: Marvel/Splendor are licensed properties — this is a personal/portfolio project; assets are owner-supplied and it should not be marketed commercially.
+- **Card data fidelity**: costs are reconstructed (see §1 caveat) until verified against a physical copy.
+- **Serverless + Pusher** keeps us fully on Vercel; if latency or presence needs outgrow it, the engine's purity makes a move to PartyKit/DO straightforward.

@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GameStatus {
+  LOBBY
+  ACTIVE
+  FINISHED
+  ABANDONED
+}
+
+enum GameMode {
+  VS_BOT
+  MULTIPLAYER
+}
+
+enum ChatKind {
+  TEXT
+  REACTION
+}
+
+model User {
+  id        String       @id @default(cuid())
+  auth0Sub  String       @unique
+  username  String       @unique
+  avatarKey String?
+  createdAt DateTime     @default(now())
+  players   GamePlayer[]
+  stats     UserStats?
+}
+
+model UserStats {
+  userId           String @id
+  user             User   @relation(fields: [userId], references: [id])
+  gamesPlayed      Int    @default(0)
+  wins             Int    @default(0)
+  vsBotWins        Int    @default(0)
+  bestPoints       Int    @default(0)
+  fastestWinTurns  Int?
+  avengersTilesWon Int    @default(0)
+  locationsClaimed Int    @default(0)
+}
+
+model Game {
+  id         String        @id @default(cuid())
+  joinCode   String        @unique
+  status     GameStatus    @default(LOBBY)
+  mode       GameMode
+  seed       String
+  settings   Json
+  state      Json
+  version    Int           @default(0)
+  winnerSeat Int?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  players    GamePlayer[]
+  moves      Move[]
+  messages   ChatMessage[]
+}
+
+model GamePlayer {
+  id         String  @id @default(cuid())
+  gameId     String
+  game       Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  seat       Int
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id])
+  guestName  String?
+  isBot      Boolean @default(false)
+  guestToken String?
+
+  @@unique([gameId, seat])
+  @@index([userId])
+}
+
+model Move {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  ordinal   Int
+  seat      Int
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@unique([gameId, ordinal])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  seat      Int
+  kind      ChatKind
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([gameId, createdAt])
+}

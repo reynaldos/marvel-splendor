@@ -1,0 +1,48 @@
+/**
+ * Runtime (zod) validation for API request bodies. `validateMove`/`applyMove`
+ * in lib/engine/* trust their `Move` argument's shape completely (they only
+ * check game-rule legality) — untrusted JSON from a client body must be
+ * shape-checked before it ever reaches them.
+ */
+import { z } from "zod";
+
+import { STONES, TOKEN_COLORS } from "@/lib/engine/types";
+
+const StoneSchema = z.enum(STONES);
+const TokenColorSchema = z.enum(TOKEN_COLORS);
+const CardLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+
+/** Mirrors `Move` from lib/engine/types.ts, minus the two server-initiated
+ * variants (`TIMEOUT_SKIP`, `END_BY_CLOCK`) — a client can never submit
+ * those directly, the server applies them on the seat's behalf. */
+export const MoveSchema = z.union([
+  z.object({ type: z.literal("TAKE_TOKENS"), colors: z.array(StoneSchema).min(1).max(3) }),
+  z.object({
+    type: z.literal("RESERVE"),
+    from: z.literal("market"),
+    level: CardLevelSchema,
+    cardId: z.string().min(1),
+  }),
+  z.object({ type: z.literal("RESERVE"), from: z.literal("deck"), level: CardLevelSchema }),
+  z.object({
+    type: z.literal("RECRUIT"),
+    from: z.enum(["market", "reserve"]),
+    cardId: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("RETURN_TOKENS"),
+    tokens: z.partialRecord(TokenColorSchema, z.number().int().nonnegative()),
+  }),
+  z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
+]);
+
+/** `POST /api/games` body — see ARCHITECTURE.md §4 `GameSettings`. */
+export const CreateGameSchema = z.object({
+  playerCount: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  botDifficulty: z.enum(["easy", "normal", "hard"]).optional(),
+  targetPoints: z.number().int().min(1).max(99).optional(),
+  turnTimeSeconds: z
+    .union([z.literal(15), z.literal(30), z.literal(60), z.literal(120), z.null()])
+    .optional(),
+  gameTimeMinutes: z.union([z.literal(10), z.literal(20), z.literal(30), z.null()]).optional(),
+});
