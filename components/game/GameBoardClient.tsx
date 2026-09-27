@@ -378,7 +378,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         className="game-board relative flex h-dvh w-full items-center overflow-hidden"
       >
         {gameData.abandoned ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
             <div className="flex flex-col items-center gap-3 rounded-lg bg-popover p-6 text-center text-popover-foreground shadow-md ring-1 ring-foreground/10">
               <p className="text-base font-bold">This game was closed</p>
               <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>

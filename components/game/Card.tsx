@@ -91,7 +91,7 @@ export function Card({
         <button
           type="button"
           aria-label="Close card actions"
-          className="fixed inset-0 cursor-default bg-black/60"
+          className="fixed inset-0 cursor-default bg-black/60 backdrop-blur-xs"
           onClick={close}
         />
       ) : null}
@@ -149,7 +149,7 @@ export function Card({
           autoFocus
           aria-label={`Close ${card.name}`}
           onClick={close}
-          className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none"
+          className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none backdrop-blur-xs"
         >
           <CardView card={card} className="h-84 w-61 rounded-xl" />
         </button>

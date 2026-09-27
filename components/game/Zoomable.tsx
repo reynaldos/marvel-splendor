@@ -61,7 +61,7 @@ export function Zoomable({ label, title, zoomed, interactive, className, style, 
             type="button"
             autoFocus
             aria-label="Close"
-            className="absolute inset-0 cursor-default bg-black/75 outline-none"
+            className="absolute inset-0 cursor-default bg-black/75 outline-none backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
           {title ? (

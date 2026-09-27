@@ -75,7 +75,7 @@ export function ReservedCards({
           <button
             type="button"
             aria-label="Close reserved cards"
-            className="absolute inset-0 cursor-default bg-black/75"
+            className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
           <h2 className="relative text-2xl font-black tracking-wide text-white uppercase">
