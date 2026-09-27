@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "cn";
-import { useDraggable } from "@dnd-kit/core";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Shield01Icon } from "@hugeicons/core-free-icons";
 
@@ -33,17 +32,14 @@ interface CardProps {
   disabled?: boolean;
   reserveAction?: CardActionProps;
   recruitAction?: CardActionProps;
-  /** dnd-kit drag source id; omit to make the card non-draggable. */
-  dragId?: string;
-  dragData?: Record<string, unknown>;
   className?: string;
 }
 
 /**
  * A single character card — the atomic visual for CardMarket and
- * ReserveTray. Tap/click toggles a reveal of the Reserve/Recruit action
- * buttons (mobile-friendly equivalent of drag-and-drop), per ARCHITECTURE.md
- * §6's accessibility note: no drag-only interactions.
+ * ReserveTray. Tap/click lifts the card over a dimmed board and shows the
+ * currently-legal Recruit/Reserve actions beside it; tapping anywhere else
+ * dismisses. All input is tap-only — there is no drag interaction.
  */
 export function Card({
   card,
@@ -54,19 +50,11 @@ export function Card({
   disabled,
   reserveAction,
   recruitAction,
-  dragId,
-  dragData,
   className,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const showBack = faceDown || !card;
   const hasActions = Boolean(reserveAction || recruitAction);
-
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: dragId ?? `card-disabled-${card?.id ?? "back"}`,
-    data: dragData,
-    disabled: !dragId || disabled || showBack,
-  });
 
   const dims = size === "sm" ? "h-24 w-16" : "h-36 w-24";
 
@@ -86,32 +74,36 @@ export function Card({
   }
 
   const meta = STONE_COLORS[card.bonus];
+  const showRecruit = recruitAction && !recruitAction.disabled;
+  const showReserve = reserveAction && !reserveAction.disabled;
 
   return (
     <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-          : undefined
-      }
-      className={cn(
-        "group relative flex shrink-0 flex-col overflow-hidden rounded-md bg-card text-left ring-1 ring-foreground/10 transition-shadow",
-        dims,
-        affordable && "ring-2 ring-primary",
-        selected && "ring-2 ring-offset-2 ring-offset-background outline outline-primary",
-        isDragging && "opacity-50",
-        dragId && !disabled && "cursor-grab active:cursor-grabbing",
-        className,
-      )}
+      className={cn("relative shrink-0", dims, expanded && "z-50", className)}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") setExpanded(false);
+      }}
     >
+      {expanded ? (
+        <button
+          type="button"
+          aria-label="Close card actions"
+          className="fixed inset-0 cursor-default bg-black/60"
+          onClick={() => setExpanded(false)}
+        />
+      ) : null}
+
       <button
         type="button"
         disabled={disabled || !hasActions}
+        aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
-        className="flex flex-1 flex-col disabled:cursor-default"
+        className={cn(
+          "relative flex size-full flex-col overflow-hidden rounded-md bg-card text-left ring-1 ring-foreground/10 transition-transform disabled:cursor-default",
+          affordable && "ring-2 ring-primary",
+          selected && "ring-2 ring-offset-2 ring-offset-background outline outline-primary",
+          expanded && "scale-105",
+        )}
       >
         <Image
           src={cardArtUrl(card.id, card.bonus, size === "sm" ? "96x64" : "160x104")}
@@ -122,7 +114,7 @@ export function Card({
           className={cn("w-full object-cover", size === "sm" ? "h-10" : "h-16")}
           draggable={false}
         />
-        <div className="flex flex-1 flex-col gap-0.5 p-1">
+        <div className="flex w-full flex-1 flex-col gap-0.5 p-1">
           <div className="flex items-center justify-between">
             <span className="rounded bg-foreground/10 px-1 text-[0.6rem] font-semibold">
               {LEVEL_LABEL[card.level]}
@@ -156,33 +148,31 @@ export function Card({
         </div>
       </button>
 
-      {hasActions && expanded ? (
-        <div className="absolute inset-0 flex flex-col items-stretch justify-center gap-1 bg-background/95 p-1.5">
-          {reserveAction ? (
+      {expanded && (showRecruit || showReserve) ? (
+        <div className="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-col gap-1.5">
+          {showRecruit ? (
             <Button
               type="button"
               size="sm"
-              variant="secondary"
-              disabled={disabled || reserveAction.disabled}
-              onClick={() => {
-                reserveAction.onClick();
-                setExpanded(false);
-              }}
-            >
-              {reserveAction.label}
-            </Button>
-          ) : null}
-          {recruitAction ? (
-            <Button
-              type="button"
-              size="sm"
-              disabled={disabled || recruitAction.disabled}
               onClick={() => {
                 recruitAction.onClick();
                 setExpanded(false);
               }}
             >
               {recruitAction.label}
+            </Button>
+          ) : null}
+          {showReserve ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                reserveAction.onClick();
+                setExpanded(false);
+              }}
+            >
+              {reserveAction.label}
             </Button>
           ) : null}
         </div>

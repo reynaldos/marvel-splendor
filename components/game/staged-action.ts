@@ -1,12 +1,11 @@
 /**
  * A player's in-progress, not-yet-submitted turn action. `GameBoardClient`
  * owns the single `staged` value; `Board` fans the setters out to
- * `TokenBank`/`CardMarket`/dnd-kit handlers, and `EndTurnBar` renders +
+ * `TokenBank`/`CardMarket`/`HandTray`, and `EndTurnBar` renders +
  * confirms/cancels it. Keeping this as one discriminated union (rather than
- * three parallel bits of state) is what makes "only one action per turn" —
- * and "drag and click produce the exact same Move" — trivially true: both
- * input paths funnel into the same `set staged(...)` calls, and confirming
- * just runs `stagedActionToMove` once.
+ * three parallel bits of state) is what makes "only one action per turn"
+ * trivially true: every tap funnels into the same `setStaged(...)` calls,
+ * and confirming just runs `stagedActionToMove` once.
  */
 import type { CardLevel, Move, Stone } from "@/lib/engine/types";
 

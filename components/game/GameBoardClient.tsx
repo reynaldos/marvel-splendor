@@ -173,6 +173,16 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [gameData],
   );
 
+  const unstageTokenColor = useCallback((color: Stone) => {
+    setStaged((prev) => {
+      if (prev?.kind !== "tokens") return prev;
+      const i = prev.colors.lastIndexOf(color);
+      if (i === -1) return prev;
+      const colors = prev.colors.filter((_, idx) => idx !== i);
+      return colors.length > 0 ? { kind: "tokens", colors } : null;
+    });
+  }, []);
+
   const stageReserveMarket = useCallback((level: CardLevel, cardId: string) => {
     setStaged({ kind: "reserve", from: "market", level, cardId });
   }, []);
@@ -248,6 +258,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           submitting={submitting}
           banterBySeat={banterBySeat}
           onStageTokenColor={stageTokenColor}
+          onUnstageTokenColor={unstageTokenColor}
           onStageReserveMarket={stageReserveMarket}
           onStageReserveDeck={stageReserveDeck}
           onStageRecruit={stageRecruit}

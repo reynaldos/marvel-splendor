@@ -30,7 +30,7 @@ export function EndTurnBar({ staged, disabled, submitting, onConfirm, onCancel, 
           </Button>
         ) : null}
         <Button type="button" size="sm" disabled={!staged || disabled || submitting} onClick={onConfirm}>
-          {submitting ? "Submitting…" : "Confirm"}
+          {submitting ? "Submitting…" : "End Turn"}
         </Button>
       </div>
     </div>

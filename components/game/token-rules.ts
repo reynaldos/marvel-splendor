@@ -1,10 +1,10 @@
 /**
- * Client-side helper for building a `TAKE_TOKENS` selection one click (or
- * one drag-drop) at a time, mirroring the rulebook clause in
+ * Client-side helper for building a `TAKE_TOKENS` selection one tap at a
+ * time, mirroring the rulebook clause in
  * ARCHITECTURE.md §1: "3 tokens of different colors" OR "2 of one color
  * (only if that stack has >= 4 before taking)". This is UI staging only —
  * the server (`lib/engine/validate.ts`) is the actual source of truth and
- * will reject anything illegal; this just keeps the click/drag affordances
+ * will reject anything illegal; this just keeps the tap affordances
  * from offering obviously-illegal combinations.
  */
 import type { Stone, TokenCounts } from "@/lib/engine/types";

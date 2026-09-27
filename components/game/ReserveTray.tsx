@@ -1,6 +1,5 @@
 "use client";
 
-import { useDroppable } from "@dnd-kit/core";
 import { cn } from "cn";
 
 import { Card } from "@/components/game/Card";
@@ -20,8 +19,6 @@ interface ReserveTrayProps {
   viewerBonuses?: StoneCounts;
   staged?: StagedAction | null;
   disabled?: boolean;
-  /** Only the viewer's own tray is a dnd-kit drop target for reserving. */
-  isDropTarget?: boolean;
   onStageRecruit?: (cardId: string) => void;
   className?: string;
   size?: "sm" | "default";
@@ -35,28 +32,14 @@ export function ReserveTray({
   viewerBonuses,
   staged,
   disabled,
-  isDropTarget,
   onStageRecruit,
   className,
   size = "sm",
 }: ReserveTrayProps) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: "reserve-tray",
-    disabled: !isDropTarget || disabled,
-  });
-
   const slots = Array.from({ length: MAX_RESERVED }, (_, i) => reserved[i]);
 
   return (
-    <div
-      ref={isDropTarget ? setNodeRef : undefined}
-      className={cn(
-        "flex gap-1.5 rounded-md p-1",
-        isDropTarget && "ring-1 ring-dashed ring-foreground/15",
-        isDropTarget && isOver && "bg-primary/10 ring-primary",
-        className,
-      )}
-    >
+    <div className={cn("flex gap-1.5 rounded-md p-1", className)}>
       {slots.map((entry, i) =>
         entry ? (
           <ReservedCardSlot

@@ -1,6 +1,5 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
 import { cn } from "cn";
 
 import { TokenChip } from "@/components/game/TokenChip";
@@ -17,10 +16,10 @@ interface TokenBankProps {
 }
 
 /**
- * The 7 shared token stacks (ARCHITECTURE.md §6 right rail). Clicking (or
- * dragging, via dnd-kit in Board) a basic-stone stack builds up a
- * `TAKE_TOKENS` selection 1 pick at a time; green (time) and gray (shield)
- * are display-only here since they're never directly takeable.
+ * The 7 shared token stacks (ARCHITECTURE.md §6 right rail). Tapping a
+ * basic-stone stack builds up a `TAKE_TOKENS` selection 1 pick at a time
+ * (picks are undone from HandTray); green (time) and gray (shield) are
+ * display-only here since they're never directly takeable.
  */
 export function TokenBank({ supply, staged, disabled, onStageTokenColor }: TokenBankProps) {
   const selectedColors = staged?.kind === "tokens" ? staged.colors : [];
@@ -65,30 +64,12 @@ function StoneStack({
   canAdd: boolean;
   onClick: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `token:${stone}`,
-    data: { type: "token", color: stone },
-    disabled: !canAdd,
-  });
-
   return (
     <button
-      ref={setNodeRef}
       type="button"
       disabled={!canAdd}
       onClick={onClick}
-      {...attributes}
-      {...listeners}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-          : undefined
-      }
-      className={cn(
-        "relative flex flex-col items-center gap-1 rounded-md p-1 transition-opacity disabled:cursor-not-allowed disabled:opacity-40",
-        canAdd && "cursor-grab hover:bg-muted active:cursor-grabbing",
-        isDragging && "opacity-50",
-      )}
+      className="relative flex flex-col items-center gap-1 rounded-md p-1 transition-opacity hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
     >
       <TokenChip
         color={stone}

@@ -1,7 +1,5 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
-import { cn } from "cn";
 
 import { Card } from "@/components/game/Card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +46,6 @@ export function CardMarket({
         {LEVEL_LABEL[level]}
       </span>
       <DeckIndicator
-        level={level}
         count={deckCount}
         disabled={disabled || !canReserve}
         onClick={() => onStageReserveDeck(level)}
@@ -83,41 +80,21 @@ export function CardMarket({
 }
 
 function DeckIndicator({
-  level,
   count,
   disabled,
   onClick,
 }: {
-  level: CardLevel;
   count: number;
   disabled?: boolean;
   onClick: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `deck:${level}`,
-    data: { type: "deck", level },
-    disabled: disabled || count === 0,
-  });
-
   return (
     <button
-      ref={setNodeRef}
       type="button"
       disabled={disabled || count === 0}
       onClick={onClick}
-      {...attributes}
-      {...listeners}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-          : undefined
-      }
       title="Reserve blind from this deck"
-      className={cn(
-        "relative flex h-36 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity disabled:cursor-not-allowed disabled:opacity-40",
-        !disabled && count > 0 && "cursor-grab hover:bg-muted/70 active:cursor-grabbing",
-        isDragging && "opacity-50",
-      )}
+      className="relative flex h-36 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <div className="size-8 rounded-full bg-foreground/10" />
       <Badge variant="secondary">{count} left</Badge>
@@ -158,8 +135,6 @@ function MarketCard({
       affordable={affordable}
       selected={selected}
       disabled={disabled}
-      dragId={`card:${level}:${cardId}`}
-      dragData={{ type: "card", from: "market", cardId, level, affordable }}
       reserveAction={{
         label: "Reserve",
         onClick: () => onStageReserveMarket(level, cardId),

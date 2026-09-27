@@ -58,7 +58,7 @@ The engine is data-driven: it makes no assumption about deck sizes. Cards, Locat
 |---|---|
 | Framework | Next.js (App Router, TypeScript, **no `src/` folder**) |
 | Styling / components | Tailwind CSS + shadcn/ui (Radix primitives) + Lucide icons |
-| Drag & drop | dnd-kit (token taking, card purchase/reserve) with click fallbacks |
+| Input | Tap/click only — no drag interactions |
 | ORM / DB | Prisma + Neon Postgres |
 | Auth | Auth0 (`@auth0/nextjs-auth0`); guests allowed for joining games |
 | Realtime | **Pusher Channels** (presence channels for lobby/seats; server broadcasts state) |
@@ -244,7 +244,7 @@ prisma/schema.prisma
 ```
 
 ### Game screen (per the approved UI reference)
-Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: six token stacks with counts + Location tiles + Avengers tile. Player plaques top/bottom-left: avatar, name, points, bonus/token strips, active-turn glow, turn timer. Bottom-center: personal token tray with `n/10` limit indicator. Bottom-right: End Turn. dnd-kit powers drag-token-to-tray and drag-card-to-tray (recruit) / to-reserve-slot (reserve); every drag has an equivalent click/tap interaction for accessibility and mobile.
+Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: six token stacks with counts + Location tiles + Avengers tile. Player plaques top/bottom-left: avatar, name, points, bonus/token strips, active-turn glow, turn timer. Bottom-center: personal token tray with `n/10` limit indicator. Bottom-right: End Turn. All input is tap/click: tapping a card lifts it over a dimmed board with Recruit/Reserve actions, tapping a token stack stages a token (tap it in the tray to put it back), tapping a deck stages a blind reserve; End Turn submits.
 
 ---
 
@@ -264,7 +264,7 @@ Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: s
 2. Pure engine with exhaustive unit tests (Vitest) — every rule above, especially Time Stone, Avengers tile stealing, compound win condition, pending sub-moves. Engine honors `GameSettings` (target points, timers as data).
 3. Card/location datasets.
 4. Bot policy + tests (bot vs bot simulations must always terminate legally).
-5. Game setup screen (settings form: target points, bot difficulty) + game UI (board, dnd-kit interactions, animations) wired to vs-bot API.
+5. Game setup screen (settings form: target points, bot difficulty) + game UI (board, tap interactions, animations) wired to vs-bot API.
 6. Auth0 profiles, R2 avatar upload, stats recording, profile pages.
 7. OpenAI banter bubbles.
 
