@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -54,7 +52,7 @@ export default async function Home() {
             <span className="font-medium text-foreground">
               {session.user.name ?? session.user.email}
             </span>{" "}
-            · <Link href="/auth/logout" className="underline">Sign out</Link>
+            · <a href="/auth/logout" className="underline">Sign out</a>
           </p>
         ) : null}
       </header>
@@ -75,7 +73,7 @@ export default async function Home() {
                 Sign in to start a game against the computer.
               </p>
               <Button asChild>
-                <Link href="/auth/login?returnTo=/">Sign in to play</Link>
+                <a href="/auth/login?returnTo=/">Sign in to play</a>
               </Button>
             </div>
           )}
