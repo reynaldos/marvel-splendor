@@ -231,7 +231,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const submitMove = useCallback(
     async (move: Move) => {
       const shown = gameRef.current;
-      if (!shown || busy.current) return;
+      if (!shown || busy.current || shown.abandoned || shown.view.status !== "active") return;
       // A timeout is sent in the background; losing the race to another
       // device, or being a moment early, isn't something to tell the player.
       const quiet = move.type === "TIMEOUT_SKIP";
@@ -371,13 +371,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const { view, players } = gameData;
   const viewer = view.players.find((p) => p.seat === view.viewerSeat);
   const isMyTurn = view.currentSeat === view.viewerSeat;
-  const disabled =
-    submitting ||
-    botPlaying ||
-    gameData.abandoned ||
-    Boolean(view.pending) ||
-    view.status !== "active" ||
-    !isMyTurn;
+  const over = gameData.abandoned || view.status !== "active";
+  const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
 
   return (
@@ -413,7 +408,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           view={view}
           turnEndsAt={botPlaying ? null : gameData.turnEndsAt}
           players={players}
-          staged={staged}
+          staged={over ? null : staged}
           disabled={disabled}
           submitting={submitting}
           banterBySeat={banterBySeat}
@@ -437,7 +432,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         />
       </div>
 
-      {viewer && !gameData.abandoned ? (
+      {viewer && !over ? (
         <PendingActionModals
           pending={view.pending}
           viewerTokens={viewer.tokens}

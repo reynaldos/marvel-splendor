@@ -78,14 +78,11 @@ export function Board({
   const viewer = view.players.find((p) => p.seat === viewerSeat);
   const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
   const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
+  // Once the game is over nobody is on turn, so no plaque glows or counts down.
+  const turnSeat = view.status === "active" ? view.currentSeat : null;
   // The win tile's art has its number printed on it; other targets get text.
   const winTile = ASSETS.winTile?.points === view.settings.targetPoints ? ASSETS.winTile : null;
-  // Square tiles share the column under the header: 70 steps of height less
-  // the header (a 1-step gap between each), capped at a market card's width
-  // so a 2-player game isn't oversized.
   const headerHeight = winTile ? 10 : 7;
-  const tileCount = view.locations.length + 1;
-  const tileSize = Math.min(16, Math.floor((70 - headerHeight - (tileCount - 1)) / tileCount));
 
   function nameForSeat(seat: number): string {
     return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
@@ -102,11 +99,16 @@ export function Board({
               key={p.seat}
               player={p}
               name={nameForSeat(p.seat)}
-              isCurrentTurn={view.currentSeat === p.seat}
+              isCurrentTurn={turnSeat === p.seat}
               turnEndsAt={turnEndsAt}
               banterText={banterBySeat[p.seat] ?? null}
               headerExtra={
-                <ReserveTray reserved={p.reserved} className="gap-0.5" cardClassName="h-6 w-4 rounded-sm" />
+                <ReserveTray
+                  reserved={p.reserved}
+                  ownerName={nameForSeat(p.seat)}
+                  className="gap-0.5"
+                  cardClassName="h-6 w-4 rounded-sm"
+                />
               }
             />
           ))}
@@ -162,7 +164,7 @@ export function Board({
             avengersHolder={view.avengersHolder}
             players={view.players}
             nameForSeat={nameForSeat}
-            tileSize={tileSize}
+            height={70 - headerHeight}
           />
         </div>
       </div>
@@ -172,7 +174,7 @@ export function Board({
         <PlayerPlaque
           player={viewer}
           name={nameForSeat(viewerSeat)}
-          isCurrentTurn={view.currentSeat === viewerSeat}
+          isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
           banterText={banterBySeat[viewerSeat] ?? null}
           hideTags
@@ -181,7 +183,7 @@ export function Board({
           <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} />
         </PlayerPlaque>
 
-        <div className={`flex min-w-0 flex-1 items-center justify-between gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>
+        <div className={`mx-auto flex shrink-0 items-center gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>
           <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} tags={viewer.tags} stagedCount={stagedColors.length} />
           <ReservedCards
             reserved={viewer.reserved}

@@ -37,7 +37,8 @@ export function ReservedCards({
   // The viewer always sees their own cards, blind-reserved or not.
   const cards = reserved.flatMap((r) => ("cardId" in r ? [getCard(r.cardId)] : []));
 
-  if (cards.length === 0) return null;
+  // Keeps the fan's space, so the tray is the same width with or without cards.
+  if (cards.length === 0) return <span className="mr-1 w-22 shrink-0" />;
 
   return (
     <>

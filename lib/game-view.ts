@@ -16,6 +16,7 @@
  *    public (everyone watched it happen), but a blind reserve's identity is
  *    only known to its owner.
  */
+import { getCard } from "@/lib/engine/data";
 import type {
   CardLevel,
   GameSettings,
@@ -32,10 +33,11 @@ import type {
  *   (either it's their own reservation, or it was reserved face-up from the
  *   market and is public knowledge). `blind` still records whether it was a
  *   blind draw, purely as flavor info ("reserved from the deck").
- * - `{ blind: true }` — someone else's blind reservation; the card id is
- *   withheld entirely.
+ * - `{ blind: true, level }` — someone else's blind reservation; the card id
+ *   is withheld entirely. Its level is public: everyone saw which deck it
+ *   was drawn from.
  */
-export type RedactedReservedCard = { cardId: string; blind: boolean } | { blind: true };
+export type RedactedReservedCard = { cardId: string; blind: boolean } | { blind: true; level: CardLevel };
 
 export interface RedactedPlayerState {
   seat: number;
@@ -64,6 +66,7 @@ export interface RedactedGameState {
   startingSeat: number;
   moveCount: number;
   round: number;
+  /** Only ever set for the seat that has to resolve it. */
   pending: PendingAction | null;
   endTriggered: boolean;
   clockExpired: boolean;
@@ -84,7 +87,7 @@ function redactPlayer(player: PlayerState, viewerSeat: number): RedactedPlayerSt
     points: player.points,
     reserved: player.reserved.map((r): RedactedReservedCard => {
       if (isViewer || !r.hidden) return { cardId: r.cardId, blind: r.hidden };
-      return { blind: true };
+      return { blind: true, level: getCard(r.cardId).level };
     }),
   };
 }
@@ -113,7 +116,8 @@ export function redactState(state: GameState, viewerSeat: number): RedactedGameS
     startingSeat: state.startingSeat,
     moveCount: state.moveCount,
     round: state.round,
-    pending: state.pending,
+    // A pending choice belongs to whoever is on turn; nobody else is asked.
+    pending: state.currentSeat === viewerSeat ? state.pending : null,
     endTriggered: state.endTriggered,
     clockExpired: state.clockExpired,
     status: state.status,
