@@ -9,6 +9,7 @@ import { HandTray, StagedTokens } from "@/components/game/HandTray";
 import { PlayerPlaque } from "@/components/game/PlayerPlaque";
 import { ReserveTray } from "@/components/game/ReserveTray";
 import { ReservedCards } from "@/components/game/ReservedCards";
+import { TeamView } from "@/components/game/TeamView";
 import { TileRail } from "@/components/game/TileRail";
 import { Zoomable } from "@/components/game/Zoomable";
 import { TokenBank } from "@/components/game/TokenBank";
@@ -95,22 +96,24 @@ export function Board({
       <div className="flex min-h-0 flex-1 justify-between gap-2">
         <div className="flex flex-col gap-1.5">
           {others.map((p) => (
-            <PlayerPlaque
-              key={p.seat}
-              player={p}
-              name={nameForSeat(p.seat)}
-              isCurrentTurn={turnSeat === p.seat}
-              turnEndsAt={turnEndsAt}
-              banterText={banterBySeat[p.seat] ?? null}
-              headerExtra={
-                <ReserveTray
-                  reserved={p.reserved}
-                  ownerName={nameForSeat(p.seat)}
-                  className="gap-0.5"
-                  cardClassName="h-6 w-4 rounded-sm"
-                />
-              }
-            />
+            // Tapping a plaque shows that player's team; its reserved cards open on their own.
+            <TeamView key={p.seat} owner={`${nameForSeat(p.seat)}'s`} cardIds={p.cards}>
+              <PlayerPlaque
+                player={p}
+                name={nameForSeat(p.seat)}
+                isCurrentTurn={turnSeat === p.seat}
+                turnEndsAt={turnEndsAt}
+                banterText={banterBySeat[p.seat] ?? null}
+                headerExtra={
+                  <ReserveTray
+                    reserved={p.reserved}
+                    ownerName={nameForSeat(p.seat)}
+                    className="gap-0.5"
+                    cardClassName="h-6 w-4 rounded-sm"
+                  />
+                }
+              />
+            </TeamView>
           ))}
         </div>
 
@@ -184,7 +187,7 @@ export function Board({
         </PlayerPlaque>
 
         <div className={`mx-auto flex shrink-0 items-center gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>
-          <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} tags={viewer.tags} stagedCount={stagedColors.length} />
+          <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} cards={viewer.cards} tags={viewer.tags} stagedCount={stagedColors.length} />
           <ReservedCards
             reserved={viewer.reserved}
             viewerTokens={viewer.tokens}

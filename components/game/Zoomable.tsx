@@ -10,6 +10,8 @@ interface ZoomableProps {
   title?: string;
   /** The enlarged view, centered on a dimmed board. */
   zoomed: ReactNode;
+  /** The enlarged view takes touches itself (to be swiped), so only a tap outside it closes. */
+  interactive?: boolean;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
@@ -18,9 +20,10 @@ interface ZoomableProps {
 /**
  * Makes something too small to read on a phone tappable: tapping it dims
  * the board and shows `zoomed` large in the middle; tapping anywhere closes
- * it. Look-only — for anything the player can act on, see Card.
+ * it. Look-only — for anything the player can act on, see Card. One inside
+ * another works: a tap opens only the innermost.
  */
-export function Zoomable({ label, title, zoomed, className, style, children }: ZoomableProps) {
+export function Zoomable({ label, title, zoomed, interactive, className, style, children }: ZoomableProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,9 +32,14 @@ export function Zoomable({ label, title, zoomed, className, style, children }: Z
         role="button"
         tabIndex={0}
         aria-label={label}
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setOpen(true);
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.stopPropagation();
+          setOpen(true);
         }}
         className={cn("cursor-pointer", className)}
         style={style}
@@ -42,7 +50,10 @@ export function Zoomable({ label, title, zoomed, className, style, children }: Z
       {open ? (
         <div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
+          // Taps in here are for this view, not whatever it sits inside.
+          onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
+            e.stopPropagation();
             if (e.key === "Escape") setOpen(false);
           }}
         >
@@ -59,7 +70,7 @@ export function Zoomable({ label, title, zoomed, className, style, children }: Z
             </h2>
           ) : null}
           {/* Taps fall through to the backdrop: there is nothing to pick here. */}
-          <div className="pointer-events-none relative">{zoomed}</div>
+          <div className={cn("relative", !interactive && "pointer-events-none")}>{zoomed}</div>
         </div>
       ) : null}
     </>
