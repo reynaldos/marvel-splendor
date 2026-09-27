@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// Bots must be able to finish a game with the real deck and tiles, not just the fixtures.
+vi.unmock("@/data/cards.json");
+vi.unmock("@/data/locations.json");
+
 import { qualifiesForWin } from "@/lib/engine/rules";
 import type { BotDifficulty, PlayerState } from "@/lib/engine/types";
 import { MOVE_CEILING, simulateBotGame } from "./sim-helpers";

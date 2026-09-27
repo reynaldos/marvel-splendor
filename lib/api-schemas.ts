@@ -12,9 +12,10 @@ const StoneSchema = z.enum(STONES);
 const TokenColorSchema = z.enum(TOKEN_COLORS);
 const CardLevelSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 
-/** Mirrors `Move` from lib/engine/types.ts, minus the two server-initiated
- * variants (`TIMEOUT_SKIP`, `END_BY_CLOCK`) — a client can never submit
- * those directly, the server applies them on the seat's behalf. */
+/** Mirrors `Move` from lib/engine/types.ts, minus the server-initiated
+ * `END_BY_CLOCK`. A client may send `TIMEOUT_SKIP` for its own expired
+ * turn, but the moves route only honors it once the server's own clock
+ * agrees the turn time has run out. */
 export const MoveSchema = z.union([
   z.object({ type: z.literal("TAKE_TOKENS"), colors: z.array(StoneSchema).min(1).max(3) }),
   z.object({
@@ -34,6 +35,7 @@ export const MoveSchema = z.union([
     tokens: z.partialRecord(TokenColorSchema, z.number().int().nonnegative()),
   }),
   z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
+  z.object({ type: z.literal("TIMEOUT_SKIP") }),
 ]);
 
 /** `POST /api/games` body — see ARCHITECTURE.md §4 `GameSettings`. */

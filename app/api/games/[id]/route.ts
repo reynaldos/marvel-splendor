@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
-import type { GameState } from "@/lib/engine/types";
+import type { GameSettings, GameState, Move } from "@/lib/engine/types";
+import { replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 
@@ -11,8 +12,11 @@ import { getOrCreateUser } from "@/lib/get-or-create-user";
  * occupies (ARCHITECTURE.md §6 `games/[id]/route.ts`). Every OTHER player's
  * hand is still visible (tokens, points, bonuses, cards are public in
  * Splendor) except their blind-reserved cards, which redactState withholds.
+ *
+ * `?since=N` (the move count the device last showed) also returns `steps`:
+ * the board after each move it missed, so it can play them back in order.
  */
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const session = await auth0.getSession();
@@ -27,6 +31,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         include: { user: { select: { username: true } } },
         orderBy: { seat: "asc" },
       },
+      moves: { select: { ordinal: true, seat: true, payload: true }, orderBy: { ordinal: "asc" } },
     },
   });
   if (!game) {
@@ -42,7 +47,30 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "You are not a participant in this game." }, { status: 403 });
   }
 
+  if (game.status === "LOBBY") {
+    return NextResponse.json({ error: "This game hasn't started yet." }, { status: 409 });
+  }
+
   const state = game.state as unknown as GameState;
+  const moves = game.moves.map((m) => ({
+    ordinal: m.ordinal,
+    seat: m.seat,
+    move: m.payload as unknown as Move,
+  }));
+
+  const since = Number(new URL(request.url).searchParams.get("since") ?? NaN);
+  const steps =
+    Number.isInteger(since) && since >= 0 && since < moves.length
+      ? replaySteps({
+          seed: game.seed,
+          settings: game.settings as unknown as GameSettings,
+          playerCount: game.players.length,
+          moves,
+          since,
+          viewerSeat: seatRow.seat,
+          finalState: state,
+        })
+      : null;
 
   return NextResponse.json({
     id: game.id,
@@ -57,5 +85,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       name: p.isBot ? "Bot" : p.user?.username ?? p.guestName ?? "Player",
     })),
     view: redactState(state, seatRow.seat),
+    moves,
+    steps: steps ?? [],
+    turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
   });
 }

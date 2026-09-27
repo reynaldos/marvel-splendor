@@ -1,30 +1,31 @@
 {
   "_meta": {
-    "source": "Requirement patterns are 8 of base Splendor's 10 noble tiles (five '4+4 of two colors' and five '3+3+3 of three colors' patterns; the blue+green 4/4 and green+red+black 3/3/3 patterns were dropped). Each of the 4 double-sided tiles carries one 4/4 face (side a) and one 3/3/3 face (side b). Marvel location names are thematic; official Marvel Splendor per-tile requirements are unpublished.",
-    "note": "requirements mirror base Splendor nobles pending verification against physical Marvel copy"
+    "source": "Marvel Splendor location tiles supplied by the project owner (\"Marvel Splendor Expansion Locations.csv\"), transcribed from tile scans. Stone colors: yellow->mind, blue->space, orange->soul, red->reality, purple->power.",
+    "ids": "loc-<tile><side>: the 4 physical tiles are double-sided, and a game uses one face of each tile it draws. Saved games refer to locations by id, so never reuse or renumber an id."
   },
   "locations": [
     {
       "id": "loc-01a",
       "tile": 1,
       "side": "a",
-      "name": "Avengers Tower",
+      "name": "Triskelion",
+      "image": "/assets/locations/triskelion.png",
       "points": 3,
       "requires": {
         "soul": 4,
-        "reality": 4
+        "power": 4
       }
     },
     {
       "id": "loc-01b",
       "tile": 1,
       "side": "b",
-      "name": "Sanctum Sanctorum",
+      "name": "Hell's Kitchen, NYC",
+      "image": "/assets/locations/hells_kitchen.png",
       "points": 3,
       "requires": {
-        "mind": 3,
-        "reality": 3,
-        "power": 3
+        "mind": 4,
+        "soul": 4
       }
     },
     {
@@ -32,10 +33,11 @@
       "tile": 2,
       "side": "a",
       "name": "Wakanda",
+      "image": "/assets/locations/wakanda.png",
       "points": 3,
       "requires": {
-        "mind": 4,
-        "space": 4
+        "space": 4,
+        "reality": 4
       }
     },
     {
@@ -43,41 +45,20 @@
       "tile": 2,
       "side": "b",
       "name": "Asgard",
+      "image": "/assets/locations/asgard.png",
       "points": 3,
       "requires": {
-        "space": 3,
+        "mind": 3,
         "soul": 3,
-        "reality": 3
+        "power": 3
       }
     },
     {
       "id": "loc-03a",
       "tile": 3,
       "side": "a",
-      "name": "Xavier's School",
-      "points": 3,
-      "requires": {
-        "mind": 4,
-        "power": 4
-      }
-    },
-    {
-      "id": "loc-03b",
-      "tile": 3,
-      "side": "b",
-      "name": "The Raft",
-      "points": 3,
-      "requires": {
-        "mind": 3,
-        "space": 3,
-        "soul": 3
-      }
-    },
-    {
-      "id": "loc-04a",
-      "tile": 4,
-      "side": "a",
-      "name": "Knowhere",
+      "name": "Attilan",
+      "image": "/assets/locations/attilan.png",
       "points": 3,
       "requires": {
         "reality": 4,
@@ -85,14 +66,40 @@
       }
     },
     {
-      "id": "loc-04b",
-      "tile": 4,
+      "id": "loc-03b",
+      "tile": 3,
       "side": "b",
-      "name": "Atlantis",
+      "name": "Avengers Tower, NYC",
+      "image": "/assets/locations/avengers_tower.png",
+      "points": 3,
+      "requires": {
+        "mind": 4,
+        "space": 4
+      }
+    },
+    {
+      "id": "loc-04a",
+      "tile": 4,
+      "side": "a",
+      "name": "Knowhere",
+      "image": "/assets/locations/knowhere.png",
       "points": 3,
       "requires": {
         "mind": 3,
         "space": 3,
+        "reality": 3
+      }
+    },
+    {
+      "id": "loc-04b",
+      "tile": 4,
+      "side": "b",
+      "name": "Atlantis",
+      "image": "/assets/locations/atlantis.jpeg",
+      "points": 3,
+      "requires": {
+        "space": 3,
+        "reality": 3,
         "power": 3
       }
     }

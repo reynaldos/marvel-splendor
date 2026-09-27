@@ -45,7 +45,7 @@ End trigger: a player has **≥ 16 Infinity Points AND ≥ 1 bonus of each of th
 Players: 2–4. Turn order clockwise from a random starter.
 
 ### Card dataset caveat
-The official 90-card cost table is not published as data. We ship a `cards.json` dataset mirroring base Splendor's well-known cost distribution per level, with points and Avengers tags assigned to match the Marvel edition's counts. Marked clearly in the repo so it can be corrected card-by-card against a physical copy later. Game asset images are supplied by the project owner.
+The official 90-card cost table is not published as data. We ship a `cards.json` dataset mirroring base Splendor's well-known cost distribution per level, with points and Avengers tags assigned to match the Marvel edition's counts. Marked clearly in the repo so it can be corrected card-by-card against a physical copy later. Game asset images are supplied by the project owner. Card `name`s are placeholders too (real Marvel characters, not matched to the physical deck). A card with an `image` renders that image as the whole card; without one the UI draws a placeholder card face.
 
 ### Extensibility guarantee
 The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated.
@@ -58,7 +58,7 @@ The engine is data-driven: it makes no assumption about deck sizes. Cards, Locat
 |---|---|
 | Framework | Next.js (App Router, TypeScript, **no `src/` folder**) |
 | Styling / components | Tailwind CSS + shadcn/ui (Radix primitives) + Lucide icons |
-| Drag & drop | dnd-kit (token taking, card purchase/reserve) with click fallbacks |
+| Input | Tap/click only — no drag interactions |
 | ORM / DB | Prisma + Neon Postgres |
 | Auth | Auth0 (`@auth0/nextjs-auth0`); guests allowed for joining games |
 | Realtime | **Pusher Channels** (presence channels for lobby/seats; server broadcasts state) |
@@ -244,7 +244,7 @@ prisma/schema.prisma
 ```
 
 ### Game screen (per the approved UI reference)
-Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: six token stacks with counts + Location tiles + Avengers tile. Player plaques top/bottom-left: avatar, name, points, bonus/token strips, active-turn glow, turn timer. Bottom-center: personal token tray with `n/10` limit indicator. Bottom-right: End Turn. dnd-kit powers drag-token-to-tray and drag-card-to-tray (recruit) / to-reserve-slot (reserve); every drag has an equivalent click/tap interaction for accessibility and mobile.
+Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps tall and at most 200 wide, that scales to fit any viewport (`.game-board` in `app/globals.css` redefines Tailwind's spacing/text variables, so every size inside the board scales together). Left column: opponent plaques (avatar, name, Avengers tags, reserved cards, points, bonuses/tokens per color, active-turn ring, turn timer). Center: three level decks (III/II/I) each with a 4-card face-up row. Right: token stacks with counts, then target points, menu (move log), Location tiles and the Avengers tile. Bottom: the viewer's plaque with the tokens being taken this turn, their tray (`n/10`, bonuses/tokens per color, reserved cards), and End Turn. Upright phones get a rotate-your-device screen. All input is tap/click: tapping a card lifts it over a dimmed board with Recruit/Reserve actions, tapping a token stack stages a token (tap it in the tray to put it back), tapping a deck stages a blind reserve; End Turn submits.
 
 ---
 
@@ -264,7 +264,7 @@ Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: s
 2. Pure engine with exhaustive unit tests (Vitest) — every rule above, especially Time Stone, Avengers tile stealing, compound win condition, pending sub-moves. Engine honors `GameSettings` (target points, timers as data).
 3. Card/location datasets.
 4. Bot policy + tests (bot vs bot simulations must always terminate legally).
-5. Game setup screen (settings form: target points, bot difficulty) + game UI (board, dnd-kit interactions, animations) wired to vs-bot API.
+5. Game setup screen (settings form: target points, bot difficulty) + game UI (board, tap interactions, animations) wired to vs-bot API.
 6. Auth0 profiles, R2 avatar upload, stats recording, profile pages.
 7. OpenAI banter bubbles.
 
@@ -283,7 +283,29 @@ Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: s
 - API: integration tests for move validation, concurrency (stale `version` rejected), redaction (a client can never see deck order or hidden reserves).
 - E2E happy paths (Playwright, later): create → join → play → finish.
 
-## 10. Risks & notes
+## 10. Known limitations — turn timers and idle games
+
+How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and are applied in `app/api/games/[id]/moves/route.ts`.
+
+**Idle games**
+
+A game is closed as `ABANDONED` once every human's latest turn has timed out: one turn each when there are several humans, two in a row for a lone human playing bots. Bots are ignored.
+
+- **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
+- **Closed tabs are not detected.** Nothing runs on the server between requests, so a device must be open on the game for a turn to time out. If every player closes their tab, the game stays `ACTIVE` until someone reopens it; the expired turn is then skipped and the rule applies.
+- **Abandoned games are not recorded in stats.** Only `FINISHED` games are.
+- **A turn skipped for having no legal move counts as idle.** It is logged as the same `TIMEOUT_SKIP` move as a timer expiry. This is rare; if it ever closes a game that was being played, record the reason on the move.
+
+**Turn timers**
+
+- **The clock restarts on a sub-move.** A turn is timed from the game row's last write (`Game.updatedAt`), so returning tokens or choosing a Location gives that turn a fresh clock.
+- **Timing out another player waits a few seconds.** A player's own device ends their turn at zero. Other devices wait about 3 seconds longer before doing it for them, so there is a short pause when someone has left.
+
+**Move playback**
+
+- **Changing card data mid-game disables playback for games in progress.** Missed moves are rebuilt by re-dealing from the seed and re-applying the move log. If costs, points or tags in `data/cards.json` change, the rebuild no longer matches the stored state and devices jump straight to the latest board instead. Adding `name` or `image` is safe.
+
+## 11. Risks & notes
 
 - **IP**: Marvel/Splendor are licensed properties — this is a personal/portfolio project; assets are owner-supplied and it should not be marketed commercially.
 - **Card data fidelity**: costs are reconstructed (see §1 caveat) until verified against a physical copy.

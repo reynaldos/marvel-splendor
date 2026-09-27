@@ -13,6 +13,7 @@ import { legalMoves } from "@/lib/engine/legal-moves";
 import { validateMove } from "@/lib/engine/validate";
 import type { GameState, Move } from "@/lib/engine/types";
 import { chooseBotMove } from "@/lib/bot/policy";
+import { Prisma } from "@/lib/generated/prisma/client";
 
 export interface AppliedMove {
   seat: number;
@@ -86,4 +87,15 @@ export function generateJoinCode(): string {
     code += JOIN_CODE_ALPHABET[randomInt(JOIN_CODE_ALPHABET.length)];
   }
   return code;
+}
+
+/** True when `error` is Prisma's unique-constraint violation on `field`. */
+export function isUniqueViolation(error: unknown, field: string): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+  const target = error.meta?.target;
+  if (Array.isArray(target)) return target.includes(field);
+  if (typeof target === "string") return target.includes(field);
+  return false;
 }

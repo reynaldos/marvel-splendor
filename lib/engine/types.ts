@@ -19,6 +19,10 @@ export type CardLevel = 1 | 2 | 3;
 
 export interface Card {
   id: string;
+  /** Display name (placeholder dataset — see data/cards.json `_meta.names`). */
+  name: string;
+  /** Full-card art path/URL; when absent the UI draws a placeholder card. */
+  image?: string;
   level: CardLevel;
   bonus: Stone;
   points: number;
@@ -34,6 +38,8 @@ export interface Location {
   name: string;
   points: number;
   requires: Partial<StoneCounts>;
+  /** Full-tile art path/URL; when absent the UI draws a placeholder tile. */
+  image?: string;
 }
 
 export type BotDifficulty = "easy" | "normal" | "hard";

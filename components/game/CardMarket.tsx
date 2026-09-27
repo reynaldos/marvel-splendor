@@ -1,16 +1,15 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
 import { cn } from "cn";
 
+import { ASSETS, AssetImage } from "@/components/game/assets";
 import { Card } from "@/components/game/Card";
-import { Badge } from "@/components/ui/badge";
 import { estimateAffordability } from "@/components/game/affordability";
 import { getCard } from "@/lib/engine/data";
 import { MAX_RESERVED, type CardLevel, type StoneCounts, type TokenCounts } from "@/lib/engine/types";
 import type { StagedAction } from "@/components/game/staged-action";
 
-const LEVEL_LABEL = { 1: "Level I", 2: "Level II", 3: "Level III" } as const;
+const LEVEL_LABEL = { 1: "I", 2: "II", 3: "III" } as const;
 
 interface CardMarketProps {
   level: CardLevel;
@@ -44,83 +43,68 @@ export function CardMarket({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="w-14 shrink-0 text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-        {LEVEL_LABEL[level]}
-      </span>
       <DeckIndicator
         level={level}
-        count={deckCount}
+        empty={deckCount === 0}
+        selected={staged?.kind === "reserve" && staged.from === "deck" && staged.level === level}
         disabled={disabled || !canReserve}
         onClick={() => onStageReserveDeck(level)}
       />
-      <div className="flex flex-1 gap-2">
-        {slots.map((cardId, slotIndex) =>
-          cardId ? (
-            <MarketCard
-              key={`${level}-${slotIndex}-${cardId}`}
-              level={level}
-              cardId={cardId}
-              viewerTokens={viewerTokens}
-              viewerBonuses={viewerBonuses}
-              canReserve={canReserve}
-              staged={staged}
-              disabled={disabled}
-              onStageReserveMarket={onStageReserveMarket}
-              onStageRecruit={onStageRecruit}
-            />
-          ) : (
-            <div
-              key={`${level}-empty-${slotIndex}`}
-              className="flex h-36 w-24 shrink-0 items-center justify-center rounded-md border border-dashed border-foreground/15 text-[0.6rem] text-muted-foreground"
-            >
-              Empty
-            </div>
-          ),
-        )}
-      </div>
+      {slots.map((cardId, slotIndex) =>
+        cardId ? (
+          <MarketCard
+            key={`${level}-${slotIndex}-${cardId}`}
+            level={level}
+            cardId={cardId}
+            viewerTokens={viewerTokens}
+            viewerBonuses={viewerBonuses}
+            canReserve={canReserve}
+            staged={staged}
+            disabled={disabled}
+            onStageReserveMarket={onStageReserveMarket}
+            onStageRecruit={onStageRecruit}
+          />
+        ) : (
+          <div
+            key={`${level}-empty-${slotIndex}`}
+            className="h-22 w-16 shrink-0 rounded-md border border-dashed border-foreground/15"
+          />
+        ),
+      )}
     </div>
   );
 }
 
 function DeckIndicator({
   level,
-  count,
+  empty,
+  selected,
   disabled,
   onClick,
 }: {
   level: CardLevel;
-  count: number;
+  empty: boolean;
+  selected: boolean;
   disabled?: boolean;
   onClick: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: `deck:${level}`,
-    data: { type: "deck", level },
-    disabled: disabled || count === 0,
-  });
-
   return (
     <button
-      ref={setNodeRef}
       type="button"
-      disabled={disabled || count === 0}
+      disabled={disabled || empty}
       onClick={onClick}
-      {...attributes}
-      {...listeners}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-          : undefined
-      }
       title="Reserve blind from this deck"
+      aria-pressed={selected}
       className={cn(
-        "relative flex h-36 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity disabled:cursor-not-allowed disabled:opacity-40",
-        !disabled && count > 0 && "cursor-grab hover:bg-muted/70 active:cursor-grabbing",
-        isDragging && "opacity-50",
+        "relative flex h-22 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40",
+        selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
       )}
     >
-      <div className="size-8 rounded-full bg-foreground/10" />
-      <Badge variant="secondary">{count} left</Badge>
+      {ASSETS.deckBacks[level] ? (
+        <AssetImage src={ASSETS.deckBacks[level]} alt={`Level ${LEVEL_LABEL[level]} deck`} />
+      ) : (
+        <span className="font-serif text-2xl font-black">{LEVEL_LABEL[level]}</span>
+      )}
     </button>
   );
 }
@@ -158,8 +142,6 @@ function MarketCard({
       affordable={affordable}
       selected={selected}
       disabled={disabled}
-      dragId={`card:${level}:${cardId}`}
-      dragData={{ type: "card", from: "market", cardId, level, affordable }}
       reserveAction={{
         label: "Reserve",
         onClick: () => onStageReserveMarket(level, cardId),

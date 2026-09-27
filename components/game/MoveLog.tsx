@@ -22,9 +22,6 @@ interface MoveLogProps {
 export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProps) {
   return (
     <div className={className}>
-      <h3 className="mb-1 text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-        Move log
-      </h3>
       <ScrollArea className="h-40 rounded-md bg-card p-2 ring-1 ring-foreground/10">
         <ol className="flex flex-col gap-1">
           {entries.length === 0 ? (
@@ -47,10 +44,9 @@ function seatLabel(seat: number, players: Array<{ seat: number; name: string }>,
   return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
 }
 
-/** Card ids double as the display label — the dataset has no `name` field (see ARCHITECTURE.md's dataset caveat). */
 function cardLabel(cardId: string): string {
   const card = getCard(cardId);
-  return `${cardId} (Lv${card.level})`;
+  return `${card.name} (Lv${card.level})`;
 }
 
 function describeMove(
@@ -77,7 +73,7 @@ function describeMove(
     case "CHOOSE_LOCATION":
       return `${who} claimed ${getLocation(move.locationId).name}`;
     case "TIMEOUT_SKIP":
-      return `${who}'s turn was skipped (no legal moves)`;
+      return `${who}'s turn was skipped`;
     case "END_BY_CLOCK":
       return "The game clock expired — finishing the round.";
     default:

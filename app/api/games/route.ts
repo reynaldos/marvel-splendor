@@ -5,7 +5,7 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, type GameSettings, type GameState } from "@/lib/engine/types";
-import { generateJoinCode, generateSeed, runServerTurnLoop } from "@/lib/game-server";
+import { generateJoinCode, generateSeed, isUniqueViolation, runServerTurnLoop } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { Prisma } from "@/lib/generated/prisma/client";
@@ -128,22 +128,12 @@ async function createGameRecord(args: {
       });
       return game.id;
     } catch (error) {
-      if (isUniqueJoinCodeViolation(error)) continue;
+      if (isUniqueViolation(error, "joinCode")) continue;
       throw error;
     }
   }
 
   throw new Error("Failed to allocate a unique join code after several attempts");
-}
-
-function isUniqueJoinCodeViolation(error: unknown): boolean {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
-    return false;
-  }
-  const target = error.meta?.target;
-  if (Array.isArray(target)) return target.includes("joinCode");
-  if (typeof target === "string") return target.includes("joinCode");
-  return false;
 }
 
 /**

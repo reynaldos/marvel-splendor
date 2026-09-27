@@ -1,64 +1,85 @@
 {
   "_meta": {
-    "source": "Base Splendor 90-card table from bouk/splendimax 'Splendor Cards.csv' (github.com/bouk/splendimax), cross-verified card-for-card against seal256/splendor 'assets/cards.csv' (github.com/seal256/splendor). Gem-to-stone mapping: diamond/white->mind, sapphire/blue->space, emerald/green->soul, ruby/red->reality, onyx/black->power.",
-    "tagRule": "Level 1: tag=1 on the five 1-point cards, else 0. Level 3: tag=2 on 5-point cards, tag=1 on 4-point cards, 0 on 3-point cards. Level 2: all 0 -- the base list has fifteen 2-point level-2 cards, so tagging them (as a naive points-based rule would) yields 40 tags; dropping level-2 tags lands the deck at exactly 25 total Avengers tags, within the ~20-25 target.",
-    "note": "costs mirror base Splendor pending verification against physical Marvel copy"
+    "source": "Marvel Splendor card list supplied by the project owner (\"Marvel Splendor Expansion Cards.csv\"), transcribed from card scans. Stone colors: yellow->mind, blue->space, orange->soul, red->reality, purple->power.",
+    "ids": "c<level>-<nn>, numbered in the CSV's order within each level. Saved games refer to cards by id, so never reuse or renumber an id.",
+    "timeStone": "Every level 3 card bears the Time Stone icon; the UI and engine derive it from the level."
   },
   "cards": [
     {
       "id": "c1-01",
+      "name": "Abomination",
+      "image": "/cards/abomination.png",
       "level": 1,
       "bonus": "power",
       "points": 0,
       "cost": {
-        "mind": 1,
-        "space": 1,
+        "space": 2,
         "soul": 1,
-        "reality": 1
+        "reality": 1,
+        "power": 1
       },
       "tags": 0
     },
     {
       "id": "c1-02",
+      "name": "America Chavez",
+      "image": "/cards/america-chavez.png",
       "level": 1,
       "bonus": "power",
       "points": 0,
       "cost": {
         "mind": 1,
-        "space": 2,
-        "soul": 1,
+        "space": 3,
         "reality": 1
       },
-      "tags": 0
+      "tags": 1
     },
     {
       "id": "c1-03",
+      "name": "Baron Zemo",
+      "image": "/cards/baron-zemo.png",
       "level": 1,
-      "bonus": "power",
+      "bonus": "mind",
       "points": 0,
       "cost": {
-        "mind": 2,
-        "space": 2,
-        "reality": 1
+        "reality": 3
       },
       "tags": 0
     },
     {
       "id": "c1-04",
+      "name": "Bullseye",
+      "image": "/cards/bullseye.png",
       "level": 1,
-      "bonus": "power",
+      "bonus": "space",
       "points": 0,
       "cost": {
+        "space": 1,
         "soul": 1,
-        "reality": 3,
+        "reality": 2,
         "power": 1
       },
       "tags": 0
     },
     {
       "id": "c1-05",
+      "name": "Crystal",
+      "image": "/cards/crystal.png",
       "level": 1,
-      "bonus": "power",
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "soul": 2,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-06",
+      "name": "Electro",
+      "image": "/cards/electro.png",
+      "level": 1,
+      "bonus": "reality",
       "points": 0,
       "cost": {
         "soul": 2,
@@ -67,44 +88,41 @@
       "tags": 0
     },
     {
-      "id": "c1-06",
+      "id": "c1-07",
+      "name": "Elektra",
+      "image": "/cards/elektra.png",
       "level": 1,
-      "bonus": "power",
+      "bonus": "space",
       "points": 0,
       "cost": {
         "mind": 2,
-        "soul": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-07",
-      "level": 1,
-      "bonus": "power",
-      "points": 0,
-      "cost": {
-        "soul": 3
+        "power": 2
       },
       "tags": 0
     },
     {
       "id": "c1-08",
+      "name": "Gorgon",
+      "image": "/cards/gorgon.png",
       "level": 1,
       "bonus": "power",
-      "points": 1,
+      "points": 0,
       "cost": {
-        "space": 4
+        "mind": 2,
+        "space": 2
       },
-      "tags": 1
+      "tags": 0
     },
     {
       "id": "c1-09",
+      "name": "Grandmaster",
+      "image": "/cards/grandmaster.png",
       "level": 1,
-      "bonus": "space",
+      "bonus": "mind",
       "points": 0,
       "cost": {
         "mind": 1,
-        "soul": 1,
+        "space": 1,
         "reality": 1,
         "power": 1
       },
@@ -112,159 +130,51 @@
     },
     {
       "id": "c1-10",
+      "name": "Hawkeye",
+      "image": "/cards/hawkeye.png",
       "level": 1,
-      "bonus": "space",
+      "bonus": "soul",
       "points": 0,
       "cost": {
         "mind": 1,
-        "soul": 1,
-        "reality": 2,
-        "power": 1
+        "space": 2,
+        "power": 2
       },
-      "tags": 0
+      "tags": 1
     },
     {
       "id": "c1-11",
+      "name": "Kate Bishop",
+      "image": "/cards/kate-bishop.png",
       "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "soul": 2,
-        "reality": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-12",
-      "level": 1,
-      "bonus": "space",
+      "bonus": "soul",
       "points": 0,
       "cost": {
         "space": 1,
-        "soul": 3,
-        "reality": 1
+        "reality": 1,
+        "power": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-12",
+      "name": "Kingpin",
+      "image": "/cards/kingpin.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "power": 2
       },
       "tags": 0
     },
     {
       "id": "c1-13",
+      "name": "Kraven",
+      "image": "/cards/kraven.png",
       "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-14",
-      "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "soul": 2,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-15",
-      "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-16",
-      "level": 1,
-      "bonus": "space",
-      "points": 1,
-      "cost": {
-        "reality": 4
-      },
-      "tags": 1
-    },
-    {
-      "id": "c1-17",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "space": 1,
-        "soul": 1,
-        "reality": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-18",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "space": 1,
-        "soul": 2,
-        "reality": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-19",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "space": 2,
-        "soul": 2,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-20",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "mind": 3,
-        "space": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-21",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "reality": 2,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-22",
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "space": 2,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-23",
-      "level": 1,
-      "bonus": "mind",
+      "bonus": "power",
       "points": 0,
       "cost": {
         "space": 3
@@ -272,183 +182,52 @@
       "tags": 0
     },
     {
-      "id": "c1-24",
+      "id": "c1-14",
+      "name": "Lizard",
+      "image": "/cards/lizard.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-15",
+      "name": "Lockjaw",
+      "image": "/cards/lockjaw.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-16",
+      "name": "M.O.D.O.K.",
+      "image": "/cards/m-o-d-o-k.png",
       "level": 1,
       "bonus": "mind",
-      "points": 1,
-      "cost": {
-        "soul": 4
-      },
-      "tags": 1
-    },
-    {
-      "id": "c1-25",
-      "level": 1,
-      "bonus": "soul",
       "points": 0,
       "cost": {
-        "mind": 1,
-        "space": 1,
-        "reality": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-26",
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "space": 1,
-        "reality": 1,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-27",
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "space": 1,
-        "reality": 2,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-28",
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "space": 3,
-        "soul": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-29",
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "mind": 2,
-        "space": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-30",
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "space": 2,
+        "soul": 2,
         "reality": 2
       },
       "tags": 0
     },
     {
-      "id": "c1-31",
+      "id": "c1-17",
+      "name": "Moon Knight",
+      "image": "/cards/moon-knight.png",
       "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-32",
-      "level": 1,
-      "bonus": "soul",
-      "points": 1,
-      "cost": {
-        "power": 4
-      },
-      "tags": 1
-    },
-    {
-      "id": "c1-33",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "space": 1,
-        "soul": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-34",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "mind": 2,
-        "space": 1,
-        "soul": 1,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-35",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "mind": 2,
-        "soul": 1,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-36",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "mind": 1,
-        "reality": 1,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-37",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "space": 2,
-        "soul": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-38",
-      "level": 1,
-      "bonus": "reality",
-      "points": 0,
-      "cost": {
-        "mind": 2,
-        "reality": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-39",
-      "level": 1,
-      "bonus": "reality",
+      "bonus": "space",
       "points": 0,
       "cost": {
         "mind": 3
@@ -456,64 +235,609 @@
       "tags": 0
     },
     {
-      "id": "c1-40",
+      "id": "c1-18",
+      "name": "Ms. Marvel",
+      "image": "/cards/ms-marvel.png",
       "level": 1,
       "bonus": "reality",
-      "points": 1,
+      "points": 0,
       "cost": {
-        "mind": 4
+        "mind": 2,
+        "soul": 2,
+        "reality": 1
       },
       "tags": 1
     },
     {
+      "id": "c1-19",
+      "name": "Mysterio",
+      "image": "/cards/mysterio.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-20",
+      "name": "Prowler",
+      "image": "/cards/prowler.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 1,
+        "reality": 2,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-21",
+      "name": "Quake",
+      "image": "/cards/quake.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 3,
+        "power": 1
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-22",
+      "name": "Rhino",
+      "image": "/cards/rhino.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-23",
+      "name": "Rocket",
+      "image": "/cards/rocket.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "reality": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-24",
+      "name": "Sandman",
+      "image": "/cards/sandman.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "soul": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-25",
+      "name": "Scarlet Spider",
+      "image": "/cards/scarlet-spider.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "space": 1,
+        "soul": 1,
+        "reality": 1,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-26",
+      "name": "Scorpion",
+      "image": "/cards/scorpion.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 1,
+      "cost": {
+        "space": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-27",
+      "name": "Silver Sable",
+      "image": "/cards/silver-sable.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-28",
+      "name": "Spider-Girl",
+      "image": "/cards/spider-girl.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-29",
+      "name": "Spider-Ham",
+      "image": "/cards/spider-ham.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-30",
+      "name": "Spider-Man 2099",
+      "image": "/cards/spider-man-2099.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-31",
+      "name": "Spider-Woman",
+      "image": "/cards/spider-woman.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "reality": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-32",
+      "name": "Squirrel Girl",
+      "image": "/cards/squirrel-girl.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "soul": 1,
+        "reality": 2,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-33",
+      "name": "Taskmaster",
+      "image": "/cards/taskmaster.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 1,
+      "cost": {
+        "mind": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-34",
+      "name": "Triton",
+      "image": "/cards/triton.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 1,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-35",
+      "name": "Valkyrie",
+      "image": "/cards/valkyrie.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 3,
+        "soul": 1,
+        "power": 1
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-36",
+      "name": "Vulture",
+      "image": "/cards/vulture.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "reality": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-37",
+      "name": "Wasp",
+      "image": "/cards/wasp.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 1,
+        "soul": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-38",
+      "name": "Winter Soldier",
+      "image": "/cards/winter-soldier.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "soul": 1,
+        "reality": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-39",
+      "name": "Wong",
+      "image": "/cards/wong.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "mind": 1,
+        "space": 1,
+        "soul": 2,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-40",
+      "name": "Yondu",
+      "image": "/cards/yondu.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "power": 4
+      },
+      "tags": 0
+    },
+    {
       "id": "c2-01",
+      "name": "Beta Ray Bill",
+      "image": "/cards/beta-ray-bill.png",
+      "level": 2,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "space": 3,
+        "soul": 2,
+        "reality": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-02",
+      "name": "Black Cat",
+      "image": "/cards/black-cat.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "reality": 3,
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-03",
+      "name": "Carnage",
+      "image": "/cards/carnage.png",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "mind": 5,
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-04",
+      "name": "Crossbones",
+      "image": "/cards/crossbones.png",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "mind": 4,
+        "space": 2,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-05",
+      "name": "Daredevil",
+      "image": "/cards/daredevil.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 3,
+      "cost": {
+        "reality": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-06",
+      "name": "Falcon",
+      "image": "/cards/falcon.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "mind": 3,
+        "reality": 3,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-07",
+      "name": "Ghost Rider",
+      "image": "/cards/ghost-rider.png",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "mind": 2,
+        "space": 4,
+        "power": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-08",
+      "name": "Ghost-Spider",
+      "image": "/cards/ghost-spider.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "space": 2,
+        "soul": 1,
+        "power": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-09",
+      "name": "Groot",
+      "image": "/cards/groot.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "reality": 5,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-10",
+      "name": "Hela",
+      "image": "/cards/hela.png",
+      "level": 2,
+      "bonus": "reality",
+      "points": 3,
+      "cost": {
+        "space": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-11",
+      "name": "Jessica Jones",
+      "image": "/cards/jessica-jones.png",
+      "level": 2,
+      "bonus": "power",
+      "points": 3,
+      "cost": {
+        "mind": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-12",
+      "name": "Karnak",
+      "image": "/cards/karnak.png",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "mind": 3,
+        "soul": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-13",
+      "name": "Maria Hill",
+      "image": "/cards/maria-hill.png",
+      "level": 2,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "space": 2,
+        "soul": 3,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-14",
+      "name": "Maximus",
+      "image": "/cards/maximus.png",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "space": 2,
+        "soul": 4,
+        "reality": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-15",
+      "name": "Medusa",
+      "image": "/cards/medusa.png",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "space": 5,
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-16",
+      "name": "Miles Morales",
+      "image": "/cards/miles-morales.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-17",
+      "name": "Nebula",
+      "image": "/cards/nebula.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 3,
+      "cost": {
+        "power": 6
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-18",
+      "name": "Nick Fury",
+      "image": "/cards/nick-fury.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "soul": 2,
+        "reality": 3,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-19",
+      "name": "Okoye",
+      "image": "/cards/okoye.png",
       "level": 2,
       "bonus": "power",
       "points": 1,
       "cost": {
         "mind": 3,
         "space": 2,
-        "soul": 2
+        "power": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-20",
+      "name": "Punisher",
+      "image": "/cards/punisher.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "reality": 5
       },
       "tags": 0
     },
     {
-      "id": "c2-02",
+      "id": "c2-21",
+      "name": "Quicksilver",
+      "image": "/cards/quicksilver.png",
       "level": 2,
-      "bonus": "power",
+      "bonus": "space",
       "points": 1,
       "cost": {
-        "mind": 3,
-        "soul": 3,
-        "power": 2
+        "mind": 2,
+        "reality": 3,
+        "power": 3
       },
-      "tags": 0
+      "tags": 1
     },
     {
-      "id": "c2-03",
+      "id": "c2-22",
+      "name": "Red Skull",
+      "image": "/cards/red-skull.png",
       "level": 2,
-      "bonus": "power",
-      "points": 2,
+      "bonus": "mind",
+      "points": 3,
       "cost": {
-        "space": 1,
-        "soul": 4,
-        "reality": 2
+        "soul": 6
       },
       "tags": 0
     },
     {
-      "id": "c2-04",
-      "level": 2,
-      "bonus": "power",
-      "points": 2,
-      "cost": {
-        "soul": 5,
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-05",
+      "id": "c2-23",
+      "name": "Ronan",
+      "image": "/cards/ronan.png",
       "level": 2,
       "bonus": "power",
       "points": 2,
@@ -523,200 +847,67 @@
       "tags": 0
     },
     {
-      "id": "c2-06",
+      "id": "c2-24",
+      "name": "Scarlet Witch",
+      "image": "/cards/scarlet-witch.png",
       "level": 2,
-      "bonus": "power",
-      "points": 3,
-      "cost": {
-        "power": 6
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-07",
-      "level": 2,
-      "bonus": "space",
-      "points": 1,
-      "cost": {
-        "space": 2,
-        "soul": 2,
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-08",
-      "level": 2,
-      "bonus": "space",
-      "points": 1,
-      "cost": {
-        "space": 2,
-        "soul": 3,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-09",
-      "level": 2,
-      "bonus": "space",
-      "points": 2,
-      "cost": {
-        "mind": 5,
-        "space": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-10",
-      "level": 2,
-      "bonus": "space",
-      "points": 2,
-      "cost": {
-        "mind": 2,
-        "reality": 1,
-        "power": 4
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-11",
-      "level": 2,
-      "bonus": "space",
-      "points": 2,
-      "cost": {
-        "space": 5
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-12",
-      "level": 2,
-      "bonus": "space",
-      "points": 3,
-      "cost": {
-        "space": 6
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-13",
-      "level": 2,
-      "bonus": "mind",
-      "points": 1,
-      "cost": {
-        "soul": 3,
-        "reality": 2,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-14",
-      "level": 2,
-      "bonus": "mind",
+      "bonus": "reality",
       "points": 1,
       "cost": {
         "mind": 2,
         "space": 3,
-        "reality": 3
+        "reality": 2
       },
-      "tags": 0
+      "tags": 1
     },
     {
-      "id": "c2-15",
+      "id": "c2-25",
+      "name": "She-Hulk",
+      "image": "/cards/she-hulk.png",
       "level": 2,
-      "bonus": "mind",
-      "points": 2,
-      "cost": {
-        "soul": 1,
-        "reality": 4,
-        "power": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-16",
-      "level": 2,
-      "bonus": "mind",
-      "points": 2,
-      "cost": {
-        "reality": 5,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-17",
-      "level": 2,
-      "bonus": "mind",
-      "points": 2,
-      "cost": {
-        "reality": 5
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-18",
-      "level": 2,
-      "bonus": "mind",
-      "points": 3,
-      "cost": {
-        "mind": 6
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-19",
-      "level": 2,
-      "bonus": "soul",
+      "bonus": "power",
       "points": 1,
       "cost": {
         "mind": 3,
         "soul": 2,
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-20",
-      "level": 2,
-      "bonus": "soul",
-      "points": 1,
-      "cost": {
-        "mind": 2,
-        "space": 3,
         "power": 2
       },
-      "tags": 0
+      "tags": 1
     },
     {
-      "id": "c2-21",
+      "id": "c2-26",
+      "name": "Shuri",
+      "image": "/cards/shuri.png",
       "level": 2,
-      "bonus": "soul",
-      "points": 2,
+      "bonus": "mind",
+      "points": 1,
       "cost": {
-        "mind": 4,
+        "mind": 3,
         "space": 2,
-        "power": 1
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-22",
-      "level": 2,
-      "bonus": "soul",
-      "points": 2,
-      "cost": {
-        "space": 5,
         "soul": 3
       },
+      "tags": 1
+    },
+    {
+      "id": "c2-27",
+      "name": "Star-Lord",
+      "image": "/cards/star-lord.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "space": 1,
+        "soul": 2,
+        "reality": 4
+      },
       "tags": 0
     },
     {
-      "id": "c2-23",
+      "id": "c2-28",
+      "name": "The Collector",
+      "image": "/cards/the-collector.png",
       "level": 2,
-      "bonus": "soul",
+      "bonus": "mind",
       "points": 2,
       "cost": {
         "soul": 5
@@ -724,311 +915,300 @@
       "tags": 0
     },
     {
-      "id": "c2-24",
-      "level": 2,
-      "bonus": "soul",
-      "points": 3,
-      "cost": {
-        "soul": 6
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-25",
-      "level": 2,
-      "bonus": "reality",
-      "points": 1,
-      "cost": {
-        "mind": 2,
-        "reality": 2,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-26",
-      "level": 2,
-      "bonus": "reality",
-      "points": 1,
-      "cost": {
-        "space": 3,
-        "reality": 2,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-27",
-      "level": 2,
-      "bonus": "reality",
-      "points": 2,
-      "cost": {
-        "mind": 1,
-        "space": 4,
-        "soul": 2
-      },
-      "tags": 0
-    },
-    {
-      "id": "c2-28",
-      "level": 2,
-      "bonus": "reality",
-      "points": 2,
-      "cost": {
-        "mind": 3,
-        "power": 5
-      },
-      "tags": 0
-    },
-    {
       "id": "c2-29",
+      "name": "Venom",
+      "image": "/cards/venom.png",
       "level": 2,
       "bonus": "reality",
       "points": 2,
       "cost": {
-        "power": 5
+        "space": 5
       },
       "tags": 0
     },
     {
       "id": "c2-30",
+      "name": "War Machine",
+      "image": "/cards/war-machine.png",
       "level": 2,
-      "bonus": "reality",
-      "points": 3,
+      "bonus": "space",
+      "points": 1,
       "cost": {
-        "reality": 6
-      },
-      "tags": 0
-    },
-    {
-      "id": "c3-01",
-      "level": 3,
-      "bonus": "power",
-      "points": 3,
-      "cost": {
-        "mind": 3,
-        "space": 3,
-        "soul": 5,
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c3-02",
-      "level": 3,
-      "bonus": "power",
-      "points": 4,
-      "cost": {
-        "reality": 7
+        "space": 2,
+        "soul": 2,
+        "power": 3
       },
       "tags": 1
     },
     {
-      "id": "c3-03",
+      "id": "c3-01",
+      "name": "Ant-Man",
+      "image": "/cards/ant-man.png",
       "level": 3,
-      "bonus": "power",
+      "bonus": "space",
       "points": 4,
       "cost": {
+        "mind": 3,
         "soul": 3,
-        "reality": 6,
+        "reality": 6
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-02",
+      "name": "Black Bolt",
+      "image": "/cards/black-bolt.png",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "mind": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-03",
+      "name": "Black Panther",
+      "image": "/cards/black-panther.png",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "mind": 6,
+        "soul": 3,
         "power": 3
       },
       "tags": 1
     },
     {
       "id": "c3-04",
+      "name": "Black Widow",
+      "image": "/cards/black-widow.png",
       "level": 3,
-      "bonus": "power",
-      "points": 5,
+      "bonus": "space",
+      "points": 3,
       "cost": {
-        "reality": 7,
+        "mind": 3,
+        "space": 3,
+        "reality": 5,
         "power": 3
       },
       "tags": 2
     },
     {
       "id": "c3-05",
-      "level": 3,
-      "bonus": "space",
-      "points": 3,
-      "cost": {
-        "mind": 3,
-        "soul": 3,
-        "reality": 3,
-        "power": 5
-      },
-      "tags": 0
-    },
-    {
-      "id": "c3-06",
-      "level": 3,
-      "bonus": "space",
-      "points": 4,
-      "cost": {
-        "mind": 7
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-07",
-      "level": 3,
-      "bonus": "space",
-      "points": 4,
-      "cost": {
-        "mind": 6,
-        "space": 3,
-        "power": 3
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-08",
-      "level": 3,
-      "bonus": "space",
-      "points": 5,
-      "cost": {
-        "mind": 7,
-        "space": 3
-      },
-      "tags": 2
-    },
-    {
-      "id": "c3-09",
-      "level": 3,
-      "bonus": "mind",
-      "points": 3,
-      "cost": {
-        "space": 3,
-        "soul": 3,
-        "reality": 5,
-        "power": 3
-      },
-      "tags": 0
-    },
-    {
-      "id": "c3-10",
-      "level": 3,
-      "bonus": "mind",
-      "points": 4,
-      "cost": {
-        "power": 7
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-11",
-      "level": 3,
-      "bonus": "mind",
-      "points": 4,
-      "cost": {
-        "mind": 3,
-        "reality": 3,
-        "power": 6
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-12",
-      "level": 3,
-      "bonus": "mind",
-      "points": 5,
-      "cost": {
-        "mind": 3,
-        "power": 7
-      },
-      "tags": 2
-    },
-    {
-      "id": "c3-13",
+      "name": "Captain America",
+      "image": "/cards/captain-america.png",
       "level": 3,
       "bonus": "soul",
       "points": 3,
       "cost": {
         "mind": 5,
         "space": 3,
+        "soul": 3,
+        "power": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-06",
+      "name": "Captain Marvel",
+      "image": "/cards/captain-marvel.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "space": 3,
+        "soul": 6,
+        "power": 3
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-07",
+      "name": "Doctor Octopus",
+      "image": "/cards/doctor-octopus.png",
+      "level": 3,
+      "bonus": "mind",
+      "points": 4,
+      "cost": {
+        "space": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-08",
+      "name": "Doctor Strange",
+      "image": "/cards/doctor-strange.png",
+      "level": 3,
+      "bonus": "reality",
+      "points": 4,
+      "cost": {
+        "power": 7
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-09",
+      "name": "Drax",
+      "image": "/cards/drax.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "soul": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-10",
+      "name": "Gamora",
+      "image": "/cards/gamora.png",
+      "level": 3,
+      "bonus": "space",
+      "points": 5,
+      "cost": {
+        "soul": 3,
+        "reality": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-11",
+      "name": "Green Goblin",
+      "image": "/cards/green-goblin.png",
+      "level": 3,
+      "bonus": "mind",
+      "points": 5,
+      "cost": {
+        "space": 7,
+        "power": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-12",
+      "name": "Hulk",
+      "image": "/cards/hulk.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 3,
+      "cost": {
+        "space": 3,
+        "soul": 5,
         "reality": 3,
         "power": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-13",
+      "name": "Iron Fist",
+      "image": "/cards/iron-fist.png",
+      "level": 3,
+      "bonus": "space",
+      "points": 4,
+      "cost": {
+        "reality": 7
       },
       "tags": 0
     },
     {
       "id": "c3-14",
+      "name": "Iron Man",
+      "image": "/cards/iron-man.png",
       "level": 3,
-      "bonus": "soul",
-      "points": 4,
-      "cost": {
-        "space": 7
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-15",
-      "level": 3,
-      "bonus": "soul",
-      "points": 4,
-      "cost": {
-        "mind": 3,
-        "space": 6,
-        "soul": 3
-      },
-      "tags": 1
-    },
-    {
-      "id": "c3-16",
-      "level": 3,
-      "bonus": "soul",
-      "points": 5,
-      "cost": {
-        "space": 7,
-        "soul": 3
-      },
-      "tags": 2
-    },
-    {
-      "id": "c3-17",
-      "level": 3,
-      "bonus": "reality",
+      "bonus": "mind",
       "points": 3,
       "cost": {
         "mind": 3,
         "space": 5,
         "soul": 3,
-        "power": 3
+        "reality": 3
+      },
+      "tags": 2
+    },
+    {
+      "id": "c3-15",
+      "name": "Loki",
+      "image": "/cards/loki.png",
+      "level": 3,
+      "bonus": "reality",
+      "points": 5,
+      "cost": {
+        "space": 3,
+        "power": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-16",
+      "name": "Luke Cage",
+      "image": "/cards/luke-cage.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 5,
+      "cost": {
+        "mind": 3,
+        "soul": 7
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-17",
+      "name": "Nova",
+      "image": "/cards/nova.png",
+      "level": 3,
+      "bonus": "reality",
+      "points": 4,
+      "cost": {
+        "soul": 3,
+        "reality": 3,
+        "power": 6
       },
       "tags": 0
     },
     {
       "id": "c3-18",
+      "name": "Spider-Man",
+      "image": "/cards/spider-man.png",
       "level": 3,
-      "bonus": "reality",
-      "points": 4,
+      "bonus": "soul",
+      "points": 5,
       "cost": {
-        "soul": 7
+        "mind": 7,
+        "reality": 3
       },
-      "tags": 1
+      "tags": 0
     },
     {
       "id": "c3-19",
+      "name": "Thor",
+      "image": "/cards/thor.png",
       "level": 3,
       "bonus": "reality",
-      "points": 4,
+      "points": 3,
       "cost": {
+        "mind": 3,
         "space": 3,
-        "soul": 6,
-        "reality": 3
+        "reality": 3,
+        "power": 5
       },
-      "tags": 1
+      "tags": 2
     },
     {
       "id": "c3-20",
+      "name": "Vision",
+      "image": "/cards/vision.png",
       "level": 3,
-      "bonus": "reality",
-      "points": 5,
+      "bonus": "mind",
+      "points": 4,
       "cost": {
-        "soul": 7,
+        "mind": 3,
+        "space": 6,
         "reality": 3
       },
-      "tags": 2
+      "tags": 1
     }
   ]
 }
