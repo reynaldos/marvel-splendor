@@ -69,7 +69,7 @@ export function CardMarket({
         ) : (
           <div
             key={`${level}-empty-${slotIndex}`}
-            className="h-22 w-16 shrink-0 rounded-md border border-dashed border-foreground/15"
+            className="aspect-card w-16 shrink-0 rounded-md border border-dashed border-foreground/15"
           />
         ),
       )}
@@ -102,7 +102,7 @@ function DeckIndicator({
   return (
     // Only an empty deck fades; one you can't draw from right now looks the same.
     // The margin is room for the pile's spread, clear of the first market card.
-    <div className={cn("relative mr-2 h-22 w-16 shrink-0", count === 0 && "opacity-40")}>
+    <div className={cn("relative mr-2 aspect-card w-16 shrink-0", count === 0 && "opacity-40")}>
       <PileLayers count={count} max={2} dx={0.4} dy={0.4} tilt={1.5} className="size-full">
         <span className={cn("relative", CARD)}>{face}</span>
       </PileLayers>

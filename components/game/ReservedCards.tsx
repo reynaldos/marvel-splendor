@@ -53,7 +53,7 @@ export function ReservedCards({
             key={card.id}
             card={card}
             className={cn(
-              "absolute top-1.5 h-20 w-14 origin-bottom shadow-md",
+              "absolute top-1.5 w-14 origin-bottom shadow-md",
               selected && "ring-2 ring-primary",
             )}
             // Fan out around the middle card.
@@ -97,7 +97,7 @@ export function ReservedCards({
                 >
                   <CardView
                     card={card}
-                    className={cn("h-52 w-38 rounded-xl ring-4", affordable ? "ring-green-500" : "ring-red-500")}
+                    className={cn("w-38 rounded-xl ring-4", affordable ? "ring-green-500" : "ring-red-500")}
                   />
                 </button>
               );

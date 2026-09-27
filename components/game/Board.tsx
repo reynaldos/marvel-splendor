@@ -109,7 +109,7 @@ export function Board({
                     reserved={p.reserved}
                     ownerName={nameForSeat(p.seat)}
                     className="gap-0.5"
-                    cardClassName="h-6 w-4 rounded-sm"
+                    cardClassName="w-4 rounded-sm"
                   />
                 }
               />

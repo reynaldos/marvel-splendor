@@ -55,7 +55,7 @@ export function TileRail({ locations, avengersHolder, players, nameForSeat, heig
         title="Locations"
         className="grid justify-center gap-1"
         style={{ gridTemplateColumns: `repeat(${columns}, calc(var(--spacing) * ${tileSize}))` }}
-        zoomed={<div className="flex gap-4 *:w-40">{locationTiles}</div>}
+        zoomed={<div className="flex gap-4 *:w-40 *:rounded-3xl">{locationTiles}</div>}
       >
         {locationTiles}
       </Zoomable>
@@ -63,7 +63,7 @@ export function TileRail({ locations, avengersHolder, players, nameForSeat, heig
         label="Show the Avengers Assemble tile"
         title="Avengers Assemble"
         style={size}
-        zoomed={<div className="w-52">{avengers}</div>}
+        zoomed={<div className="w-52 *:rounded-3xl">{avengers}</div>}
       >
         {avengers}
       </Zoomable>

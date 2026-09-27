@@ -12,7 +12,7 @@ interface ReserveTrayProps {
   /** Whose cards these are, for the enlarged view's heading. */
   ownerName: string;
   className?: string;
-  /** `h-* w-*` for each card slot. */
+  /** Width (`w-*`) of each card slot; the height follows. */
   cardClassName?: string;
 }
 
@@ -22,7 +22,7 @@ function ReservedCard({ entry, className }: { entry: RedactedReservedCard; class
   // A blind reserve shows the back of the deck it came from.
   const back = ASSETS.deckBacks[entry.level];
   return back ? (
-    <span className={cn("relative block shrink-0 overflow-hidden ring-1 ring-foreground/10", className)}>
+    <span className={cn("relative block aspect-card shrink-0 overflow-hidden ring-1 ring-foreground/10", className)}>
       <AssetImage src={back} alt={`Face-down level ${entry.level} card`} />
     </span>
   ) : (
@@ -37,13 +37,13 @@ function ReservedCard({ entry, className }: { entry: RedactedReservedCard; class
  * them all large, side by side. The viewer's own reserved cards live in
  * `ReservedCards`.
  */
-export function ReserveTray({ reserved, ownerName, className, cardClassName = "h-17 w-12" }: ReserveTrayProps) {
+export function ReserveTray({ reserved, ownerName, className, cardClassName = "w-12" }: ReserveTrayProps) {
   const slots = Array.from({ length: MAX_RESERVED }, (_, i) => reserved[i]);
   const tray = slots.map((entry, i) =>
     entry ? (
       <ReservedCard key={i} entry={entry} className={cardClassName} />
     ) : (
-      <div key={i} className={cn("shrink-0 rounded-md border border-dashed border-foreground/15", cardClassName)} />
+      <div key={i} className={cn("aspect-card shrink-0 rounded-md border border-dashed border-foreground/15", cardClassName)} />
     ),
   );
   const layout = cn("flex shrink-0 gap-1.5", className);
@@ -58,7 +58,7 @@ export function ReserveTray({ reserved, ownerName, className, cardClassName = "h
       zoomed={
         <div className="flex gap-6">
           {reserved.map((entry, i) => (
-            <ReservedCard key={i} entry={entry} className="h-52 w-38 rounded-xl" />
+            <ReservedCard key={i} entry={entry} className="w-38 rounded-xl" />
           ))}
         </div>
       }
