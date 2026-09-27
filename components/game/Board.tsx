@@ -3,16 +3,15 @@
 import type { ReactNode } from "react";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
-import { AvengersTile } from "@/components/game/AvengersTile";
 import { CardMarket } from "@/components/game/CardMarket";
 import { EndTurnBar } from "@/components/game/EndTurnBar";
 import { HandTray, StagedTokens } from "@/components/game/HandTray";
-import { LocationTile } from "@/components/game/LocationTile";
 import { PlayerPlaque } from "@/components/game/PlayerPlaque";
 import { ReserveTray } from "@/components/game/ReserveTray";
 import { ReservedCards } from "@/components/game/ReservedCards";
+import { TileRail } from "@/components/game/TileRail";
+import { Zoomable } from "@/components/game/Zoomable";
 import { TokenBank } from "@/components/game/TokenBank";
-import { getLocation } from "@/lib/engine/data";
 import type { CardLevel, Stone } from "@/lib/engine/types";
 import type { RedactedGameState } from "@/lib/game-view";
 import type { StagedAction } from "@/components/game/staged-action";
@@ -140,12 +139,17 @@ export function Board({
             style={{ height: `calc(var(--spacing) * ${headerHeight})` }}
           >
             {winTile ? (
-              <span
-                title={`${winTile.points} points to win`}
+              <Zoomable
+                label={`Show the win tile: ${winTile.points} points to win`}
                 className="relative aspect-[1404/688] h-full overflow-hidden rounded-md ring-1 ring-foreground/10"
+                zoomed={
+                  <div className="relative aspect-[1404/688] w-150 overflow-hidden rounded-xl">
+                    <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="75vw" />
+                  </div>
+                }
               >
                 <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} />
-              </span>
+              </Zoomable>
             ) : (
               <span className="text-sm font-bold" title="Points needed to win">
                 {view.settings.targetPoints} pts to win
@@ -153,15 +157,13 @@ export function Board({
             )}
             {menu}
           </div>
-          <div
-            className="mx-auto flex min-h-0 flex-1 flex-col items-center justify-center gap-1"
-            style={{ width: `calc(var(--spacing) * ${tileSize})` }}
-          >
-            {view.locations.map((id) => (
-              <LocationTile key={id} location={getLocation(id)} />
-            ))}
-            <AvengersTile avengersHolder={view.avengersHolder} players={view.players} nameForSeat={nameForSeat} />
-          </div>
+          <TileRail
+            locations={view.locations}
+            avengersHolder={view.avengersHolder}
+            players={view.players}
+            nameForSeat={nameForSeat}
+            tileSize={tileSize}
+          />
         </div>
       </div>
 

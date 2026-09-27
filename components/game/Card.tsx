@@ -34,7 +34,8 @@ interface CardProps {
 /**
  * A single character card — the atomic visual for CardMarket and
  * ReserveTray. Tap/click lifts the card over a dimmed board and shows the
- * currently-legal Recruit/Reserve actions beside it; tapping anywhere else
+ * currently-legal Recruit/Reserve actions beside it, plus View, which opens
+ * the card large in the middle of the screen; tapping anywhere else
  * dismisses. All input is tap-only — there is no drag interaction.
  *
  * A card with an `image` renders that image full-bleed (the art carries its
@@ -53,8 +54,8 @@ export function Card({
   className,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [viewing, setViewing] = useState(false);
   const showBack = faceDown || !card;
-  const hasActions = Boolean(reserveAction || recruitAction);
 
   if (showBack) {
     return (
@@ -70,14 +71,20 @@ export function Card({
     );
   }
 
-  const showRecruit = recruitAction && !recruitAction.disabled;
-  const showReserve = reserveAction && !reserveAction.disabled;
+  // `disabled` (not your turn, or busy) only takes away the moves; any
+  // face-up card can still be opened to look at.
+  const showRecruit = !disabled && recruitAction && !recruitAction.disabled;
+  const showReserve = !disabled && reserveAction && !reserveAction.disabled;
+  const close = () => {
+    setExpanded(false);
+    setViewing(false);
+  };
 
   return (
     <div
       className={cn("relative h-22 w-16 shrink-0", expanded && "z-50", className)}
       onKeyDown={(e) => {
-        if (e.key === "Escape") setExpanded(false);
+        if (e.key === "Escape") close();
       }}
     >
       {expanded ? (
@@ -85,13 +92,12 @@ export function Card({
           type="button"
           aria-label="Close card actions"
           className="fixed inset-0 cursor-default bg-black/60"
-          onClick={() => setExpanded(false)}
+          onClick={close}
         />
       ) : null}
 
       <button
         type="button"
-        disabled={disabled || !hasActions}
         aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
         className={cn(
@@ -104,7 +110,7 @@ export function Card({
         <CardArt card={card} />
       </button>
 
-      {expanded && (showRecruit || showReserve) ? (
+      {expanded && !viewing ? (
         <div className="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-col gap-1.5">
           {showRecruit ? (
             <Button
@@ -131,7 +137,22 @@ export function Card({
               {reserveAction.label}
             </Button>
           ) : null}
+          <Button type="button" size="lg" variant="secondary" onClick={() => setViewing(true)}>
+            View
+          </Button>
         </div>
+      ) : null}
+
+      {viewing ? (
+        <button
+          type="button"
+          autoFocus
+          aria-label={`Close ${card.name}`}
+          onClick={close}
+          className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none"
+        >
+          <CardView card={card} className="h-84 w-61 rounded-xl" />
+        </button>
       ) : null}
     </div>
   );

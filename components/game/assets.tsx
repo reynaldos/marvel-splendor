@@ -18,10 +18,24 @@ export const ASSETS = assetsJson as unknown as {
   winTile: { image: string; points: number } | null;
 };
 
-/** Art that fills its (positioned) parent. */
-export function AssetImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+/**
+ * Art that fills its (positioned) parent. `sizes` is how wide it is drawn,
+ * which picks the resolution to load; the default is sharp enough for a
+ * card or tile opened large.
+ */
+export function AssetImage({
+  src,
+  alt,
+  sizes = "25vw",
+  className,
+}: {
+  src: string;
+  alt: string;
+  sizes?: string;
+  className?: string;
+}) {
   return (
-    <Image src={src} alt={alt} fill sizes="12rem" className={cn("object-cover", className)} draggable={false} />
+    <Image src={src} alt={alt} fill sizes={sizes} className={cn("object-cover", className)} draggable={false} />
   );
 }
 

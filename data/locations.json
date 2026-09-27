@@ -95,7 +95,7 @@
       "tile": 4,
       "side": "b",
       "name": "Atlantis",
-      "image": "/assets/locations/atlantis.png",
+      "image": "/assets/locations/atlantis.jpeg",
       "points": 3,
       "requires": {
         "space": 3,
