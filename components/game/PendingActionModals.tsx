@@ -91,6 +91,7 @@ function ReturnTokensDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
+        className="max-h-[90dvh] overflow-y-auto"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -164,6 +165,7 @@ function ChooseLocationDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
+        className="max-h-[90dvh] overflow-y-auto"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -175,10 +177,11 @@ function ChooseLocationDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap justify-center gap-3">
           {pending?.options.map((id) => (
             <LocationTile
               key={id}
+              className="w-28"
               location={getLocation(id)}
               selectable
               onClick={() => !submitting && onSubmit(id)}

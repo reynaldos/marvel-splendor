@@ -4,73 +4,113 @@ import { cn } from "cn";
 
 import { TokenChip } from "@/components/game/TokenChip";
 import { tokenMeta } from "@/components/game/stone-colors";
-import { HAND_LIMIT, TOKEN_COLORS, totalTokens, type Stone, type TokenCounts } from "@/lib/engine/types";
+import {
+  HAND_LIMIT,
+  STONES,
+  TOKEN_COLORS,
+  totalTokens,
+  type Stone,
+  type StoneCounts,
+  type TokenCounts,
+} from "@/lib/engine/types";
 
 interface HandTrayProps {
   tokens: TokenCounts;
-  /** Tokens picked from the bank this turn but not yet submitted. */
-  stagedColors: Stone[];
-  disabled?: boolean;
-  onUnstageTokenColor: (color: Stone) => void;
+  bonuses: StoneCounts;
+  /** Avengers tags across recruited cards. */
+  tags: number;
+  /** Tokens picked this turn — counted toward the n/10 indicator. */
+  stagedCount: number;
   className?: string;
 }
 
+const SLOT = "absolute flex size-7 items-center justify-center text-sm font-black tabular-nums";
+const EMPTY = "bg-foreground/10";
+
 /**
- * The viewer's own personal token tray (ARCHITECTURE.md §6 bottom-center)
- * with an n/10 hand-limit indicator. Tokens staged this turn sit in their
- * own "Taking this turn" box beside it; tapping one puts it back.
+ * The viewer's own holdings (ARCHITECTURE.md §6 bottom-center): an n/10
+ * token hand-limit indicator, then one column per color — a square for
+ * cards (bonuses) with a circle for tokens tucked under its corner, then
+ * the Avengers tag count. Empty slots stay visible so a color never moves.
  */
-export function HandTray({ tokens, stagedColors, disabled, onUnstageTokenColor, className }: HandTrayProps) {
-  const total = totalTokens(tokens) + stagedColors.length;
-  const over = total > HAND_LIMIT;
+export function HandTray({ tokens, bonuses, tags, stagedCount, className }: HandTrayProps) {
+  const total = totalTokens(tokens) + stagedCount;
 
   return (
-    <div className={cn("flex items-stretch gap-2", className)}>
-      <div className="flex min-h-16 min-w-56 flex-col gap-1.5 rounded-lg bg-card p-2.5 ring-1 ring-foreground/10">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-            Your tokens
-          </h3>
-          <span
-            className={cn(
-              "text-xs font-bold tabular-nums",
-              over ? "text-destructive" : "text-muted-foreground",
-            )}
-          >
-            {total}/{HAND_LIMIT}
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {TOKEN_COLORS.filter((c) => tokens[c] > 0).map((c) => (
-            <TokenChip key={c} color={c} count={tokens[c]} />
-          ))}
-          {totalTokens(tokens) === 0 ? (
-            <span className="text-[0.65rem] text-muted-foreground">No tokens yet</span>
-          ) : null}
-        </div>
-      </div>
-
-      {stagedColors.length > 0 ? (
-        <div className="flex flex-col gap-1.5 rounded-lg border-2 border-dashed border-primary bg-primary/10 p-2.5">
-          <h3 className="text-[0.65rem] font-medium tracking-wide text-primary uppercase">
-            Taking this turn
-          </h3>
-          <div className="flex gap-1.5">
-            {stagedColors.map((c, i) => (
-              <button
-                key={`${c}-${i}`}
-                type="button"
-                disabled={disabled}
-                aria-label={`Put back ${tokenMeta(c).label}`}
-                onClick={() => onUnstageTokenColor(c)}
-                className="rounded-full"
+    <div className={cn("flex shrink-0 items-center gap-2", className)}>
+      <span
+        className={cn("-rotate-6 text-2xl font-black tabular-nums", total > HAND_LIMIT && "text-destructive")}
+        title="Tokens held / hand limit"
+      >
+        {total}
+        <span className="text-sm">/{HAND_LIMIT}</span>
+      </span>
+      <span className="h-12 w-px bg-border" />
+      <div className="flex gap-1">
+        {TOKEN_COLORS.map((color) => {
+          const meta = tokenMeta(color);
+          const filled = cn(meta.swatch, meta.onSwatch);
+          const bonus = STONES.includes(color as Stone) ? bonuses[color as Stone] : null;
+          return (
+            <div key={color} className="relative h-13 w-8">
+              {bonus !== null ? (
+                <span
+                  title={`${meta.label} cards`}
+                  className={cn(SLOT, "top-0 left-0 items-start rounded-md leading-tight", bonus > 0 ? filled : EMPTY)}
+                >
+                  {bonus > 0 ? bonus : null}
+                </span>
+              ) : null}
+              <span
+                title={`${meta.label} tokens`}
+                className={cn(
+                  SLOT,
+                  "right-0 bottom-0 rounded-full ring-2 ring-card",
+                  tokens[color] > 0 ? filled : "bg-muted",
+                )}
               >
-                <TokenChip color={c} />
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
+                {tokens[color] > 0 ? tokens[color] : null}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <span
+        className={cn("ml-1 flex items-center gap-1 text-xl font-black tabular-nums", tags === 0 && "opacity-40")}
+        title="Avengers tags"
+      >
+        <span className="flex size-7 items-center justify-center rounded-full bg-white text-base text-red-600 ring-1 ring-black/30">
+          A
+        </span>
+        {tags}
+      </span>
+    </div>
+  );
+}
+
+interface StagedTokensProps {
+  colors: Stone[];
+  disabled?: boolean;
+  onUnstageTokenColor: (color: Stone) => void;
+}
+
+/** The tokens being taken this turn, kept apart from owned ones; tap one to put it back. */
+export function StagedTokens({ colors, disabled, onUnstageTokenColor }: StagedTokensProps) {
+  return (
+    <div className="flex min-h-0 flex-1 items-center gap-1.5 px-1">
+      {colors.map((c, i) => (
+        <button
+          key={`${c}-${i}`}
+          type="button"
+          disabled={disabled}
+          aria-label={`Put back ${tokenMeta(c).label}`}
+          onClick={() => onUnstageTokenColor(c)}
+          // The button owns the size; up to 3 of these must fit the plaque's width.
+          className="flex aspect-square w-10 shrink-0 rounded-full"
+        >
+          <TokenChip color={c} className="size-full shadow-md" />
+        </button>
+      ))}
     </div>
   );
 }

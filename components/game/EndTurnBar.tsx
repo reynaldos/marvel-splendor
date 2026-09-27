@@ -1,52 +1,33 @@
+import { cn } from "cn";
+
 import { Button } from "@/components/ui/button";
-import { getCard } from "@/lib/engine/data";
-import { tokenMeta } from "@/components/game/stone-colors";
-import type { StagedAction } from "@/components/game/staged-action";
 
 interface EndTurnBarProps {
-  staged: StagedAction | null;
+  /** True once there is a staged action to submit. */
+  hasStaged: boolean;
   disabled?: boolean;
   submitting?: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
   className?: string;
 }
 
 /**
- * Bottom-right action affordances (ARCHITECTURE.md §6). There's no PASS
- * move in the engine — every legal turn takes some action — so "End Turn"
- * here just means "confirm and submit whatever is currently staged".
+ * Bottom-right End Turn button (ARCHITECTURE.md §6). There's no PASS move
+ * in the engine — every legal turn takes some action — so "End Turn" just
+ * means "submit whatever is currently staged". Staged picks are undone
+ * where they were made (tap the token, or the deck, again).
  */
-export function EndTurnBar({ staged, disabled, submitting, onConfirm, onCancel, className }: EndTurnBarProps) {
+export function EndTurnBar({ hasStaged, disabled, submitting, onConfirm, className }: EndTurnBarProps) {
   return (
-    <div className={`flex flex-col items-end gap-1.5 ${className ?? ""}`}>
-      <p className="max-w-56 text-right text-xs text-muted-foreground">
-        {staged ? describeStaged(staged) : "Take tokens, reserve, or recruit a card to build your turn."}
-      </p>
-      <div className="flex gap-2">
-        {staged ? (
-          <Button type="button" variant="outline" size="sm" disabled={submitting} onClick={onCancel}>
-            Cancel
-          </Button>
-        ) : null}
-        <Button type="button" size="sm" disabled={!staged || disabled || submitting} onClick={onConfirm}>
-          {submitting ? "Submitting…" : "End Turn"}
-        </Button>
-      </div>
+    <div className={cn("flex w-28 shrink-0 flex-col justify-end pb-2", className)}>
+      <Button
+        type="button"
+        className="h-12 rounded-full text-base font-black uppercase"
+        disabled={!hasStaged || disabled || submitting}
+        onClick={onConfirm}
+      >
+        {submitting ? "Sending…" : "End Turn"}
+      </Button>
     </div>
   );
 }
-
-function describeStaged(staged: StagedAction): string {
-  switch (staged.kind) {
-    case "tokens":
-      return `Take ${staged.colors.map((c) => tokenMeta(c).label).join(", ")}`;
-    case "reserve":
-      return staged.from === "market"
-        ? `Reserve ${getCard(staged.cardId).name} (Lv${staged.level})`
-        : `Reserve blind from the Level ${staged.level} deck`;
-    case "recruit":
-      return `Recruit ${getCard(staged.cardId).name}`;
-  }
-}
-

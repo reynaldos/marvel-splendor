@@ -13,7 +13,7 @@ interface BanterBubbleProps {
 export function BanterBubble({ text }: BanterBubbleProps) {
   if (!text) return null;
   return (
-    <div className="absolute -top-3 left-1/2 z-10 max-w-40 -translate-x-1/2 -translate-y-full rounded-lg bg-popover px-2 py-1 text-[0.65rem] text-popover-foreground shadow-md ring-1 ring-foreground/10">
+    <div className="absolute -top-3 left-1/2 z-10 max-w-40 -translate-x-1/2 -translate-y-full rounded-lg bg-popover px-2 py-1 fs-2xs text-popover-foreground shadow-md ring-1 ring-foreground/10">
       {text}
       <span className="absolute bottom-0 left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rotate-45 bg-popover ring-1 ring-foreground/10" />
     </div>

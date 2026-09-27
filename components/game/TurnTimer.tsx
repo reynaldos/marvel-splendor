@@ -40,7 +40,7 @@ function TurnTimerCountdown({ seconds }: { seconds: number }) {
   return (
     <div
       className={cn(
-        "flex size-7 items-center justify-center rounded-full text-[0.65rem] font-bold tabular-nums ring-2",
+        "flex size-7 items-center justify-center rounded-full fs-2xs font-bold tabular-nums ring-2",
         low ? "text-destructive ring-destructive" : "text-foreground ring-foreground/20",
       )}
       title="Turn time remaining (visual only — not enforced client-side)"

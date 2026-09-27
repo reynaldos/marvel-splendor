@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
@@ -183,19 +186,31 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     });
   }, []);
 
-  const stageReserveMarket = useCallback((level: CardLevel, cardId: string) => {
-    setStaged({ kind: "reserve", from: "market", level, cardId });
-  }, []);
+  // Picking Reserve/Recruit on a card is already an explicit two-tap choice
+  // (open the card, then the action), so it ends the turn immediately
+  // instead of staging. Tokens and blind deck reserves still wait for End Turn.
+  const stageReserveMarket = useCallback(
+    (level: CardLevel, cardId: string) => {
+      void submitMove({ type: "RESERVE", from: "market", level, cardId });
+    },
+    [submitMove],
+  );
 
+  // Tapping the staged deck again un-stages it.
   const stageReserveDeck = useCallback((level: CardLevel) => {
-    setStaged({ kind: "reserve", from: "deck", level });
+    setStaged((prev) =>
+      prev?.kind === "reserve" && prev.from === "deck" && prev.level === level
+        ? null
+        : { kind: "reserve", from: "deck", level },
+    );
   }, []);
 
-  const stageRecruit = useCallback((from: "market" | "reserve", cardId: string) => {
-    setStaged({ kind: "recruit", from, cardId });
-  }, []);
-
-  const cancelStaged = useCallback(() => setStaged(null), []);
+  const stageRecruit = useCallback(
+    (from: "market" | "reserve", cardId: string) => {
+      void submitMove({ type: "RECRUIT", from, cardId });
+    },
+    [submitMove],
+  );
 
   const confirmStaged = useCallback(() => {
     if (!staged) return;
@@ -241,8 +256,13 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
 
   return (
-    <div className="flex flex-1 flex-col gap-3 lg:flex-row">
-      <div className="relative flex-1">
+    <>
+      {/* Phones held upright: the landscape canvas would be unreadably small. */}
+      <div className="fixed inset-0 z-[60] hidden items-center justify-center bg-background p-6 text-center text-sm portrait:max-md:flex">
+        Rotate your device to landscape to play.
+      </div>
+
+      <div className="game-board relative flex h-dvh w-full items-center overflow-hidden">
         {botPlaying ? (
           <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
             <span className="rounded-full bg-popover px-3 py-1 text-xs text-popover-foreground shadow-md ring-1 ring-foreground/10">
@@ -257,19 +277,29 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           disabled={disabled}
           submitting={submitting}
           banterBySeat={banterBySeat}
+          menu={
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" size="icon" aria-label="Menu">
+                  <Menu />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-h-[90dvh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Move log</DialogTitle>
+                </DialogHeader>
+                <MoveLog entries={moveLog} players={players} viewerSeat={view.viewerSeat} />
+              </DialogContent>
+            </Dialog>
+          }
           onStageTokenColor={stageTokenColor}
           onUnstageTokenColor={unstageTokenColor}
           onStageReserveMarket={stageReserveMarket}
           onStageReserveDeck={stageReserveDeck}
           onStageRecruit={stageRecruit}
           onConfirm={confirmStaged}
-          onCancel={cancelStaged}
         />
       </div>
-
-      <aside className="w-full shrink-0 p-3 lg:w-72">
-        <MoveLog entries={moveLog} players={players} viewerSeat={view.viewerSeat} />
-      </aside>
 
       {viewer ? (
         <PendingActionModals
@@ -291,6 +321,6 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         viewerSeat={view.viewerSeat}
         nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`}
       />
-    </div>
+    </>
   );
 }

@@ -1,12 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { AvengersTile } from "@/components/game/AvengersTile";
 import { CardMarket } from "@/components/game/CardMarket";
 import { EndTurnBar } from "@/components/game/EndTurnBar";
-import { HandTray } from "@/components/game/HandTray";
+import { HandTray, StagedTokens } from "@/components/game/HandTray";
 import { LocationTile } from "@/components/game/LocationTile";
 import { PlayerPlaque } from "@/components/game/PlayerPlaque";
 import { ReserveTray } from "@/components/game/ReserveTray";
+import { ReservedCards } from "@/components/game/ReservedCards";
 import { TokenBank } from "@/components/game/TokenBank";
 import { getLocation } from "@/lib/engine/data";
 import type { CardLevel, Stone } from "@/lib/engine/types";
@@ -28,22 +31,30 @@ interface BoardProps {
   disabled: boolean;
   submitting: boolean;
   banterBySeat: Record<number, string | null>;
+  /** Top-right menu button (owned by GameBoardClient). */
+  menu: ReactNode;
   onStageTokenColor: (color: Stone) => void;
   onUnstageTokenColor: (color: Stone) => void;
   onStageReserveMarket: (level: CardLevel, cardId: string) => void;
   onStageReserveDeck: (level: CardLevel) => void;
   onStageRecruit: (from: "market" | "reserve", cardId: string) => void;
   onConfirm: () => void;
-  onCancel: () => void;
 }
 
+const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
+
 /**
- * Top-level board layout (ARCHITECTURE.md §6): left = 3 CardMarket rows
- * (III/II/I), right rail = TokenBank + Locations + Avengers tile, plaques
- * top (opponents) / bottom (viewer), bottom-center HandTray, bottom-right
- * EndTurnBar. Purely props-in — all fetching/mutation lives in
- * GameBoardClient; this component only wires tap input to the staging
- * callbacks it's handed.
+ * Top-level board layout (ARCHITECTURE.md §6), built for a landscape phone:
+ * a canvas 100 spacing steps tall that never scrolls (see `.game-board` in
+ * globals.css for how a step scales with the viewport).
+ *
+ *   opponents | III/II/I market rows | token bank | target, menu, tiles
+ *   ----------+----------------------+------------+--------------------
+ *   taking    | your tray: n/10, holdings,        | End Turn
+ *   this turn | reserved-card fan                 |
+ *
+ * Purely props-in — all fetching/mutation lives in GameBoardClient; this
+ * component only wires tap input to the staging callbacks it's handed.
  */
 export function Board({
   view,
@@ -52,17 +63,23 @@ export function Board({
   disabled,
   submitting,
   banterBySeat,
+  menu,
   onStageTokenColor,
   onUnstageTokenColor,
   onStageReserveMarket,
   onStageReserveDeck,
   onStageRecruit,
   onConfirm,
-  onCancel,
 }: BoardProps) {
   const viewerSeat = view.viewerSeat;
   const viewer = view.players.find((p) => p.seat === viewerSeat);
   const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
+  const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
+  const turnKey = `${view.currentSeat}-${view.moveCount}`;
+  // Square tiles share one column: 63 steps of height (a 1-step gap between
+  // each), capped at a market card's width so a 2-player game isn't oversized.
+  const tileCount = view.locations.length + 1;
+  const tileSize = Math.min(16, Math.floor((63 - (tileCount - 1)) / tileCount));
 
   function nameForSeat(seat: number): string {
     return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
@@ -71,29 +88,26 @@ export function Board({
   if (!viewer) return null;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
-      {others.length > 0 ? (
-        <div className="flex flex-wrap items-start justify-center gap-4">
+    <div className="flex h-100 w-full flex-col gap-2 p-2 pb-0">
+      <div className="flex min-h-0 flex-1 justify-between gap-2">
+        <div className="flex flex-col gap-1.5">
           {others.map((p) => (
-            <div key={p.seat} className="flex flex-col items-center gap-1.5">
-              <PlayerPlaque
-                player={p}
-                name={nameForSeat(p.seat)}
-                isBot={players.find((pl) => pl.seat === p.seat)?.isBot ?? false}
-                isViewer={false}
-                isCurrentTurn={view.currentSeat === p.seat}
-                settings={view.settings}
-                turnKey={`${view.currentSeat}-${view.moveCount}`}
-                banterText={banterBySeat[p.seat] ?? null}
-              />
-              <ReserveTray reserved={p.reserved} isViewer={false} size="sm" />
-            </div>
+            <PlayerPlaque
+              key={p.seat}
+              player={p}
+              name={nameForSeat(p.seat)}
+              isCurrentTurn={view.currentSeat === p.seat}
+              settings={view.settings}
+              turnKey={turnKey}
+              banterText={banterBySeat[p.seat] ?? null}
+              headerExtra={
+                <ReserveTray reserved={p.reserved} className="gap-0.5" cardClassName="h-6 w-4 rounded-sm" />
+              }
+            />
           ))}
         </div>
-      ) : null}
 
-      <div className="flex flex-1 flex-col gap-4 lg:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-2">
+        <div className="flex flex-col justify-between">
           {([3, 2, 1] as CardLevel[]).map((level) => (
             <CardMarket
               key={level}
@@ -112,60 +126,55 @@ export function Board({
           ))}
         </div>
 
-        <div className="flex w-full flex-col gap-3 lg:w-64">
-          <TokenBank
-            supply={view.supply}
-            staged={staged}
-            disabled={disabled}
-            onStageTokenColor={onStageTokenColor}
-          />
-          <div className="flex flex-col gap-2">
-            <h3 className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-              Locations
-            </h3>
+        <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} />
+
+        <div className="flex w-32 flex-col gap-1">
+          <div className="flex h-7 items-center justify-end gap-2">
+            <span className="text-sm font-bold" title="Points needed to win">
+              {view.settings.targetPoints} pts to win
+            </span>
+            {menu}
+          </div>
+          <div
+            className="mx-auto flex min-h-0 flex-1 flex-col items-center justify-center gap-1"
+            style={{ width: `calc(var(--spacing) * ${tileSize})` }}
+          >
             {view.locations.map((id) => (
               <LocationTile key={id} location={getLocation(id)} />
             ))}
+            <AvengersTile avengersHolder={view.avengersHolder} players={view.players} nameForSeat={nameForSeat} />
           </div>
-          <AvengersTile
-            avengersHolder={view.avengersHolder}
-            players={view.players}
-            nameForSeat={nameForSeat}
-          />
         </div>
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-4 border-t border-border pt-3">
-        <div className="flex flex-col items-start gap-1.5">
-          <PlayerPlaque
-            player={viewer}
-            name={nameForSeat(viewerSeat)}
-            isBot={false}
-            isViewer
-            isCurrentTurn={view.currentSeat === viewerSeat}
-            settings={view.settings}
-            turnKey={`${view.currentSeat}-${view.moveCount}`}
-            banterText={banterBySeat[viewerSeat] ?? null}
-          />
-          <ReserveTray
+      {/* Panels run off the bottom edge, like a physical tray. */}
+      <div className="flex h-24 shrink-0 items-stretch gap-2">
+        <PlayerPlaque
+          player={viewer}
+          name={nameForSeat(viewerSeat)}
+          isCurrentTurn={view.currentSeat === viewerSeat}
+          settings={view.settings}
+          turnKey={turnKey}
+          banterText={banterBySeat[viewerSeat] ?? null}
+          hideTags
+          className={`w-40 ${TRAY_PANEL}`}
+        >
+          <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} />
+        </PlayerPlaque>
+
+        <div className={`flex min-w-0 flex-1 items-center justify-between gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>
+          <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} tags={viewer.tags} stagedCount={stagedColors.length} />
+          <ReservedCards
             reserved={viewer.reserved}
-            isViewer
             viewerTokens={viewer.tokens}
             viewerBonuses={viewer.bonuses}
-            staged={staged}
+            selected={staged?.kind === "recruit" && staged.from === "reserve"}
             disabled={disabled}
             onStageRecruit={(cardId) => onStageRecruit("reserve", cardId)}
           />
         </div>
 
-        <HandTray
-          tokens={viewer.tokens}
-          stagedColors={staged?.kind === "tokens" ? staged.colors : []}
-          disabled={disabled}
-          onUnstageTokenColor={onUnstageTokenColor}
-        />
-
-        <EndTurnBar staged={staged} disabled={disabled} submitting={submitting} onConfirm={onConfirm} onCancel={onCancel} />
+        <EndTurnBar hasStaged={staged !== null} disabled={disabled} submitting={submitting} onConfirm={onConfirm} />
       </div>
     </div>
   );

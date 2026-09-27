@@ -22,9 +22,6 @@ interface MoveLogProps {
 export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProps) {
   return (
     <div className={className}>
-      <h3 className="mb-1 text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-        Move log
-      </h3>
       <ScrollArea className="h-40 rounded-md bg-card p-2 ring-1 ring-foreground/10">
         <ol className="flex flex-col gap-1">
           {entries.length === 0 ? (

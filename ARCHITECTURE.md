@@ -244,7 +244,7 @@ prisma/schema.prisma
 ```
 
 ### Game screen (per the approved UI reference)
-Left: three level decks (III/II/I) each with a 4-card face-up row. Right rail: six token stacks with counts + Location tiles + Avengers tile. Player plaques top/bottom-left: avatar, name, points, bonus/token strips, active-turn glow, turn timer. Bottom-center: personal token tray with `n/10` limit indicator. Bottom-right: End Turn. All input is tap/click: tapping a card lifts it over a dimmed board with Recruit/Reserve actions, tapping a token stack stages a token (tap it in the tray to put it back), tapping a deck stages a blind reserve; End Turn submits.
+Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps tall and at most 200 wide, that scales to fit any viewport (`.game-board` in `app/globals.css` redefines Tailwind's spacing/text variables, so every size inside the board scales together). Left column: opponent plaques (avatar, name, Avengers tags, reserved cards, points, bonuses/tokens per color, active-turn ring, turn timer). Center: three level decks (III/II/I) each with a 4-card face-up row. Right: token stacks with counts, then target points, menu (move log), Location tiles and the Avengers tile. Bottom: the viewer's plaque with the tokens being taken this turn, their tray (`n/10`, bonuses/tokens per color, reserved cards), and End Turn. Upright phones get a rotate-your-device screen. All input is tap/click: tapping a card lifts it over a dimmed board with Recruit/Reserve actions, tapping a token stack stages a token (tap it in the tray to put it back), tapping a deck stages a blind reserve; End Turn submits.
 
 ---
 

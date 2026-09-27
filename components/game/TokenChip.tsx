@@ -12,7 +12,7 @@ interface TokenChipProps {
 }
 
 const SIZE_CLASSES: Record<NonNullable<TokenChipProps["size"]>, string> = {
-  sm: "size-5 text-[0.6rem]",
+  sm: "size-5 fs-2xs",
   default: "size-8 text-xs",
   lg: "size-10 text-sm",
 };
