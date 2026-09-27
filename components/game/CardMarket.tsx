@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
@@ -132,6 +133,8 @@ function MarketCard({
 }) {
   const card = getCard(cardId);
   const { affordable } = estimateAffordability(card, viewerTokens, viewerBonuses);
+  // The affordable outline is a hint, shown only with ?cheat=true.
+  const cheat = useSearchParams().get("cheat") === "true";
   const selected =
     (staged?.kind === "reserve" && staged.from === "market" && staged.cardId === cardId) ||
     (staged?.kind === "recruit" && staged.cardId === cardId);
@@ -139,7 +142,7 @@ function MarketCard({
   return (
     <Card
       card={card}
-      affordable={affordable}
+      affordable={cheat && affordable}
       selected={selected}
       disabled={disabled}
       reserveAction={{
