@@ -2,9 +2,10 @@
 
 import { cn } from "cn";
 
+import { PileLayers } from "@/components/game/PileLayers";
 import { TokenChip } from "@/components/game/TokenChip";
 import { canAddTokenColor } from "@/components/game/token-rules";
-import { STONES, TOKEN_COLORS, type Stone, type TokenCounts } from "@/lib/engine/types";
+import { STONES, TOKEN_COLORS, type Stone, type TokenColor, type TokenCounts } from "@/lib/engine/types";
 import type { StagedAction } from "@/components/game/staged-action";
 
 interface TokenBankProps {
@@ -14,8 +15,25 @@ interface TokenBankProps {
   onStageTokenColor: (color: Stone) => void;
 }
 
-const ROW = "flex items-center gap-1";
+const ROW = "flex items-center gap-2";
 const COUNT = "w-4 text-right text-sm font-bold tabular-nums text-muted-foreground";
+
+/** One pile: the top token with the edges of those beneath it, or an empty space. */
+function TokenPile({ color, count, className }: { color: TokenColor; count: number; className?: string }) {
+  return (
+    // Taller than a token, so the pile's edge has room and no pile moves as it shrinks.
+    <span className="relative flex h-10 w-9">
+      {count > 0 ? (
+        <>
+          <PileLayers count={count} max={2} dx={0.4} dy={0.7} className="size-8">
+            <TokenChip color={color} className="size-full" />
+          </PileLayers>
+          <TokenChip color={color} className={cn("size-8", className)} />
+        </>
+      ) : null}
+    </span>
+  );
+}
 
 /**
  * The 7 shared token stacks, one column with the count beside each
@@ -35,7 +53,7 @@ export function TokenBank({ supply, staged, disabled, onStageTokenColor }: Token
           return (
             <div key={color} className={ROW}>
               <span className={COUNT}>{supply[color]}</span>
-              {supply[color] > 0 ? <TokenChip color={color} className="size-9" /> : <span className="size-9" />}
+              <TokenPile color={color} count={supply[color]} />
             </div>
           );
         }
@@ -51,17 +69,11 @@ export function TokenBank({ supply, staged, disabled, onStageTokenColor }: Token
             className={cn(ROW, "relative disabled:cursor-default")}
           >
             <span className={COUNT}>{left}</span>
-            {left > 0 ? (
-              <TokenChip
-                color={stone}
-                className={cn(
-                  "size-9",
-                  selectedCount > 0 && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-                )}
-              />
-            ) : (
-              <span className="size-9" />
-            )}
+            <TokenPile
+              color={stone}
+              count={left}
+              className={cn(selectedCount > 0 && "ring-2 ring-primary ring-offset-2 ring-offset-background")}
+            />
             {selectedCount > 0 ? (
               <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-primary fs-2xs font-bold text-primary-foreground">
                 {selectedCount}

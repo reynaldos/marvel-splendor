@@ -1,40 +1,69 @@
 import { cn } from "cn";
 
-import { Card } from "@/components/game/Card";
+import { ASSETS, AssetImage } from "@/components/game/assets";
+import { Card, CardView } from "@/components/game/Card";
+import { Zoomable } from "@/components/game/Zoomable";
 import { getCard } from "@/lib/engine/data";
 import { MAX_RESERVED } from "@/lib/engine/types";
 import type { RedactedReservedCard } from "@/lib/game-view";
 
 interface ReserveTrayProps {
   reserved: RedactedReservedCard[];
+  /** Whose cards these are, for the enlarged view's heading. */
+  ownerName: string;
   className?: string;
   /** `h-* w-*` for each card slot. */
   cardClassName?: string;
 }
 
+function ReservedCard({ entry, className }: { entry: RedactedReservedCard; className: string }) {
+  if ("cardId" in entry) return <CardView card={getCard(entry.cardId)} className={className} />;
+
+  // A blind reserve shows the back of the deck it came from.
+  const back = ASSETS.deckBacks[entry.level];
+  return back ? (
+    <span className={cn("relative block shrink-0 overflow-hidden ring-1 ring-foreground/10", className)}>
+      <AssetImage src={back} alt={`Face-down level ${entry.level} card`} />
+    </span>
+  ) : (
+    <Card faceDown className={className} />
+  );
+}
+
 /**
  * An opponent's up-to-3 reserved cards, display-only (rulebook: max 3,
  * never discardable). A blind reservation renders as an unidentifiable
- * face-down card — the slot is never omitted. The viewer's own reserved
- * cards live in `ReservedCards`.
+ * face-down card — the slot is never omitted. Tapping any of them shows
+ * them all large, side by side. The viewer's own reserved cards live in
+ * `ReservedCards`.
  */
-export function ReserveTray({ reserved, className, cardClassName = "h-17 w-12" }: ReserveTrayProps) {
+export function ReserveTray({ reserved, ownerName, className, cardClassName = "h-17 w-12" }: ReserveTrayProps) {
   const slots = Array.from({ length: MAX_RESERVED }, (_, i) => reserved[i]);
+  const tray = slots.map((entry, i) =>
+    entry ? (
+      <ReservedCard key={i} entry={entry} className={cardClassName} />
+    ) : (
+      <div key={i} className={cn("shrink-0 rounded-md border border-dashed border-foreground/15", cardClassName)} />
+    ),
+  );
+  const layout = cn("flex shrink-0 gap-1.5", className);
+
+  if (reserved.length === 0) return <div className={layout}>{tray}</div>;
 
   return (
-    <div className={cn("flex shrink-0 gap-1.5", className)}>
-      {slots.map((entry, i) =>
-        !entry ? (
-          <div
-            key={i}
-            className={cn("shrink-0 rounded-md border border-dashed border-foreground/15", cardClassName)}
-          />
-        ) : "cardId" in entry ? (
-          <Card key={i} card={getCard(entry.cardId)} className={cardClassName} />
-        ) : (
-          <Card key={i} faceDown className={cardClassName} />
-        ),
-      )}
-    </div>
+    <Zoomable
+      label={`Show ${ownerName}'s reserved cards`}
+      title={`${ownerName}'s reserved cards`}
+      className={layout}
+      zoomed={
+        <div className="flex gap-6">
+          {reserved.map((entry, i) => (
+            <ReservedCard key={i} entry={entry} className="h-52 w-38 rounded-xl" />
+          ))}
+        </div>
+      }
+    >
+      {tray}
+    </Zoomable>
   );
 }

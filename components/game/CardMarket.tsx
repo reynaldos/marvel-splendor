@@ -1,9 +1,11 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
 import { Card } from "@/components/game/Card";
+import { PileLayers } from "@/components/game/PileLayers";
 import { estimateAffordability } from "@/components/game/affordability";
 import { getCard } from "@/lib/engine/data";
 import { MAX_RESERVED, type CardLevel, type StoneCounts, type TokenCounts } from "@/lib/engine/types";
@@ -45,7 +47,7 @@ export function CardMarket({
     <div className="flex items-center gap-2">
       <DeckIndicator
         level={level}
-        empty={deckCount === 0}
+        count={deckCount}
         selected={staged?.kind === "reserve" && staged.from === "deck" && staged.level === level}
         disabled={disabled || !canReserve}
         onClick={() => onStageReserveDeck(level)}
@@ -77,35 +79,48 @@ export function CardMarket({
 
 function DeckIndicator({
   level,
-  empty,
+  count,
   selected,
   disabled,
   onClick,
 }: {
   level: CardLevel;
-  empty: boolean;
+  /** Cards left in the deck. */
+  count: number;
   selected: boolean;
   disabled?: boolean;
   onClick: () => void;
 }) {
+  const back = ASSETS.deckBacks[level];
+  const face = back ? (
+    <AssetImage src={back} alt={`Level ${LEVEL_LABEL[level]} deck`} />
+  ) : (
+    <span className="font-serif text-2xl font-black">{LEVEL_LABEL[level]}</span>
+  );
+  const CARD = "flex size-full items-center justify-center overflow-hidden rounded-md bg-muted ring-1 ring-foreground/10";
+
   return (
-    <button
-      type="button"
-      disabled={disabled || empty}
-      onClick={onClick}
-      title="Reserve blind from this deck"
-      aria-pressed={selected}
-      className={cn(
-        "relative flex h-22 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40",
-        selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-      )}
-    >
-      {ASSETS.deckBacks[level] ? (
-        <AssetImage src={ASSETS.deckBacks[level]} alt={`Level ${LEVEL_LABEL[level]} deck`} />
-      ) : (
-        <span className="font-serif text-2xl font-black">{LEVEL_LABEL[level]}</span>
-      )}
-    </button>
+    // Only an empty deck fades; one you can't draw from right now looks the same.
+    // The margin is room for the pile's spread, clear of the first market card.
+    <div className={cn("relative mr-2 h-22 w-16 shrink-0", count === 0 && "opacity-40")}>
+      <PileLayers count={count} max={2} dx={0.4} dy={0.4} tilt={1.5} className="size-full">
+        <span className={cn("relative", CARD)}>{face}</span>
+      </PileLayers>
+      <button
+        type="button"
+        disabled={disabled || count === 0}
+        onClick={onClick}
+        title="Reserve blind from this deck"
+        aria-pressed={selected}
+        className={cn(
+          "relative text-center disabled:cursor-default",
+          CARD,
+          selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+        )}
+      >
+        {face}
+      </button>
+    </div>
   );
 }
 
@@ -132,6 +147,8 @@ function MarketCard({
 }) {
   const card = getCard(cardId);
   const { affordable } = estimateAffordability(card, viewerTokens, viewerBonuses);
+  // The affordable outline is a hint, shown only with ?cheat=true.
+  const cheat = useSearchParams().get("cheat") === "true";
   const selected =
     (staged?.kind === "reserve" && staged.from === "market" && staged.cardId === cardId) ||
     (staged?.kind === "recruit" && staged.cardId === cardId);
@@ -139,7 +156,7 @@ function MarketCard({
   return (
     <Card
       card={card}
-      affordable={affordable}
+      affordable={cheat && affordable}
       selected={selected}
       disabled={disabled}
       reserveAction={{

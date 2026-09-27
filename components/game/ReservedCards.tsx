@@ -37,7 +37,8 @@ export function ReservedCards({
   // The viewer always sees their own cards, blind-reserved or not.
   const cards = reserved.flatMap((r) => ("cardId" in r ? [getCard(r.cardId)] : []));
 
-  if (cards.length === 0) return null;
+  // Keeps the fan's space, so the tray is the same width with or without cards.
+  if (cards.length === 0) return <span className="mr-1 w-22 shrink-0" />;
 
   return (
     <>
@@ -52,7 +53,7 @@ export function ReservedCards({
             key={card.id}
             card={card}
             className={cn(
-              "absolute top-2 h-20 w-14 origin-bottom shadow-md",
+              "absolute top-1.5 h-20 w-14 origin-bottom shadow-md",
               selected && "ring-2 ring-primary",
             )}
             // Fan out around the middle card.
@@ -74,7 +75,7 @@ export function ReservedCards({
           <button
             type="button"
             aria-label="Close reserved cards"
-            className="absolute inset-0 cursor-default bg-black/75"
+            className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
           <h2 className="relative text-2xl font-black tracking-wide text-white uppercase">

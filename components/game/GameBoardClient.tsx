@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
 import { useGameUpdates } from "@/components/game/use-game-updates";
+import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
-import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
+import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, type StagedAction } from "@/components/game/staged-action";
@@ -105,7 +104,6 @@ function delay(ms: number): Promise<void> {
  */
 export function GameBoardClient({ gameId }: { gameId: string }) {
   const [gameData, setGameData] = useState<GameData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [fatalError, setFatalError] = useState<string | null>(null);
 
   const [staged, setStaged] = useState<StagedAction | null>(null);
@@ -152,7 +150,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   /**
    * Pulls the latest game. `quiet` is for background refreshes: a failure is
-   * ignored, since the board on screen is still good and the next signal retries.
+   * ignored, since the board on screen is still good and the next signal
+   * retries. With no board on screen yet, a failure is always shown.
    */
   const fetchGame = useCallback(
     async (quiet = false) => {
@@ -163,6 +162,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       busy.current = true;
       try {
         const shown = gameRef.current;
+        if (!shown) quiet = false;
         const res = await fetch(`/api/games/${gameId}${shown ? `?since=${shown.view.moveCount}` : ""}`);
         const body = await res.json().catch(() => null);
         if (!res.ok) {
@@ -207,20 +207,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // Another player moved, or the safety-net timer fired.
   useGameUpdates(gameId, () => void fetchGame(true));
 
-  // Standard "fetch on mount" effect shape (react.dev/learn/synchronizing-
-  // with-effects#fetching-data): an `ignore` flag set in the cleanup
-  // function guards the post-await setState calls against a stale request
-  // whose component/deps already changed before it resolved. This is
-  // exactly the pattern React's own docs recommend for effect-based data
-  // fetching.
   useEffect(() => {
-    let ignore = false;
-    fetchGame().finally(() => {
-      if (!ignore) setLoading(false);
-    });
-    return () => {
-      ignore = true;
-    };
+    void fetchGame();
   }, [fetchGame]);
 
   // Note: a stale staged action never lingers once a pending sub-move
@@ -232,7 +220,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const submitMove = useCallback(
     async (move: Move) => {
       const shown = gameRef.current;
-      if (!shown || busy.current) return;
+      if (!shown || busy.current || shown.abandoned || shown.view.status !== "active") return;
       // A timeout is sent in the background; losing the race to another
       // device, or being a moment early, isn't something to tell the player.
       const quiet = move.type === "TIMEOUT_SKIP";
@@ -351,7 +339,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [submitMove],
   );
 
-  if (loading) {
+  // Loading until there is a board or an error: a fetch that was skipped
+  // because another was already running must not end the wait.
+  if (!gameData && !fatalError) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-6">
         <Skeleton className="h-8 w-48" />
@@ -372,13 +362,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const { view, players } = gameData;
   const viewer = view.players.find((p) => p.seat === view.viewerSeat);
   const isMyTurn = view.currentSeat === view.viewerSeat;
-  const disabled =
-    submitting ||
-    botPlaying ||
-    gameData.abandoned ||
-    Boolean(view.pending) ||
-    view.status !== "active" ||
-    !isMyTurn;
+  const over = gameData.abandoned || view.status !== "active";
+  const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
 
   return (
@@ -393,7 +378,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         className="game-board relative flex h-dvh w-full items-center overflow-hidden"
       >
         {gameData.abandoned ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
             <div className="flex flex-col items-center gap-3 rounded-lg bg-popover p-6 text-center text-popover-foreground shadow-md ring-1 ring-foreground/10">
               <p className="text-base font-bold">This game was closed</p>
               <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>
@@ -414,24 +399,20 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           view={view}
           turnEndsAt={botPlaying ? null : gameData.turnEndsAt}
           players={players}
-          staged={staged}
+          staged={over ? null : staged}
           disabled={disabled}
           submitting={submitting}
           banterBySeat={banterBySeat}
           menu={
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button type="button" variant="outline" size="icon" aria-label="Menu">
-                  <Menu />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90dvh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Move log</DialogTitle>
-                </DialogHeader>
-                <MoveLog entries={moveLog} players={players} viewerSeat={view.viewerSeat} />
-              </DialogContent>
-            </Dialog>
+            <GameMenu
+              moveLog={moveLog}
+              players={players}
+              viewerSeat={view.viewerSeat}
+              settings={view.settings}
+              finished={view.status === "finished"}
+              busy={submitting || botPlaying}
+              onForfeit={() => void submitMove({ type: "FORFEIT" })}
+            />
           }
           onStageTokenColor={stageTokenColor}
           onUnstageTokenColor={unstageTokenColor}
@@ -442,7 +423,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         />
       </div>
 
-      {viewer && !gameData.abandoned ? (
+      {viewer && !over ? (
         <PendingActionModals
           pending={view.pending}
           viewerTokens={viewer.tokens}

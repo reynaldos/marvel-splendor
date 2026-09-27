@@ -99,7 +99,9 @@ export type Move =
   /** Server-initiated: current player timed out; resolves pendings with defaults and passes. */
   | { type: "TIMEOUT_SKIP" }
   /** Server-initiated: game clock expired; finishes the game after the current round. */
-  | { type: "END_BY_CLOCK" };
+  | { type: "END_BY_CLOCK" }
+  /** Any seat, any time: that seat loses and the game ends at once. */
+  | { type: "FORFEIT" };
 
 export type MoveType = Move["type"];
 

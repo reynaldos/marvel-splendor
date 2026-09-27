@@ -32,6 +32,19 @@ import {
 export function applyMove(state: GameState, seat: number, move: Move): GameState {
   let next = cloneState(state);
 
+  if (move.type === "FORFEIT") {
+    // ponytail: ends the game for the whole table. Hand the seat to a bot
+    // instead if 3-4 player games should carry on without the quitter.
+    const others = next.players.filter((p) => p.seat !== seat);
+    return {
+      ...next,
+      moveCount: next.moveCount + 1,
+      pending: null,
+      status: "finished",
+      ...pickWinners(others, next.avengersHolder),
+    };
+  }
+
   if (move.type === "TIMEOUT_SKIP" || move.type === "END_BY_CLOCK") {
     const actingSeat = next.currentSeat;
     if (move.type === "END_BY_CLOCK") next.clockExpired = true;
