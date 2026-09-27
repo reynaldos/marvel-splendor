@@ -1,21 +1,22 @@
 {
   "_meta": {
-    "note": "Optional art for the game board. Set a value to an image path under /public (e.g. \"/assets/tokens/mind.png\") and the board shows it; leave it null to keep the drawn placeholder. Character cards and Location tiles carry their own optional \"image\" field in cards.json / locations.json."
+    "note": "Optional art for the game board. Set a value to an image path under /public (e.g. \"/assets/tokens/mind.png\") and the board shows it; leave it null to keep the drawn placeholder. winTile is the \"points to win\" tile: its art has the number printed on it, so it is only shown in games whose target matches \"points\". Character cards and Location tiles carry their own optional \"image\" field in cards.json / locations.json."
   },
   "tokens": {
-    "mind": null,
-    "space": null,
-    "soul": null,
-    "power": null,
-    "reality": null,
-    "time": null,
-    "shield": null
+    "mind": "/assets/stones/mind-token.png",
+    "space": "/assets/stones/space-token.png",
+    "soul": "/assets/stones/soul-token.png",
+    "power": "/assets/stones/power-token.png",
+    "reality": "/assets/stones/reality-token.png",
+    "time": "/assets/stones/time-token.png",
+    "shield": "/assets/stones/shield-token.png"
   },
   "deckBacks": {
-    "1": null,
-    "2": null,
-    "3": null
+    "1": "/assets/lvl1_back.png",
+    "2":"/assets/lvl2_back.png",
+    "3": "/assets/lvl3_back.png"
   },
-  "avengersTile": null,
-  "avengersIcon": null
+  "avengersTile": "/assets/avengers-assemble.png",
+  "avengersIcon": "/assets/avengers-icon.png",
+  "winTile": { "image": "/assets/infinity-gauntlet.jpg", "points": 16 }
 }

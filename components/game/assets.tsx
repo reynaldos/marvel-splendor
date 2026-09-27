@@ -14,6 +14,8 @@ export const ASSETS = assetsJson as unknown as {
   deckBacks: Record<CardLevel, string | null>;
   avengersTile: string | null;
   avengersIcon: string | null;
+  /** The "points to win" tile. Its art prints the number, so it only fits games with that target. */
+  winTile: { image: string; points: number } | null;
 };
 
 /** Art that fills its (positioned) parent. */

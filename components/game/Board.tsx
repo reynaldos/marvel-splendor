@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { ASSETS, AssetImage } from "@/components/game/assets";
 import { AvengersTile } from "@/components/game/AvengersTile";
 import { CardMarket } from "@/components/game/CardMarket";
 import { EndTurnBar } from "@/components/game/EndTurnBar";
@@ -78,10 +79,14 @@ export function Board({
   const viewer = view.players.find((p) => p.seat === viewerSeat);
   const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
   const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
-  // Square tiles share one column: 63 steps of height (a 1-step gap between
-  // each), capped at a market card's width so a 2-player game isn't oversized.
+  // The win tile's art has its number printed on it; other targets get text.
+  const winTile = ASSETS.winTile?.points === view.settings.targetPoints ? ASSETS.winTile : null;
+  // Square tiles share the column under the header: 70 steps of height less
+  // the header (a 1-step gap between each), capped at a market card's width
+  // so a 2-player game isn't oversized.
+  const headerHeight = winTile ? 10 : 7;
   const tileCount = view.locations.length + 1;
-  const tileSize = Math.min(16, Math.floor((63 - (tileCount - 1)) / tileCount));
+  const tileSize = Math.min(16, Math.floor((70 - headerHeight - (tileCount - 1)) / tileCount));
 
   function nameForSeat(seat: number): string {
     return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
@@ -130,10 +135,22 @@ export function Board({
         <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} />
 
         <div className="flex w-32 flex-col gap-1">
-          <div className="flex h-7 items-center justify-end gap-2">
-            <span className="text-sm font-bold" title="Points needed to win">
-              {view.settings.targetPoints} pts to win
-            </span>
+          <div
+            className="flex shrink-0 items-center justify-end gap-2"
+            style={{ height: `calc(var(--spacing) * ${headerHeight})` }}
+          >
+            {winTile ? (
+              <span
+                title={`${winTile.points} points to win`}
+                className="relative aspect-[1404/688] h-full overflow-hidden rounded-md ring-1 ring-foreground/10"
+              >
+                <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} />
+              </span>
+            ) : (
+              <span className="text-sm font-bold" title="Points needed to win">
+                {view.settings.targetPoints} pts to win
+              </span>
+            )}
             {menu}
           </div>
           <div

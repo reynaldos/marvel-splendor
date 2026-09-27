@@ -14,8 +14,8 @@ interface AvengersTileProps {
 /**
  * The contested Avengers Assemble tile (ARCHITECTURE.md §1), square like a
  * Location tile: points top-left, the Avengers badge on the right (or the
- * supplied tile art), and along the bottom the current holder (or the
- * threshold to claim it) — drawn over the art too, since it changes. Each
+ * supplied tile art), and along the bottom the current holder, or on the
+ * drawn tile the threshold to claim it. Each
  * player's own tag count lives on their plaque. The tile moves once a
  * player's tags strictly exceed the holder's.
  */
@@ -43,11 +43,15 @@ export function AvengersTile({ avengersHolder, players, nameForSeat, className }
           <AvengersIcon className="absolute top-[5cqw] right-[5cqw] size-[40cqw] text-[length:30cqw]" />
         </>
       )}
-      <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-black/60 px-[5cqw] py-[3cqw] text-[length:10.5cqw] leading-tight font-bold text-white uppercase">
-        {avengersHolder !== null
-          ? `${nameForSeat(avengersHolder)} (${holderTags})`
-          : `First to ${TAGS_TO_CLAIM_AVENGERS} tags`}
-      </span>
+      {/* The holder changes during play, so it's drawn over art too. The
+          unclaimed hint is only for the drawn tile; art carries its own text. */}
+      {avengersHolder !== null || !ASSETS.avengersTile ? (
+        <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-black/60 px-[5cqw] py-[3cqw] text-[length:10.5cqw] leading-tight font-bold text-white uppercase">
+          {avengersHolder !== null
+            ? `${nameForSeat(avengersHolder)} (${holderTags})`
+            : `First to ${TAGS_TO_CLAIM_AVENGERS} tags`}
+        </span>
+      ) : null}
     </div>
   );
 }
