@@ -1209,6 +1209,34 @@
         "reality": 3
       },
       "tags": 1
+    },
+    {
+      "id": "c3-21",
+      "name": "Thanos",
+      "image": "/cards/thanos.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 6,
+      "cost": {
+        "mind": 3,
+        "space": 5,
+        "reality": 3,
+        "power": 5
+
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-22",
+      "name": "Human Torch",
+      "image": "/cards/human-torch.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "space": 4
+      },
+      "tags": 0
     }
   ]
 }
