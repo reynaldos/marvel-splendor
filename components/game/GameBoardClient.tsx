@@ -104,7 +104,6 @@ function delay(ms: number): Promise<void> {
  */
 export function GameBoardClient({ gameId }: { gameId: string }) {
   const [gameData, setGameData] = useState<GameData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [fatalError, setFatalError] = useState<string | null>(null);
 
   const [staged, setStaged] = useState<StagedAction | null>(null);
@@ -151,7 +150,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   /**
    * Pulls the latest game. `quiet` is for background refreshes: a failure is
-   * ignored, since the board on screen is still good and the next signal retries.
+   * ignored, since the board on screen is still good and the next signal
+   * retries. With no board on screen yet, a failure is always shown.
    */
   const fetchGame = useCallback(
     async (quiet = false) => {
@@ -162,6 +162,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       busy.current = true;
       try {
         const shown = gameRef.current;
+        if (!shown) quiet = false;
         const res = await fetch(`/api/games/${gameId}${shown ? `?since=${shown.view.moveCount}` : ""}`);
         const body = await res.json().catch(() => null);
         if (!res.ok) {
@@ -206,20 +207,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // Another player moved, or the safety-net timer fired.
   useGameUpdates(gameId, () => void fetchGame(true));
 
-  // Standard "fetch on mount" effect shape (react.dev/learn/synchronizing-
-  // with-effects#fetching-data): an `ignore` flag set in the cleanup
-  // function guards the post-await setState calls against a stale request
-  // whose component/deps already changed before it resolved. This is
-  // exactly the pattern React's own docs recommend for effect-based data
-  // fetching.
   useEffect(() => {
-    let ignore = false;
-    fetchGame().finally(() => {
-      if (!ignore) setLoading(false);
-    });
-    return () => {
-      ignore = true;
-    };
+    void fetchGame();
   }, [fetchGame]);
 
   // Note: a stale staged action never lingers once a pending sub-move
@@ -350,7 +339,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [submitMove],
   );
 
-  if (loading) {
+  // Loading until there is a board or an error: a fetch that was skipped
+  // because another was already running must not end the wait.
+  if (!gameData && !fatalError) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-6">
         <Skeleton className="h-8 w-48" />
