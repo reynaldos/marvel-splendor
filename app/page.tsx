@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,13 +8,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { redirect } from "next/navigation";
+
+import { Input } from "@/components/ui/input";
 import { SettingsForm } from "@/components/lobby/SettingsForm";
 import { auth0 } from "@/lib/auth0";
+import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { createLobby } from "@/lib/lobby";
+
+async function createGameAction() {
+  "use server";
+  const session = await auth0.getSession();
+  if (!session) redirect("/auth/login?returnTo=/");
+  const user = await getOrCreateUser(session.user);
+  const gameId = await createLobby(user.id);
+  redirect(`/lobby/${gameId}`);
+}
+
+// The join page does the joining (and the sign-in check), so the share link
+// and this form are one code path.
+async function joinGameAction(formData: FormData) {
+  "use server";
+  const code = String(formData.get("code") ?? "").trim();
+  redirect(`/join/${encodeURIComponent(code)}`);
+}
 
 // Landing page (ARCHITECTURE.md §6): Play vs Computer / Create / Join.
-// Phase 1 only implements vs-computer end to end; Create (multiplayer
-// lobby) and Join (by code) are Phase 2 — kept visible but disabled per the
-// approved landing description.
 export default async function Home() {
   const session = await auth0.getSession();
 
@@ -65,33 +83,39 @@ export default async function Home() {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="opacity-70">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Create
-              <Badge variant="outline">Coming soon</Badge>
-            </CardTitle>
+            <CardTitle>Create</CardTitle>
             <CardDescription>Host a private game friends join with a share code.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button disabled className="w-full">
-              Create game
-            </Button>
+            <form action={createGameAction}>
+              <Button type="submit" className="w-full">
+                {session ? "Create game" : "Sign in to create"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
 
-        <Card className="opacity-70">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Join
-              <Badge variant="outline">Coming soon</Badge>
-            </CardTitle>
+            <CardTitle>Join</CardTitle>
             <CardDescription>Enter a friend&apos;s share code to join their table.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button disabled className="w-full">
-              Join game
-            </Button>
+            <form action={joinGameAction} className="flex gap-2">
+              <Input
+                name="code"
+                aria-label="Join code"
+                placeholder="ABC234"
+                required
+                maxLength={6}
+                autoComplete="off"
+                autoCapitalize="characters"
+                className="font-mono uppercase"
+              />
+              <Button type="submit">Join</Button>
+            </form>
           </CardContent>
         </Card>
       </div>

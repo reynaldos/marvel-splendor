@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
+import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -23,6 +24,13 @@ interface GamePlayerInfo {
   name: string;
 }
 
+/** One move and the board right after it. */
+interface GameStep {
+  seat: number;
+  move: Move;
+  view: RedactedGameState;
+}
+
 interface GameGetResponse {
   id: string;
   status: string;
@@ -31,23 +39,41 @@ interface GameGetResponse {
   version: number;
   players: GamePlayerInfo[];
   view: RedactedGameState;
+  /** The whole move log, in order. */
+  moves: Array<{ ordinal: number; seat: number; move: Move }>;
+  /** The moves since `?since=`, to play back; empty when there's nothing to show. */
+  steps: GameStep[];
+  turnEndsInMs: number | null;
 }
 
 interface MovesPostResponse {
   view: RedactedGameState;
-  /** The board after the submitter's own move, before any bot replied. */
-  ownView: RedactedGameState;
-  botMoves: Array<{ seat: number; move: Move; view: RedactedGameState }>;
+  /** The submitted move, then every move the server made after it. */
+  steps: GameStep[];
+  turnEndsInMs: number | null;
 }
 
 interface GameData {
   id: string;
   players: GamePlayerInfo[];
   view: RedactedGameState;
+  /** When the current turn runs out, on this device's clock; null when untimed. */
+  turnEndsAt: number | null;
+}
+
+/** The server sends time remaining, not a timestamp, so device clocks needn't agree with it. */
+function toDeadline(turnEndsInMs: number | null): number | null {
+  return turnEndsInMs === null ? null : Date.now() + turnEndsInMs;
+}
+
+function toLogEntry(step: { seat: number; move: Move }): MoveLogEntry {
+  return { id: crypto.randomUUID(), seat: step.seat, move: step.move, timestamp: Date.now() };
 }
 
 /** How long each bot appears to think before its move lands. */
 const BOT_THINK_MS = 3500;
+/** How long after the deadline before timing out another player; their own device goes first. */
+const OTHERS_CLAIM_DELAY_MS = 3000;
 
 // Which side the phone's notch is on in landscape, for `.game-board`'s side
 // margins. "landscape-primary" is the device turned counter-clockwise, which
@@ -92,35 +118,98 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [banterBySeat, setBanterBySeat] = useState<Record<number, string | null>>({});
 
-  const fetchGame = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/games/${gameId}`);
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        setFatalError(body?.error ?? `Could not load this game (${res.status}).`);
-        return false;
+  // Latest values for the async flows below, which outlive the render that started them.
+  const gameRef = useRef<GameData | null>(null);
+  /** Shows a settled board. The ref is set at once, not on the next render,
+   * so a catch-up fetch fired right after asks only for moves newer than it. */
+  const commit = useCallback((data: GameData) => {
+    gameRef.current = data;
+    setGameData(data);
+  }, []);
+  // One flow at a time touches the board; a signal that arrives meanwhile is
+  // remembered and acted on once the current flow finishes.
+  const busy = useRef(false);
+  const missedSignal = useRef(false);
+  /** Runs at the end of every flow; refetches if a signal was missed during it. */
+  const catchUp = useRef(() => {});
+
+  /** Shows each step in turn, pausing before a bot's so it appears to think. */
+  const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[]) => {
+    for (const step of steps) {
+      if (players.find((p) => p.seat === step.seat)?.isBot) {
+        setBotPlaying(true);
+        await delay(BOT_THINK_MS);
       }
-      const data = body as GameGetResponse;
-      setGameData({ id: data.id, players: data.players, view: data.view });
-      setFatalError(null);
-      return true;
-    } catch {
-      setFatalError("Could not reach the server.");
-      return false;
+      setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
+      setMoveLog((log) => [...log, toLogEntry(step)]);
     }
-  }, [gameId]);
+    setBotPlaying(false);
+  }, []);
+
+  /**
+   * Pulls the latest game. `quiet` is for background refreshes: a failure is
+   * ignored, since the board on screen is still good and the next signal retries.
+   */
+  const fetchGame = useCallback(
+    async (quiet = false) => {
+      if (busy.current) {
+        missedSignal.current = true;
+        return;
+      }
+      busy.current = true;
+      try {
+        const shown = gameRef.current;
+        const res = await fetch(`/api/games/${gameId}${shown ? `?since=${shown.view.moveCount}` : ""}`);
+        const body = await res.json().catch(() => null);
+        if (!res.ok) {
+          if (!quiet) setFatalError(body?.error ?? `Could not load this game (${res.status}).`);
+          return;
+        }
+        const data = body as GameGetResponse;
+        // A reply that was in flight while we moved can be older than what we show.
+        if (shown && shown.view.moveCount > data.view.moveCount) return;
+
+        if (shown) {
+          setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
+          await playSteps(data.steps, data.players);
+        }
+        setMoveLog(data.moves.map(toLogEntry));
+        commit({
+          id: data.id,
+          players: data.players,
+          view: data.view,
+          turnEndsAt: toDeadline(data.turnEndsInMs),
+        });
+        setFatalError(null);
+      } catch {
+        if (!quiet) setFatalError("Could not reach the server.");
+      } finally {
+        busy.current = false;
+        catchUp.current();
+      }
+    },
+    [gameId, playSteps, commit],
+  );
+
+  useEffect(() => {
+    catchUp.current = () => {
+      if (!missedSignal.current) return;
+      missedSignal.current = false;
+      void fetchGame(true);
+    };
+  }, [fetchGame]);
+
+  // Another player moved, or the safety-net timer fired.
+  useGameUpdates(gameId, () => void fetchGame(true));
 
   // Standard "fetch on mount" effect shape (react.dev/learn/synchronizing-
   // with-effects#fetching-data): an `ignore` flag set in the cleanup
   // function guards the post-await setState calls against a stale request
   // whose component/deps already changed before it resolved. This is
   // exactly the pattern React's own docs recommend for effect-based data
-  // fetching; `react-hooks/set-state-in-effect` flags it anyway because its
-  // static analysis can't see that `fetchGame`'s setState calls all happen
-  // after an `await`, not synchronously — hence the targeted disable below.
+  // fetching.
   useEffect(() => {
     let ignore = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above; setState only ever runs post-await inside fetchGame/finally.
     fetchGame().finally(() => {
       if (!ignore) setLoading(false);
     });
@@ -137,8 +226,12 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   const submitMove = useCallback(
     async (move: Move) => {
-      if (!gameData) return;
-      const submitterSeat = gameData.view.viewerSeat;
+      const shown = gameRef.current;
+      if (!shown || busy.current) return;
+      // A timeout is sent in the background; losing the race to another
+      // device, or being a moment early, isn't something to tell the player.
+      const quiet = move.type === "TIMEOUT_SKIP";
+      busy.current = true;
       setSubmitting(true);
       try {
         const res = await fetch(`/api/games/${gameId}/moves`, {
@@ -149,57 +242,42 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const body = await res.json().catch(() => null);
 
         if (!res.ok) {
-          toast.error(body?.error ?? `That move was rejected (${res.status}).`);
-          if (res.status === 409) await fetchGame();
+          if (!quiet) toast.error(body?.error ?? `That move was rejected (${res.status}).`);
+          // Someone else changed the game first; catch up once this flow ends.
+          if (res.status === 409) missedSignal.current = true;
           return;
         }
 
-        const { view, ownView, botMoves } = body as MovesPostResponse;
-        const showView = (v: RedactedGameState) => setGameData((prev) => (prev ? { ...prev, view: v } : prev));
-        showView(botMoves.length > 0 ? ownView : view);
+        const { view, steps, turnEndsInMs } = body as MovesPostResponse;
         setStaged(null);
-        setMoveLog((log) => [
-          ...log,
-          { id: crypto.randomUUID(), seat: submitterSeat, move, timestamp: Date.now() },
-        ]);
-
-        if (botMoves.length > 0) {
-          // The request is done; what follows is the bots' turns playing back.
-          setSubmitting(false);
-          setBotPlaying(true);
-          for (const applied of botMoves) {
-            await delay(BOT_THINK_MS);
-            showView(applied.view);
-            setMoveLog((log) => [
-              ...log,
-              { id: crypto.randomUUID(), seat: applied.seat, move: applied.move, timestamp: Date.now() },
-            ]);
-          }
-          setBotPlaying(false);
-        }
+        // The request is done; what follows is the moves playing back.
+        setSubmitting(false);
+        await playSteps(steps, shown.players);
+        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs) });
       } catch {
-        toast.error("Could not reach the server. Please try again.");
+        if (!quiet) toast.error("Could not reach the server. Please try again.");
       } finally {
         setSubmitting(false);
+        busy.current = false;
+        catchUp.current();
       }
     },
-    [gameData, gameId, fetchGame],
+    [gameId, playSteps, commit],
   );
 
-  // When the viewer's turn timer runs out, give up the turn. The server
-  // re-checks the time itself, so this can't be used to skip early.
+  // When a turn's time runs out, skip it: straight away if it's the viewer's
+  // own, after a short wait if it's someone else's who may have walked away.
+  // The server re-checks the time itself, so this can't skip a turn early.
   const live = gameData?.view;
-  const turnSeconds = live?.settings.turnTimeSeconds ?? null;
-  const myTurnKey =
-    live && live.status === "active" && live.currentSeat === live.viewerSeat && !submitting && !botPlaying
-      ? `${live.currentSeat}-${live.moveCount}`
-      : null;
+  const turnEndsAt = gameData?.turnEndsAt ?? null;
+  const timed = live?.status === "active" && turnEndsAt !== null && !submitting && !botPlaying;
+  const isMine = live?.currentSeat === live?.viewerSeat;
   useEffect(() => {
-    if (myTurnKey === null || turnSeconds === null) return;
-    const timer = setTimeout(() => void submitMove({ type: "TIMEOUT_SKIP" }), turnSeconds * 1000);
+    if (!timed || turnEndsAt === null) return;
+    const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
+    const timer = setTimeout(() => void submitMove({ type: "TIMEOUT_SKIP" }), Math.max(0, wait));
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart only when the turn changes, not when submitMove's identity does.
-  }, [myTurnKey, turnSeconds]);
+  }, [timed, isMine, turnEndsAt, submitMove]);
 
   const stageTokenColor = useCallback(
     (color: Stone) => {
@@ -312,6 +390,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         ) : null}
         <Board
           view={view}
+          turnEndsAt={botPlaying ? null : gameData.turnEndsAt}
           players={players}
           staged={staged}
           disabled={disabled}

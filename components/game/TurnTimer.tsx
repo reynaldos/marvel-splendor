@@ -4,46 +4,32 @@ import { useEffect, useState } from "react";
 import { cn } from "cn";
 
 interface TurnTimerProps {
-  /** null = untimed; render nothing. */
-  turnTimeSeconds: number | null;
-  /** Change this whenever the active turn changes to reset the countdown. */
-  turnKey: string;
+  /** When the turn runs out, on this device's clock; null = untimed, render nothing. */
+  endsAt: number | null;
 }
 
 /**
- * Presentational, best-effort countdown only (ARCHITECTURE.md §5: real
- * enforcement is a Phase-2 `claim-timeout` backstop, not this component's
- * job). Never auto-submits anything — it's purely a visual cue that resets
- * whenever `turnKey` changes.
+ * Countdown to a deadline the server set, so every device shows the same
+ * time left. Presentational only — GameBoardClient ends the turn.
  */
-export function TurnTimer({ turnTimeSeconds, turnKey }: TurnTimerProps) {
-  if (turnTimeSeconds === null) return null;
-  return <TurnTimerCountdown key={turnKey} seconds={turnTimeSeconds} />;
-}
-
-function TurnTimerCountdown({ seconds }: { seconds: number }) {
-  // `seconds` only ever changes when the parent remounts this component via
-  // `key={turnKey}` (see `TurnTimer` above), so lazy-initializing from it
-  // here — rather than resyncing in an effect — is enough to reset the
-  // countdown every turn.
-  const [remaining, setRemaining] = useState(seconds);
+export function TurnTimer({ endsAt }: TurnTimerProps) {
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRemaining((r) => Math.max(0, r - 1));
-    }, 1000);
+    const interval = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(interval);
   }, []);
 
-  const low = remaining <= Math.min(5, seconds / 3);
+  if (endsAt === null) return null;
+  const remaining = Math.max(0, Math.ceil((endsAt - now) / 1000));
 
   return (
     <div
       className={cn(
         "flex size-7 items-center justify-center rounded-full fs-2xs font-bold tabular-nums ring-2",
-        low ? "text-destructive ring-destructive" : "text-foreground ring-foreground/20",
+        remaining <= 5 ? "text-destructive ring-destructive" : "text-foreground ring-foreground/20",
       )}
-      title="Turn time remaining (visual only — not enforced client-side)"
+      title="Turn time remaining"
     >
       {remaining}
     </div>

@@ -25,6 +25,8 @@ interface PlayerInfo {
 
 interface BoardProps {
   view: RedactedGameState;
+  /** When the current turn runs out (device clock); null when untimed. */
+  turnEndsAt: number | null;
   players: PlayerInfo[];
   staged: StagedAction | null;
   /** True while resolving a pending sub-move, submitting, or replaying bot moves. */
@@ -58,6 +60,7 @@ const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
  */
 export function Board({
   view,
+  turnEndsAt,
   players,
   staged,
   disabled,
@@ -75,7 +78,6 @@ export function Board({
   const viewer = view.players.find((p) => p.seat === viewerSeat);
   const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
   const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
-  const turnKey = `${view.currentSeat}-${view.moveCount}`;
   // Square tiles share one column: 63 steps of height (a 1-step gap between
   // each), capped at a market card's width so a 2-player game isn't oversized.
   const tileCount = view.locations.length + 1;
@@ -97,8 +99,7 @@ export function Board({
               player={p}
               name={nameForSeat(p.seat)}
               isCurrentTurn={view.currentSeat === p.seat}
-              settings={view.settings}
-              turnKey={turnKey}
+              turnEndsAt={turnEndsAt}
               banterText={banterBySeat[p.seat] ?? null}
               headerExtra={
                 <ReserveTray reserved={p.reserved} className="gap-0.5" cardClassName="h-6 w-4 rounded-sm" />
@@ -153,8 +154,7 @@ export function Board({
           player={viewer}
           name={nameForSeat(viewerSeat)}
           isCurrentTurn={view.currentSeat === viewerSeat}
-          settings={view.settings}
-          turnKey={turnKey}
+          turnEndsAt={turnEndsAt}
           banterText={banterBySeat[viewerSeat] ?? null}
           hideTags
           className={`w-40 ${TRAY_PANEL}`}

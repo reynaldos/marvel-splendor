@@ -8,7 +8,6 @@ import { tokenMeta } from "@/components/game/stone-colors";
 import {
   STONES,
   TOKEN_COLORS,
-  type GameSettings,
   type Stone,
   type StoneCounts,
   type TokenCounts,
@@ -21,9 +20,8 @@ interface PlayerPlaqueProps {
   player: RedactedPlayerState;
   name: string;
   isCurrentTurn: boolean;
-  settings: GameSettings;
-  /** Changes whenever it becomes this player's turn again — resets TurnTimer. */
-  turnKey: string;
+  /** When the current turn runs out (device clock); null when untimed. */
+  turnEndsAt: number | null;
   banterText?: string | null;
   /** Rendered in the header, before the points (opponents' reserved cards). */
   headerExtra?: ReactNode;
@@ -43,8 +41,7 @@ export function PlayerPlaque({
   player,
   name,
   isCurrentTurn,
-  settings,
-  turnKey,
+  turnEndsAt,
   banterText,
   headerExtra,
   hideTags,
@@ -83,7 +80,7 @@ export function PlayerPlaque({
 
       {isCurrentTurn ? (
         <div className="absolute top-1/2 -right-2 -translate-y-1/2 rounded-full bg-card text-card-foreground">
-          <TurnTimer turnTimeSeconds={settings.turnTimeSeconds} turnKey={turnKey} />
+          <TurnTimer endsAt={turnEndsAt} />
         </div>
       ) : null}
 

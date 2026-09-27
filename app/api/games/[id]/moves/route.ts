@@ -6,23 +6,27 @@ import { prisma } from "@/lib/db";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
 import type { GameState, Move } from "@/lib/engine/types";
+import { turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameStats } from "@/lib/record-stats";
 
 /** Tolerance for the client's countdown finishing a hair before the server's. */
 const TIMEOUT_GRACE_MS = 1000;
+/** Extra wait before another player may time someone out, so their own device goes first. */
+const OTHERS_CLAIM_DELAY_MS = 2000;
 
 /**
  * POST /api/games/[id]/moves — submit the current seat's move, then run the
  * server-side bot loop (ARCHITECTURE.md §5: "the move POST response contains
  * the bot's reply move(s) and new view"). `botMoves` in the response
  * carries every move the server auto-applied AFTER the submitter's own move
- * — bot choices, and any zero-legal-moves TIMEOUT_SKIPs for any seat — each
- * with the view after it, and `ownView` is the view after the submitter's
- * move alone, so the client can play them back one at a time.
+ * — bot choices, and any zero-legal-moves TIMEOUT_SKIPs for any seat. `steps`
+ * in the response is the submitted move followed by those, each with the
+ * board after it, so the client can play them back one at a time.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -61,7 +65,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const state = game.state as unknown as GameState;
-  const seat = seatRow.seat;
+  const viewerSeat = seatRow.seat;
+  // A timeout is the one move made on someone else's behalf: any player may
+  // call it on whoever's turn has run out, so a closed tab can't freeze the game.
+  const seat = move.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
 
   if (seat !== state.currentSeat) {
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
@@ -70,11 +77,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (move.type === "TIMEOUT_SKIP") {
     // ponytail: the turn is timed from the game row's last write, so resolving
     // a pending sub-move restarts the clock. Store a per-turn deadline in the
-    // state if that slack ever matters (and for multiplayer claim-timeout).
-    const turnMs = state.settings.turnTimeSeconds === null ? null : state.settings.turnTimeSeconds * 1000;
-    const elapsed = Date.now() - game.updatedAt.getTime();
-    if (turnMs === null || elapsed < turnMs - TIMEOUT_GRACE_MS) {
-      return NextResponse.json({ error: "Your turn time has not run out yet." }, { status: 400 });
+    // state if that slack ever matters.
+    const left = turnEndsInMs(state, game.updatedAt);
+    const required = viewerSeat === seat ? -TIMEOUT_GRACE_MS : OTHERS_CLAIM_DELAY_MS;
+    if (left === null || -left < required) {
+      return NextResponse.json({ error: "The turn time has not run out yet." }, { status: 400 });
     }
   }
 
@@ -91,7 +98,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const allApplied: AppliedMove[] = [{ seat, move, ordinal: humanOrdinal }, ...botApplied];
 
-  const persisted = await persistMoves(id, game.version, finalState, allApplied);
+  const movedAt = new Date();
+  const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt);
   if (!persisted) {
     return NextResponse.json(
       { error: "Game was updated concurrently — please refresh and retry." },
@@ -99,23 +107,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
+  // vs-bot games have one device, which gets everything in this response.
+  if (game.mode === "MULTIPLAYER") await notifyGame(id);
+
   if (finalState.status === "finished") {
-    await recordFinishedGameStats(id, finalState, game.players, localUser.id);
+    await recordFinishedGameStats(id, game.mode, finalState, game.players, localUser.id);
   }
 
-  // Replay the auto-applied moves so the client gets the board as it stood
-  // after each one, and can show them one at a time.
-  let replay = afterHumanMove;
-  const botMoves = botApplied.map(({ seat: s, move: m }) => {
+  // The board as it stood after each move — the submitted one, then every
+  // auto-applied one — so the client can show them one at a time.
+  let replay = state;
+  const steps = allApplied.map(({ seat: s, move: m }) => {
     replay = applyMove(replay, s, m);
-    return { seat: s, move: m, view: redactState(replay, seat) };
+    return { seat: s, move: m, view: redactState(replay, viewerSeat) };
   });
 
   return NextResponse.json({
     // `view` already carries status/winnerSeat/sharedWinners.
-    view: redactState(finalState, seat),
-    ownView: redactState(afterHumanMove, seat),
-    botMoves,
+    view: redactState(finalState, viewerSeat),
+    steps,
+    turnEndsInMs: turnEndsInMs(finalState, movedAt, movedAt.getTime()),
   });
 }
 
@@ -124,6 +135,7 @@ async function persistMoves(
   expectedVersion: number,
   finalState: GameState,
   applied: AppliedMove[],
+  movedAt: Date,
 ): Promise<boolean> {
   try {
     await prisma.$transaction(async (tx) => {
@@ -132,6 +144,8 @@ async function persistMoves(
         data: {
           state: finalState as unknown as Prisma.InputJsonValue,
           version: expectedVersion + 1,
+          // The turn clock runs from this exact instant (see turnEndsInMs).
+          updatedAt: movedAt,
           status: finalState.status === "finished" ? "FINISHED" : "ACTIVE",
           winnerSeat: finalState.winnerSeat,
         },
@@ -160,6 +174,7 @@ class StaleVersionError extends Error {}
 
 async function recordFinishedGameStats(
   gameId: string,
+  mode: "VS_BOT" | "MULTIPLAYER",
   finalState: GameState,
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
   fallbackHumanUserId: string,
@@ -191,7 +206,7 @@ async function recordFinishedGameStats(
     };
   });
 
-  await recordGameStats({ mode: "VS_BOT", players: outcomes });
+  await recordGameStats({ mode, players: outcomes });
 }
 
 function isTurnPrimary(type: string | undefined): boolean {
