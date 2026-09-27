@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -155,9 +154,9 @@ export function SettingsForm() {
 
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
       {needsSignIn ? (
-        <Link href="/auth/login?returnTo=/" className="text-xs underline">
+        <a href="/auth/login?returnTo=/" className="text-xs underline">
           Sign in
-        </Link>
+        </a>
       ) : null}
 
       <Button type="submit" disabled={submitting} className="self-start">
