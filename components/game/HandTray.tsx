@@ -33,9 +33,10 @@ const EMPTY = "bg-foreground/10";
 
 /**
  * The viewer's own holdings (ARCHITECTURE.md §6 bottom-center): an n/10
- * token hand-limit indicator over a View team button, then one column per color — a square for
- * cards (bonuses) with a circle for tokens tucked under its corner, then
- * the Avengers tag count. Empty slots stay visible so a color never moves.
+ * token hand-limit indicator over a View team button, then one column per
+ * color — a square for cards (bonuses) with the stone's token tucked under
+ * its corner, its count on a badge — then the Avengers tag count. Empty
+ * slots stay visible so a color never moves.
  */
 export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className }: HandTrayProps) {
   const total = totalTokens(tokens) + stagedCount;
@@ -69,20 +70,23 @@ export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className 
               {bonus !== null ? (
                 <span
                   title={`${meta.label} cards`}
-                  className={cn(SLOT, "top-0 left-0 items-start rounded-md leading-tight", bonus > 0 ? filled : EMPTY)}
+                  // Centered in the part of the square the token doesn't cover.
+                  className={cn(SLOT, "top-0 left-0 rounded-md pb-1 leading-none", bonus > 0 ? filled : EMPTY)}
                 >
                   {bonus > 0 ? bonus : null}
                 </span>
               ) : null}
-              <span
-                title={`${meta.label} tokens`}
-                className={cn(
-                  SLOT,
-                  "right-0 bottom-0 rounded-full ring-2 ring-card",
-                  tokens[color] > 0 ? filled : "bg-muted",
-                )}
-              >
-                {tokens[color] > 0 ? tokens[color] : null}
+              <span title={`${meta.label} tokens`} className="absolute right-0 bottom-0 size-7">
+                {/* Held tokens show the stone itself; a faded one marks the empty slot. */}
+                <TokenChip
+                  color={color}
+                  className={cn("size-full ring-2 ring-card", tokens[color] === 0 && "opacity-25 grayscale")}
+                />
+                {tokens[color] > 0 ? (
+                  <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-white fs-2xs leading-none font-black text-black tabular-nums ring-1 ring-black">
+                    {tokens[color]}
+                  </span>
+                ) : null}
               </span>
             </div>
           );
