@@ -22,7 +22,8 @@ const COUNT = "w-4 text-right text-sm font-bold tabular-nums text-muted-foregrou
  * (ARCHITECTURE.md §6 right rail). Tapping a basic-stone stack builds up a
  * `TAKE_TOKENS` selection 1 pick at a time (picks are undone from
  * StagedTokens); green (time) and gray (shield) are display-only here since
- * they're never directly takeable.
+ * they're never directly takeable. A pile you can't take from looks the
+ * same as one you can; an empty pile shows its 0 beside an empty space.
  */
 export function TokenBank({ supply, staged, disabled, onStageTokenColor }: TokenBankProps) {
   const selectedColors = staged?.kind === "tokens" ? staged.colors : [];
@@ -34,28 +35,33 @@ export function TokenBank({ supply, staged, disabled, onStageTokenColor }: Token
           return (
             <div key={color} className={ROW}>
               <span className={COUNT}>{supply[color]}</span>
-              <TokenChip color={color} className="size-9" />
+              {supply[color] > 0 ? <TokenChip color={color} className="size-9" /> : <span className="size-9" />}
             </div>
           );
         }
         const stone = color as Stone;
         const selectedCount = selectedColors.filter((c) => c === stone).length;
+        const left = supply[stone] - selectedCount;
         return (
           <button
             key={stone}
             type="button"
             disabled={disabled || !canAddTokenColor(selectedColors, stone, supply)}
             onClick={() => onStageTokenColor(stone)}
-            className={cn(ROW, "relative transition-opacity disabled:cursor-not-allowed disabled:opacity-40")}
+            className={cn(ROW, "relative disabled:cursor-default")}
           >
-            <span className={COUNT}>{supply[stone] - selectedCount}</span>
-            <TokenChip
-              color={stone}
-              className={cn(
-                "size-9",
-                selectedCount > 0 && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-              )}
-            />
+            <span className={COUNT}>{left}</span>
+            {left > 0 ? (
+              <TokenChip
+                color={stone}
+                className={cn(
+                  "size-9",
+                  selectedCount > 0 && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                )}
+              />
+            ) : (
+              <span className="size-9" />
+            )}
             {selectedCount > 0 ? (
               <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-primary fs-2xs font-bold text-primary-foreground">
                 {selectedCount}

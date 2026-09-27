@@ -110,11 +110,27 @@ body {
  * with it. At a 390px-tall phone one step is ~4px, i.e. Tailwind's default.
  */
 .game-board {
-  --spacing: min(1dvh, 0.5dvw);
+  /*
+   * Side margins. A landscape phone reports the same safe-area inset on both
+   * sides, but only one side has the notch; the other only needs to clear
+   * the rounded corner, so it gets a fraction (GameBoardClient sets
+   * data-notch once it knows which way the phone is turned).
+   */
+  --pad-l: env(safe-area-inset-left, 0px);
+  --pad-r: env(safe-area-inset-right, 0px);
+  padding-left: var(--pad-l);
+  padding-right: var(--pad-r);
+  --spacing: min(1dvh, calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
   --text-xs: calc(var(--spacing) * 3);
   --text-sm: calc(var(--spacing) * 3.5);
   --text-base: calc(var(--spacing) * 4);
   --text-lg: calc(var(--spacing) * 4.5);
   --text-xl: calc(var(--spacing) * 5);
   --text-2xl: calc(var(--spacing) * 6);
+}
+.game-board[data-notch="left"] {
+  --pad-r: calc(env(safe-area-inset-right, 0px) * 0.3);
+}
+.game-board[data-notch="right"] {
+  --pad-l: calc(env(safe-area-inset-left, 0px) * 0.3);
 }

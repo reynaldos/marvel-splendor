@@ -73,7 +73,7 @@ function describeMove(
     case "CHOOSE_LOCATION":
       return `${who} claimed ${getLocation(move.locationId).name}`;
     case "TIMEOUT_SKIP":
-      return `${who}'s turn was skipped (no legal moves)`;
+      return `${who}'s turn was skipped`;
     case "END_BY_CLOCK":
       return "The game clock expired — finishing the round.";
     default:

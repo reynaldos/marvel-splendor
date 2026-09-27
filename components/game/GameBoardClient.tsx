@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,7 +35,9 @@ interface GameGetResponse {
 
 interface MovesPostResponse {
   view: RedactedGameState;
-  botMoves: Array<{ seat: number; move: Move }>;
+  /** The board after the submitter's own move, before any bot replied. */
+  ownView: RedactedGameState;
+  botMoves: Array<{ seat: number; move: Move; view: RedactedGameState }>;
 }
 
 interface GameData {
@@ -44,7 +46,22 @@ interface GameData {
   view: RedactedGameState;
 }
 
-const BOT_MOVE_STAGGER_MS = 550;
+/** How long each bot appears to think before its move lands. */
+const BOT_THINK_MS = 3500;
+
+// Which side the phone's notch is on in landscape, for `.game-board`'s side
+// margins. "landscape-primary" is the device turned counter-clockwise, which
+// puts the top of the phone (and its notch) on the left.
+function subscribeOrientation(onChange: () => void) {
+  screen.orientation?.addEventListener("change", onChange);
+  return () => screen.orientation?.removeEventListener("change", onChange);
+}
+function getNotchSide(): "left" | "right" | undefined {
+  const type = screen.orientation?.type;
+  if (type === "landscape-primary") return "left";
+  if (type === "landscape-secondary") return "right";
+  return undefined;
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,6 +83,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [botPlaying, setBotPlaying] = useState(false);
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
+  const notchSide = useSyncExternalStore(subscribeOrientation, getNotchSide, () => undefined);
 
   // Integration point for a later task (OpenAI banter bubbles): nothing
   // populates this yet, but the plumbing — state + setter + prop passthrough
@@ -136,8 +154,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           return;
         }
 
-        const { view, botMoves } = body as MovesPostResponse;
-        setGameData((prev) => (prev ? { ...prev, view } : prev));
+        const { view, ownView, botMoves } = body as MovesPostResponse;
+        const showView = (v: RedactedGameState) => setGameData((prev) => (prev ? { ...prev, view: v } : prev));
+        showView(botMoves.length > 0 ? ownView : view);
         setStaged(null);
         setMoveLog((log) => [
           ...log,
@@ -145,9 +164,12 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         ]);
 
         if (botMoves.length > 0) {
+          // The request is done; what follows is the bots' turns playing back.
+          setSubmitting(false);
           setBotPlaying(true);
           for (const applied of botMoves) {
-            await delay(BOT_MOVE_STAGGER_MS);
+            await delay(BOT_THINK_MS);
+            showView(applied.view);
             setMoveLog((log) => [
               ...log,
               { id: crypto.randomUUID(), seat: applied.seat, move: applied.move, timestamp: Date.now() },
@@ -163,6 +185,21 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     },
     [gameData, gameId, fetchGame],
   );
+
+  // When the viewer's turn timer runs out, give up the turn. The server
+  // re-checks the time itself, so this can't be used to skip early.
+  const live = gameData?.view;
+  const turnSeconds = live?.settings.turnTimeSeconds ?? null;
+  const myTurnKey =
+    live && live.status === "active" && live.currentSeat === live.viewerSeat && !submitting && !botPlaying
+      ? `${live.currentSeat}-${live.moveCount}`
+      : null;
+  useEffect(() => {
+    if (myTurnKey === null || turnSeconds === null) return;
+    const timer = setTimeout(() => void submitMove({ type: "TIMEOUT_SKIP" }), turnSeconds * 1000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart only when the turn changes, not when submitMove's identity does.
+  }, [myTurnKey, turnSeconds]);
 
   const stageTokenColor = useCallback(
     (color: Stone) => {
@@ -262,7 +299,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         Rotate your device to landscape to play.
       </div>
 
-      <div className="game-board relative flex h-dvh w-full items-center overflow-hidden">
+      <div
+        data-notch={notchSide}
+        className="game-board relative flex h-dvh w-full items-center overflow-hidden"
+      >
         {botPlaying ? (
           <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
             <span className="rounded-full bg-popover px-3 py-1 text-xs text-popover-foreground shadow-md ring-1 ring-foreground/10">

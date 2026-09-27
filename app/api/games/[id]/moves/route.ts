@@ -12,13 +12,17 @@ import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameStats } from "@/lib/record-stats";
 
+/** Tolerance for the client's countdown finishing a hair before the server's. */
+const TIMEOUT_GRACE_MS = 1000;
+
 /**
  * POST /api/games/[id]/moves — submit the current seat's move, then run the
  * server-side bot loop (ARCHITECTURE.md §5: "the move POST response contains
  * the bot's reply move(s) and new view"). `botMoves` in the response
  * carries every move the server auto-applied AFTER the submitter's own move
- * — bot choices, and any zero-legal-moves TIMEOUT_SKIPs for any seat — so
- * the client can sequence/animate them one at a time.
+ * — bot choices, and any zero-legal-moves TIMEOUT_SKIPs for any seat — each
+ * with the view after it, and `ownView` is the view after the submitter's
+ * move alone, so the client can play them back one at a time.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -63,6 +67,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
   }
 
+  if (move.type === "TIMEOUT_SKIP") {
+    // ponytail: the turn is timed from the game row's last write, so resolving
+    // a pending sub-move restarts the clock. Store a per-turn deadline in the
+    // state if that slack ever matters (and for multiplayer claim-timeout).
+    const turnMs = state.settings.turnTimeSeconds === null ? null : state.settings.turnTimeSeconds * 1000;
+    const elapsed = Date.now() - game.updatedAt.getTime();
+    if (turnMs === null || elapsed < turnMs - TIMEOUT_GRACE_MS) {
+      return NextResponse.json({ error: "Your turn time has not run out yet." }, { status: 400 });
+    }
+  }
+
   const validation = validateMove(state, seat, move);
   if (!validation.ok) {
     return NextResponse.json({ error: validation.reason }, { status: 400 });
@@ -88,10 +103,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await recordFinishedGameStats(id, finalState, game.players, localUser.id);
   }
 
+  // Replay the auto-applied moves so the client gets the board as it stood
+  // after each one, and can show them one at a time.
+  let replay = afterHumanMove;
+  const botMoves = botApplied.map(({ seat: s, move: m }) => {
+    replay = applyMove(replay, s, m);
+    return { seat: s, move: m, view: redactState(replay, seat) };
+  });
+
   return NextResponse.json({
     // `view` already carries status/winnerSeat/sharedWinners.
     view: redactState(finalState, seat),
-    botMoves: botApplied.map(({ seat: s, move: m }) => ({ seat: s, move: m })),
+    ownView: redactState(afterHumanMove, seat),
+    botMoves,
   });
 }
 
