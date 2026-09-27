@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "note": "Optional art for the game board. Set a value to an image path under /public (e.g. \"/assets/tokens/mind.png\") and the board shows it; leave it null to keep the drawn placeholder. Character cards and Location tiles carry their own optional \"image\" field in cards.json / locations.json."
+  },
+  "tokens": {
+    "mind": null,
+    "space": null,
+    "soul": null,
+    "power": null,
+    "reality": null,
+    "time": null,
+    "shield": null
+  },
+  "deckBacks": {
+    "1": null,
+    "2": null,
+    "3": null
+  },
+  "avengersTile": null,
+  "avengersIcon": null
+}

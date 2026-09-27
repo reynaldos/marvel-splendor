@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
+import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { STONE_COLORS } from "@/components/game/stone-colors";
 import { STONES, type Card as CardType } from "@/lib/engine/types";
 
@@ -162,7 +162,7 @@ export function CardView({
 
 function CardArt({ card }: { card: CardType }) {
   return card.image ? (
-    <Image src={card.image} alt={card.name} fill sizes="12rem" className="object-cover" draggable={false} />
+    <AssetImage src={card.image} alt={card.name} />
   ) : (
     <CardFace card={card} />
   );
@@ -174,6 +174,7 @@ const BADGE = "size-[21cqw] text-[length:14cqw]";
  * `cqw` (percent of the card's width) so it holds up at any card size. */
 function CardFace({ card }: { card: CardType }) {
   const meta = STONE_COLORS[card.bonus];
+  const bonusArt = ASSETS.tokens[card.bonus];
 
   return (
     <>
@@ -184,21 +185,18 @@ function CardFace({ card }: { card: CardType }) {
           {card.points > 0 ? card.points : null}
         </span>
         {Array.from({ length: card.tags }).map((_, i) => (
-          <span
-            key={i}
-            title="Avengers tag"
-            className={cn(
-              "flex items-center justify-center rounded-full bg-white font-black text-red-600 ring-1 ring-black/30",
-              BADGE,
-            )}
-          >
-            A
-          </span>
+          <AvengersIcon key={i} className={BADGE} />
         ))}
         <span
           title={`${meta.label} bonus`}
-          className={cn("ml-auto rounded-full bg-zinc-900 ring-2 ring-inset", meta.ring, BADGE)}
-        />
+          className={cn(
+            "relative ml-auto overflow-hidden rounded-full bg-zinc-900 ring-2 ring-inset",
+            meta.ring,
+            BADGE,
+          )}
+        >
+          {bonusArt ? <AssetImage src={bonusArt} alt="" /> : null}
+        </span>
       </span>
 
       {/* Rulebook: every Level 3 card bears the Time Stone. */}

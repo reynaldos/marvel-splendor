@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 
+import { ASSETS, AssetImage } from "@/components/game/assets";
 import { Card } from "@/components/game/Card";
 import { estimateAffordability } from "@/components/game/affordability";
 import { getCard } from "@/lib/engine/data";
@@ -43,8 +44,8 @@ export function CardMarket({
   return (
     <div className="flex items-center gap-2">
       <DeckIndicator
-        label={LEVEL_LABEL[level]}
-        count={deckCount}
+        level={level}
+        empty={deckCount === 0}
         selected={staged?.kind === "reserve" && staged.from === "deck" && staged.level === level}
         disabled={disabled || !canReserve}
         onClick={() => onStageReserveDeck(level)}
@@ -75,14 +76,14 @@ export function CardMarket({
 }
 
 function DeckIndicator({
-  label,
-  count,
+  level,
+  empty,
   selected,
   disabled,
   onClick,
 }: {
-  label: string;
-  count: number;
+  level: CardLevel;
+  empty: boolean;
   selected: boolean;
   disabled?: boolean;
   onClick: () => void;
@@ -90,17 +91,20 @@ function DeckIndicator({
   return (
     <button
       type="button"
-      disabled={disabled || count === 0}
+      disabled={disabled || empty}
       onClick={onClick}
       title="Reserve blind from this deck"
       aria-pressed={selected}
       className={cn(
-        "flex h-22 w-16 shrink-0 flex-col items-center justify-center rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40",
+        "relative flex h-22 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-center ring-1 ring-foreground/10 transition-opacity hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40",
         selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
       )}
     >
-      <span className="font-serif text-2xl font-black">{label}</span>
-      <span className="fs-2xs text-muted-foreground">{count} left</span>
+      {ASSETS.deckBacks[level] ? (
+        <AssetImage src={ASSETS.deckBacks[level]} alt={`Level ${LEVEL_LABEL[level]} deck`} />
+      ) : (
+        <span className="font-serif text-2xl font-black">{LEVEL_LABEL[level]}</span>
+      )}
     </button>
   );
 }

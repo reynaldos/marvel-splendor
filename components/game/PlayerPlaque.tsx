@@ -3,6 +3,7 @@ import { cn } from "cn";
 import { Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvengersIcon } from "@/components/game/assets";
 import { tokenMeta } from "@/components/game/stone-colors";
 import {
   STONES,
@@ -65,9 +66,7 @@ export function PlayerPlaque({
         <span className="min-w-0 flex-1 truncate text-xs font-medium">{name}</span>
         {player.tags > 0 && !hideTags ? (
           <span className="flex items-center gap-0.5 fs-2xs font-bold" title="Avengers tags">
-            <span className="flex size-3.5 items-center justify-center rounded-full bg-white font-black text-red-600 ring-1 ring-black/30">
-              A
-            </span>
+            <AvengersIcon className="size-3.5" />
             {player.tags}
           </span>
         ) : null}

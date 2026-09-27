@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 
+import { AvengersIcon } from "@/components/game/assets";
 import { TokenChip } from "@/components/game/TokenChip";
 import { tokenMeta } from "@/components/game/stone-colors";
 import {
@@ -79,9 +80,7 @@ export function HandTray({ tokens, bonuses, tags, stagedCount, className }: Hand
         className={cn("ml-1 flex items-center gap-1 text-xl font-black tabular-nums", tags === 0 && "opacity-40")}
         title="Avengers tags"
       >
-        <span className="flex size-7 items-center justify-center rounded-full bg-white text-base text-red-600 ring-1 ring-black/30">
-          A
-        </span>
+        <AvengersIcon className="size-7 text-base" />
         {tags}
       </span>
     </div>

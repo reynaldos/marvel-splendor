@@ -38,6 +38,8 @@ export interface Location {
   name: string;
   points: number;
   requires: Partial<StoneCounts>;
+  /** Full-tile art path/URL; when absent the UI draws a placeholder tile. */
+  image?: string;
 }
 
 export type BotDifficulty = "easy" | "normal" | "hard";
