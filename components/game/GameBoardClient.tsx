@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { Menu } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,6 +49,7 @@ interface GameGetResponse {
 
 interface MovesPostResponse {
   view: RedactedGameState;
+  status: string;
   /** The submitted move, then every move the server made after it. */
   steps: GameStep[];
   turnEndsInMs: number | null;
@@ -59,6 +61,8 @@ interface GameData {
   view: RedactedGameState;
   /** When the current turn runs out, on this device's clock; null when untimed. */
   turnEndsAt: number | null;
+  /** Closed because nobody was playing (or by hand); the board is read-only. */
+  abandoned: boolean;
 }
 
 /** The server sends time remaining, not a timestamp, so device clocks needn't agree with it. */
@@ -179,6 +183,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           players: data.players,
           view: data.view,
           turnEndsAt: toDeadline(data.turnEndsInMs),
+          abandoned: data.status === "ABANDONED",
         });
         setFatalError(null);
       } catch {
@@ -248,12 +253,12 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           return;
         }
 
-        const { view, steps, turnEndsInMs } = body as MovesPostResponse;
+        const { view, status, steps, turnEndsInMs } = body as MovesPostResponse;
         setStaged(null);
         // The request is done; what follows is the moves playing back.
         setSubmitting(false);
         await playSteps(steps, shown.players);
-        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs) });
+        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), abandoned: status === "ABANDONED" });
       } catch {
         if (!quiet) toast.error("Could not reach the server. Please try again.");
       } finally {
@@ -367,7 +372,13 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const { view, players } = gameData;
   const viewer = view.players.find((p) => p.seat === view.viewerSeat);
   const isMyTurn = view.currentSeat === view.viewerSeat;
-  const disabled = submitting || botPlaying || Boolean(view.pending) || view.status !== "active" || !isMyTurn;
+  const disabled =
+    submitting ||
+    botPlaying ||
+    gameData.abandoned ||
+    Boolean(view.pending) ||
+    view.status !== "active" ||
+    !isMyTurn;
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
 
   return (
@@ -381,6 +392,17 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         data-notch={notchSide}
         className="game-board relative flex h-dvh w-full items-center overflow-hidden"
       >
+        {gameData.abandoned ? (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70">
+            <div className="flex flex-col items-center gap-3 rounded-lg bg-popover p-6 text-center text-popover-foreground shadow-md ring-1 ring-foreground/10">
+              <p className="text-base font-bold">This game was closed</p>
+              <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>
+              <Button asChild>
+                <Link href="/">Back to home</Link>
+              </Button>
+            </div>
+          </div>
+        ) : null}
         {botPlaying ? (
           <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
             <span className="rounded-full bg-popover px-3 py-1 text-xs text-popover-foreground shadow-md ring-1 ring-foreground/10">
@@ -420,7 +442,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         />
       </div>
 
-      {viewer ? (
+      {viewer && !gameData.abandoned ? (
         <PendingActionModals
           pending={view.pending}
           viewerTokens={viewer.tokens}

@@ -283,7 +283,29 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 - API: integration tests for move validation, concurrency (stale `version` rejected), redaction (a client can never see deck order or hidden reserves).
 - E2E happy paths (Playwright, later): create → join → play → finish.
 
-## 10. Risks & notes
+## 10. Known limitations — turn timers and idle games
+
+How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and are applied in `app/api/games/[id]/moves/route.ts`.
+
+**Idle games**
+
+A game is closed as `ABANDONED` once every human's latest turn has timed out: one turn each when there are several humans, two in a row for a lone human playing bots. Bots are ignored.
+
+- **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
+- **Closed tabs are not detected.** Nothing runs on the server between requests, so a device must be open on the game for a turn to time out. If every player closes their tab, the game stays `ACTIVE` until someone reopens it; the expired turn is then skipped and the rule applies.
+- **Abandoned games are not recorded in stats.** Only `FINISHED` games are.
+- **A turn skipped for having no legal move counts as idle.** It is logged as the same `TIMEOUT_SKIP` move as a timer expiry. This is rare; if it ever closes a game that was being played, record the reason on the move.
+
+**Turn timers**
+
+- **The clock restarts on a sub-move.** A turn is timed from the game row's last write (`Game.updatedAt`), so returning tokens or choosing a Location gives that turn a fresh clock.
+- **Timing out another player waits a few seconds.** A player's own device ends their turn at zero. Other devices wait about 3 seconds longer before doing it for them, so there is a short pause when someone has left.
+
+**Move playback**
+
+- **Changing card data mid-game disables playback for games in progress.** Missed moves are rebuilt by re-dealing from the seed and re-applying the move log. If costs, points or tags in `data/cards.json` change, the rebuild no longer matches the stored state and devices jump straight to the latest board instead. Adding `name` or `image` is safe.
+
+## 11. Risks & notes
 
 - **IP**: Marvel/Splendor are licensed properties — this is a personal/portfolio project; assets are owner-supplied and it should not be marketed commercially.
 - **Card data fidelity**: costs are reconstructed (see §1 caveat) until verified against a physical copy.

@@ -87,6 +87,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     view: redactState(state, seatRow.seat),
     moves,
     steps: steps ?? [],
-    turnEndsInMs: turnEndsInMs(state, game.updatedAt),
+    turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
   });
 }

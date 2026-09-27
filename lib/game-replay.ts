@@ -57,3 +57,25 @@ export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.n
   if (state.status !== "active" || state.settings.turnTimeSeconds === null) return null;
   return turnStartedAt.getTime() + state.settings.turnTimeSeconds * 1000 - now;
 }
+
+/**
+ * True when nobody is playing any more: every human's latest turns all ran
+ * out the clock. With several humans that's one timed-out turn each; a lone
+ * human (vs bots) gets two, so stepping away for one turn doesn't end a game.
+ *
+ * ponytail: a turn skipped for having no legal move is logged as the same
+ * TIMEOUT_SKIP and counts as idle here. Record the reason on the move if
+ * that rare case ever closes a game that was really being played.
+ */
+export function isTableIdle(
+  humanSeats: number[],
+  /** Latest first. */
+  recentMoves: Array<{ seat: number; move: Move }>,
+): boolean {
+  if (humanSeats.length === 0) return false;
+  const turnsEach = humanSeats.length === 1 ? 2 : 1;
+  return humanSeats.every((seat) => {
+    const latest = recentMoves.filter((m) => m.seat === seat).slice(0, turnsEach);
+    return latest.length === turnsEach && latest.every((m) => m.move.type === "TIMEOUT_SKIP");
+  });
+}

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
 import type { GameState, Move } from "@/lib/engine/types";
-import { turnEndsInMs } from "@/lib/game-replay";
+import { isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -98,8 +98,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const allApplied: AppliedMove[] = [{ seat, move, ordinal: humanOrdinal }, ...botApplied];
 
+  // A timeout is the only move that can leave the table idle, so only then look.
+  let abandoned = false;
+  if (move.type === "TIMEOUT_SKIP" && finalState.status !== "finished") {
+    const earlier = await prisma.move.findMany({
+      where: { gameId: id },
+      orderBy: { ordinal: "desc" },
+      // Plenty to cover every seat's last two turns, sub-moves included.
+      take: 40,
+      select: { seat: true, payload: true },
+    });
+    abandoned = isTableIdle(
+      game.players.filter((p) => !p.isBot).map((p) => p.seat),
+      [
+        ...allApplied.toReversed(),
+        ...earlier.map((m) => ({ seat: m.seat, move: m.payload as unknown as Move })),
+      ],
+    );
+  }
+
   const movedAt = new Date();
-  const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt);
+  const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";
+  const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt, status);
   if (!persisted) {
     return NextResponse.json(
       { error: "Game was updated concurrently — please refresh and retry." },
@@ -125,8 +145,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json({
     // `view` already carries status/winnerSeat/sharedWinners.
     view: redactState(finalState, viewerSeat),
+    status,
     steps,
-    turnEndsInMs: turnEndsInMs(finalState, movedAt, movedAt.getTime()),
+    turnEndsInMs: abandoned ? null : turnEndsInMs(finalState, movedAt, movedAt.getTime()),
   });
 }
 
@@ -136,6 +157,7 @@ async function persistMoves(
   finalState: GameState,
   applied: AppliedMove[],
   movedAt: Date,
+  status: "ACTIVE" | "FINISHED" | "ABANDONED",
 ): Promise<boolean> {
   try {
     await prisma.$transaction(async (tx) => {
@@ -146,7 +168,7 @@ async function persistMoves(
           version: expectedVersion + 1,
           // The turn clock runs from this exact instant (see turnEndsInMs).
           updatedAt: movedAt,
-          status: finalState.status === "finished" ? "FINISHED" : "ACTIVE",
+          status,
           winnerSeat: finalState.winnerSeat,
         },
       });
