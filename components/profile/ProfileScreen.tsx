@@ -33,7 +33,7 @@ export function ProfileScreen({ username, name, avatarUrl, joined, stats, career
         </header>
 
         <div className="flex items-end gap-6">
-          <div className="frame-gold relative flex h-57 w-48 shrink-0 flex-col items-center justify-center gap-1 rounded-3xl px-3 text-center">
+          <div className="frame-gold relative flex h-52 w-48 shrink-0 flex-col items-center justify-center gap-1 rounded-3xl px-3 text-center">
             {isOwn ? (
               <Link
                 href="/settings"
@@ -43,7 +43,7 @@ export function ProfileScreen({ username, name, avatarUrl, joined, stats, career
                 <Pencil className="size-5" />
               </Link>
             ) : null}
-            <PlayerAvatar src={avatarUrl} name={username} className="mb-1 size-26 text-4xl" />
+            <PlayerAvatar src={avatarUrl} name={username} className="mb-1 size-24 text-4xl" />
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
             <p className="text-xs font-bold text-cosmos-300">Joined {joined}</p>
