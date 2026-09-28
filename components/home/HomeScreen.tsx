@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { LogOut, Settings, Swords, Trophy } from "lucide-react";
 
-import { AvengersArt, CardFanArt } from "@/components/home/art";
+import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
 import { SettingsForm } from "@/components/lobby/SettingsForm";
 import { Stage, StageRows } from "@/components/Stage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -26,12 +25,10 @@ const DIALOG = "theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflo
 /** What a visitor sees before signing in. */
 export function WelcomeScreen() {
   return (
-    <Stage className="justify-center">
-      <div className="frame-gold flex w-150 items-center gap-8 rounded-3xl px-10 py-8">
-        <div className="relative h-54 w-60 shrink-0">
-          <CardFanArt />
-        </div>
-        <div className="flex flex-col items-center gap-4 text-center">
+    <Stage>
+      <div className="relative h-100 w-full">
+        <WelcomeArt />
+        <div className="absolute inset-y-0 right-[6%] flex w-86 flex-col items-center justify-center gap-4 text-center">
           <Logo className="text-5xl" />
           <p className="font-display text-sm font-bold tracking-wide text-gold-400 uppercase">
             Bring together a team of super heroes and stop Thanos from ending the world
@@ -39,12 +36,12 @@ export function WelcomeScreen() {
           <p className="text-xs text-cosmos-300">
             Recruit heroes, gather the Infinity Stones, assemble the Avengers, and claim the Gauntlet.
           </p>
-          <Button
-            asChild
-            className="h-12 rounded-full bg-marvel px-10 font-display text-base font-black tracking-wide text-white uppercase hover:bg-red-500"
+          <a
+            href="/auth/login?returnTo=/"
+            className="glow-gold flex h-13 items-center rounded-full bg-linear-to-b from-gold-200 via-gold-400 to-gold-600 px-12 font-display text-lg font-black tracking-wide text-cosmos-950 uppercase ring-2 ring-gold-200 hover:brightness-110"
           >
-            <a href="/auth/login?returnTo=/">Sign in to play</a>
-          </Button>
+            Sign in to play
+          </a>
         </div>
       </div>
     </Stage>

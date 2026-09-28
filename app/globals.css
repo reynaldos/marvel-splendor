@@ -256,3 +256,28 @@ body {
 .stage {
   --pad-b: env(safe-area-inset-bottom, 0px);
 }
+
+/* A slow bob, for art adrift in space. Stagger pieces with a negative animation-delay. */
+@keyframes drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 calc(var(--spacing) * -2.5); }
+}
+.drift {
+  animation: drift 6s ease-in-out infinite;
+}
+
+/* A breathing gold halo, for the one button that matters. */
+@keyframes glow-gold {
+  0%, 100% { box-shadow: 0 0 calc(var(--spacing) * 2) rgb(246 201 69 / 0.45); }
+  50% { box-shadow: 0 0 calc(var(--spacing) * 6) rgb(246 201 69 / 0.9); }
+}
+.glow-gold {
+  animation: glow-gold 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift,
+  .glow-gold {
+    animation: none;
+  }
+}
