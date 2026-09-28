@@ -234,7 +234,7 @@ components/
           LocationTile, AvengersTile, ReserveTray, HandTray, EndTurnBar,
           MoveLog, BanterBubble, GameOverDialog, TurnTimer,
           ChatPanel, ReactionPicker, ReactionBubble)
-  lobby/ (SettingsForm, SeatList, ShareCode)
+  lobby/ (SoloGameScreen, PrivateGameScreen, Option, SeatList, ShareCode)
   ui/    (shadcn/ui generated)
 lib/
   engine/  bot/  db.ts  pusher.ts  r2.ts  auth.ts  openai.ts
@@ -314,7 +314,7 @@ Profile:
 
 What these need before they can be built:
 
-- **Hero or villain per card.** `data/cards.json` does not say which a card is. Each card needs a field for it.
+- **Hero or villain per card.** Done: every card in `data/cards.json` has `side`: `"hero"`, `"villain"`, or `"both"` for one that could go either way. A `"both"` card counts once as a hero and once as a villain. A new card must be given one.
 - **New stat columns.** `UserStats` holds totals only (games, wins, best points, fastest win, tiles, locations). The new stats need new columns, which is a schema change and a migration.
 - **Past games.** Every move is saved, so the new stats can be worked out for games already played by replaying their move logs.
 - **A name on the user.** `User` has `username` but no `name`. Adding it is a schema change.
@@ -329,16 +329,20 @@ What these need before they can be built:
 
 ## 10. Known limitations — turn timers and idle games
 
-How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and are applied in `app/api/games/[id]/moves/route.ts`.
+How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and the engine (`isAway`) and are applied in `app/api/games/[id]/moves/route.ts`.
 
 **Idle games**
 
-A game is closed as `ABANDONED` once every person at the table has missed three turns in a row. Bots are ignored, and one person still playing keeps the game open.
+A player who misses three turns in a row is marked away, and a bot plays their seat from then on. They see a notice with an "I'm back" button, which hands the seat back at any time. A game is closed as `ABANDONED` once every person at the table is away. Bots are ignored, and one person still playing keeps the game open.
 
+- **The count lives in the game state.** Each seat carries `missedTurns`; a timed-out turn adds one and a played turn clears it. Coming back is logged as a `REJOIN` move.
+- **A turn skipped for having no legal move does not count.** It is logged as `TIMEOUT_SKIP` with `stuck: true`, which only the server can set.
+- **The stand-in bot plays at the game's bot level**, or normal when the game has none.
+- **Bot-played turns count in that player's stats.** A win earned by the stand-in bot is recorded as the player's win.
 - **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
 - **Closed tabs are not detected.** Nothing runs on the server between requests, so a device must be open on the game for a turn to time out. If every player closes their tab, the game stays `ACTIVE` until someone reopens it; the expired turn is then skipped and the rule applies.
 - **Abandoned games are not recorded in stats.** Only `FINISHED` games are.
-- **A turn skipped for having no legal move counts as idle.** It is logged as the same `TIMEOUT_SKIP` move as a timer expiry. This is rare; if it ever closes a game that was being played, record the reason on the move.
+- **Games in progress before this rule lose move playback** if they already had a timed-out turn, since their stored state has no count. They jump straight to the latest board instead.
 
 **Game clock**
 
