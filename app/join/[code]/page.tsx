@@ -5,14 +5,15 @@ import { redirect } from "next/navigation";
 import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
 import { auth0 } from "@/lib/auth0";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { joinLobby, normalizeJoinCode } from "@/lib/lobby";
+import { extractCheatCode, joinLobby, normalizeJoinCode } from "@/lib/lobby";
 import { pageMetadata } from "@/lib/site";
 
 type Props = { params: Promise<{ code: string }> };
 
 // This is the link friends are sent, so its preview is the invite.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const code = normalizeJoinCode(decodeURIComponent((await params).code));
+  const { code: rawCode } = extractCheatCode(decodeURIComponent((await params).code));
+  const code = normalizeJoinCode(rawCode);
   return pageMetadata(
     "You're invited to a game",
     code ? `Join my Marvel Splendor game with room code ${code}.` : undefined,
@@ -23,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // Opening the link seats you; if you're already seated it takes you back to your game.
 export default async function JoinPage({ params }: Props) {
   const { code } = await params;
+  const { code: rawCode, cheat } = extractCheatCode(decodeURIComponent(code));
 
   const session = await auth0.getSession();
   if (!session) {
@@ -37,9 +39,10 @@ export default async function JoinPage({ params }: Props) {
   }
   const user = await getOrCreateUser(session.user);
 
-  const result = await joinLobby(user.id, decodeURIComponent(code));
+  const result = await joinLobby(user.id, rawCode);
   if (result.ok) {
-    redirect(result.status === "LOBBY" ? `/lobby/${result.gameId}` : `/play/${result.gameId}`);
+    const target = result.status === "LOBBY" ? `/lobby/${result.gameId}` : `/play/${result.gameId}`;
+    redirect(cheat ? `${target}?cheat=true` : target);
   }
 
   return (
