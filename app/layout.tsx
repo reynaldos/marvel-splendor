@@ -72,7 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>
             <AppWindow />
             {/* The installed app opens on the launch picture; this holds it a little longer, then fades. */}
-            <LaunchArt className="launch-splash pointer-events-none fixed inset-0 z-[110] hidden landscape:[@media(display-mode:standalone)]:flex" />
+            <LaunchArt className="launch-splash pointer-events-none fixed inset-0 z-[110] hidden [@media(display-mode:standalone)]:flex" />
             {children}
             <RotateNotice />
             <Toaster />
