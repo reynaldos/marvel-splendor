@@ -14,7 +14,7 @@ function Piece({ src, className, drift }: { src: string; className: string; drif
       className={cn("absolute overflow-hidden shadow-lg", drift !== undefined && "drift", className)}
       style={drift === undefined ? undefined : { animationDelay: `${-drift}s` }}
     >
-      <AssetImage src={src} alt="" />
+      <AssetImage src={src} alt="" sizes="18vw" />
     </span>
   );
 }
@@ -69,7 +69,7 @@ export function WelcomeArt() {
     <>
       {/* Thanos, with his face and the Gauntlet kept clear of everything adrift. */}
       <span className="fade-edges absolute -top-[18%] left-[4%] aspect-[3/4] h-[125%]">
-        <AssetImage src="/assets/thanos.png" alt="" sizes="50vw" className="object-contain" />
+        <AssetImage src="/assets/thanos.png" alt="" sizes="50vw" preload className="object-contain" />
       </span>
 
       {STONES.map(({ stone, x, y, size, tilt, pace, far }, i) => (

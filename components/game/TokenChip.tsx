@@ -36,7 +36,7 @@ export function TokenChip({ color, count, size = "default", className }: TokenCh
       )}
       title={meta.label}
     >
-      {art ? <AssetImage src={art} alt="" /> : null}
+      {art ? <AssetImage src={art} alt="" sizes="6vw" /> : null}
       <span className="relative">{typeof count === "number" ? count : null}</span>
       <span className="sr-only">{meta.label}</span>
     </span>

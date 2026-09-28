@@ -91,7 +91,7 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
                 </span>
               ))}
               <span className="relative aspect-[1404/688] w-44 overflow-hidden rounded-xl shadow-lg ring-2 ring-gold-400">
-                <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" />
+                <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" sizes="22vw" />
               </span>
             </div>
             <form action={onCreate} className="flex">

@@ -163,7 +163,7 @@ export function Board({
                   </div>
                 }
               >
-                <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} />
+                <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="12vw" />
               </Zoomable>
             ) : (
               <span className="text-sm font-bold" title="Points needed to win">

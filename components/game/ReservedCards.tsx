@@ -4,6 +4,7 @@ import { useState } from "react";
 import { cn } from "cn";
 import { Check } from "lucide-react";
 
+import { LargeImages } from "@/components/game/assets";
 import { CardView } from "@/components/game/Card";
 import { estimateAffordability } from "@/components/game/affordability";
 import { getCard } from "@/lib/engine/data";
@@ -83,6 +84,7 @@ export function ReservedCards({
           <h2 className="relative font-display text-2xl font-black tracking-widest text-gold-400 uppercase">
             {disabled ? "Your reserved cards" : "Select a card to recruit"}
           </h2>
+          <LargeImages>
           <div className="relative flex items-start gap-6">
             {cards.map((card) => {
               const affordable = estimateAffordability(card, viewerTokens, viewerBonuses).affordable;
@@ -115,6 +117,7 @@ export function ReservedCards({
               );
             })}
           </div>
+          </LargeImages>
         </div>
       ) : null}
     </>

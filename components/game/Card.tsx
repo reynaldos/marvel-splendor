@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
-import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
+import { ASSETS, AssetImage, AvengersIcon, LargeImages } from "@/components/game/assets";
 import { STONE_COLORS } from "@/components/game/stone-colors";
 import { STONES, type Card as CardType } from "@/lib/engine/types";
 
@@ -151,7 +151,9 @@ export function Card({
           onClick={close}
           className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none backdrop-blur-xs"
         >
-          <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
+          <LargeImages>
+            <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
+          </LargeImages>
         </button>
       ) : null}
     </div>
