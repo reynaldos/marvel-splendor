@@ -1,4 +1,3 @@
-import type { Viewport } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { LobbyLive } from "@/components/lobby/LobbyLive";
@@ -8,7 +7,8 @@ import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS } from "@/lib/lobby";
-import { tableOrder } from "@/lib/lobby-rules";
+import { botName, tableOrder } from "@/lib/lobby-rules";
+import { pageMetadata } from "@/lib/site";
 
 import {
   addBotAction,
@@ -18,8 +18,7 @@ import {
   startGameAction,
 } from "./actions";
 
-// Draw under the phone's notch margins; the stage pads the content back out.
-export const viewport: Viewport = { viewportFit: "cover" };
+export const metadata = pageMetadata("Game Lobby", "Waiting for players to take their seats.", true);
 
 // Server-rendered; LobbyLive re-renders it whenever the table changes.
 export default async function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
@@ -52,13 +51,12 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
       <LobbyLive gameId={game.id} />
       <LobbyScreen
         joinCode={game.joinCode}
-        shareUrl={`${process.env.APP_BASE_URL ?? ""}/join/${game.joinCode}`}
         seats={Array.from({ length: MAX_SEATS }, (_, i) => {
           const player = tableOrder(game.players)[i];
           if (!player) return null;
           return {
             seat: player.seat,
-            name: player.isBot ? "Bot" : (player.user?.username ?? "Player"),
+            name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
             isBot: player.isBot,
             isHost: player.seat === 0,
             isYou: player.userId === user.id,

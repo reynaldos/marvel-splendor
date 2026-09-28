@@ -103,9 +103,29 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Behave like an app: no rubber-band scrolling, no grey flash or zoom on tap. */
+html {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* A long press on the game shouldn't select text or pop up the copy menu; typing still works. */
+.game-board,
+.stage {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.stage :is(input, .select-all) {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Tiny text sizes expressed in spacing steps so they scale with the game board. */
@@ -140,7 +160,10 @@ body {
   --pad-r: env(safe-area-inset-right, 0px);
   padding-left: var(--pad-l);
   padding-right: var(--pad-r);
-  --spacing: min(1dvh, calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
+  /* Menus stay clear of the home bar; the board's trays run off the bottom edge under it. */
+  --pad-b: 0px;
+  padding-bottom: var(--pad-b);
+  --spacing: min(calc((100dvh - var(--pad-b)) / 100), calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
   --text-xs: calc(var(--spacing) * 3);
   --text-sm: calc(var(--spacing) * 3.5);
   --text-base: calc(var(--spacing) * 4);
@@ -219,4 +242,52 @@ body {
   --input: rgb(77 95 214 / 0.5);
   --ring: var(--color-gold-400);
   color: var(--foreground);
+}
+
+/* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
+@keyframes turn-banner {
+  0% { opacity: 0; transform: scaleY(0.4); }
+  15%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+}
+.turn-banner {
+  animation: turn-banner both ease-out;
+}
+.stage {
+  --pad-b: env(safe-area-inset-bottom, 0px);
+}
+
+/* A slow bob, for art adrift in space. Stagger pieces with a negative animation-delay. */
+@keyframes drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 calc(var(--spacing) * -2.5); }
+}
+.drift {
+  animation: drift 6s ease-in-out infinite;
+}
+
+/* A breathing gold halo, for the one button that matters. */
+@keyframes glow-gold {
+  0%, 100% { box-shadow: 0 0 calc(var(--spacing) * 2) rgb(246 201 69 / 0.45); }
+  50% { box-shadow: 0 0 calc(var(--spacing) * 6) rgb(246 201 69 / 0.9); }
+}
+.glow-gold {
+  animation: glow-gold 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift,
+  .glow-gold {
+    animation: none;
+  }
+}
+
+/* Melts a cut-out picture into the background: soft at both sides and along the bottom. */
+.fade-edges {
+  --sides: linear-gradient(to right, transparent 2%, black 28%, black 80%, transparent 100%);
+  --bottom: linear-gradient(to bottom, black 62%, transparent 96%);
+  -webkit-mask-image: var(--sides), var(--bottom);
+  mask-image: var(--sides), var(--bottom);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }

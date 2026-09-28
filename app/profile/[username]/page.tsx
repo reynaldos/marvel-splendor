@@ -9,6 +9,12 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
 import { publicAvatarUrl } from "@/lib/r2";
+import { pageMetadata } from "@/lib/site";
+
+export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  return pageMetadata(`${username}'s profile`, `${username}'s Marvel Splendor wins and stats.`);
+}
 
 // Public profile + stats — ARCHITECTURE.md §6: `profile/[username]/page.tsx`.
 export default async function PublicProfilePage({

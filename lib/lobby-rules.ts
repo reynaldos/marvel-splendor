@@ -11,3 +11,8 @@ export function nextOption(options: number[], current: number | null): number {
 export function tableOrder<T extends { seat: number; isBot: boolean }>(players: T[]): T[] {
   return [...players].sort((a, b) => Number(a.isBot) - Number(b.isBot) || a.seat - b.seat);
 }
+
+/** "Bot 1", "Bot 2"…, counted in seat order, so a bot keeps its name from the lobby into the game. */
+export function botName(players: Array<{ seat: number; isBot: boolean }>, seat: number): string {
+  return `Bot ${players.filter((p) => p.isBot && p.seat <= seat).length}`;
+}

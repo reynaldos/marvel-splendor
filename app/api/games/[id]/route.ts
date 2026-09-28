@@ -6,6 +6,7 @@ import type { GameSettings, GameState, Move } from "@/lib/engine/types";
 import { replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { botName } from "@/lib/lobby-rules";
 
 /**
  * GET /api/games/[id] — the redacted view for whichever seat the requester
@@ -82,7 +83,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       seat: p.seat,
       isBot: p.isBot,
       userId: p.userId,
-      name: p.isBot ? "Bot" : p.user?.username ?? p.guestName ?? "Player",
+      name: p.isBot ? botName(game.players, p.seat) : p.user?.username ?? p.guestName ?? "Player",
     })),
     view: redactState(state, seatRow.seat),
     moves,

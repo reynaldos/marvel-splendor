@@ -1,20 +1,39 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
 import { auth0 } from "@/lib/auth0";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { joinLobby } from "@/lib/lobby";
+import { joinLobby, normalizeJoinCode } from "@/lib/lobby";
+import { pageMetadata } from "@/lib/site";
 
-// Join flow (ARCHITECTURE.md §6): the share link and the landing page's
-// Join form both land here. Opening it seats you; if you're already seated
-// it just takes you back to your game.
-export default async function JoinPage({ params }: { params: Promise<{ code: string }> }) {
+type Props = { params: Promise<{ code: string }> };
+
+// This is the link friends are sent, so its preview is the invite.
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const code = normalizeJoinCode(decodeURIComponent((await params).code));
+  return pageMetadata(
+    "You're invited to a game",
+    code ? `Join my Marvel Splendor game with room code ${code}.` : undefined,
+    true,
+  );
+}
+
+// Opening the link seats you; if you're already seated it takes you back to your game.
+export default async function JoinPage({ params }: Props) {
   const { code } = await params;
 
   const session = await auth0.getSession();
   if (!session) {
-    redirect(`/auth/login?returnTo=${encodeURIComponent(`/join/${code}`)}`);
+    // Shown, not redirected, so the link's preview is this page and not the sign-in form.
+    return (
+      <NoticeScreen title="You're invited" message="Sign in to take your seat at the table.">
+        <a href={`/auth/login?returnTo=${encodeURIComponent(`/join/${code}`)}`} className={NOTICE_BUTTON}>
+          Sign in to join
+        </a>
+      </NoticeScreen>
+    );
   }
   const user = await getOrCreateUser(session.user);
 
@@ -24,12 +43,10 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-      <h1 className="text-2xl font-bold">Couldn&apos;t join</h1>
-      <p className="text-sm text-muted-foreground">{result.reason}</p>
-      <Button asChild>
-        <Link href="/">Back to home</Link>
-      </Button>
-    </div>
+    <NoticeScreen title="Couldn't join" message={result.reason}>
+      <Link href="/" className={NOTICE_BUTTON}>
+        Back to home
+      </Link>
+    </NoticeScreen>
   );
 }

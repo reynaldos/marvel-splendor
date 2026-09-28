@@ -13,9 +13,9 @@ import { TeamView } from "@/components/game/TeamView";
 import { TileRail } from "@/components/game/TileRail";
 import { Zoomable } from "@/components/game/Zoomable";
 import { TokenBank } from "@/components/game/TokenBank";
-import type { CardLevel, Stone } from "@/lib/engine/types";
+import { HAND_LIMIT, totalTokens, type CardLevel, type Stone } from "@/lib/engine/types";
 import type { RedactedGameState } from "@/lib/game-view";
-import type { StagedAction } from "@/components/game/staged-action";
+import { tokensAfter, type StagedAction } from "@/components/game/staged-action";
 
 interface PlayerInfo {
   seat: number;
@@ -42,9 +42,17 @@ interface BoardProps {
   onStageReserveDeck: (level: CardLevel) => void;
   onStageRecruit: (from: "market" | "reserve", cardId: string) => void;
   onConfirm: () => void;
+  /** Set while the viewer is, or is about to be, over the token limit; opens the popup to give some back. */
+  onReturn?: () => void;
 }
 
 const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
+
+/** Everyone but the viewer, in the order their turns come after the viewer's. */
+export function afterViewer<T extends { seat: number }>(players: T[], viewerSeat: number): T[] {
+  const turnsAway = (seat: number) => (seat - viewerSeat + players.length) % players.length;
+  return players.filter((p) => p.seat !== viewerSeat).sort((a, b) => turnsAway(a.seat) - turnsAway(b.seat));
+}
 
 /**
  * Top-level board layout (ARCHITECTURE.md §6), built for a landscape phone:
@@ -74,10 +82,11 @@ export function Board({
   onStageReserveDeck,
   onStageRecruit,
   onConfirm,
+  onReturn,
 }: BoardProps) {
   const viewerSeat = view.viewerSeat;
   const viewer = view.players.find((p) => p.seat === viewerSeat);
-  const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
+  const others = afterViewer(view.players, viewerSeat);
   const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
   // Once the game is over nobody is on turn, so no plaque glows or counts down.
   const turnSeat = view.status === "active" ? view.currentSeat : null;
@@ -103,6 +112,7 @@ export function Board({
                 name={nameForSeat(p.seat)}
                 isCurrentTurn={turnSeat === p.seat}
                 turnEndsAt={turnEndsAt}
+                turnSeconds={view.settings.turnTimeSeconds}
                 banterText={banterBySeat[p.seat] ?? null}
                 headerExtra={
                   <ReserveTray
@@ -179,6 +189,7 @@ export function Board({
           name={nameForSeat(viewerSeat)}
           isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
+          turnSeconds={view.settings.turnTimeSeconds}
           banterText={banterBySeat[viewerSeat] ?? null}
           hideTags
           className={`w-40 ${TRAY_PANEL}`}
@@ -198,7 +209,14 @@ export function Board({
           />
         </div>
 
-        <EndTurnBar hasStaged={staged !== null} disabled={disabled} submitting={submitting} onConfirm={onConfirm} />
+        <EndTurnBar
+          hasStaged={staged !== null}
+          overLimit={totalTokens(tokensAfter(staged, viewer.tokens, view.supply)) > HAND_LIMIT}
+          disabled={disabled}
+          submitting={submitting}
+          onConfirm={onConfirm}
+          onReturn={onReturn}
+        />
       </div>
     </div>
   );

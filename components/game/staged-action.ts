@@ -7,7 +7,7 @@
  * trivially true: every tap funnels into the same `setStaged(...)` calls,
  * and confirming just runs `stagedActionToMove` once.
  */
-import type { CardLevel, Move, Stone } from "@/lib/engine/types";
+import type { CardLevel, Move, Stone, TokenCounts } from "@/lib/engine/types";
 
 export type StagedAction =
   | { kind: "tokens"; colors: Stone[] }
@@ -26,4 +26,13 @@ export function stagedActionToMove(staged: StagedAction): Move {
     case "recruit":
       return { type: "RECRUIT", from: staged.from, cardId: staged.cardId };
   }
+}
+
+/** The tokens a player would hold once the pick is played. */
+export function tokensAfter(staged: StagedAction | null, held: TokenCounts, supply: TokenCounts): TokenCounts {
+  const after = { ...held };
+  if (staged?.kind === "tokens") for (const color of staged.colors) after[color] += 1;
+  // A reserve comes with a S.H.I.E.L.D. token while any are left.
+  if (staged?.kind === "reserve" && supply.shield > 0) after.shield += 1;
+  return after;
 }
