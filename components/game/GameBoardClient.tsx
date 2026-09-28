@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
+import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
@@ -78,20 +79,6 @@ const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
 
-// Which side the phone's notch is on in landscape, for `.game-board`'s side
-// margins. "landscape-primary" is the device turned counter-clockwise, which
-// puts the top of the phone (and its notch) on the left.
-function subscribeOrientation(onChange: () => void) {
-  screen.orientation?.addEventListener("change", onChange);
-  return () => screen.orientation?.removeEventListener("change", onChange);
-}
-function getNotchSide(): "left" | "right" | undefined {
-  const type = screen.orientation?.type;
-  if (type === "landscape-primary") return "left";
-  if (type === "landscape-secondary") return "right";
-  return undefined;
-}
-
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -111,7 +98,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [botPlaying, setBotPlaying] = useState(false);
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
-  const notchSide = useSyncExternalStore(subscribeOrientation, getNotchSide, () => undefined);
+  const notchSide = useNotchSide();
 
   // Integration point for a later task (OpenAI banter bubbles): nothing
   // populates this yet, but the plumbing — state + setter + prop passthrough
@@ -368,19 +355,14 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   return (
     <>
-      {/* Phones held upright: the landscape canvas would be unreadably small. */}
-      <div className="fixed inset-0 z-[60] hidden items-center justify-center bg-background p-6 text-center text-sm portrait:max-md:flex">
-        Rotate your device to landscape to play.
-      </div>
-
       <div
         data-notch={notchSide}
-        className="game-board relative flex h-dvh w-full items-center overflow-hidden"
+        className="game-board theme-cosmos dark relative flex h-dvh w-full items-center overflow-hidden bg-cosmos"
       >
         {gameData.abandoned ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
-            <div className="flex flex-col items-center gap-3 rounded-lg bg-popover p-6 text-center text-popover-foreground shadow-md ring-1 ring-foreground/10">
-              <p className="text-base font-bold">This game was closed</p>
+            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md">
+              <p className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">This game was closed</p>
               <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>
               <Button asChild>
                 <Link href="/">Back to home</Link>
@@ -390,7 +372,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         ) : null}
         {botPlaying ? (
           <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
-            <span className="rounded-full bg-popover px-3 py-1 text-xs text-popover-foreground shadow-md ring-1 ring-foreground/10">
+            <span className="rounded-full bg-popover px-3 py-1 font-display text-xs font-bold tracking-wide text-gold-400 uppercase shadow-md ring-2 ring-cosmos-500 ring-inset">
               Bot is thinking…
             </span>
           </div>

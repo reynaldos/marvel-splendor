@@ -78,7 +78,7 @@ export function ReservedCards({
             className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-xs"
             onClick={() => setOpen(false)}
           />
-          <h2 className="relative text-2xl font-black tracking-wide text-white uppercase">
+          <h2 className="relative font-display text-2xl font-black tracking-widest text-gold-400 uppercase">
             {disabled ? "Your reserved cards" : "Select a card to recruit"}
           </h2>
           <div className="relative flex gap-6">
@@ -97,7 +97,7 @@ export function ReservedCards({
                 >
                   <CardView
                     card={card}
-                    className={cn("w-38 rounded-xl ring-4", affordable ? "ring-green-500" : "ring-red-500")}
+                    className={cn("w-38 rounded-[10%/7.1%] ring-4", affordable ? "ring-green-500" : "ring-red-500")}
                   />
                 </button>
               );

@@ -42,7 +42,8 @@ export interface Location {
   image?: string;
 }
 
-export type BotDifficulty = "easy" | "normal" | "hard";
+export const BOT_DIFFICULTIES = ["easy", "normal", "hard"] as const;
+export type BotDifficulty = (typeof BOT_DIFFICULTIES)[number];
 
 export interface GameSettings {
   /** Per-turn time limit in seconds; null = untimed. */
@@ -52,6 +53,8 @@ export interface GameSettings {
   /** Infinity Point threshold of the compound win condition (rulebook default 16). */
   targetPoints: number;
   botDifficulty?: BotDifficulty;
+  /** Overrides botDifficulty for the bot in that seat. */
+  botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {

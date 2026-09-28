@@ -74,8 +74,8 @@ export function PlayerPlaque({
 
       {/* Hangs off the corner so the name gets the header's full width. */}
       <span className="absolute -top-2 -right-2 flex size-9 items-center justify-center" title="Points">
-        <Star className="absolute size-full fill-yellow-400 text-yellow-600" />
-        <span className="relative text-xs font-black text-yellow-950 tabular-nums">{player.points}</span>
+        <Star className="absolute size-full fill-gold-400 text-gold-600" />
+        <span className="relative text-xs font-black text-cosmos-950 tabular-nums">{player.points}</span>
       </span>
 
       {children ?? <Holdings bonuses={player.bonuses} tokens={player.tokens} />}

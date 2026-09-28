@@ -32,7 +32,7 @@ export function GameOverDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="theme-cosmos dark border-2 border-gold-400">
         <DialogHeader>
           <DialogTitle>Game over</DialogTitle>
           <DialogDescription>

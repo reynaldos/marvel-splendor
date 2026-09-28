@@ -26,7 +26,10 @@ export function nextFreeSeat(takenSeats: number[]): number | null {
 }
 
 /** Creates a game in LOBBY status with `userId` hosting from seat 0. */
-export async function createLobby(userId: string): Promise<string> {
+export async function createLobby(
+  userId: string,
+  rules: { targetPoints: number; turnTimeSeconds: number },
+): Promise<string> {
   // A handful of retries covers the astronomically unlikely joinCode collision.
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
@@ -36,9 +39,7 @@ export async function createLobby(userId: string): Promise<string> {
           status: "LOBBY",
           mode: "MULTIPLAYER",
           seed: generateSeed(),
-          // Timed by default: the turn timer is what lets the table move on
-          // from a player who has walked away. The host can change it.
-          settings: { ...DEFAULT_SETTINGS, turnTimeSeconds: 60 } as unknown as Prisma.InputJsonValue,
+          settings: { ...DEFAULT_SETTINGS, ...rules } as unknown as Prisma.InputJsonValue,
           // The real state is dealt when the host starts, once the player count is known.
           state: {},
           players: { create: { seat: 0, userId } },

@@ -65,7 +65,7 @@ export function Zoomable({ label, title, zoomed, interactive, className, style, 
             onClick={() => setOpen(false)}
           />
           {title ? (
-            <h2 className="pointer-events-none relative text-2xl font-black tracking-wide text-white uppercase">
+            <h2 className="pointer-events-none relative font-display text-2xl font-black tracking-widest text-gold-400 uppercase">
               {title}
             </h2>
           ) : null}

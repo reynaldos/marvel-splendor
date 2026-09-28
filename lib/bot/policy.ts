@@ -122,7 +122,7 @@ const WEIGHTS: Record<BotDifficulty, Weights> = {
 const HOARD_THRESHOLD = 5;
 
 export function chooseBotMove(state: GameState, seat: number): Move {
-  const difficulty = state.settings.botDifficulty ?? "normal";
+  const difficulty = state.settings.botDifficultyBySeat?.[seat] ?? state.settings.botDifficulty ?? "normal";
   const weights = WEIGHTS[difficulty];
 
   const candidates = legalMoves(state, seat);

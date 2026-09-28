@@ -91,7 +91,7 @@ function ReturnTokensDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
-        className="max-h-[90dvh] overflow-y-auto"
+        className="theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -165,7 +165,7 @@ function ChooseLocationDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
-        className="max-h-[90dvh] overflow-y-auto"
+        className="theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}

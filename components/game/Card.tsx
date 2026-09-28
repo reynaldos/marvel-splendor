@@ -151,7 +151,7 @@ export function Card({
           onClick={close}
           className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none backdrop-blur-xs"
         >
-          <CardView card={card} className="w-61 rounded-xl" />
+          <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
         </button>
       ) : null}
     </div>
