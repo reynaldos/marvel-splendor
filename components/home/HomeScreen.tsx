@@ -21,7 +21,7 @@ const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-
 const ICON_LINK =
   "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
 // Dialogs open outside the stage, so they carry the look themselves.
-const DIALOG = "dark max-h-[90dvh] overflow-y-auto border-2 border-gold-400 bg-cosmos-900 text-white";
+const DIALOG = "theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto";
 
 /** What a visitor sees before signing in. */
 export function WelcomeScreen() {

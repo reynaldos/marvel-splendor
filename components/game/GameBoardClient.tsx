@@ -357,12 +357,12 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     <>
       <div
         data-notch={notchSide}
-        className="game-board relative flex h-dvh w-full items-center overflow-hidden"
+        className="game-board theme-cosmos dark relative flex h-dvh w-full items-center overflow-hidden bg-cosmos"
       >
         {gameData.abandoned ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
-            <div className="flex flex-col items-center gap-3 rounded-lg bg-popover p-6 text-center text-popover-foreground shadow-md ring-1 ring-foreground/10">
-              <p className="text-base font-bold">This game was closed</p>
+            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md">
+              <p className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">This game was closed</p>
               <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>
               <Button asChild>
                 <Link href="/">Back to home</Link>
@@ -372,7 +372,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         ) : null}
         {botPlaying ? (
           <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
-            <span className="rounded-full bg-popover px-3 py-1 text-xs text-popover-foreground shadow-md ring-1 ring-foreground/10">
+            <span className="rounded-full bg-popover px-3 py-1 font-display text-xs font-bold tracking-wide text-gold-400 uppercase shadow-md ring-2 ring-cosmos-500 ring-inset">
               Bot is thinking…
             </span>
           </div>

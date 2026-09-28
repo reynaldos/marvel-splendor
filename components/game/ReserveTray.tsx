@@ -58,7 +58,7 @@ export function ReserveTray({ reserved, ownerName, className, cardClassName = "w
       zoomed={
         <div className="flex gap-6">
           {reserved.map((entry, i) => (
-            <ReservedCard key={i} entry={entry} className="w-38 rounded-xl" />
+            <ReservedCard key={i} entry={entry} className="w-38 rounded-[10%/7.1%]" />
           ))}
         </div>
       }

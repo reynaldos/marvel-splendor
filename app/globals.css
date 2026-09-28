@@ -197,3 +197,26 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* The box-art palette as the app's color roles, for the board and its popups. */
+.theme-cosmos {
+  --background: var(--color-cosmos-950);
+  --foreground: #fff;
+  --card: var(--color-cosmos-800);
+  --card-foreground: #fff;
+  --popover: var(--color-cosmos-900);
+  --popover-foreground: #fff;
+  --primary: var(--color-gold-400);
+  --primary-foreground: var(--color-cosmos-950);
+  --secondary: var(--color-cosmos-700);
+  --secondary-foreground: #fff;
+  --muted: var(--color-cosmos-700);
+  --muted-foreground: var(--color-cosmos-300);
+  --accent: var(--color-cosmos-700);
+  --accent-foreground: #fff;
+  --destructive: #ff6b6b;
+  --border: rgb(77 95 214 / 0.5);
+  --input: rgb(77 95 214 / 0.5);
+  --ring: var(--color-gold-400);
+  color: var(--foreground);
+}

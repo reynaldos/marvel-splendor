@@ -22,7 +22,7 @@ export function EndTurnBar({ hasStaged, disabled, submitting, onConfirm, classNa
     <div className={cn("flex w-28 shrink-0 flex-col justify-end pb-2", className)}>
       <Button
         type="button"
-        className="h-12 rounded-full text-base font-black uppercase"
+        className="h-12 rounded-full bg-marvel px-4 font-display text-sm font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300 disabled:opacity-100"
         disabled={!hasStaged || disabled || submitting}
         onClick={onConfirm}
       >

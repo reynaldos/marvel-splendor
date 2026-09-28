@@ -48,7 +48,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
             <Menu />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuContent align="end" className="theme-cosmos dark w-40 border-2 border-gold-400">
           <DropdownMenuItem onSelect={() => setOpen("moves")}>Moves</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setOpen("settings")}>Game settings</DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -65,7 +65,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
       </DropdownMenu>
 
       <Dialog open={open !== null} onOpenChange={(next) => !next && setOpen(null)}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto">
+        <DialogContent className="theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto">
           {open === "moves" ? (
             <>
               <DialogHeader>
