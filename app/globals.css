@@ -262,6 +262,37 @@ body {
 .launch-splash {
   animation: launch-splash 2.4s ease-in both;
 }
+/*
+ * Held upright, the art is turned a quarter, as the launch picture is: it
+ * reads as "turn me", and covers the turn-your-phone notice until it fades.
+ * It is measured from its own box, which runs on past the bottom edge by the
+ * height of the status bar, as an installed iPhone app measures the screen
+ * that much short.
+ */
+@media (orientation: portrait) {
+  .launch-splash {
+    bottom: calc(env(safe-area-inset-top, 0px) * -1);
+    container-type: size;
+  }
+  .launch-splash > div,
+  .launch-splash::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100cqh;
+    translate: -50% -50%;
+    rotate: 90deg;
+  }
+  .launch-splash > div {
+    --spacing: min(1cqw, 0.5cqh);
+  }
+  /* The night sky, turned with the art. */
+  .launch-splash::before {
+    content: "";
+    height: 100cqw;
+    background: inherit;
+  }
+}
 
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
 @keyframes turn-banner {
