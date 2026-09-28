@@ -24,6 +24,7 @@ describe("data/cards.json", () => {
   });
 
   it.each(ALL_CARDS)("$name is well formed", (card) => {
+    expect(["hero", "villain", "both"]).toContain(card.side);
     expect([1, 2, 3]).toContain(card.level);
     expect(STONES).toContain(card.bonus);
     expect(card.points).toBeGreaterThanOrEqual(0);

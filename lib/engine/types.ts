@@ -21,6 +21,8 @@ export interface Card {
   id: string;
   /** Display name (placeholder dataset — see data/cards.json `_meta.names`). */
   name: string;
+  /** Counted by the stats; no part in the rules. "both" counts once as each. */
+  side: "hero" | "villain" | "both";
   /** Full-card art path/URL; when absent the UI draws a placeholder card. */
   image?: string;
   level: CardLevel;
