@@ -13,3 +13,12 @@ export function checkUsername(typed: string): { username: string } | { error: st
   }
   return { username };
 }
+
+export const NAME_MAX = 40;
+
+/** Tidies a typed name; an empty one means no name. */
+export function checkName(typed: string): { name: string | null } | { error: string } {
+  const name = typed.trim().replace(/\s+/g, " ");
+  if (name.length > NAME_MAX) return { error: `Keep the name to ${NAME_MAX} characters.` };
+  return { name: name || null };
+}

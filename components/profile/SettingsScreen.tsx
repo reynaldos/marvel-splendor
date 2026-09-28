@@ -12,12 +12,14 @@ import { AVATAR_TYPES, checkAvatarFile, uploadAvatar } from "@/components/profil
 import { Stage, StageRows } from "@/components/Stage";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AVATAR_LIBRARY } from "@/lib/avatars";
-import { checkUsername, USERNAME_MAX } from "@/lib/username";
-import type { SaveState } from "@/app/settings/actions";
+import { checkUsername, NAME_MAX, USERNAME_MAX } from "@/lib/username";
+import type { ProfileChanges, SaveState } from "@/app/settings/actions";
 
 const HEADING = "font-display text-base font-bold tracking-wide text-gold-400 uppercase";
 const PILL_BUTTON =
   "h-11 rounded-full px-6 text-base font-black uppercase disabled:bg-cosmos-700 disabled:text-cosmos-300";
+const FIELD =
+  "h-11 rounded-full bg-cosmos-950 px-5 text-lg font-bold ring-2 ring-cosmos-500 outline-none ring-inset placeholder:text-cosmos-500 focus:ring-gold-400";
 /** How long typing must pause before the username is looked up. */
 const CHECK_DELAY_MS = 400;
 
@@ -26,16 +28,18 @@ type Picked = { src: string; id: string } | { src: string; file: File };
 
 interface SettingsScreenProps {
   username: string;
+  name: string | null;
   avatarUrl: string | null;
   onCheckUsername: (typed: string) => Promise<SaveState>;
-  onSave: (changes: { username: string; avatarId: string | null }) => Promise<SaveState>;
+  onSave: (changes: ProfileChanges) => Promise<SaveState>;
 }
 
-/** Where a player changes their picture and username. Nothing is kept until Save. */
-export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }: SettingsScreenProps) {
+/** Where a player changes their picture, name and username. Nothing is kept until Save. */
+export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUsername, onSave }: SettingsScreenProps) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(username);
+  const [fullName, setFullName] = useState(savedName ?? "");
   const [picked, setPicked] = useState<Picked | null>(null);
   // What the server said about the username last looked up.
   const [looked, setLooked] = useState<{ name: string; result: SaveState } | null>(null);
@@ -46,7 +50,7 @@ export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }:
 
   const typed = name.trim().toLowerCase();
   const nameChanged = typed !== username;
-  const unsaved = nameChanged || picked !== null;
+  const unsaved = nameChanged || picked !== null || fullName.trim() !== (savedName ?? "");
   const shape = checkUsername(name);
   const shown = picked?.src ?? avatarUrl;
 
@@ -81,7 +85,11 @@ export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }:
     setSaving(true);
     setResult(null);
     try {
-      const saved = await onSave({ username: typed, avatarId: picked && "id" in picked ? picked.id : null });
+      const saved = await onSave({
+        username: typed,
+        name: fullName,
+        avatarId: picked && "id" in picked ? picked.id : null,
+      });
       if (saved.ok && picked && "file" in picked) {
         await uploadAvatar(picked.file);
         router.refresh();
@@ -160,7 +168,7 @@ export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }:
             </div>
           </div>
 
-          <div className="flex w-60 flex-col gap-3">
+          <div className="flex w-60 flex-col gap-2">
             <label htmlFor="username" className={HEADING}>
               Username
             </label>
@@ -177,7 +185,7 @@ export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }:
               spellCheck={false}
               aria-describedby="username-note"
               aria-invalid={nameNote ? !nameNote.ok : undefined}
-              className="h-12 rounded-full bg-cosmos-950 px-5 text-xl font-bold ring-2 ring-cosmos-500 outline-none ring-inset focus:ring-gold-400"
+              className={FIELD}
             />
             <p
               id="username-note"
@@ -186,6 +194,21 @@ export function SettingsScreen({ username, avatarUrl, onCheckUsername, onSave }:
             >
               {nameNote?.message}
             </p>
+            <label htmlFor="name" className={HEADING}>
+              Name
+            </label>
+            <input
+              id="name"
+              value={fullName}
+              onChange={(event) => {
+                setResult(null);
+                setFullName(event.target.value);
+              }}
+              maxLength={NAME_MAX}
+              autoComplete="name"
+              placeholder="Optional"
+              className={FIELD}
+            />
           </div>
         </div>
 

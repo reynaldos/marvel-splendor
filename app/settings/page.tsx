@@ -8,7 +8,7 @@ import { pageMetadata } from "@/lib/site";
 
 import { checkUsernameAction, saveProfileAction } from "./actions";
 
-export const metadata = pageMetadata("Profile settings", "Your picture and username.", true);
+export const metadata = pageMetadata("Profile settings", "Your picture, name and username.", true);
 
 export default async function SettingsPage() {
   const session = await auth0.getSession();
@@ -19,6 +19,7 @@ export default async function SettingsPage() {
   return (
     <SettingsScreen
       username={user.username}
+      name={user.name}
       avatarUrl={publicAvatarUrl(user.avatarKey)}
       onCheckUsername={checkUsernameAction}
       onSave={saveProfileAction}

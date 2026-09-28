@@ -291,9 +291,9 @@ Tiles and cards have different corners, as on the real game, and should not be g
 
 Pictures are resized and served as AVIF or WebP, and cached for a month. Each picture's address carries a fingerprint of its contents from `data/image-versions.json`, so replacing a picture gives it a new address and players fetch the new one. `pnpm dev` and `pnpm build` refresh the fingerprints; `pnpm images` does it by hand.
 
-**Phase 4 — stats and profiles (planned, not started)**
+**Phase 4 — stats and profiles**
 
-Player stats, shown on the profile page:
+Player stats, shown on the profile page. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.
 
 | Stat | Meaning |
 |---|---|
@@ -313,15 +313,17 @@ Profile:
 - Edit username. Done. Usernames are 3 to 20 characters: lowercase letters, numbers, `-` and `_`. The page looks the name up as it is typed and says whether it is free; the database's unique rule on `username` still has the last word when saving.
 - **Scaling the username check (future).** Today each check is one lookup on the unique index, which is quick at this size. If sign-ups ever grow to where those lookups load the database, keep the taken usernames in a fast in-memory set in front of it: a Bloom filter or a Redis set. A name the set has never seen is free without asking the database; only a possible match is looked up. The unique rule stays as the last word either way.
 - One Save button keeps the picture and the username together. Leaving with unsaved changes asks first. The browser's own back button is not caught. The Profile page links to it with "Edit profile"; it has no link back to the profile.
-- Edit name. Not started: it needs the `name` column below.
-- Profile and Settings pages in the box-art theme. Done.
+- Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
+- Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
+- Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
+- Level, coins and rank. Planned, not started. None of these exist in the game yet; the results popup and the player card are where they would show.
 
 What these need before they can be built:
 
 - **Hero or villain per card.** Done: every card in `data/cards.json` has `side`: `"hero"`, `"villain"`, or `"both"` for one that could go either way. A `"both"` card counts once as a hero and once as a villain. A new card must be given one.
-- **New stat columns.** Not done. `UserStats` holds totals only (games, wins, best points, fastest win, tiles, locations). The new stats need these columns, which is a schema change: `recruitsByCard Json @default("{}")` (times each card was recruited, by card id; the hero and villain counts and the most used of each come from it), `winPointsTotal Int @default(0)`, `bestWinPoints Int?`, `lowestLossPoints Int?`, `avengersTagsTotal Int @default(0)`, `mostAvengersTags Int @default(0)`.
-- **Past games.** Every move is saved, so the new stats can be worked out for games already played by replaying their move logs.
-- **A name on the user.** Not done. `User` has `username` but no `name`. Adding `name String?` is a schema change.
+- **New stat columns.** Not needed today. The stats read every finished game the player was in, and clearing games (`pnpm games:clear`) clears them. If either ever matters, keep running totals on `UserStats` instead.
+- **Past games.** Done: covered by reading finished games.
+- **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
 - **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
 
 ## 9. Testing & correctness strategy

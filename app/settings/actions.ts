@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db";
 import { isUniqueViolation } from "@/lib/game-server";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { deleteAvatarObject } from "@/lib/r2";
-import { checkUsername } from "@/lib/username";
+import { checkName, checkUsername } from "@/lib/username";
 
 export interface SaveState {
   ok: boolean;
@@ -34,16 +34,27 @@ export async function checkUsernameAction(typed: string): Promise<SaveState> {
   return holder && holder.id !== user.id ? TAKEN : { ok: true, message: "Available" };
 }
 
-/** Saves the username and, when one was chosen, a picture from the library. */
-export async function saveProfileAction(changes: { username: string; avatarId: string | null }): Promise<SaveState> {
+export interface ProfileChanges {
+  username: string;
+  name: string;
+  /** A picture chosen from the library, or null to leave the picture as it is. */
+  avatarId: string | null;
+}
+
+export async function saveProfileAction(changes: ProfileChanges): Promise<SaveState> {
   const user = await signedInUser();
   const checked = checkUsername(changes.username);
   if ("error" in checked) return { ok: false, message: checked.error };
+  const named = checkName(changes.name);
+  if ("error" in named) return { ok: false, message: named.error };
   const avatarKey = changes.avatarId === null ? undefined : libraryAvatarKey(changes.avatarId);
   if (avatarKey === null) return { ok: false, message: "That picture isn't in the library." };
 
   try {
-    await prisma.user.update({ where: { id: user.id }, data: { username: checked.username, avatarKey } });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { username: checked.username, name: named.name, avatarKey },
+    });
   } catch (error) {
     // Someone can take the name between the check and the save; the database has the last word.
     if (isUniqueViolation(error, "username")) return TAKEN;
