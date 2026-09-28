@@ -9,6 +9,7 @@ import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
+import { pageMetadata } from "@/lib/site";
 
 import {
   addBotAction,
@@ -20,6 +21,8 @@ import {
 
 // Draw under the phone's notch margins; the stage pads the content back out.
 export const viewport: Viewport = { viewportFit: "cover" };
+
+export const metadata = pageMetadata("Game Lobby", "Waiting for players to take their seats.", true);
 
 // Server-rendered; LobbyLive re-renders it whenever the table changes.
 export default async function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
