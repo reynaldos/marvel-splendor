@@ -309,17 +309,20 @@ Player stats, shown on the profile page:
 
 Profile:
 
-- Profile picture: upload one, or choose one from a library of pictures.
-- Edit username and name.
+- Profile picture: upload one, or choose one from a library of pictures. Done.
+- Edit username. Done. Usernames are 3 to 20 characters: lowercase letters, numbers, `-` and `_`. The page looks the name up as it is typed and says whether it is free; the database's unique rule on `username` still has the last word when saving.
+- **Scaling the username check (future).** Today each check is one lookup on the unique index, which is quick at this size. If sign-ups ever grow to where those lookups load the database, keep the taken usernames in a fast in-memory set in front of it: a Bloom filter or a Redis set. A name the set has never seen is free without asking the database; only a possible match is looked up. The unique rule stays as the last word either way.
+- One Save button keeps the picture and the username together. Leaving with unsaved changes asks first. The browser's own back button is not caught. The Profile page links to it with "Edit profile"; it has no link back to the profile.
+- Edit name. Not started: it needs the `name` column below.
+- Profile and Settings pages in the box-art theme. Done.
 
 What these need before they can be built:
 
 - **Hero or villain per card.** Done: every card in `data/cards.json` has `side`: `"hero"`, `"villain"`, or `"both"` for one that could go either way. A `"both"` card counts once as a hero and once as a villain. A new card must be given one.
-- **New stat columns.** `UserStats` holds totals only (games, wins, best points, fastest win, tiles, locations). The new stats need new columns, which is a schema change and a migration.
+- **New stat columns.** Not done. `UserStats` holds totals only (games, wins, best points, fastest win, tiles, locations). The new stats need these columns, which is a schema change: `recruitsByCard Json @default("{}")` (times each card was recruited, by card id; the hero and villain counts and the most used of each come from it), `winPointsTotal Int @default(0)`, `bestWinPoints Int?`, `lowestLossPoints Int?`, `avengersTagsTotal Int @default(0)`, `mostAvengersTags Int @default(0)`.
 - **Past games.** Every move is saved, so the new stats can be worked out for games already played by replaying their move logs.
-- **A name on the user.** `User` has `username` but no `name`. Adding it is a schema change.
-- **A picture library.** A set of pictures to choose from, and a way to store the choice. `avatarKey` today points at an uploaded file only.
-- **Already built:** uploading a profile picture, on the Settings page.
+- **A name on the user.** Not done. `User` has `username` but no `name`. Adding `name String?` is a schema change.
+- **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
 
 ## 9. Testing & correctness strategy
 

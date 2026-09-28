@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bot, Hourglass, Star, UsersRound } from "lucide-react";
+import { Bot, Hourglass, Star, UsersRound } from "lucide-react";
 
+import { BackLink } from "@/components/BackLink";
 import { Logo } from "@/components/home/Logo";
 import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
@@ -112,12 +112,7 @@ export function SoloGameScreen() {
         </div>
 
         <footer className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 text-base font-bold hover:text-gold-200">
-            <span className="flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
-              <ArrowLeft className="size-6" />
-            </span>
-            Back
-          </Link>
+          <BackLink />
           {error ? <p className="text-sm font-bold text-red-300">{error}</p> : null}
           <button
             type="button"

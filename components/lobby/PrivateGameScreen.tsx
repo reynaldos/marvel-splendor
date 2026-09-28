@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { cn } from "cn";
-import { ArrowLeft, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
+import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { Logo } from "@/components/home/Logo";
 import { Option } from "@/components/lobby/Option";
@@ -103,12 +103,7 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
         </div>
 
         <footer className="flex">
-          <Link href="/" className="flex items-center gap-2 text-base font-bold hover:text-gold-200">
-            <span className="flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
-              <ArrowLeft className="size-6" />
-            </span>
-            Back
-          </Link>
+          <BackLink />
         </footer>
       </StageRows>
     </Stage>
