@@ -50,7 +50,7 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScree
     <Stage>
       <StageRows>
         <header className="flex items-center gap-4">
-          <Link href="/profile" className={`${PILL} pl-1 hover:bg-cosmos-500`}>
+          <Link href={`/profile/${username}`} className={`${PILL} pl-1 hover:bg-cosmos-500`}>
             <PlayerAvatar src={avatarUrl} name={username} />
             <span className="max-w-40 truncate text-base font-bold">{username}</span>
           </Link>

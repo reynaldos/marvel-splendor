@@ -112,8 +112,9 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* The night sky is behind every screen, so the moment between two pages shows it, not a black flash. */
 body {
-  background: var(--background);
+  @apply bg-cosmos;
   color: var(--foreground);
 }
 
