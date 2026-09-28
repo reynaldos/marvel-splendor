@@ -281,3 +281,13 @@ body {
     animation: none;
   }
 }
+
+/* Melts a cut-out picture into the background: soft at both sides and along the bottom. */
+.fade-edges {
+  --sides: linear-gradient(to right, transparent 2%, black 28%, black 80%, transparent 100%);
+  --bottom: linear-gradient(to bottom, black 62%, transparent 96%);
+  -webkit-mask-image: var(--sides), var(--bottom);
+  mask-image: var(--sides), var(--bottom);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}

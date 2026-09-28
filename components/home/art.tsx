@@ -1,7 +1,6 @@
 import { cn } from "cn";
 
 import { AssetImage } from "@/components/game/assets";
-import { HeroFan } from "@/components/home/HeroFan";
 
 /**
  * One picture in a tile's art, placed and tilted by `className`. `drift` sets
@@ -53,20 +52,26 @@ export function AvengersArt() {
 // Scattered by hand: mixed sizes, tilts and speeds, the small blurred ones further away.
 // `x`/`y` are a share of the screen, `size` is in spacing steps, `pace` is seconds per bob.
 const STONES = [
-  { stone: "mind", x: 3, y: 7, size: 11, tilt: -18, pace: 7 },
-  { stone: "reality", x: 41, y: 2, size: 7, tilt: 25, pace: 9, far: true },
-  { stone: "space", x: 1, y: 60, size: 15, tilt: 12, pace: 6 },
-  { stone: "soul", x: 45, y: 68, size: 12, tilt: -28, pace: 8 },
+  { stone: "mind", x: 4, y: 12, size: 13, tilt: -18, pace: 7 },
+  { stone: "reality", x: 47, y: 2, size: 7, tilt: 25, pace: 9, far: true },
+  { stone: "space", x: 41, y: 18, size: 14, tilt: 12, pace: 6 },
+  { stone: "soul", x: 6, y: 70, size: 14, tilt: -28, pace: 8 },
   { stone: "power", x: 91, y: 5, size: 13, tilt: 32, pace: 6.5 },
   { stone: "time", x: 94, y: 74, size: 8, tilt: -12, pace: 9.5, far: true },
   { stone: "shield", x: 52, y: 88, size: 6, tilt: 40, pace: 10, far: true },
-  { stone: "power", x: 24, y: 1, size: 5, tilt: -35, pace: 11, far: true },
+  { stone: "reality", x: 49, y: 62, size: 9, tilt: -35, pace: 8.5 },
+  { stone: "power", x: 17, y: 90, size: 6, tilt: 20, pace: 11, far: true },
 ];
 
-/** The welcome screen's backdrop: a hand of heroes, the tiles, and the stones adrift. */
+/** The welcome screen's backdrop: Thanos, with the stones adrift around him. */
 export function WelcomeArt() {
   return (
     <>
+      {/* Thanos, with his face and the Gauntlet kept clear of everything adrift. */}
+      <span className="fade-edges absolute -top-[18%] left-[4%] aspect-[3/4] h-[125%]">
+        <AssetImage src="/assets/thanos.png" alt="" sizes="50vw" className="object-contain" />
+      </span>
+
       {STONES.map(({ stone, x, y, size, tilt, pace, far }, i) => (
         <span
           key={i}
@@ -86,19 +91,6 @@ export function WelcomeArt() {
           <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
         </span>
       ))}
-
-      <Piece
-        src="/assets/infinity-gauntlet.jpg"
-        drift={1.7}
-        className="bottom-[4%] left-[9%] aspect-[1404/688] w-36 -rotate-6 rounded-xl ring-2 ring-gold-400"
-      />
-      <Piece
-        src="/assets/avengers-assemble.png"
-        drift={3}
-        className="bottom-[9%] left-[31%] aspect-square w-20 rotate-12 rounded-xl ring-2 ring-gold-400"
-      />
-
-      <HeroFan />
     </>
   );
 }
