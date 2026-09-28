@@ -45,9 +45,16 @@ export function applyMove(state: GameState, seat: number, move: Move): GameState
     };
   }
 
-  if (move.type === "TIMEOUT_SKIP" || move.type === "END_BY_CLOCK") {
+  // The clock running out takes nobody's turn: whoever is up still plays, and
+  // the game ends once the round is complete, or at once if it already is.
+  if (move.type === "END_BY_CLOCK") {
+    next.clockExpired = true;
+    next.moveCount += 1;
+    return next.pending ? next : finalizeIfNeeded(next);
+  }
+
+  if (move.type === "TIMEOUT_SKIP") {
     const actingSeat = next.currentSeat;
-    if (move.type === "END_BY_CLOCK") next.clockExpired = true;
     while (next.pending) {
       next = resolvePendingWithDefault(next, actingSeat);
     }
@@ -259,7 +266,7 @@ function runHandLimitCheck(state: GameState, seat: number): GameState {
   return { ...state, pending: { type: "RETURN_TOKENS", mustReturn: total - HAND_LIMIT } };
 }
 
-/** Server default for TIMEOUT_SKIP/END_BY_CLOCK: resolve whatever is pending. */
+/** Server default for TIMEOUT_SKIP: resolve whatever is pending. */
 function resolvePendingWithDefault(state: GameState, seat: number): GameState {
   const pending = state.pending;
   if (!pending) return state;

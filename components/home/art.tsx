@@ -36,14 +36,14 @@ export function CardFanArt() {
 export function AvengersArt() {
   return (
     <>
-      <Piece src="/assets/locations/wakanda.png" className="top-10 left-[5%] aspect-square w-28 -rotate-12 rounded-xl" />
+      <Piece src="/assets/locations/wakanda.png" className="top-10 left-[5%] aspect-square w-28 -rotate-12 rounded-tile" />
       <Piece
         src="/assets/locations/avengers_tower.png"
-        className="top-10 right-[5%] aspect-square w-28 rotate-12 rounded-xl"
+        className="top-10 right-[5%] aspect-square w-28 rotate-12 rounded-tile"
       />
       <Piece
         src="/assets/avengers-assemble.png"
-        className="top-5 left-1/2 aspect-square w-36 -translate-x-1/2 rounded-xl ring-2 ring-gold-400"
+        className="top-5 left-1/2 aspect-square w-36 -translate-x-1/2 rounded-tile ring-2 ring-gold-400"
       />
     </>
   );

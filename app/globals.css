@@ -130,6 +130,15 @@ body {
 
 /* Tiny text sizes expressed in spacing steps so they scale with the game board. */
 /* A character card's proportions: the average of the card art's. Give the card a width. */
+/*
+ * Corners differ by piece, as on the real game. Location and Avengers tiles are
+ * square with well-rounded corners; character cards are taller with tighter
+ * ones (`rounded-md` on the board, `rounded-[10%/7.1%]` when opened large).
+ * Tiles take this wherever they are drawn, so they always match the board.
+ */
+@utility rounded-tile {
+  border-radius: 12%;
+}
 @utility aspect-card {
   aspect-ratio: 1 / 1.411;
 }

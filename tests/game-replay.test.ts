@@ -50,16 +50,28 @@ describe("isTableIdle", () => {
   const skip = (seat: number) => ({ seat, move: { type: "TIMEOUT_SKIP" } as Move });
   const play = (seat: number) => ({ seat, move: { type: "TAKE_TOKENS", colors: ["mind"] } as Move });
 
-  it("closes a table once every human has just timed out", () => {
-    expect(isTableIdle([0, 1], [skip(1), skip(0), play(1)])).toBe(true);
+  const clock = (seat: number) => ({ seat, move: { type: "END_BY_CLOCK" } as Move });
+  // Latest first: `times` rounds in which every seat given let its turn run out.
+  const idleRounds = (times: number, ...seats: number[]) =>
+    Array.from({ length: times }, () => seats.toReversed().map(skip)).flat();
+
+  it("closes a table once everyone has missed three turns in a row", () => {
+    expect(isTableIdle([0, 1], idleRounds(3, 0, 1))).toBe(true);
+    expect(isTableIdle([0], [play(1), skip(0), play(1), skip(0), play(1), skip(0)])).toBe(true);
+  });
+  it("keeps it open after one or two missed turns", () => {
+    expect(isTableIdle([0], [play(1), skip(0)])).toBe(false);
+    expect(isTableIdle([0], [play(1), skip(0), play(1), skip(0)])).toBe(false);
+    expect(isTableIdle([0, 1], idleRounds(2, 0, 1))).toBe(false);
   });
   it("keeps it open while anyone is still playing", () => {
-    expect(isTableIdle([0, 1], [skip(1), play(0)])).toBe(false);
-    // Seat 1 hasn't had a turn yet.
-    expect(isTableIdle([0, 1], [skip(0)])).toBe(false);
+    expect(isTableIdle([0, 1], [skip(1), skip(0), skip(1), skip(0), play(1), skip(0)])).toBe(false);
   });
-  it("ignores bots, and gives a lone human two turns", () => {
-    expect(isTableIdle([0], [play(1), skip(0), play(1), play(0)])).toBe(false);
-    expect(isTableIdle([0], [play(1), skip(0), play(1), skip(0)])).toBe(true);
+  it("starts the count again after a turn is played", () => {
+    expect(isTableIdle([0], [skip(0), skip(0), play(0), skip(0)])).toBe(false);
   });
+  it("does not count the game clock running out as a turn played", () => {
+    expect(isTableIdle([0], [skip(0), clock(0), skip(0), skip(0)])).toBe(true);
+  });
+
 });

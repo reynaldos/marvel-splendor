@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
-import { replaySteps, turnEndsInMs } from "@/lib/game-replay";
+import { gameEndsInMs, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { botName } from "@/lib/lobby-rules";
@@ -89,5 +89,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     moves,
     steps: steps ?? [],
     turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
+    gameEndsInMs: game.status === "ACTIVE" ? gameEndsInMs(state.settings, game.createdAt) : null,
   });
 }

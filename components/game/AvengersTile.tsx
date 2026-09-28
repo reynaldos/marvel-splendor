@@ -26,7 +26,7 @@ export function AvengersTile({ avengersHolder, players, nameForSeat, className }
     <div
       title="Avengers Assemble"
       className={cn(
-        "@container relative aspect-square w-full overflow-hidden rounded-[12%] bg-muted ring-1 ring-foreground/10",
+        "@container relative aspect-square w-full overflow-hidden rounded-tile bg-muted ring-1 ring-foreground/10",
         className,
       )}
     >

@@ -1,7 +1,9 @@
-import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { LobbyLive } from "@/components/lobby/LobbyLive";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
+import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
@@ -36,8 +38,16 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
       players: { include: { user: { select: { username: true } } }, orderBy: { seat: "asc" } },
     },
   });
-  // Also where guests land when the host closes the table.
-  if (!game) notFound();
+  // Where guests land when the host cancels: the lobby refreshes and the game is gone.
+  if (!game) {
+    return (
+      <NoticeScreen title="Game cancelled" message="The host closed this room. Ask them for a new code, or start a game of your own.">
+        <Link href="/" className={NOTICE_BUTTON}>
+          Back to home
+        </Link>
+      </NoticeScreen>
+    );
+  }
 
   const mySeat = game.players.find((p) => p.userId === user.id);
   // Not seated yet: the join page seats you, or explains why it can't.

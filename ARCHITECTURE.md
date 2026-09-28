@@ -277,6 +277,50 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 
 **Phase 3 — polish (post-v1 candidates)**: spectators, rematch, game history/replay viewer (we already store the move log), leaderboards, OpenAI post-game recaps and AI avatars.
 
+**Corners**
+
+Tiles and cards have different corners, as on the real game, and should not be given the same ones.
+
+| Piece | Shape | Corners |
+|---|---|---|
+| Location tiles, Avengers Assemble tile | Square | `rounded-tile` (12% of the tile), everywhere they are drawn |
+| Character cards on the board | Taller than wide | `rounded-md` |
+| Character cards opened large | Taller than wide | `rounded-[10%/7.1%]` |
+
+**Images (done)**
+
+Pictures are resized and served as AVIF or WebP, and cached for a month. Each picture's address carries a fingerprint of its contents from `data/image-versions.json`, so replacing a picture gives it a new address and players fetch the new one. `pnpm dev` and `pnpm build` refresh the fingerprints; `pnpm images` does it by hand.
+
+**Phase 4 — stats and profiles (planned, not started)**
+
+Player stats, shown on the profile page:
+
+| Stat | Meaning |
+|---|---|
+| Hero count | Heroes recruited, across all games |
+| Villain count | Villains recruited, across all games |
+| Most used hero | The hero recruited most often |
+| Most used villain | The villain recruited most often |
+| Average Infinity Points in wins | Mean points over games won |
+| Highest Infinity Points in a win | Best winning score |
+| Lowest Infinity Points in a loss | Worst losing score |
+| Average Avengers badge count | Mean Avengers tags held at the end of a game |
+| Biggest Avengers badge group | Most Avengers tags held at the end of any one game |
+
+Profile:
+
+- Profile picture: upload one, or choose one from a library of pictures.
+- Edit username and name.
+
+What these need before they can be built:
+
+- **Hero or villain per card.** `data/cards.json` does not say which a card is. Each card needs a field for it.
+- **New stat columns.** `UserStats` holds totals only (games, wins, best points, fastest win, tiles, locations). The new stats need new columns, which is a schema change and a migration.
+- **Past games.** Every move is saved, so the new stats can be worked out for games already played by replaying their move logs.
+- **A name on the user.** `User` has `username` but no `name`. Adding it is a schema change.
+- **A picture library.** A set of pictures to choose from, and a way to store the choice. `avatarKey` today points at an uploaded file only.
+- **Already built:** uploading a profile picture, on the Settings page.
+
 ## 9. Testing & correctness strategy
 
 - Engine: property-style tests (token conservation invariants — supply + hands + spent always equals initial counts), scenario tests for every rulebook clause, full bot-vs-bot fuzz games from random seeds asserting no illegal state.
@@ -289,12 +333,18 @@ How the timing rules behave today, including the cases they do not cover. The ru
 
 **Idle games**
 
-A game is closed as `ABANDONED` once every human's latest turn has timed out: one turn each when there are several humans, two in a row for a lone human playing bots. Bots are ignored.
+A game is closed as `ABANDONED` once every person at the table has missed three turns in a row. Bots are ignored, and one person still playing keeps the game open.
 
 - **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
 - **Closed tabs are not detected.** Nothing runs on the server between requests, so a device must be open on the game for a turn to time out. If every player closes their tab, the game stays `ACTIVE` until someone reopens it; the expired turn is then skipped and the rule applies.
 - **Abandoned games are not recorded in stats.** Only `FINISHED` games are.
 - **A turn skipped for having no legal move counts as idle.** It is logged as the same `TIMEOUT_SKIP` move as a timer expiry. This is rare; if it ever closes a game that was being played, record the reason on the move.
+
+**Game clock**
+
+- **Checked only when someone moves.** Nothing runs on the server between requests, so a game whose clock has run out carries on until the next move, which is then recorded as the start of the final round.
+- **The final round is played out.** The clock takes nobody's turn: whoever is up still plays, and the game ends when the round is complete, so everyone has had the same number of turns.
+- **Offered in Play vs Computer only.** Private games have no game clock setting.
 
 **Turn timers**
 

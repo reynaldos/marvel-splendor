@@ -53,6 +53,8 @@ export interface GameSettings {
   /** Infinity Point threshold of the compound win condition (rulebook default 16). */
   targetPoints: number;
   botDifficulty?: BotDifficulty;
+  /** When play began, in milliseconds; the game clock runs from here. */
+  startedAt?: number;
   /** Overrides botDifficulty for the bot in that seat. */
   botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
 }

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
+import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
@@ -46,6 +47,7 @@ interface GameGetResponse {
   /** The moves since `?since=`, to play back; empty when there's nothing to show. */
   steps: GameStep[];
   turnEndsInMs: number | null;
+  gameEndsInMs: number | null;
 }
 
 interface MovesPostResponse {
@@ -54,6 +56,7 @@ interface MovesPostResponse {
   /** The submitted move, then every move the server made after it. */
   steps: GameStep[];
   turnEndsInMs: number | null;
+  gameEndsInMs: number | null;
 }
 
 interface GameData {
@@ -62,13 +65,15 @@ interface GameData {
   view: RedactedGameState;
   /** When the current turn runs out, on this device's clock; null when untimed. */
   turnEndsAt: number | null;
+  /** When the game clock runs out, on this device's clock; null when the game has none. */
+  gameEndsAt: number | null;
   /** Closed because nobody was playing (or by hand); the board is read-only. */
   abandoned: boolean;
 }
 
 /** The server sends time remaining, not a timestamp, so device clocks needn't agree with it. */
-function toDeadline(turnEndsInMs: number | null): number | null {
-  return turnEndsInMs === null ? null : Date.now() + turnEndsInMs;
+function toDeadline(msLeft: number | null): number | null {
+  return msLeft === null ? null : Date.now() + msLeft;
 }
 
 function toLogEntry(step: { seat: number; move: Move }): MoveLogEntry {
@@ -175,6 +180,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           players: data.players,
           view: data.view,
           turnEndsAt: toDeadline(data.turnEndsInMs),
+          gameEndsAt: toDeadline(data.gameEndsInMs),
           abandoned: data.status === "ABANDONED",
         });
         setFatalError(null);
@@ -234,12 +240,18 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           return false;
         }
 
-        const { view, status, steps, turnEndsInMs } = body as MovesPostResponse;
+        const { view, status, steps, turnEndsInMs, gameEndsInMs } = body as MovesPostResponse;
         setStaged(null);
         // The request is done; what follows is the moves playing back.
         setSubmitting(false);
         await playSteps(steps, shown.players);
-        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), abandoned: status === "ABANDONED" });
+        commit({
+          ...shown,
+          view,
+          turnEndsAt: toDeadline(turnEndsInMs),
+          gameEndsAt: toDeadline(gameEndsInMs),
+          abandoned: status === "ABANDONED",
+        });
         return true;
       } catch {
         if (!quiet) toast.error("Could not reach the server. Please try again.");
@@ -414,13 +426,16 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             </span>
           </div>
         ) : null}
-        {botPlaying ? (
-          <div className="absolute inset-x-0 top-2 z-20 flex justify-center">
+        <div className="pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center gap-2">
+          {gameData.gameEndsAt !== null && !over ? (
+            <GameClock endsAt={gameData.gameEndsAt} lastRound={view.clockExpired} />
+          ) : null}
+          {botPlaying ? (
             <span className="rounded-full bg-popover px-3 py-1 font-display text-xs font-bold tracking-wide text-gold-400 uppercase shadow-md ring-2 ring-cosmos-500 ring-inset">
               Bot is thinking…
             </span>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
         <Board
           view={view}
           turnEndsAt={botPlaying ? null : gameData.turnEndsAt}

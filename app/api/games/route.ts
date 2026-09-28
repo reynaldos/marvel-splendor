@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     targetPoints: targetPoints ?? DEFAULT_SETTINGS.targetPoints,
     turnTimeSeconds: turnTimeSeconds ?? DEFAULT_SETTINGS.turnTimeSeconds,
     gameTimeMinutes: gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes,
+    startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
   };
 

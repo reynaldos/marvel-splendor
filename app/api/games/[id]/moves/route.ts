@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
 import type { GameState, Move } from "@/lib/engine/types";
-import { isTableIdle, turnEndsInMs } from "@/lib/game-replay";
+import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -64,7 +64,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "This game is not active." }, { status: 400 });
   }
 
-  const state = game.state as unknown as GameState;
+  const stored = game.state as unknown as GameState;
+  // The game clock is checked whenever anyone moves. Once it has run out, that
+  // is recorded first, and the round in progress becomes the last.
+  const clockLeft = gameEndsInMs(stored.settings, game.createdAt);
+  const clockRanOut = clockLeft !== null && clockLeft <= 0 && !stored.clockExpired && move.type !== "FORFEIT";
+  const clockMove: AppliedMove[] = clockRanOut
+    ? [{ seat: stored.currentSeat, move: { type: "END_BY_CLOCK" }, ordinal: stored.moveCount }]
+    : [];
+  const state = clockRanOut ? applyMove(stored, stored.currentSeat, { type: "END_BY_CLOCK" }) : stored;
   const viewerSeat = seatRow.seat;
   // A timeout is the one move made on someone else's behalf: any player may
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
@@ -86,18 +94,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  const validation = validateMove(state, seat, move);
-  if (!validation.ok) {
-    return NextResponse.json({ error: validation.reason }, { status: 400 });
+  // The clock ending the game outright leaves no turn to take.
+  const over = state.status === "finished";
+  if (!over) {
+    const validation = validateMove(state, seat, move);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.reason }, { status: 400 });
+    }
   }
 
   const humanOrdinal = state.moveCount;
-  const afterHumanMove = applyMove(state, seat, move);
+  const afterHumanMove = over ? state : applyMove(state, seat, move);
 
   const isBotSeat = (s: number) => game.players.find((p) => p.seat === s)?.isBot ?? false;
   const { state: finalState, applied: botApplied } = runServerTurnLoop(afterHumanMove, isBotSeat);
 
-  const allApplied: AppliedMove[] = [{ seat, move, ordinal: humanOrdinal }, ...botApplied];
+  const allApplied: AppliedMove[] = [
+    ...clockMove,
+    ...(over ? [] : [{ seat, move, ordinal: humanOrdinal }]),
+    ...botApplied,
+  ];
 
   // A timeout is the only move that can leave the table idle, so only then look.
   let abandoned = false;
@@ -105,8 +121,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const earlier = await prisma.move.findMany({
       where: { gameId: id },
       orderBy: { ordinal: "desc" },
-      // Plenty to cover every seat's last two turns, sub-moves included.
-      take: 40,
+      // Plenty to cover every seat's last three turns, sub-moves included.
+      take: 80,
       select: { seat: true, payload: true },
     });
     abandoned = isTableIdle(
@@ -137,7 +153,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // The board as it stood after each move — the submitted one, then every
   // auto-applied one — so the client can show them one at a time.
-  let replay = state;
+  let replay = stored;
   const steps = allApplied.map(({ seat: s, move: m }) => {
     replay = applyMove(replay, s, m);
     return { seat: s, move: m, view: redactState(replay, viewerSeat) };
@@ -149,6 +165,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     status,
     steps,
     turnEndsInMs: abandoned ? null : turnEndsInMs(finalState, movedAt, movedAt.getTime()),
+    gameEndsInMs: gameEndsInMs(finalState.settings, game.createdAt),
   });
 }
 

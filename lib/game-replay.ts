@@ -59,10 +59,13 @@ export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.n
   return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
 }
 
+/** Missed turns in a row, by every person at the table, before a game is closed. */
+export const IDLE_TURNS = 3;
+
 /**
- * True when nobody is playing any more: every human's latest turns all ran
- * out the clock. With several humans that's one timed-out turn each; a lone
- * human (vs bots) gets two, so stepping away for one turn doesn't end a game.
+ * True when nobody is playing any more: every person's last `IDLE_TURNS`
+ * turns all ran out the clock. Bots don't count, and one person still playing
+ * keeps the game open.
  *
  * ponytail: a turn skipped for having no legal move is logged as the same
  * TIMEOUT_SKIP and counts as idle here. Record the reason on the move if
@@ -74,9 +77,19 @@ export function isTableIdle(
   recentMoves: Array<{ seat: number; move: Move }>,
 ): boolean {
   if (humanSeats.length === 0) return false;
-  const turnsEach = humanSeats.length === 1 ? 2 : 1;
+  // The game clock running out is logged against whoever was up, but isn't their move.
+  const turns = recentMoves.filter((m) => m.move.type !== "END_BY_CLOCK");
   return humanSeats.every((seat) => {
-    const latest = recentMoves.filter((m) => m.seat === seat).slice(0, turnsEach);
-    return latest.length === turnsEach && latest.every((m) => m.move.type === "TIMEOUT_SKIP");
+    const latest = turns.filter((m) => m.seat === seat).slice(0, IDLE_TURNS);
+    return latest.length === IDLE_TURNS && latest.every((m) => m.move.type === "TIMEOUT_SKIP");
   });
+}
+
+/**
+ * Milliseconds left on the game clock, or null when there is none. Games
+ * from before `startedAt` was recorded are timed from when they were created.
+ */
+export function gameEndsInMs(settings: GameSettings, createdAt: Date, now = Date.now()): number | null {
+  if (settings.gameTimeMinutes === null) return null;
+  return (settings.startedAt ?? createdAt.getTime()) + settings.gameTimeMinutes * 60_000 - now;
 }
