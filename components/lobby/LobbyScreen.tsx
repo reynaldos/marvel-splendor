@@ -24,7 +24,6 @@ type Action = (formData: FormData) => Promise<void>;
 
 interface LobbyScreenProps {
   joinCode: string;
-  shareUrl: string;
   /** One entry per place at the table, people first; null is an open place. */
   seats: Array<LobbySeat | null>;
   /** True when the viewer is hosting and may change the table. */
@@ -109,7 +108,6 @@ function Rule({ icon, label, value }: { icon: ReactNode; label: string; value: s
 /** The table before a game: the code to share, who has sat down, and the host's controls. */
 export function LobbyScreen({
   joinCode,
-  shareUrl,
   seats,
   isHost,
   targetPoints,
@@ -128,7 +126,7 @@ export function LobbyScreen({
       <StageRows>
         <header className="flex items-center justify-between">
           <Logo className="text-3xl" />
-          <ShareCode code={joinCode} url={shareUrl} />
+          <ShareCode code={joinCode} />
         </header>
 
         <ol className="flex items-start justify-evenly">

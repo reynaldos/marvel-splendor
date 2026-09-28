@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "cn";
+import { Check } from "lucide-react";
 
 import { CardView } from "@/components/game/Card";
 import { estimateAffordability } from "@/components/game/affordability";
@@ -23,7 +24,8 @@ interface ReservedCardsProps {
 /**
  * The viewer's reserved cards: a fan peeking out of the tray. Tapping it
  * dims the board and lays the cards out large, bordered green when
- * affordable and red when not; tapping an affordable one recruits it.
+ * affordable, with a check beneath, and red when not; tapping an affordable
+ * one recruits it.
  */
 export function ReservedCards({
   reserved,
@@ -67,7 +69,7 @@ export function ReservedCards({
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4"
           onKeyDown={(e) => {
             if (e.key === "Escape") setOpen(false);
           }}
@@ -81,7 +83,7 @@ export function ReservedCards({
           <h2 className="relative font-display text-2xl font-black tracking-widest text-gold-400 uppercase">
             {disabled ? "Your reserved cards" : "Select a card to recruit"}
           </h2>
-          <div className="relative flex gap-6">
+          <div className="relative flex items-start gap-6">
             {cards.map((card) => {
               const affordable = estimateAffordability(card, viewerTokens, viewerBonuses).affordable;
               return (
@@ -94,11 +96,21 @@ export function ReservedCards({
                     onStageRecruit(card.id);
                     setOpen(false);
                   }}
+                  className="flex flex-col items-center gap-2"
                 >
                   <CardView
                     card={card}
                     className={cn("w-38 rounded-[10%/7.1%] ring-4", affordable ? "ring-green-500" : "ring-red-500")}
                   />
+                  {/* Keeps its space when hidden, so the cards stay level. */}
+                  <span
+                    className={cn(
+                      "flex size-8 items-center justify-center rounded-full bg-green-500 text-white",
+                      !affordable && "invisible",
+                    )}
+                  >
+                    <Check className="size-5" strokeWidth={3} />
+                  </span>
                 </button>
               );
             })}

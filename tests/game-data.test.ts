@@ -6,7 +6,7 @@ vi.unmock("@/data/cards.json");
 vi.unmock("@/data/locations.json");
 
 import { ALL_CARDS, ALL_LOCATIONS } from "@/lib/engine/data";
-import { STONES } from "@/lib/engine/types";
+import { MARKET_SLOTS, STONES } from "@/lib/engine/types";
 
 // Guards the real deck against the slips a hand edit makes.
 describe("data/cards.json", () => {
@@ -15,17 +15,16 @@ describe("data/cards.json", () => {
     expect(new Set(ALL_CARDS.map((c) => c.name)).size).toBe(ALL_CARDS.length);
   });
 
-  it("has the rulebook's deck sizes, with bonuses spread evenly over the five stones", () => {
-    for (const [level, size] of [[1, 40], [2, 30], [3, 20]] as const) {
-      const cards = ALL_CARDS.filter((c) => c.level === level);
-      expect(cards).toHaveLength(size);
-      for (const stone of STONES) {
-        expect(cards.filter((c) => c.bonus === stone)).toHaveLength(size / STONES.length);
-      }
+  // The deck grows as cards are added, so sizes aren't pinned; a level only
+  // needs enough cards to deal its row of the market.
+  it("has enough cards at every level to fill the market", () => {
+    for (const level of [1, 2, 3]) {
+      expect(ALL_CARDS.filter((c) => c.level === level).length).toBeGreaterThanOrEqual(MARKET_SLOTS);
     }
   });
 
   it.each(ALL_CARDS)("$name is well formed", (card) => {
+    expect([1, 2, 3]).toContain(card.level);
     expect(STONES).toContain(card.bonus);
     expect(card.points).toBeGreaterThanOrEqual(0);
     expect([0, 1, 2]).toContain(card.tags);

@@ -53,7 +53,7 @@ function Option({
 
 /** Setting up a game with friends: choose the rules and open a room, or join someone else's. */
 export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin: Action }) {
-  const [turnTime, setTurnTime] = useState(60);
+  const [turnTime, setTurnTime] = useState(TURN_TIME_OPTIONS[0]);
   const [points, setPoints] = useState(POINT_OPTIONS[0]);
 
   return (

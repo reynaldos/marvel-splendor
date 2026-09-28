@@ -22,6 +22,8 @@ interface PlayerPlaqueProps {
   isCurrentTurn: boolean;
   /** When the current turn runs out (device clock); null when untimed. */
   turnEndsAt: number | null;
+  /** The turn's full length in seconds; null when untimed. */
+  turnSeconds: number | null;
   banterText?: string | null;
   /** Rendered in the header, before the points (opponents' reserved cards). */
   headerExtra?: ReactNode;
@@ -42,6 +44,7 @@ export function PlayerPlaque({
   name,
   isCurrentTurn,
   turnEndsAt,
+  turnSeconds,
   banterText,
   headerExtra,
   hideTags,
@@ -82,7 +85,7 @@ export function PlayerPlaque({
 
       {isCurrentTurn ? (
         <div className="absolute top-1/2 -right-2 -translate-y-1/2 rounded-full bg-card text-card-foreground">
-          <TurnTimer endsAt={turnEndsAt} />
+          <TurnTimer endsAt={turnEndsAt} seconds={turnSeconds} />
         </div>
       ) : null}
 

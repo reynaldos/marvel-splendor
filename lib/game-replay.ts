@@ -10,6 +10,7 @@ import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
 import { redactState, type RedactedGameState } from "@/lib/game-view";
+import { TURN_BANNER_MS } from "@/lib/turn-banner";
 
 export interface GameStep {
   seat: number;
@@ -55,7 +56,7 @@ export function replaySteps(args: {
 /** Milliseconds left on the current turn, or null when turns are untimed or the game is over. */
 export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.now()): number | null {
   if (state.status !== "active" || state.settings.turnTimeSeconds === null) return null;
-  return turnStartedAt.getTime() + state.settings.turnTimeSeconds * 1000 - now;
+  return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
 }
 
 /**

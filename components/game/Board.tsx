@@ -46,6 +46,12 @@ interface BoardProps {
 
 const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
 
+/** Everyone but the viewer, in the order their turns come after the viewer's. */
+export function afterViewer<T extends { seat: number }>(players: T[], viewerSeat: number): T[] {
+  const turnsAway = (seat: number) => (seat - viewerSeat + players.length) % players.length;
+  return players.filter((p) => p.seat !== viewerSeat).sort((a, b) => turnsAway(a.seat) - turnsAway(b.seat));
+}
+
 /**
  * Top-level board layout (ARCHITECTURE.md §6), built for a landscape phone:
  * a canvas 100 spacing steps tall that never scrolls (see `.game-board` in
@@ -77,7 +83,7 @@ export function Board({
 }: BoardProps) {
   const viewerSeat = view.viewerSeat;
   const viewer = view.players.find((p) => p.seat === viewerSeat);
-  const others = view.players.filter((p) => p.seat !== viewerSeat).sort((a, b) => a.seat - b.seat);
+  const others = afterViewer(view.players, viewerSeat);
   const stagedColors = staged?.kind === "tokens" ? staged.colors : [];
   // Once the game is over nobody is on turn, so no plaque glows or counts down.
   const turnSeat = view.status === "active" ? view.currentSeat : null;
@@ -103,6 +109,7 @@ export function Board({
                 name={nameForSeat(p.seat)}
                 isCurrentTurn={turnSeat === p.seat}
                 turnEndsAt={turnEndsAt}
+                turnSeconds={view.settings.turnTimeSeconds}
                 banterText={banterBySeat[p.seat] ?? null}
                 headerExtra={
                   <ReserveTray
@@ -179,6 +186,7 @@ export function Board({
           name={nameForSeat(viewerSeat)}
           isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
+          turnSeconds={view.settings.turnTimeSeconds}
           banterText={banterBySeat[viewerSeat] ?? null}
           hideTags
           className={`w-40 ${TRAY_PANEL}`}

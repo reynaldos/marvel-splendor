@@ -220,3 +220,13 @@ body {
   --ring: var(--color-gold-400);
   color: var(--foreground);
 }
+
+/* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
+@keyframes turn-banner {
+  0% { opacity: 0; transform: scaleY(0.4); }
+  15%, 80% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+}
+.turn-banner {
+  animation: turn-banner both ease-out;
+}

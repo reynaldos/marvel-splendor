@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS } from "@/lib/lobby";
-import { tableOrder } from "@/lib/lobby-rules";
+import { botName, tableOrder } from "@/lib/lobby-rules";
 
 import {
   addBotAction,
@@ -52,13 +52,12 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
       <LobbyLive gameId={game.id} />
       <LobbyScreen
         joinCode={game.joinCode}
-        shareUrl={`${process.env.APP_BASE_URL ?? ""}/join/${game.joinCode}`}
         seats={Array.from({ length: MAX_SEATS }, (_, i) => {
           const player = tableOrder(game.players)[i];
           if (!player) return null;
           return {
             seat: player.seat,
-            name: player.isBot ? "Bot" : (player.user?.username ?? "Player"),
+            name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
             isBot: player.isBot,
             isHost: player.seat === 0,
             isYou: player.userId === user.id,

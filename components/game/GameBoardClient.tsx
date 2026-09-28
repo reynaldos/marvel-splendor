@@ -16,6 +16,7 @@ import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, type StagedAction } from "@/components/game/staged-action";
 import type { CardLevel, Move, Stone, TokenColor } from "@/lib/engine/types";
+import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
 interface GamePlayerInfo {
@@ -204,13 +205,14 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // can only ever become non-null as the direct result of a move that just
   // went through that same success path.
 
+  /** Resolves to whether the move went through. */
   const submitMove = useCallback(
-    async (move: Move) => {
+    async (move: Move, quietly = false): Promise<boolean> => {
       const shown = gameRef.current;
-      if (!shown || busy.current || shown.abandoned || shown.view.status !== "active") return;
+      if (!shown || busy.current || shown.abandoned || shown.view.status !== "active") return false;
       // A timeout is sent in the background; losing the race to another
       // device, or being a moment early, isn't something to tell the player.
-      const quiet = move.type === "TIMEOUT_SKIP";
+      const quiet = quietly || move.type === "TIMEOUT_SKIP";
       busy.current = true;
       setSubmitting(true);
       try {
@@ -225,7 +227,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           if (!quiet) toast.error(body?.error ?? `That move was rejected (${res.status}).`);
           // Someone else changed the game first; catch up once this flow ends.
           if (res.status === 409) missedSignal.current = true;
-          return;
+          return false;
         }
 
         const { view, status, steps, turnEndsInMs } = body as MovesPostResponse;
@@ -234,8 +236,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         setSubmitting(false);
         await playSteps(steps, shown.players);
         commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), abandoned: status === "ABANDONED" });
+        return true;
       } catch {
         if (!quiet) toast.error("Could not reach the server. Please try again.");
+        return false;
       } finally {
         setSubmitting(false);
         busy.current = false;
@@ -245,9 +249,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [gameId, playSteps, commit],
   );
 
-  // When a turn's time runs out, skip it: straight away if it's the viewer's
+  // When a turn's time runs out, end it: straight away if it's the viewer's
   // own, after a short wait if it's someone else's who may have walked away.
-  // The server re-checks the time itself, so this can't skip a turn early.
+  // The viewer's own turn plays whatever they had picked; with nothing picked,
+  // or a pick the server won't take, it is skipped. The server re-checks the
+  // time itself, so this can't skip a turn early.
+  const stagedRef = useRef(staged);
+  useEffect(() => {
+    stagedRef.current = staged;
+  });
   const live = gameData?.view;
   const turnEndsAt = gameData?.turnEndsAt ?? null;
   const timed = live?.status === "active" && turnEndsAt !== null && !submitting && !botPlaying;
@@ -255,7 +265,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   useEffect(() => {
     if (!timed || turnEndsAt === null) return;
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
-    const timer = setTimeout(() => void submitMove({ type: "TIMEOUT_SKIP" }), Math.max(0, wait));
+    const timer = setTimeout(async () => {
+      const picked = isMine ? stagedRef.current : null;
+      if (picked && (await submitMove(stagedActionToMove(picked), true))) return;
+      void submitMove({ type: "TIMEOUT_SKIP" });
+    }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
 
@@ -368,6 +382,19 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
                 <Link href="/">Back to home</Link>
               </Button>
             </div>
+          </div>
+        ) : null}
+        {isMyTurn && !over && !botPlaying && !view.pending ? (
+          // Keyed by turn, so it plays once each time the turn comes round.
+          <div
+            key={view.moveCount}
+            style={{ animationDuration: `${TURN_BANNER_MS}ms` }}
+            className="turn-banner pointer-events-none absolute inset-0 z-40 flex items-center justify-center"
+          >
+            {/* The gold lettering is its own element: it paints with its background. */}
+            <span className="w-full bg-cosmos-950/85 py-4 text-center shadow-lg ring-2 ring-gold-400">
+              <span className="font-display text-5xl font-black tracking-widest text-gold uppercase">Your turn</span>
+            </span>
           </div>
         ) : null}
         {botPlaying ? (
