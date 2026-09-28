@@ -17,6 +17,19 @@ export function normalizeJoinCode(raw: string): string | null {
   return /^[A-Z0-9]{6}$/.test(code) ? code : null;
 }
 
+const CHEAT_SUFFIX = /\+cheat$/i;
+
+/**
+ * A join code with "+cheat" appended (e.g. "ABC234+cheat") seats the player
+ * normally but flags the game for cheat mode, same as opening it with
+ * `?cheat=true`. Codes are plain alphanumeric, so "+" can't collide with one.
+ */
+export function extractCheatCode(raw: string): { code: string; cheat: boolean } {
+  const trimmed = raw.trim();
+  const cheat = CHEAT_SUFFIX.test(trimmed);
+  return { code: trimmed.replace(CHEAT_SUFFIX, ""), cheat };
+}
+
 /** The lowest seat number nobody holds yet, or null when the table is full. */
 export function nextFreeSeat(takenSeats: number[]): number | null {
   for (let seat = 0; seat < MAX_SEATS; seat++) {
