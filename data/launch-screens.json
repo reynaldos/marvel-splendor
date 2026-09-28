@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "note": "iPhone screens, upright: [width in points, height in points, pixels per point]. One launch picture is made per screen, each way up. After adding a screen, run `pnpm launch:images` with the dev server running."
+  },
+  "screens": [
+    [440, 956, 3],
+    [430, 932, 3],
+    [428, 926, 3],
+    [414, 896, 3],
+    [414, 896, 2],
+    [402, 874, 3],
+    [393, 852, 3],
+    [390, 844, 3],
+    [375, 812, 3],
+    [375, 667, 2]
+  ]
+}

@@ -291,6 +291,17 @@ Tiles and cards have different corners, as on the real game, and should not be g
 
 Pictures are resized and served as AVIF or WebP, and cached for a month. Each picture's address carries a fingerprint of its contents from `data/image-versions.json`, so replacing a picture gives it a new address and players fetch the new one. `pnpm dev` and `pnpm build` refresh the fingerprints; `pnpm images` does it by hand.
 
+**iPhone launch image (done)**
+
+An installed iPhone app shows a launch picture every time it opens: Thanos over the game's name on the night sky, with the stones adrift all round.
+
+- **One picture per screen.** An iPhone only uses a picture made for its exact screen, so there is one per screen size, each way up. The screens are listed in `data/launch-screens.json` and the pictures are in `public/launch`.
+- **The pictures are photographs of a page.** `/launch-art` draws the art (`components/LaunchArt.tsx`), and `pnpm launch:images` photographs it at every screen size. Run it, with the dev server running, after changing the art or adding a screen. It needs Google Chrome and a Mac.
+- **Held a little longer.** iPhones take the launch picture down as soon as the app is ready, which cannot be changed. So the app holds the same art over itself for about two seconds as it opens, then fades it. This is in the installed app only, and plays again after signing in, since that reloads the app.
+- **The name is in a shipped font.** "Splendor" is set in Gelasio, which comes with the app, so it looks the same on every device and in the launch pictures.
+- **Each way up has its own layout.** Thanos sits over the name both ways. On its side the stones are spread from edge to edge; upright they are spread from top to bottom (`StackedArt` in `components/home/art.tsx`).
+- **Not covered:** iPads open on a plain dark screen. A phone that already has the app installed must remove and re-add it to pick up new pictures.
+
 **Phase 4 — stats and profiles**
 
 Player stats, shown on the profile page. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.

@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "games:clear": "node scripts/clear-games.mjs",
-    "db:update": "prisma db push && prisma generate"
+    "db:update": "prisma db push && prisma generate",
+    "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.30.0",

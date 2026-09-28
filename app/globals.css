@@ -72,6 +72,7 @@
 
 @theme inline {
   --font-display: var(--font-orbitron);
+  --font-logo: var(--font-gelasio), Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -251,6 +252,15 @@ body {
   --input: rgb(77 95 214 / 0.5);
   --ring: var(--color-gold-400);
   color: var(--foreground);
+}
+
+/* The launch picture, held over the app as it opens, then faded away. */
+@keyframes launch-splash {
+  0%, 75% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+.launch-splash {
+  animation: launch-splash 2.4s ease-in both;
 }
 
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */

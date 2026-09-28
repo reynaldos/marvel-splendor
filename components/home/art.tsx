@@ -49,9 +49,22 @@ export function AvengersArt() {
   );
 }
 
-// Scattered by hand: mixed sizes, tilts and speeds, the small blurred ones further away.
-// `x`/`y` are a share of the screen, `size` is in spacing steps, `pace` is seconds per bob.
-const STONES = [
+interface Stone {
+  stone: string;
+  /** A share of the screen, from the left and from the top. */
+  x: number;
+  y: number;
+  /** In spacing steps. */
+  size: number;
+  tilt: number;
+  /** Seconds per bob. */
+  pace: number;
+  /** Small and blurred, as if further away. */
+  far?: boolean;
+}
+
+// Scattered by hand, clear of Thanos's face and the Gauntlet: mixed sizes, tilts and speeds.
+const STONES: Stone[] = [
   { stone: "mind", x: 4, y: 12, size: 13, tilt: -18, pace: 7 },
   { stone: "reality", x: 47, y: 2, size: 7, tilt: 25, pace: 9, far: true },
   { stone: "space", x: 41, y: 18, size: 14, tilt: 12, pace: 6 },
@@ -63,6 +76,60 @@ const STONES = [
   { stone: "power", x: 17, y: 90, size: 6, tilt: 20, pace: 11, far: true },
 ];
 
+// The same for a phone held upright: spread from top to bottom, round Thanos and the name.
+const STONES_UPRIGHT: Stone[] = [
+  { stone: "mind", x: 7, y: 5, size: 24, tilt: -18, pace: 7 },
+  { stone: "soul", x: 36, y: 13, size: 11, tilt: 30, pace: 10, far: true },
+  { stone: "reality", x: 62, y: 3, size: 13, tilt: 25, pace: 9, far: true },
+  { stone: "space", x: 80, y: 11, size: 26, tilt: 12, pace: 6 },
+  { stone: "power", x: 2, y: 27, size: 17, tilt: 32, pace: 6.5 },
+  { stone: "soul", x: 87, y: 34, size: 20, tilt: -28, pace: 8 },
+  { stone: "time", x: 3, y: 55, size: 13, tilt: -12, pace: 9.5, far: true },
+  { stone: "reality", x: 89, y: 55, size: 16, tilt: -35, pace: 8.5 },
+  { stone: "space", x: 2, y: 68, size: 12, tilt: -22, pace: 9, far: true },
+  { stone: "shield", x: 91, y: 73, size: 10, tilt: 18, pace: 10.5, far: true },
+  { stone: "power", x: 8, y: 80, size: 26, tilt: 20, pace: 7.5 },
+  { stone: "shield", x: 45, y: 91, size: 12, tilt: 40, pace: 10, far: true },
+  { stone: "mind", x: 73, y: 85, size: 22, tilt: 15, pace: 8 },
+];
+
+// On its side, with Thanos in the middle: spread from edge to edge, either side of him.
+const STONES_WIDE: Stone[] = [
+  { stone: "mind", x: 4, y: 9, size: 14, tilt: -18, pace: 7 },
+  { stone: "reality", x: 20, y: 4, size: 7, tilt: 25, pace: 9, far: true },
+  { stone: "space", x: 25, y: 30, size: 12, tilt: 12, pace: 6 },
+  { stone: "soul", x: 7, y: 50, size: 13, tilt: -28, pace: 8 },
+  { stone: "power", x: 19, y: 68, size: 8, tilt: 20, pace: 11, far: true },
+  { stone: "time", x: 28, y: 80, size: 11, tilt: -12, pace: 9.5 },
+  { stone: "shield", x: 3, y: 84, size: 7, tilt: 40, pace: 10, far: true },
+  { stone: "soul", x: 71, y: 5, size: 7, tilt: 30, pace: 10, far: true },
+  { stone: "power", x: 89, y: 8, size: 14, tilt: 32, pace: 6.5 },
+  { stone: "reality", x: 69, y: 33, size: 11, tilt: -35, pace: 8.5 },
+  { stone: "mind", x: 87, y: 45, size: 12, tilt: 15, pace: 8 },
+  { stone: "time", x: 76, y: 64, size: 8, tilt: -12, pace: 9.5, far: true },
+  { stone: "space", x: 90, y: 76, size: 13, tilt: -22, pace: 7.5 },
+  { stone: "shield", x: 68, y: 85, size: 7, tilt: 18, pace: 10.5, far: true },
+];
+
+function DriftingStones({ stones }: { stones: Stone[] }) {
+  return stones.map(({ stone, x, y, size, tilt, pace, far }, i) => (
+    <span
+      key={i}
+      className={cn("drift absolute aspect-square overflow-hidden rounded-full shadow-lg", far && "opacity-60 blur-[1px]")}
+      style={{
+        left: `${x}%`,
+        top: `${y}%`,
+        width: `calc(var(--spacing) * ${size})`,
+        rotate: `${tilt}deg`,
+        animationDuration: `${pace}s`,
+        animationDelay: `${-i * 1.7}s`,
+      }}
+    >
+      <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
+    </span>
+  ));
+}
+
 /** The welcome screen's backdrop: Thanos, with the stones adrift around him. */
 export function WelcomeArt() {
   return (
@@ -71,26 +138,27 @@ export function WelcomeArt() {
       <span className="fade-edges absolute -top-[18%] left-[4%] aspect-[3/4] h-[125%]">
         <AssetImage src="/assets/thanos.png" alt="" sizes="50vw" preload className="object-contain" />
       </span>
+      <DriftingStones stones={STONES} />
+    </>
+  );
+}
 
-      {STONES.map(({ stone, x, y, size, tilt, pace, far }, i) => (
-        <span
-          key={i}
-          className={cn(
-            "drift absolute aspect-square overflow-hidden rounded-full shadow-lg",
-            far && "opacity-60 blur-[1px]",
-          )}
-          style={{
-            left: `${x}%`,
-            top: `${y}%`,
-            width: `calc(var(--spacing) * ${size})`,
-            rotate: `${tilt}deg`,
-            animationDuration: `${pace}s`,
-            animationDelay: `${-i * 1.7}s`,
-          }}
-        >
-          <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
+/**
+ * Thanos in the middle, over whatever is passed in, with the stones all round:
+ * spread from side to side, or from top to bottom on a phone held upright.
+ */
+export function StackedArt({ upright, children }: { upright?: boolean; children: React.ReactNode }) {
+  return (
+    <>
+      <DriftingStones stones={upright ? STONES_UPRIGHT : STONES_WIDE} />
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        {/* On its side there is no room to spare, so the empty sky above his head runs off the top. */}
+        <span className={cn("fade-edges relative aspect-[3/4]", upright ? "w-160" : "-mt-16 h-86")}>
+          <AssetImage src="/assets/thanos.png" alt="" sizes={upright ? "80vw" : "40vw"} className="object-contain" />
         </span>
-      ))}
+        {/* Drawn up over where Thanos fades out. */}
+        <div className="relative -mt-16">{children}</div>
+      </div>
     </>
   );
 }
