@@ -78,8 +78,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
   const seat = move.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
 
-  // Forfeiting doesn't wait for your turn.
-  if (move.type !== "FORFEIT" && seat !== state.currentSeat) {
+  // Forfeiting and coming back don't wait for your turn.
+  const anytime = move.type === "FORFEIT" || move.type === "REJOIN";
+  if (!anytime && seat !== state.currentSeat) {
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
   }
 
@@ -115,26 +116,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     ...botApplied,
   ];
 
-  // A timeout is the only move that can leave the table idle, so only then look.
-  let abandoned = false;
-  if (move.type === "TIMEOUT_SKIP" && finalState.status !== "finished") {
-    const earlier = await prisma.move.findMany({
-      where: { gameId: id },
-      orderBy: { ordinal: "desc" },
-      // Plenty to cover every seat's last three turns, sub-moves included.
-      take: 80,
-      select: { seat: true, payload: true },
-    });
-    abandoned = isTableIdle(
+  const abandoned =
+    finalState.status !== "finished" &&
+    isTableIdle(
       game.players.filter((p) => !p.isBot).map((p) => p.seat),
-      [
-        ...allApplied.toReversed(),
-        ...earlier.map((m) => ({ seat: m.seat, move: m.payload as unknown as Move })),
-      ],
+      finalState,
     );
-  }
 
-  const movedAt = new Date();
+  const now = new Date();
+  // Coming back is no part of anyone's turn, so the turn clock keeps running.
+  const movedAt = move.type === "REJOIN" ? game.updatedAt : now;
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";
   const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt, status);
   if (!persisted) {
@@ -164,7 +155,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     view: redactState(finalState, viewerSeat),
     status,
     steps,
-    turnEndsInMs: abandoned ? null : turnEndsInMs(finalState, movedAt, movedAt.getTime()),
+    turnEndsInMs: abandoned ? null : turnEndsInMs(finalState, movedAt, now.getTime()),
     gameEndsInMs: gameEndsInMs(finalState.settings, game.createdAt),
   });
 }

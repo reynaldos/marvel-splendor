@@ -83,6 +83,15 @@ export interface PlayerState {
   bonuses: StoneCounts;
   tags: number;
   points: number;
+  /** Turns in a row this seat let the clock run out; absent means none. */
+  missedTurns?: number;
+}
+
+/** Missed turns in a row before a bot plays the seat, until its player comes back. */
+export const IDLE_TURNS = 3;
+
+export function isAway(player: { missedTurns?: number }): boolean {
+  return (player.missedTurns ?? 0) >= IDLE_TURNS;
 }
 
 /** A decision the current player must make before their turn can end. */
@@ -102,11 +111,13 @@ export type Move =
   | { type: "RETURN_TOKENS"; tokens: Partial<TokenCounts> }
   | { type: "CHOOSE_LOCATION"; locationId: string }
   /** Server-initiated: current player timed out; resolves pendings with defaults and passes. */
-  | { type: "TIMEOUT_SKIP" }
+  | { type: "TIMEOUT_SKIP"; /** Skipped for having no move, not for being late. */ stuck?: true }
   /** Server-initiated: game clock expired; finishes the game after the current round. */
   | { type: "END_BY_CLOCK" }
   /** Any seat, any time: that seat loses and the game ends at once. */
-  | { type: "FORFEIT" };
+  | { type: "FORFEIT" }
+  /** A seat a bot took over for being away: its player takes it back. */
+  | { type: "REJOIN" };
 
 export type MoveType = Move["type"];
 

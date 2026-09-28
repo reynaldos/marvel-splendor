@@ -8,7 +8,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
-import type { GameSettings, GameState, Move } from "@/lib/engine/types";
+import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
 import { redactState, type RedactedGameState } from "@/lib/game-view";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 
@@ -59,30 +59,9 @@ export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.n
   return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
 }
 
-/** Missed turns in a row, by every person at the table, before a game is closed. */
-export const IDLE_TURNS = 3;
-
-/**
- * True when nobody is playing any more: every person's last `IDLE_TURNS`
- * turns all ran out the clock. Bots don't count, and one person still playing
- * keeps the game open.
- *
- * ponytail: a turn skipped for having no legal move is logged as the same
- * TIMEOUT_SKIP and counts as idle here. Record the reason on the move if
- * that rare case ever closes a game that was really being played.
- */
-export function isTableIdle(
-  humanSeats: number[],
-  /** Latest first. */
-  recentMoves: Array<{ seat: number; move: Move }>,
-): boolean {
-  if (humanSeats.length === 0) return false;
-  // The game clock running out is logged against whoever was up, but isn't their move.
-  const turns = recentMoves.filter((m) => m.move.type !== "END_BY_CLOCK");
-  return humanSeats.every((seat) => {
-    const latest = turns.filter((m) => m.seat === seat).slice(0, IDLE_TURNS);
-    return latest.length === IDLE_TURNS && latest.every((m) => m.move.type === "TIMEOUT_SKIP");
-  });
+/** True when nobody is playing any more: every person at the table is away. Bots don't count. */
+export function isTableIdle(humanSeats: number[], state: GameState): boolean {
+  return humanSeats.length > 0 && humanSeats.every((seat) => isAway(state.players[seat]));
 }
 
 /**

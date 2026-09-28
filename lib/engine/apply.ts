@@ -20,6 +20,7 @@ import {
   STONES,
   TAGS_TO_CLAIM_AVENGERS,
   TOKEN_COLORS,
+  isAway,
   totalTokens,
   type CardLevel,
   type GameState,
@@ -45,6 +46,12 @@ export function applyMove(state: GameState, seat: number, move: Move): GameState
     };
   }
 
+  if (move.type === "REJOIN") {
+    next.players[seat].missedTurns = 0;
+    next.moveCount += 1;
+    return next;
+  }
+
   // The clock running out takes nobody's turn: whoever is up still plays, and
   // the game ends once the round is complete, or at once if it already is.
   if (move.type === "END_BY_CLOCK") {
@@ -55,6 +62,9 @@ export function applyMove(state: GameState, seat: number, move: Move): GameState
 
   if (move.type === "TIMEOUT_SKIP") {
     const actingSeat = next.currentSeat;
+    if (!move.stuck) {
+      next.players[actingSeat].missedTurns = (next.players[actingSeat].missedTurns ?? 0) + 1;
+    }
     while (next.pending) {
       next = resolvePendingWithDefault(next, actingSeat);
     }
@@ -81,6 +91,11 @@ export function applyMove(state: GameState, seat: number, move: Move): GameState
     case "CHOOSE_LOCATION":
       next = applyChooseLocation(next, seat, move.locationId);
       break;
+  }
+
+  // Playing ends a run of missed turns, unless a bot is doing the playing.
+  if (next.players[seat].missedTurns && !isAway(next.players[seat])) {
+    next.players[seat] = { ...next.players[seat], missedTurns: 0 };
   }
 
   next.moveCount += 1;

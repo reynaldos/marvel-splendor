@@ -16,7 +16,7 @@ import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
-import { HAND_LIMIT, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
+import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
@@ -85,6 +85,9 @@ const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
 
+const NOTICE =
+  "flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md";
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -135,7 +138,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   /** Shows each step in turn, pausing before a bot's so it appears to think. */
   const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[]) => {
     for (const step of steps) {
-      if (players.find((p) => p.seat === step.seat)?.isBot) {
+      const away = step.view.players.find((p) => p.seat === step.seat)?.away;
+      if (away || players.find((p) => p.seat === step.seat)?.isBot) {
         setBotPlaying(true);
         await delay(BOT_THINK_MS);
       }
@@ -376,7 +380,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     );
   }
 
-  const { view, players } = gameData;
+  const { view } = gameData;
+  const awaySeats = view.players.filter((p) => p.away).map((p) => p.seat);
+  const players = gameData.players.map((p) => (awaySeats.includes(p.seat) ? { ...p, name: `${p.name} (bot)` } : p));
   const viewer = view.players.find((p) => p.seat === view.viewerSeat);
   const isMyTurn = view.currentSeat === view.viewerSeat;
   const over = gameData.abandoned || view.status !== "active";
@@ -404,11 +410,23 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       >
         {gameData.abandoned ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
-            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md">
+            <div className={NOTICE}>
               <p className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">This game was closed</p>
               <p className="text-xs text-muted-foreground">Nobody was playing, so the table was cleared.</p>
               <Button asChild>
                 <Link href="/">Back to home</Link>
+              </Button>
+            </div>
+          </div>
+        ) : viewer?.away && !over ? (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
+            <div className={NOTICE}>
+              <p className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">
+                A bot is playing for you
+              </p>
+              <p className="text-xs text-muted-foreground">You missed {IDLE_TURNS} turns in a row.</p>
+              <Button disabled={submitting || botPlaying} onClick={() => void submitMove({ type: "REJOIN" })}>
+                I&apos;m back
               </Button>
             </div>
           </div>
