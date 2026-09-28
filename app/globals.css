@@ -103,9 +103,29 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Behave like an app: no rubber-band scrolling, no grey flash or zoom on tap. */
+html {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* A long press on the game shouldn't select text or pop up the copy menu; typing still works. */
+.game-board,
+.stage {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.stage :is(input, .select-all) {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Tiny text sizes expressed in spacing steps so they scale with the game board. */
@@ -140,7 +160,10 @@ body {
   --pad-r: env(safe-area-inset-right, 0px);
   padding-left: var(--pad-l);
   padding-right: var(--pad-r);
-  --spacing: min(1dvh, calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
+  /* Menus stay clear of the home bar; the board's trays run off the bottom edge under it. */
+  --pad-b: 0px;
+  padding-bottom: var(--pad-b);
+  --spacing: min(calc((100dvh - var(--pad-b)) / 100), calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
   --text-xs: calc(var(--spacing) * 3);
   --text-sm: calc(var(--spacing) * 3.5);
   --text-base: calc(var(--spacing) * 4);
@@ -229,4 +252,7 @@ body {
 }
 .turn-banner {
   animation: turn-banner both ease-out;
+}
+.stage {
+  --pad-b: env(safe-area-inset-bottom, 0px);
 }

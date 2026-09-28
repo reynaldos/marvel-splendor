@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+/** The galaxy background's darkest blue, for the phone's bars and the launch screen. */
+export const THEME_COLOR = "#070b2a";
+
 export const SITE_NAME = "Marvel Splendor";
 export const SITE_DESCRIPTION =
   "Recruit heroes, gather the Infinity Stones, assemble the Avengers and claim the Gauntlet. Play the computer or a private game with friends.";

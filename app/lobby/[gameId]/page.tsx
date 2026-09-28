@@ -1,4 +1,3 @@
-import type { Viewport } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { LobbyLive } from "@/components/lobby/LobbyLive";
@@ -18,9 +17,6 @@ import {
   setBotDifficultyAction,
   startGameAction,
 } from "./actions";
-
-// Draw under the phone's notch margins; the stage pads the content back out.
-export const viewport: Viewport = { viewportFit: "cover" };
 
 export const metadata = pageMetadata("Game Lobby", "Waiting for players to take their seats.", true);
 

@@ -1,13 +1,9 @@
-import type { Viewport } from "next";
 
 import { HomeScreen, WelcomeScreen } from "@/components/home/HomeScreen";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { publicAvatarUrl } from "@/lib/r2";
-
-// Draw under the phone's notch margins; the stage pads the content back out.
-export const viewport: Viewport = { viewportFit: "cover" };
 
 export default async function Home() {
   const session = await auth0.getSession();

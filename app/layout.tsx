@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { RotateCw } from "lucide-react";
 
-import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, siteUrl, THEME_COLOR } from "@/lib/site";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,9 +32,18 @@ export const metadata: Metadata = {
   openGraph: { title: SITE_NAME, description: SITE_DESCRIPTION, siteName: SITE_NAME, type: "website" },
   twitter: { title: SITE_NAME, description: SITE_DESCRIPTION, card: "summary_large_image" },
   appleWebApp: { title: SITE_NAME, capable: true, statusBarStyle: "black-translucent" },
+  // Older iPhones read this tag, not the manifest, to open full screen.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
-export const viewport: Viewport = { themeColor: "#070b2a" };
+export const viewport: Viewport = {
+  themeColor: THEME_COLOR,
+  // Draw under the notch margins; the screens pad their content back out.
+  viewportFit: "cover",
+  // A stray pinch or double tap mid-game would zoom the board.
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

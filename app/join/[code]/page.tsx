@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -9,9 +9,6 @@ import { joinLobby, normalizeJoinCode } from "@/lib/lobby";
 import { pageMetadata } from "@/lib/site";
 
 type Props = { params: Promise<{ code: string }> };
-
-// Draw under the phone's notch margins; the stage pads the content back out.
-export const viewport: Viewport = { viewportFit: "cover" };
 
 // This is the link friends are sent, so its preview is the invite.
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
