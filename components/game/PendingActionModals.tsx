@@ -17,6 +17,9 @@ interface PendingActionModalsProps {
   pending: PendingAction | null;
   viewerTokens: TokenCounts;
   submitting?: boolean;
+  /** The return-tokens popup can be closed to look at the board, and reopened. */
+  returnOpen: boolean;
+  onReturnOpenChange: (open: boolean) => void;
   onSubmitReturnTokens: (tokens: Partial<Record<TokenColor, number>>) => void;
   onSubmitChooseLocation: (locationId: string) => void;
 }
@@ -25,13 +28,15 @@ interface PendingActionModalsProps {
  * Modal(s) for the two `PendingAction` kinds (ARCHITECTURE.md's "pending
  * sub-moves"). Per the API contract, `pending` is only ever non-null for
  * the viewer's own seat, so this always blocks the *viewer's* input until
- * resolved — no close/escape affordance, since the server will reject any
- * other move type while a pending action is outstanding.
+ * resolved. Returning tokens can be closed to look at the board and
+ * reopened from the turn button; choosing a Location cannot be closed.
  */
 export function PendingActionModals({
   pending,
   viewerTokens,
   submitting,
+  returnOpen,
+  onReturnOpenChange,
   onSubmitReturnTokens,
   onSubmitChooseLocation,
 }: PendingActionModalsProps) {
@@ -41,6 +46,8 @@ export function PendingActionModals({
         pending={pending?.type === "RETURN_TOKENS" ? pending : null}
         viewerTokens={viewerTokens}
         submitting={submitting}
+        open={returnOpen}
+        onOpenChange={onReturnOpenChange}
         onSubmit={onSubmitReturnTokens}
       />
       <ChooseLocationDialog
@@ -56,21 +63,20 @@ function ReturnTokensDialog({
   pending,
   viewerTokens,
   submitting,
+  open,
+  onOpenChange,
   onSubmit,
 }: {
   pending: { type: "RETURN_TOKENS"; mustReturn: number } | null;
   viewerTokens: TokenCounts;
   submitting?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSubmit: (tokens: Partial<Record<TokenColor, number>>) => void;
 }) {
   return (
-    <Dialog open={Boolean(pending)}>
-      <DialogContent
-        className="theme-cosmos dark max-h-[90dvh] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-xl"
-        showCloseButton={false}
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
+    <Dialog open={Boolean(pending) && open} onOpenChange={onOpenChange}>
+      <DialogContent className="theme-cosmos dark max-h-[90dvh] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-xl">
         {pending ? (
           // Keyed so each new request starts with nothing picked.
           <ReturnTokens
@@ -189,7 +195,7 @@ export function ReturnTokens({
           disabled={left !== 0 || submitting}
           onClick={() => onSubmit(returning)}
         >
-          {submitting ? "Sending…" : left > 0 ? `Pick ${left} more` : `Give back ${mustReturn}`}
+          {submitting ? "Sending…" : "Return the excess tokens"}
         </Button>
       </DialogFooter>
     </>

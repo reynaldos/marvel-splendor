@@ -13,9 +13,9 @@ import { TeamView } from "@/components/game/TeamView";
 import { TileRail } from "@/components/game/TileRail";
 import { Zoomable } from "@/components/game/Zoomable";
 import { TokenBank } from "@/components/game/TokenBank";
-import type { CardLevel, Stone } from "@/lib/engine/types";
+import { HAND_LIMIT, totalTokens, type CardLevel, type Stone } from "@/lib/engine/types";
 import type { RedactedGameState } from "@/lib/game-view";
-import type { StagedAction } from "@/components/game/staged-action";
+import { tokensAfter, type StagedAction } from "@/components/game/staged-action";
 
 interface PlayerInfo {
   seat: number;
@@ -42,6 +42,8 @@ interface BoardProps {
   onStageReserveDeck: (level: CardLevel) => void;
   onStageRecruit: (from: "market" | "reserve", cardId: string) => void;
   onConfirm: () => void;
+  /** Set while the viewer is, or is about to be, over the token limit; opens the popup to give some back. */
+  onReturn?: () => void;
 }
 
 const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
@@ -80,6 +82,7 @@ export function Board({
   onStageReserveDeck,
   onStageRecruit,
   onConfirm,
+  onReturn,
 }: BoardProps) {
   const viewerSeat = view.viewerSeat;
   const viewer = view.players.find((p) => p.seat === viewerSeat);
@@ -206,7 +209,14 @@ export function Board({
           />
         </div>
 
-        <EndTurnBar hasStaged={staged !== null} disabled={disabled} submitting={submitting} onConfirm={onConfirm} />
+        <EndTurnBar
+          hasStaged={staged !== null}
+          overLimit={totalTokens(tokensAfter(staged, viewer.tokens, view.supply)) > HAND_LIMIT}
+          disabled={disabled}
+          submitting={submitting}
+          onConfirm={onConfirm}
+          onReturn={onReturn}
+        />
       </div>
     </div>
   );

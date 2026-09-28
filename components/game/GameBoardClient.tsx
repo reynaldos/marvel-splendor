@@ -14,8 +14,8 @@ import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
-import { stagedActionToMove, type StagedAction } from "@/components/game/staged-action";
-import type { CardLevel, Move, Stone, TokenColor } from "@/lib/engine/types";
+import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
+import { HAND_LIMIT, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
@@ -99,6 +99,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [botPlaying, setBotPlaying] = useState(false);
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
+  // The move the return-tokens popup was closed on; a later one opens it afresh.
+  const [returnClosedAt, setReturnClosedAt] = useState<number | null>(null);
+  // Choosing what to give back for a pick that isn't played yet; closing it keeps the pick.
+  const [choosingReturn, setChoosingReturn] = useState(false);
   const notchSide = useNotchSide();
 
   // Integration point for a later task (OpenAI banter bubbles): nothing
@@ -367,6 +371,19 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
 
+  const owesTokens = view.pending?.type === "RETURN_TOKENS";
+  const afterPick = viewer ? tokensAfter(staged, viewer.tokens, view.supply) : null;
+  const overBy = afterPick ? totalTokens(afterPick) - HAND_LIMIT : 0;
+  const pickGoesOver = !disabled && staged !== null && overBy > 0;
+  // Nothing is sent until the tokens to give back are chosen, so backing out costs nothing.
+  const playThenReturn = async (tokens: Partial<Record<TokenColor, number>>) => {
+    if (!staged) return;
+    setChoosingReturn(false);
+    // The pick leaves tokens owed; this keeps that popup shut while the rest is sent.
+    setReturnClosedAt(view.moveCount + 1);
+    if (await submitMove(stagedActionToMove(staged))) await submitMove({ type: "RETURN_TOKENS", tokens });
+  };
+
   return (
     <>
       <div
@@ -429,15 +446,28 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           onStageReserveDeck={stageReserveDeck}
           onStageRecruit={stageRecruit}
           onConfirm={confirmStaged}
+          onReturn={
+            owesTokens && !over
+              ? () => setReturnClosedAt(null)
+              : pickGoesOver
+                ? () => setChoosingReturn(true)
+                : undefined
+          }
         />
       </div>
 
       {viewer && !over ? (
         <PendingActionModals
-          pending={view.pending}
-          viewerTokens={viewer.tokens}
+          pending={
+            view.pending ?? (choosingReturn && pickGoesOver ? { type: "RETURN_TOKENS", mustReturn: overBy } : null)
+          }
+          viewerTokens={owesTokens || !afterPick ? viewer.tokens : afterPick}
           submitting={submitting}
-          onSubmitReturnTokens={submitReturnTokens}
+          returnOpen={owesTokens ? returnClosedAt !== view.moveCount : choosingReturn}
+          onReturnOpenChange={(open) =>
+            owesTokens ? setReturnClosedAt(open ? null : view.moveCount) : setChoosingReturn(open)
+          }
+          onSubmitReturnTokens={owesTokens ? submitReturnTokens : playThenReturn}
           onSubmitChooseLocation={submitChooseLocation}
         />
       ) : null}
