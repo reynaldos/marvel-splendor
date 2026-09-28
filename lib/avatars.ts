@@ -6,17 +6,30 @@ interface LibraryAvatar {
   fit?: string;
 }
 
-/** The pictures a player can pick from instead of uploading one. */
+/**
+ * The pictures a player can pick from instead of uploading one. To add one,
+ * put a square picture in public/assets/pfp and give it a line here. A
+ * player's choice is saved by `id`, so never change or reuse one.
+ */
 export const AVATAR_LIBRARY: LibraryAvatar[] = [
-  { id: "thanos", label: "Thanos", src: "/assets/thanos.png", fit: "scale-115 object-[50%_15%]" },
-  { id: "avengers", label: "Avengers", src: "/assets/avengers-icon.png", fit: "object-contain" },
-  { id: "mind", label: "Mind Stone", src: "/assets/stones/mind-token.png" },
-  { id: "space", label: "Space Stone", src: "/assets/stones/space-token.png" },
-  { id: "soul", label: "Soul Stone", src: "/assets/stones/soul-token.png" },
-  { id: "power", label: "Power Stone", src: "/assets/stones/power-token.png" },
-  { id: "reality", label: "Reality Stone", src: "/assets/stones/reality-token.png" },
-  { id: "time", label: "Time Stone", src: "/assets/stones/time-token.png" },
-  { id: "shield", label: "S.H.I.E.L.D.", src: "/assets/stones/shield-token.png" },
+  { id: "iron-man", label: "Iron Man", src: "/assets/pfp/pfp-iron-man.jpg" },
+  { id: "captain-america", label: "Captain America", src: "/assets/pfp/pfp-captain-america.jpg" },
+  { id: "thor", label: "Thor", src: "/assets/pfp/pfp-thor.jpg" },
+  { id: "hulk", label: "Hulk", src: "/assets/pfp/pfp-hulk.jpg" },
+  { id: "black-widow", label: "Black Widow", src: "/assets/pfp/pfp-black-widow.jpg" },
+  { id: "spider-man", label: "Spider-Man", src: "/assets/pfp/pfp-spider-man.jpg" },
+  { id: "dr-strange", label: "Doctor Strange", src: "/assets/pfp/pfp-dr-strange.jpg" },
+  { id: "scarlet-witch", label: "Scarlet Witch", src: "/assets/pfp/pfp-scarlet-witch.jpg" },
+  { id: "vision", label: "Vision", src: "/assets/pfp/pfp-vision.jpg" },
+  { id: "ant-man", label: "Ant-Man", src: "/assets/pfp/pfp-ant-man.jpg" },
+  { id: "wolverine", label: "Wolverine", src: "/assets/pfp/pfp-wolverine.jpg" },
+  { id: "storm", label: "Storm", src: "/assets/pfp/pfp-storm.jpg" },
+  { id: "mr-fantastic", label: "Mister Fantastic", src: "/assets/pfp/pfp-mr-fantastic.jpg" },
+  { id: "invisible-woman", label: "Invisible Woman", src: "/assets/pfp/pfp-invisible-woman.jpg" },
+  { id: "loki", label: "Loki", src: "/assets/pfp/pfp-loki.jpg" },
+  { id: "venom", label: "Venom", src: "/assets/pfp/pfp-venom.jpg" },
+  { id: "magneto", label: "Magneto", src: "/assets/pfp/pfp-magneto.jpg" },
+  { id: "doom", label: "Doctor Doom", src: "/assets/pfp/pfp-doom.jpg" },
 ];
 
 // Uploaded pictures are stored under "avatars/", so the two can't be confused.

@@ -277,6 +277,19 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 
 **Phase 3 — polish (post-v1 candidates)**: spectators, rematch, game history/replay viewer (we already store the move log), leaderboards, OpenAI post-game recaps and AI avatars.
 
+**Still to do**
+
+- **Style the win screen.** The popup at the end of a game is still plain: a title, the winner's name and a button. Give it the box-art theme, and show how the whole table finished, as the results popup on the profile's Game Record does.
+- **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
+- **Sound effects and background music.** None yet. Sounds for taking tokens, recruiting, reserving, your turn, the timer running low, and winning or losing; music on the menus and the board. Needs a mute control that is remembered, and sound files the project has the right to use. Phones only play sound after the player's first tap.
+- **Team against team at the end of a game.** A comparison of the teams each player recruited: heroes against villains, points, bonuses by stone, Avengers badges, and the strongest card on each side. It can be worked out from the saved game, as the stats are.
+- **A "squad pic" at the end of a game.** A picture of the player's recruited team to keep or share. To decide first: put together from the card art the game already has, or drawn by an image model. The second costs money per picture and needs care over the use of Marvel's characters.
+- **A gallery of past teams.** A page, or a tab on the profile, showing the team the player recruited in each finished game, latest first. The teams are already saved with each game, so it needs no database change; the squad pics would show here once they exist, which does need somewhere to keep them.
+- End-to-end tests.
+- Chat and emoji reactions.
+- Bot banter.
+- Level, coins and rank.
+
 **Corners**
 
 Tiles and cards have different corners, as on the real game, and should not be given the same ones.
@@ -342,7 +355,7 @@ What these need before they can be built:
 - **New stat columns.** Not needed today. The stats read every finished game the player was in, and clearing games (`pnpm games:clear`) clears them. If either ever matters, keep running totals on `UserStats` instead.
 - **Past games.** Done: covered by reading finished games.
 - **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
-- **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
+- **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. They ship with the app, in `public/assets/pfp`; Cloudflare is only for pictures players upload. To add one, put a square picture in that folder and give it a line in the list. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
 
 ## 9. Testing & correctness strategy
 
