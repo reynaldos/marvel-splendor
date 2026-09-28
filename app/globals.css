@@ -56,7 +56,22 @@
   --chart-5: oklch(0.645 0.246 16.439);
 }
 
+/* Palette taken from the game box: night-sky blues, a gold frame, Marvel red. */
+@theme {
+  --color-cosmos-950: #070b2a;
+  --color-cosmos-900: #0d1445;
+  --color-cosmos-800: #172066;
+  --color-cosmos-700: #24308f;
+  --color-cosmos-500: #4d5fd6;
+  --color-cosmos-300: #a9b4ff;
+  --color-gold-200: #fff0a8;
+  --color-gold-400: #f6c945;
+  --color-gold-600: #b57f14;
+  --color-marvel: #ed1d24;
+}
+
 @theme inline {
+  --font-display: var(--font-orbitron);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -113,7 +128,8 @@ body {
  * and text variables here makes every size utility inside the board scale
  * with it. At a 390px-tall phone one step is ~4px, i.e. Tailwind's default.
  */
-.game-board {
+.game-board,
+.stage {
   /*
    * Side margins. A landscape phone reports the same safe-area inset on both
    * sides, but only one side has the notch; the other only needs to clear
@@ -131,10 +147,53 @@ body {
   --text-lg: calc(var(--spacing) * 4.5);
   --text-xl: calc(var(--spacing) * 5);
   --text-2xl: calc(var(--spacing) * 6);
+  --text-3xl: calc(var(--spacing) * 7.5);
+  --text-5xl: calc(var(--spacing) * 12);
 }
 .game-board[data-notch="left"] {
   --pad-r: calc(env(safe-area-inset-right, 0px) * 0.3);
 }
 .game-board[data-notch="right"] {
   --pad-l: calc(env(safe-area-inset-left, 0px) * 0.3);
+}
+
+/* The box's night sky: two tiled star fields over drifting nebula clouds. */
+@utility bg-cosmos {
+  background-color: var(--color-cosmos-950);
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 90px 140px, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 160px 60px, #fff, transparent),
+    radial-gradient(1px 1px at 130px 190px, rgb(200 210 255 / 0.9), transparent),
+    radial-gradient(1px 1px at 50px 100px, rgb(255 255 255 / 0.6), transparent),
+    radial-gradient(2px 2px at 110px 80px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 260px 210px, rgb(255 230 200 / 0.9), transparent),
+    radial-gradient(1px 1px at 300px 40px, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(35% 45% at 18% 25%, rgb(168 85 247 / 0.45), transparent 70%),
+    radial-gradient(30% 40% at 78% 20%, rgb(236 72 153 / 0.28), transparent 70%),
+    radial-gradient(40% 50% at 85% 85%, rgb(56 130 255 / 0.4), transparent 70%),
+    radial-gradient(30% 35% at 35% 90%, rgb(45 212 191 / 0.18), transparent 70%),
+    linear-gradient(115deg, transparent 30%, rgb(140 120 255 / 0.16) 48%, rgb(255 255 255 / 0.07) 52%, transparent 70%),
+    linear-gradient(160deg, var(--color-cosmos-900), var(--color-cosmos-950));
+  background-size:
+    200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px,
+    340px 340px, 340px 340px, 340px 340px,
+    auto, auto, auto, auto, auto, auto;
+}
+
+/* The box's gold frame. Fill it by setting --frame-fill to a color or gradient. */
+@utility frame-gold {
+  border: calc(var(--spacing) * 0.8) solid transparent;
+  background:
+    var(--frame-fill, linear-gradient(var(--color-cosmos-800), var(--color-cosmos-900))) padding-box,
+    linear-gradient(135deg, var(--color-gold-200), var(--color-gold-400) 30%, var(--color-gold-600) 60%, var(--color-gold-200)) border-box;
+  box-shadow: 0 calc(var(--spacing) * 1) calc(var(--spacing) * 3) rgb(0 0 0 / 0.5);
+}
+
+/* Gold lettering, as on the box's title. */
+@utility text-gold {
+  background: linear-gradient(180deg, var(--color-gold-200), var(--color-gold-400) 45%, var(--color-gold-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

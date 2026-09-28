@@ -368,11 +368,6 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   return (
     <>
-      {/* Phones held upright: the landscape canvas would be unreadably small. */}
-      <div className="fixed inset-0 z-[60] hidden items-center justify-center bg-background p-6 text-center text-sm portrait:max-md:flex">
-        Rotate your device to landscape to play.
-      </div>
-
       <div
         data-notch={notchSide}
         className="game-board relative flex h-dvh w-full items-center overflow-hidden"
