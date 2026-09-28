@@ -37,6 +37,7 @@ export const MoveSchema = z.union([
   z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
   z.object({ type: z.literal("TIMEOUT_SKIP") }),
   z.object({ type: z.literal("FORFEIT") }),
+  z.object({ type: z.literal("REJOIN") }),
 ]);
 
 /** `POST /api/games` body — see ARCHITECTURE.md §4 `GameSettings`. */
@@ -45,7 +46,7 @@ export const CreateGameSchema = z.object({
   botDifficulty: z.enum(["easy", "normal", "hard"]).optional(),
   targetPoints: z.number().int().min(1).max(99).optional(),
   turnTimeSeconds: z
-    .union([z.literal(15), z.literal(30), z.literal(60), z.literal(120), z.null()])
+    .union([z.literal(15), z.literal(30), z.literal(60), z.literal(90), z.literal(120), z.null()])
     .optional(),
   gameTimeMinutes: z.union([z.literal(10), z.literal(20), z.literal(30), z.null()]).optional(),
 });

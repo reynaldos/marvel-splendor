@@ -27,7 +27,7 @@ export function LocationTile({ location, selectable, onClick, className }: Locat
       type={selectable && onClick ? "button" : undefined}
       onClick={selectable ? onClick : undefined}
       className={cn(
-        "@container relative block aspect-square w-full overflow-hidden rounded-[12%] bg-muted text-left ring-1 ring-foreground/10",
+        "@container relative block aspect-square w-full overflow-hidden rounded-tile bg-muted text-left ring-1 ring-foreground/10",
         selectable && "cursor-pointer ring-2 ring-primary hover:brightness-110",
         className,
       )}

@@ -85,7 +85,11 @@ function isUniqueConstraintError(error: unknown, field: string): boolean {
  */
 export async function getOrCreateUser(profile: Auth0Profile): Promise<User> {
   const existing = await prisma.user.findUnique({ where: { auth0Sub: profile.sub } });
-  if (existing) return existing;
+  if (existing) {
+    // Keeps the email in step with the sign-in, writing only when it has changed.
+    if (!profile.email || profile.email === existing.email) return existing;
+    return prisma.user.update({ where: { id: existing.id }, data: { email: profile.email } });
+  }
 
   const base = deriveUsernameBase(profile);
 
@@ -100,6 +104,7 @@ export async function getOrCreateUser(profile: Auth0Profile): Promise<User> {
         data: {
           auth0Sub: profile.sub,
           username,
+          email: profile.email,
           stats: { create: {} },
         },
       });

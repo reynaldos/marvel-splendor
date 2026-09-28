@@ -11,7 +11,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { applyMove } from "@/lib/engine/apply";
 import { legalMoves } from "@/lib/engine/legal-moves";
 import { validateMove } from "@/lib/engine/validate";
-import type { GameState, Move } from "@/lib/engine/types";
+import { isAway, type GameState, type Move } from "@/lib/engine/types";
 import { chooseBotMove } from "@/lib/bot/policy";
 import { Prisma } from "@/lib/generated/prisma/client";
 
@@ -47,13 +47,17 @@ export function runServerTurnLoop(
     const ordinal = state.moveCount;
 
     if (legalMoves(state, seat).length === 0) {
-      const move: Move = { type: "TIMEOUT_SKIP" };
+      const move: Move = { type: "TIMEOUT_SKIP", stuck: true };
       state = applyMove(state, seat, move);
       applied.push({ seat, move, ordinal });
       continue;
     }
 
-    if (!isBotSeat(seat)) break;
+    // A bot also plays for anyone who has been away too long, while somebody is still here.
+    if (!isBotSeat(seat)) {
+      const someoneIsHere = state.players.some((p) => !isBotSeat(p.seat) && !isAway(p));
+      if (!isAway(state.players[seat]) || !someoneIsHere) break;
+    }
 
     const move = chooseBotMove(state, seat);
     const validation = validateMove(state, seat, move);

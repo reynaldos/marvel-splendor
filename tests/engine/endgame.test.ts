@@ -205,14 +205,44 @@ describe("END_BY_CLOCK", () => {
     const afterClock = applyMove(state, 1, { type: "END_BY_CLOCK" });
     expect(afterClock.clockExpired).toBe(true);
     expect(afterClock.status).toBe("active"); // round not done yet
-    expect(afterClock.currentSeat).toBe(2);
+    expect(afterClock.currentSeat).toBe(1); // the clock takes nobody's turn
+    expect(afterClock.moveCount).toBe(state.moveCount + 1);
+
+    const afterSeat1 = applyMove(afterClock, 1, { type: "TIMEOUT_SKIP" });
+    expect(afterSeat1.status).toBe("active");
 
     // seat 2's move wraps currentSeat back to startingSeat (0) — the round
     // is now complete, so the clock-forced finalize fires right here.
-    const afterSeat2 = applyMove(afterClock, 2, { type: "TIMEOUT_SKIP" });
+    const afterSeat2 = applyMove(afterSeat1, 2, { type: "TIMEOUT_SKIP" });
     expect(afterSeat2.currentSeat).toBe(0);
     expect(afterSeat2.status).toBe("finished");
     expect(afterSeat2.winnerSeat).toBe(1); // highest points, nobody needed to qualify
+  });
+});
+
+describe("END_BY_CLOCK at a round boundary", () => {
+  it("ends the game at once: everyone has had the same number of turns", () => {
+    const state = makeState(2, {
+      startingSeat: 0,
+      currentSeat: 0,
+      moveCount: 8,
+      players: [makePlayer(0, { points: 4 }), makePlayer(1, { points: 7 })],
+    });
+    const after = applyMove(state, 0, { type: "END_BY_CLOCK" });
+    expect(after.status).toBe("finished");
+    expect(after.winnerSeat).toBe(1);
+  });
+
+  it("leaves a pending choice with the player who owes it", () => {
+    const state = makeState(2, {
+      startingSeat: 0,
+      currentSeat: 0,
+      pending: { type: "RETURN_TOKENS", mustReturn: 1 },
+      players: [makePlayer(0, { tokens: { ...emptyTokens(), mind: 11 } }), makePlayer(1)],
+    });
+    const after = applyMove(state, 0, { type: "END_BY_CLOCK" });
+    expect(after.pending).toEqual(state.pending);
+    expect(after.status).toBe("active");
   });
 });
 

@@ -28,6 +28,10 @@ model User {
   id        String       @id @default(cuid())
   auth0Sub  String       @unique
   username  String       @unique
+  name      String?
+  // As last seen at sign-in. Not unique: one person can sign in more than one way.
+  email     String?
+  // An uploaded picture's storage key, or "library/<id>" for one from the library.
   avatarKey String?
   createdAt DateTime     @default(now())
   players   GamePlayer[]

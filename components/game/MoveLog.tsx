@@ -49,7 +49,7 @@ function cardLabel(cardId: string): string {
   return `${card.name} (Lv${card.level})`;
 }
 
-function describeMove(
+export function describeMove(
   entry: MoveLogEntry,
   players: Array<{ seat: number; name: string }>,
   viewerSeat: number,
@@ -74,6 +74,8 @@ function describeMove(
       return `${who} claimed ${getLocation(move.locationId).name}`;
     case "TIMEOUT_SKIP":
       return `${who}'s turn was skipped`;
+    case "REJOIN":
+      return `${who} is back`;
     case "FORFEIT":
       return `${who} forfeited the game`;
     case "END_BY_CLOCK":

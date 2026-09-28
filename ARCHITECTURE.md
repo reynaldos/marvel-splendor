@@ -234,7 +234,7 @@ components/
           LocationTile, AvengersTile, ReserveTray, HandTray, EndTurnBar,
           MoveLog, BanterBubble, GameOverDialog, TurnTimer,
           ChatPanel, ReactionPicker, ReactionBubble)
-  lobby/ (SettingsForm, SeatList, ShareCode)
+  lobby/ (SoloGameScreen, PrivateGameScreen, Option, SeatList, ShareCode)
   ui/    (shadcn/ui generated)
 lib/
   engine/  bot/  db.ts  pusher.ts  r2.ts  auth.ts  openai.ts
@@ -277,6 +277,66 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 
 **Phase 3 — polish (post-v1 candidates)**: spectators, rematch, game history/replay viewer (we already store the move log), leaderboards, OpenAI post-game recaps and AI avatars.
 
+**Corners**
+
+Tiles and cards have different corners, as on the real game, and should not be given the same ones.
+
+| Piece | Shape | Corners |
+|---|---|---|
+| Location tiles, Avengers Assemble tile | Square | `rounded-tile` (12% of the tile), everywhere they are drawn |
+| Character cards on the board | Taller than wide | `rounded-md` |
+| Character cards opened large | Taller than wide | `rounded-[10%/7.1%]` |
+
+**Images (done)**
+
+Pictures are resized and served as AVIF or WebP, and cached for a month. Each picture's address carries a fingerprint of its contents from `data/image-versions.json`, so replacing a picture gives it a new address and players fetch the new one. `pnpm dev` and `pnpm build` refresh the fingerprints; `pnpm images` does it by hand.
+
+**iPhone launch image (done)**
+
+An installed iPhone app shows a launch picture every time it opens: Thanos over the game's name on the night sky, with the stones adrift all round.
+
+- **One picture per screen.** An iPhone only uses a picture made for its exact screen, so there is one per screen size, each way up. The screens are listed in `data/launch-screens.json` and the pictures are in `public/launch`.
+- **The pictures are photographs of a page.** `/launch-art` draws the art (`components/LaunchArt.tsx`), and `pnpm launch:images` photographs it at every screen size. Run it, with the dev server running, after changing the art or adding a screen. It needs Google Chrome and a Mac.
+- **Held a little longer.** iPhones take the launch picture down as soon as the app is ready, which cannot be changed. So the app holds the same art over itself for about two seconds as it opens, then fades it. This is in the installed app only, and plays again after signing in, since that reloads the app.
+- **The name is in a shipped font.** "Splendor" is set in Gelasio, which comes with the app, so it looks the same on every device and in the launch pictures.
+- **Each way up has its own layout.** Thanos sits over the name both ways. On its side the stones are spread from edge to edge; upright they are spread from top to bottom (`StackedArt` in `components/home/art.tsx`).
+- **Not covered:** iPads open on a plain dark screen. A phone that already has the app installed must remove and re-add it to pick up new pictures.
+
+**Phase 4 — stats and profiles**
+
+Player stats, shown on the profile page. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.
+
+| Stat | Meaning |
+|---|---|
+| Hero count | Heroes recruited, across all games |
+| Villain count | Villains recruited, across all games |
+| Most used hero | The hero recruited most often |
+| Most used villain | The villain recruited most often |
+| Average Infinity Points in wins | Mean points over games won |
+| Highest Infinity Points in a win | Best winning score |
+| Lowest Infinity Points in a loss | Worst losing score |
+| Average Avengers badge count | Mean Avengers tags held at the end of a game |
+| Biggest Avengers badge group | Most Avengers tags held at the end of any one game |
+
+Profile:
+
+- Profile picture: upload one, or choose one from a library of pictures. Done.
+- Edit username. Done. Usernames are 3 to 20 characters: lowercase letters, numbers, `-` and `_`. The page looks the name up as it is typed and says whether it is free; the database's unique rule on `username` still has the last word when saving.
+- **Scaling the username check (future).** Today each check is one lookup on the unique index, which is quick at this size. If sign-ups ever grow to where those lookups load the database, keep the taken usernames in a fast in-memory set in front of it: a Bloom filter or a Redis set. A name the set has never seen is free without asking the database; only a possible match is looked up. The unique rule stays as the last word either way.
+- One Save button keeps the picture and the username together. Leaving with unsaved changes asks first. The browser's own back button is not caught. The Profile page links to it with "Edit profile"; it has no link back to the profile.
+- Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
+- Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
+- Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
+- Level, coins and rank. Planned, not started. None of these exist in the game yet; the results popup and the player card are where they would show.
+
+What these need before they can be built:
+
+- **Hero or villain per card.** Done: every card in `data/cards.json` has `side`: `"hero"`, `"villain"`, or `"both"` for one that could go either way. A `"both"` card counts once as a hero and once as a villain. A new card must be given one.
+- **New stat columns.** Not needed today. The stats read every finished game the player was in, and clearing games (`pnpm games:clear`) clears them. If either ever matters, keep running totals on `UserStats` instead.
+- **Past games.** Done: covered by reading finished games.
+- **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
+- **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
+
 ## 9. Testing & correctness strategy
 
 - Engine: property-style tests (token conservation invariants — supply + hands + spent always equals initial counts), scenario tests for every rulebook clause, full bot-vs-bot fuzz games from random seeds asserting no illegal state.
@@ -285,16 +345,26 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 
 ## 10. Known limitations — turn timers and idle games
 
-How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and are applied in `app/api/games/[id]/moves/route.ts`.
+How the timing rules behave today, including the cases they do not cover. The rules live in `lib/game-replay.ts` (`turnEndsInMs`, `isTableIdle`) and the engine (`isAway`) and are applied in `app/api/games/[id]/moves/route.ts`.
 
 **Idle games**
 
-A game is closed as `ABANDONED` once every human's latest turn has timed out: one turn each when there are several humans, two in a row for a lone human playing bots. Bots are ignored.
+A player who misses three turns in a row is marked away, and a bot plays their seat from then on. They see a notice with an "I'm back" button, which hands the seat back at any time. A game is closed as `ABANDONED` once every person at the table is away. Bots are ignored, and one person still playing keeps the game open.
 
+- **The count lives in the game state.** Each seat carries `missedTurns`; a timed-out turn adds one and a played turn clears it. Coming back is logged as a `REJOIN` move.
+- **A turn skipped for having no legal move does not count.** It is logged as `TIMEOUT_SKIP` with `stuck: true`, which only the server can set.
+- **The stand-in bot plays at the game's bot level**, or normal when the game has none.
+- **Bot-played turns count in that player's stats.** A win earned by the stand-in bot is recorded as the player's win.
 - **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
 - **Closed tabs are not detected.** Nothing runs on the server between requests, so a device must be open on the game for a turn to time out. If every player closes their tab, the game stays `ACTIVE` until someone reopens it; the expired turn is then skipped and the rule applies.
 - **Abandoned games are not recorded in stats.** Only `FINISHED` games are.
-- **A turn skipped for having no legal move counts as idle.** It is logged as the same `TIMEOUT_SKIP` move as a timer expiry. This is rare; if it ever closes a game that was being played, record the reason on the move.
+- **Games in progress before this rule lose move playback** if they already had a timed-out turn, since their stored state has no count. They jump straight to the latest board instead.
+
+**Game clock**
+
+- **Checked only when someone moves.** Nothing runs on the server between requests, so a game whose clock has run out carries on until the next move, which is then recorded as the start of the final round.
+- **The final round is played out.** The clock takes nobody's turn: whoever is up still plays, and the game ends when the round is complete, so everyone has had the same number of turns.
+- **Offered in Play vs Computer only.** Private games have no game clock setting.
 
 **Turn timers**
 

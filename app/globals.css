@@ -72,6 +72,7 @@
 
 @theme inline {
   --font-display: var(--font-orbitron);
+  --font-logo: var(--font-gelasio), Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -130,6 +131,15 @@ body {
 
 /* Tiny text sizes expressed in spacing steps so they scale with the game board. */
 /* A character card's proportions: the average of the card art's. Give the card a width. */
+/*
+ * Corners differ by piece, as on the real game. Location and Avengers tiles are
+ * square with well-rounded corners; character cards are taller with tighter
+ * ones (`rounded-md` on the board, `rounded-[10%/7.1%]` when opened large).
+ * Tiles take this wherever they are drawn, so they always match the board.
+ */
+@utility rounded-tile {
+  border-radius: 12%;
+}
 @utility aspect-card {
   aspect-ratio: 1 / 1.411;
 }
@@ -244,6 +254,15 @@ body {
   color: var(--foreground);
 }
 
+/* The launch picture, held over the app as it opens, then faded away. */
+@keyframes launch-splash {
+  0%, 75% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+.launch-splash {
+  animation: launch-splash 2.4s ease-in both;
+}
+
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
 @keyframes turn-banner {
   0% { opacity: 0; transform: scaleY(0.4); }
@@ -283,6 +302,15 @@ body {
 }
 
 /* Melts a cut-out picture into the background: soft at both sides and along the bottom. */
+/* A scrolling list whose rows fade out at the top and bottom instead of being cut off.
+   The padding matches the fade, so the first and last rows rest clear of it. */
+.scroll-fade {
+  --fade: calc(var(--spacing) * 5);
+  padding-block: var(--fade);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
+}
+
 .fade-edges {
   --sides: linear-gradient(to right, transparent 2%, black 28%, black 80%, transparent 100%);
   --bottom: linear-gradient(to bottom, black 62%, transparent 96%);

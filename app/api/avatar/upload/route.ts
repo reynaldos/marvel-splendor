@@ -91,7 +91,7 @@ export async function PUT(request: Request) {
     data: { avatarKey: key },
   });
 
-  if (previousKey && previousKey !== key) {
+  if (previousKey && previousKey !== key && isOwnAvatarKey(user.id, previousKey)) {
     // Fire-and-forget cleanup of the replaced avatar object.
     void deleteAvatarObject(previousKey);
   }

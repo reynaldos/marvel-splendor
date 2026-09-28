@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { cn } from "cn";
 
+import { AssetImage } from "@/components/game/AssetImage";
 import assetsJson from "@/data/assets.json";
 import type { CardLevel, TokenColor } from "@/lib/engine/types";
 
@@ -17,27 +17,6 @@ export const ASSETS = assetsJson as unknown as {
   /** The "points to win" tile. Its art prints the number, so it only fits games with that target. */
   winTile: { image: string; points: number } | null;
 };
-
-/**
- * Art that fills its (positioned) parent. `sizes` is how wide it is drawn,
- * which picks the resolution to load; the default is sharp enough for a
- * card or tile opened large.
- */
-export function AssetImage({
-  src,
-  alt,
-  sizes = "25vw",
-  className,
-}: {
-  src: string;
-  alt: string;
-  sizes?: string;
-  className?: string;
-}) {
-  return (
-    <Image src={src} alt={alt} fill sizes={sizes} className={cn("object-cover", className)} draggable={false} />
-  );
-}
 
 /** The Avengers emblem: the supplied icon, or a drawn "A" badge. Size it with `className`. */
 export function AvengersIcon({ className }: { className?: string }) {
@@ -57,3 +36,5 @@ export function AvengersIcon({ className }: { className?: string }) {
     </span>
   );
 }
+
+export { AssetImage, LargeImages } from "@/components/game/AssetImage";

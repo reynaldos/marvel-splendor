@@ -17,6 +17,7 @@
  *    only known to its owner.
  */
 import { getCard } from "@/lib/engine/data";
+import { isAway } from "@/lib/engine/types";
 import type {
   CardLevel,
   GameSettings,
@@ -48,6 +49,8 @@ export interface RedactedPlayerState {
   bonuses: StoneCounts;
   tags: number;
   points: number;
+  /** A bot is playing this seat while its player is away. */
+  away: boolean;
 }
 
 export interface RedactedGameState {
@@ -85,6 +88,7 @@ function redactPlayer(player: PlayerState, viewerSeat: number): RedactedPlayerSt
     bonuses: { ...player.bonuses },
     tags: player.tags,
     points: player.points,
+    away: isAway(player),
     reserved: player.reserved.map((r): RedactedReservedCard => {
       if (isViewer || !r.hidden) return { cardId: r.cardId, blind: r.hidden };
       return { blind: true, level: getCard(r.cardId).level };

@@ -1,0 +1,260 @@
+"use client";
+
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useRouter } from "next/navigation";
+import { cn } from "cn";
+
+import { BackLink } from "@/components/BackLink";
+import { AssetImage } from "@/components/game/assets";
+import { Logo } from "@/components/home/Logo";
+import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { AVATAR_TYPES, checkAvatarFile, uploadAvatar } from "@/components/profile/upload-avatar";
+import { Stage, StageRows } from "@/components/Stage";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AVATAR_LIBRARY } from "@/lib/avatars";
+import { checkUsername, NAME_MAX, USERNAME_MAX } from "@/lib/username";
+import type { ProfileChanges, SaveState } from "@/app/settings/actions";
+
+const HEADING = "font-display text-base font-bold tracking-wide text-gold-400 uppercase";
+const PILL_BUTTON =
+  "h-11 rounded-full px-6 text-base font-black uppercase disabled:bg-cosmos-700 disabled:text-cosmos-300";
+const FIELD =
+  "h-11 rounded-full bg-cosmos-950 px-5 text-lg font-bold ring-2 ring-cosmos-500 outline-none ring-inset placeholder:text-cosmos-500 focus:ring-gold-400";
+/** How long typing must pause before the username is looked up. */
+const CHECK_DELAY_MS = 400;
+
+/** A picture picked but not saved yet: one from the library, or a file to upload. */
+type Picked = { src: string; id: string } | { src: string; file: File };
+
+interface SettingsScreenProps {
+  username: string;
+  name: string | null;
+  avatarUrl: string | null;
+  onCheckUsername: (typed: string) => Promise<SaveState>;
+  onSave: (changes: ProfileChanges) => Promise<SaveState>;
+}
+
+/** Where a player changes their picture, name and username. Nothing is kept until Save. */
+export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUsername, onSave }: SettingsScreenProps) {
+  const router = useRouter();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState(username);
+  const [fullName, setFullName] = useState(savedName ?? "");
+  const [picked, setPicked] = useState<Picked | null>(null);
+  // What the server said about the username last looked up.
+  const [looked, setLooked] = useState<{ name: string; result: SaveState } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState<SaveState | null>(null);
+  // Stopped on the way out, for unsaved changes.
+  const [leaving, setLeaving] = useState(false);
+
+  const typed = name.trim().toLowerCase();
+  const nameChanged = typed !== username;
+  const unsaved = nameChanged || picked !== null || fullName.trim() !== (savedName ?? "");
+  const shape = checkUsername(name);
+  const shown = picked?.src ?? avatarUrl;
+
+  useEffect(() => {
+    if (!nameChanged || "error" in checkUsername(typed)) return;
+    let current = true;
+    const timer = setTimeout(async () => {
+      const found = await onCheckUsername(typed).catch(() => null);
+      if (current && found) setLooked({ name: typed, result: found });
+    }, CHECK_DELAY_MS);
+    return () => {
+      current = false;
+      clearTimeout(timer);
+    };
+  }, [typed, nameChanged, onCheckUsername]);
+
+  const nameNote: SaveState | null = !nameChanged
+    ? null
+    : "error" in shape
+      ? { ok: false, message: shape.error }
+      : looked?.name === typed
+        ? looked.result
+        : { ok: true, message: "Checking…" };
+  const nameIsFree = !nameChanged || (looked?.name === typed && looked.result.ok);
+
+  function pick(next: Picked) {
+    setResult(null);
+    setPicked(next);
+  }
+
+  async function save() {
+    setSaving(true);
+    setResult(null);
+    try {
+      const saved = await onSave({
+        username: typed,
+        name: fullName,
+        avatarId: picked && "id" in picked ? picked.id : null,
+      });
+      if (saved.ok && picked && "file" in picked) {
+        await uploadAvatar(picked.file);
+        router.refresh();
+      }
+      if (saved.ok) setPicked(null);
+      setResult(saved);
+    } catch (error) {
+      setResult({ ok: false, message: error instanceof Error ? error.message : "Something went wrong." });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const holdIfUnsaved = (event: MouseEvent) => {
+    if (!unsaved) return;
+    event.preventDefault();
+    setLeaving(true);
+  };
+
+  return (
+    <Stage>
+      <StageRows>
+        <header className="flex items-center justify-between">
+          <Logo className="text-3xl" />
+          <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">
+            Profile settings
+          </h1>
+        </header>
+
+        <div className="flex items-center justify-around gap-6">
+          <div className="flex w-40 flex-col items-center gap-3">
+            <PlayerAvatar src={shown} name={typed || username} className="size-28 text-4xl" />
+            <input
+              ref={fileInput}
+              type="file"
+              accept={AVATAR_TYPES.join(",")}
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (!file) return;
+                const problem = checkAvatarFile(file);
+                if (problem) setResult({ ok: false, message: problem });
+                else pick({ src: URL.createObjectURL(file), file });
+              }}
+            />
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => fileInput.current?.click()}
+              className={cn(PILL_BUTTON, "bg-cosmos-500 hover:bg-cosmos-300 hover:text-cosmos-950")}
+            >
+              Upload
+            </button>
+          </div>
+
+          <div className="flex w-60 flex-col gap-3">
+            <h2 className={HEADING}>Or choose a picture</h2>
+            <div className="grid grid-cols-5 gap-2">
+              {AVATAR_LIBRARY.map((picture) => (
+                <button
+                  key={picture.id}
+                  type="button"
+                  aria-label={picture.label}
+                  aria-pressed={shown === picture.src}
+                  disabled={saving}
+                  onClick={() => pick({ src: picture.src, id: picture.id })}
+                  className={cn(
+                    "relative aspect-square overflow-hidden rounded-full ring-2 ring-cosmos-500 hover:ring-gold-200",
+                    shown === picture.src && "ring-4 ring-gold-400",
+                  )}
+                >
+                  <AssetImage src={picture.src} alt="" className={picture.fit} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex w-60 flex-col gap-2">
+            <label htmlFor="username" className={HEADING}>
+              Username
+            </label>
+            <input
+              id="username"
+              value={name}
+              onChange={(event) => {
+                setResult(null);
+                setName(event.target.value);
+              }}
+              maxLength={USERNAME_MAX}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              aria-describedby="username-note"
+              aria-invalid={nameNote ? !nameNote.ok : undefined}
+              className={FIELD}
+            />
+            <p
+              id="username-note"
+              aria-live="polite"
+              className={cn("h-4 px-5 text-xs font-bold", nameNote?.ok ? "text-gold-200" : "text-red-300")}
+            >
+              {nameNote?.message}
+            </p>
+            <label htmlFor="name" className={HEADING}>
+              Name
+            </label>
+            <input
+              id="name"
+              value={fullName}
+              onChange={(event) => {
+                setResult(null);
+                setFullName(event.target.value);
+              }}
+              maxLength={NAME_MAX}
+              autoComplete="name"
+              placeholder="Optional"
+              className={FIELD}
+            />
+          </div>
+        </div>
+
+        <footer className="flex items-center justify-between gap-4">
+          <BackLink onClick={holdIfUnsaved} />
+          <p
+            aria-live="polite"
+            className={cn("ml-auto text-sm font-bold", result?.ok ? "text-gold-200" : "text-red-300")}
+          >
+            {result?.message}
+          </p>
+          <button
+            type="button"
+            disabled={saving || !unsaved || !nameIsFree}
+            onClick={save}
+            className="h-13 w-64 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </button>
+        </footer>
+      </StageRows>
+
+      <Dialog open={leaving} onOpenChange={setLeaving}>
+        <DialogContent showCloseButton={false} className="theme-cosmos dark border-2 border-gold-400">
+          <DialogHeader>
+            <DialogTitle>Leave without saving?</DialogTitle>
+            <DialogDescription>Your changes have not been saved and will be lost.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setLeaving(false)}
+              className={cn(PILL_BUTTON, "bg-gold-400 text-cosmos-950 hover:bg-gold-200")}
+            >
+              Keep editing
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className={cn(PILL_BUTTON, "bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500")}
+            >
+              Leave
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Stage>
+  );
+}

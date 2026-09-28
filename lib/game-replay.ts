@@ -8,7 +8,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
-import type { GameSettings, GameState, Move } from "@/lib/engine/types";
+import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
 import { redactState, type RedactedGameState } from "@/lib/game-view";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 
@@ -59,24 +59,16 @@ export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.n
   return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
 }
 
+/** True when nobody is playing any more: every person at the table is away. Bots don't count. */
+export function isTableIdle(humanSeats: number[], state: GameState): boolean {
+  return humanSeats.length > 0 && humanSeats.every((seat) => isAway(state.players[seat]));
+}
+
 /**
- * True when nobody is playing any more: every human's latest turns all ran
- * out the clock. With several humans that's one timed-out turn each; a lone
- * human (vs bots) gets two, so stepping away for one turn doesn't end a game.
- *
- * ponytail: a turn skipped for having no legal move is logged as the same
- * TIMEOUT_SKIP and counts as idle here. Record the reason on the move if
- * that rare case ever closes a game that was really being played.
+ * Milliseconds left on the game clock, or null when there is none. Games
+ * from before `startedAt` was recorded are timed from when they were created.
  */
-export function isTableIdle(
-  humanSeats: number[],
-  /** Latest first. */
-  recentMoves: Array<{ seat: number; move: Move }>,
-): boolean {
-  if (humanSeats.length === 0) return false;
-  const turnsEach = humanSeats.length === 1 ? 2 : 1;
-  return humanSeats.every((seat) => {
-    const latest = recentMoves.filter((m) => m.seat === seat).slice(0, turnsEach);
-    return latest.length === turnsEach && latest.every((m) => m.move.type === "TIMEOUT_SKIP");
-  });
+export function gameEndsInMs(settings: GameSettings, createdAt: Date, now = Date.now()): number | null {
+  if (settings.gameTimeMinutes === null) return null;
+  return (settings.startedAt ?? createdAt.getTime()) + settings.gameTimeMinutes * 60_000 - now;
 }

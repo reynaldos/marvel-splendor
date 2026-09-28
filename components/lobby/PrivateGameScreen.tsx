@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { cn } from "cn";
-import { ArrowLeft, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
+import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { Logo } from "@/components/home/Logo";
+import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
 import { nextOption, POINT_OPTIONS, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
@@ -22,34 +23,6 @@ const STONES_AROUND = [
   { stone: "reality", place: "top-6 right-9" },
   { stone: "time", place: "right-0 bottom-0" },
 ];
-
-/** A game option: its picture and name, over its value on a pill you tap to change. */
-function Option({
-  icon,
-  label,
-  value,
-  onNext,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  onNext: () => void;
-}) {
-  return (
-    <div className="flex w-44 flex-col items-center gap-2">
-      {icon}
-      <span className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">{label}</span>
-      <button
-        type="button"
-        onClick={onNext}
-        aria-label={`${label}: ${value}. Tap to change`}
-        className="h-11 w-36 rounded-full bg-cosmos-950 text-xl font-black ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-700"
-      >
-        {value}
-      </button>
-    </div>
-  );
-}
 
 /** Setting up a game with friends: choose the rules and open a room, or join someone else's. */
 export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin: Action }) {
@@ -91,7 +64,7 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
                 </span>
               ))}
               <span className="relative aspect-[1404/688] w-44 overflow-hidden rounded-xl shadow-lg ring-2 ring-gold-400">
-                <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" />
+                <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" sizes="22vw" />
               </span>
             </div>
             <form action={onCreate} className="flex">
@@ -130,12 +103,7 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
         </div>
 
         <footer className="flex">
-          <Link href="/" className="flex items-center gap-2 text-base font-bold hover:text-gold-200">
-            <span className="flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
-              <ArrowLeft className="size-6" />
-            </span>
-            Back
-          </Link>
+          <BackLink />
         </footer>
       </StageRows>
     </Stage>

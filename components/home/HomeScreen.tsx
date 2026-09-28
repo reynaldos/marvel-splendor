@@ -4,23 +4,12 @@ import { LogOut, Settings, Swords, Trophy } from "lucide-react";
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
-import { SettingsForm } from "@/components/lobby/SettingsForm";
+import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Stage, StageRows } from "@/components/Stage";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
 const ICON_LINK =
   "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
-// Dialogs open outside the stage, so they carry the look themselves.
-const DIALOG = "theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto";
 
 /** What a visitor sees before signing in. */
 export function WelcomeScreen() {
@@ -62,10 +51,7 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScree
       <StageRows>
         <header className="flex items-center gap-4">
           <Link href="/profile" className={`${PILL} pl-1 hover:bg-cosmos-500`}>
-            <Avatar className="size-10 ring-2 ring-gold-400">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
-              <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <PlayerAvatar src={avatarUrl} name={username} />
             <span className="max-w-40 truncate text-base font-bold">{username}</span>
           </Link>
           <span className={PILL} title="Games won">
@@ -86,18 +72,7 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScree
         </header>
 
         <div className="flex min-h-0 flex-1 gap-8">
-          <Dialog>
-            <DialogTrigger asChild>
-              <ModeTile label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
-            </DialogTrigger>
-            <DialogContent className={DIALOG}>
-              <DialogHeader>
-                <DialogTitle>Play vs Computer</DialogTitle>
-                <DialogDescription>Set up the table and start straight away.</DialogDescription>
-              </DialogHeader>
-              <SettingsForm />
-            </DialogContent>
-          </Dialog>
+          <ModeTile href="/solo" label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
 
           <ModeTile
             href="/private"

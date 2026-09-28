@@ -3,6 +3,8 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "cn";
 
+import { LargeImages } from "@/components/game/assets";
+
 interface ZoomableProps {
   /** What tapping does, for screen readers: "Show location tiles". */
   label: string;
@@ -70,7 +72,9 @@ export function Zoomable({ label, title, zoomed, interactive, className, style, 
             </h2>
           ) : null}
           {/* Taps fall through to the backdrop: there is nothing to pick here. */}
-          <div className={cn("relative", !interactive && "pointer-events-none")}>{zoomed}</div>
+          <div className={cn("relative", !interactive && "pointer-events-none")}>
+            <LargeImages>{zoomed}</LargeImages>
+          </div>
         </div>
       ) : null}
     </>

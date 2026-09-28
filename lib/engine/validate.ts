@@ -7,6 +7,7 @@ import { canAffordRecruit } from "./rules";
 import {
   MAX_RESERVED,
   TOKEN_COLORS,
+  isAway,
   type GameState,
   type Move,
   type Stone,
@@ -27,6 +28,9 @@ export function validateMove(state: GameState, seat: number, move: Move): Valida
   }
 
   if (move.type === "FORFEIT") return OK;
+  if (move.type === "REJOIN") {
+    return isAway(state.players[seat]) ? OK : fail("This seat is not being played by a bot.");
+  }
 
   const isServerMove = move.type === "TIMEOUT_SKIP" || move.type === "END_BY_CLOCK";
   if (!isServerMove && seat !== state.currentSeat) {

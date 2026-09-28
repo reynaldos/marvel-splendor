@@ -8,6 +8,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { libraryAvatarSrc } from "@/lib/avatars";
+
 // Cloudflare R2 is S3-API-compatible; the AWS SDK just needs a custom
 // endpoint + "auto" region. Env vars per .env.example.
 function requireEnv(name: string): string {
@@ -102,9 +104,11 @@ export async function deleteAvatarObject(key: string): Promise<void> {
   }
 }
 
-/** Builds the public URL for an avatar object key, or `null` if there isn't one. */
+/** Where a player's picture is, uploaded or from the library, or `null` if they have none. */
 export function publicAvatarUrl(key: string | null | undefined): string | null {
   if (!key) return null;
+  const fromLibrary = libraryAvatarSrc(key);
+  if (fromLibrary) return fromLibrary;
   const base = requireEnv("R2_PUBLIC_BASE_URL").replace(/\/+$/, "");
   return `${base}/${key}`;
 }
