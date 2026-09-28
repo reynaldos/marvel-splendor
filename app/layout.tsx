@@ -5,6 +5,7 @@ import "./globals.css";
 import { RotateCw } from "lucide-react";
 
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl, THEME_COLOR } from "@/lib/site";
+import { AppWindow } from "@/components/AppWindow";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>
+            <AppWindow />
             {children}
             {/* Every screen is laid out for landscape; a phone held upright is asked to turn. */}
             <div className="fixed inset-0 z-[100] hidden flex-col items-center justify-center gap-4 bg-cosmos p-6 text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase portrait:max-md:flex">
