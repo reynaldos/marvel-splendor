@@ -76,7 +76,7 @@ const STONES: Stone[] = [
   { stone: "power", x: 17, y: 90, size: 6, tilt: 20, pace: 11, far: true },
 ];
 
-// The same for a phone held upright: spread from top to bottom, round Thanos and the name.
+// The same for a phone held upright: spread from top to bottom, round Thanos, the name and the line under it.
 const STONES_UPRIGHT: Stone[] = [
   { stone: "mind", x: 7, y: 5, size: 24, tilt: -18, pace: 7 },
   { stone: "soul", x: 36, y: 13, size: 11, tilt: 30, pace: 10, far: true },
@@ -88,9 +88,9 @@ const STONES_UPRIGHT: Stone[] = [
   { stone: "reality", x: 89, y: 55, size: 16, tilt: -35, pace: 8.5 },
   { stone: "space", x: 2, y: 68, size: 12, tilt: -22, pace: 9, far: true },
   { stone: "shield", x: 91, y: 73, size: 10, tilt: 18, pace: 10.5, far: true },
-  { stone: "power", x: 8, y: 80, size: 26, tilt: 20, pace: 7.5 },
-  { stone: "shield", x: 45, y: 91, size: 12, tilt: 40, pace: 10, far: true },
-  { stone: "mind", x: 73, y: 85, size: 22, tilt: 15, pace: 8 },
+  { stone: "power", x: 6, y: 91, size: 22, tilt: 20, pace: 7.5 },
+  { stone: "shield", x: 45, y: 95, size: 10, tilt: 40, pace: 10, far: true },
+  { stone: "mind", x: 78, y: 92, size: 20, tilt: 15, pace: 8 },
 ];
 
 // On its side, with Thanos in the middle: spread from edge to edge, either side of him.
@@ -111,7 +111,7 @@ const STONES_WIDE: Stone[] = [
   { stone: "shield", x: 68, y: 85, size: 7, tilt: 18, pace: 10.5, far: true },
 ];
 
-function DriftingStones({ stones }: { stones: Stone[] }) {
+function DriftingStones({ stones, lazy }: { stones: Stone[]; lazy?: boolean }) {
   return stones.map(({ stone, x, y, size, tilt, pace, far }, i) => (
     <span
       key={i}
@@ -125,7 +125,7 @@ function DriftingStones({ stones }: { stones: Stone[] }) {
         animationDelay: `${-i * 1.7}s`,
       }}
     >
-      <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
+      <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" lazy={lazy} />
     </span>
   ));
 }
@@ -146,15 +146,22 @@ export function WelcomeArt() {
 /**
  * Thanos in the middle, over whatever is passed in, with the stones all round:
  * spread from side to side, or from top to bottom on a phone held upright.
+ * It is drawn on every page but seldom shown, so its pictures wait until it is.
  */
 export function StackedArt({ upright, children }: { upright?: boolean; children: React.ReactNode }) {
   return (
     <>
-      <DriftingStones stones={upright ? STONES_UPRIGHT : STONES_WIDE} />
+      <DriftingStones stones={upright ? STONES_UPRIGHT : STONES_WIDE} lazy />
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {/* On its side there is no room to spare, so the empty sky above his head runs off the top. */}
-        <span className={cn("fade-edges relative aspect-[3/4]", upright ? "w-160" : "-mt-16 h-86")}>
-          <AssetImage src="/assets/thanos.png" alt="" sizes={upright ? "80vw" : "40vw"} className="object-contain" />
+        <span className={cn("fade-edges relative aspect-[3/4]", upright ? "w-140" : "-mt-16 h-86")}>
+          <AssetImage
+            src="/assets/thanos.png"
+            alt=""
+            sizes={upright ? "70vw" : "40vw"}
+            lazy
+            className="object-contain"
+          />
         </span>
         {/* Drawn up over where Thanos fades out. */}
         <div className="relative -mt-16">{children}</div>
