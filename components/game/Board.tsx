@@ -21,6 +21,7 @@ interface PlayerInfo {
   seat: number;
   isBot: boolean;
   userId: string | null;
+  avatarUrl: string | null;
   name: string;
 }
 
@@ -94,6 +95,7 @@ export function Board({
   const winTile = ASSETS.winTile?.points === view.settings.targetPoints ? ASSETS.winTile : null;
   const headerHeight = winTile ? 10 : 7;
 
+  const avatarForSeat = (seat: number) => players.find((p) => p.seat === seat)?.avatarUrl ?? null;
   function nameForSeat(seat: number): string {
     return players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`;
   }
@@ -110,6 +112,7 @@ export function Board({
               <PlayerPlaque
                 player={p}
                 name={nameForSeat(p.seat)}
+                avatarUrl={avatarForSeat(p.seat)}
                 isCurrentTurn={turnSeat === p.seat}
                 turnEndsAt={turnEndsAt}
                 turnSeconds={view.settings.turnTimeSeconds}
@@ -187,6 +190,7 @@ export function Board({
         <PlayerPlaque
           player={viewer}
           name={nameForSeat(viewerSeat)}
+          avatarUrl={avatarForSeat(viewerSeat)}
           isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
           turnSeconds={view.settings.turnTimeSeconds}

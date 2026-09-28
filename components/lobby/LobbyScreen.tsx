@@ -1,3 +1,4 @@
+import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import type { ReactNode } from "react";
 import { cn } from "cn";
 import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
@@ -10,6 +11,8 @@ import { Stage, StageRows } from "@/components/Stage";
 import type { BotDifficulty } from "@/lib/engine/types";
 
 export interface LobbySeat {
+  /** The player's picture; without one, their initials are shown. */
+  avatarUrl?: string | null;
   /** The seat number the table's actions refer to. */
   seat: number;
   name: string;
@@ -63,7 +66,9 @@ function Place({
             : "border-3 border-dashed border-cosmos-500/70 bg-cosmos-950/50",
         )}
       >
-        {seat && !seat.isBot ? (
+        {seat?.avatarUrl ? (
+          <PlayerAvatar src={seat.avatarUrl} name={seat.name} className="size-24 ring-0" />
+        ) : seat && !seat.isBot ? (
           <span className="font-display text-5xl font-black text-gold-200">
             {seat.name.slice(0, 2).toUpperCase()}
           </span>

@@ -146,9 +146,9 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
             </button>
           </div>
 
-          <div className="flex w-60 flex-col gap-3">
+          <div className="flex w-72 flex-col gap-3">
             <h2 className={HEADING}>Or choose a picture</h2>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-6 gap-2">
               {AVATAR_LIBRARY.map((picture) => (
                 <button
                   key={picture.id}
@@ -224,7 +224,7 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
             type="button"
             disabled={saving || !unsaved || !nameIsFree}
             onClick={save}
-            className="h-13 w-64 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
+            className="h-13 w-64 rounded-full bg-gold-400 font-display text-lg font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200 disabled:bg-cosmos-700 disabled:text-cosmos-300"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>

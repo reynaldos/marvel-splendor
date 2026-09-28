@@ -10,6 +10,7 @@ import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
+import { publicAvatarUrl } from "@/lib/r2";
 import { pageMetadata } from "@/lib/site";
 
 import {
@@ -35,7 +36,7 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: {
-      players: { include: { user: { select: { username: true } } }, orderBy: { seat: "asc" } },
+      players: { include: { user: { select: { username: true, avatarKey: true } } }, orderBy: { seat: "asc" } },
     },
   });
   // Where guests land when the host cancels: the lobby refreshes and the game is gone.
@@ -67,6 +68,7 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
           return {
             seat: player.seat,
             name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
+            avatarUrl: publicAvatarUrl(player.user?.avatarKey),
             isBot: player.isBot,
             isHost: player.seat === 0,
             isYou: player.userId === user.id,
