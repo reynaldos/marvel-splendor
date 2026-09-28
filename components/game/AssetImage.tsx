@@ -30,6 +30,7 @@ export function AssetImage({
   alt,
   sizes,
   preload,
+  lazy,
   className,
 }: {
   src: string;
@@ -37,6 +38,8 @@ export function AssetImage({
   sizes?: string;
   /** For the one big picture a screen opens on: fetched before the page is even read. */
   preload?: boolean;
+  /** For art that is usually hidden: not fetched until it is on screen. */
+  lazy?: boolean;
   className?: string;
 }) {
   const inherited = useContext(ImageSizes);
@@ -47,7 +50,7 @@ export function AssetImage({
       fill
       sizes={sizes ?? inherited}
       // No screen scrolls, so every picture is in view from the start: nothing to defer.
-      loading="eager"
+      loading={lazy ? "lazy" : "eager"}
       preload={preload}
       className={cn("object-cover", className)}
       draggable={false}

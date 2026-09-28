@@ -127,7 +127,7 @@ interface StatsTabsProps {
   games: GameRecord[];
 }
 
-const PANEL = "h-48 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
+const PANEL = "h-44 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
 
 /** A player's stats, a few at a time, then their games: tabs along the top. */
 export function StatsTabs({ stats, career, games }: StatsTabsProps) {
@@ -137,7 +137,7 @@ export function StatsTabs({ stats, career, games }: StatsTabsProps) {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <div role="tablist" className="flex gap-1 px-4">
+      <div role="tablist" className="flex gap-1 px-3">
         {[...all.map((tab) => tab.name), "Game Record"].map((name, i) => (
           <button
             key={name}
@@ -146,7 +146,8 @@ export function StatsTabs({ stats, career, games }: StatsTabsProps) {
             aria-selected={i === open}
             onClick={() => setOpen(i)}
             className={cn(
-              "h-9 rounded-t-xl px-4 text-base font-black whitespace-nowrap",
+              // Each tab is as wide as its name, and gives way before the row outgrows the panel.
+              "h-8 min-w-0 truncate rounded-t-xl px-3 text-sm font-black",
               i === open ? "bg-cosmos-500 text-white" : "bg-cosmos-800 text-cosmos-300 hover:text-white",
             )}
           >
@@ -159,7 +160,7 @@ export function StatsTabs({ stats, career, games }: StatsTabsProps) {
           role="tabpanel"
           className={cn(
             PANEL,
-            "grid content-center gap-x-5 gap-y-4 px-5",
+            "grid content-center gap-x-5 gap-y-3 px-5",
             shown.stats.length > 4 ? "grid-cols-3" : "grid-cols-2",
           )}
         >

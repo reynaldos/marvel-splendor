@@ -2,12 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Gelasio, Geist, Geist_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 
-import { RotateCw } from "lucide-react";
-
 import { LAUNCH_IMAGES } from "@/lib/launch-images";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl, THEME_COLOR } from "@/lib/site";
 import { AppWindow } from "@/components/AppWindow";
-import { LaunchArt } from "@/components/LaunchArt";
+import { LaunchArt, RotateNotice } from "@/components/LaunchArt";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -66,7 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${gelasio.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${gelasio.variable} h-full bg-cosmos-950 antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
@@ -74,14 +72,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>
             <AppWindow />
             {/* The installed app opens on the launch picture; this holds it a little longer, then fades. */}
-            {/* ponytail: its pictures load in a browser tab too, where it is never shown. Draw it only once the page knows it is installed if that ever costs too much. */}
-            <LaunchArt className="launch-splash pointer-events-none fixed inset-0 z-[110] hidden [@media(display-mode:standalone)]:flex" />
+            <LaunchArt className="launch-splash pointer-events-none fixed inset-0 z-[110] hidden landscape:[@media(display-mode:standalone)]:flex" />
             {children}
-            {/* Every screen is laid out for landscape; a phone held upright is asked to turn. */}
-            <div className="fixed inset-0 z-[100] hidden flex-col items-center justify-center gap-4 bg-cosmos p-6 text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase portrait:max-md:flex">
-              <RotateCw className="size-10" />
-              Rotate your device to play
-            </div>
+            <RotateNotice />
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>

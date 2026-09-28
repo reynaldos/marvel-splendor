@@ -296,11 +296,18 @@ Pictures are resized and served as AVIF or WebP, and cached for a month. Each pi
 An installed iPhone app shows a launch picture every time it opens: Thanos over the game's name on the night sky, with the stones adrift all round.
 
 - **One picture per screen.** An iPhone only uses a picture made for its exact screen, so there is one per screen size, each way up. The screens are listed in `data/launch-screens.json` and the pictures are in `public/launch`.
+- **The art is for a phone on its side.** The picture for a phone held upright is the same one turned a quarter, so it reads as "turn me". It reads the right way up once the phone is turned to the left.
 - **The pictures are photographs of a page.** `/launch-art` draws the art (`components/LaunchArt.tsx`), and `pnpm launch:images` photographs it at every screen size. Run it, with the dev server running, after changing the art or adding a screen. It needs Google Chrome and a Mac.
-- **Held a little longer.** iPhones take the launch picture down as soon as the app is ready, which cannot be changed. So the app holds the same art over itself for about two seconds as it opens, then fades it. This is in the installed app only, and plays again after signing in, since that reloads the app.
+- **Held a little longer.** iPhones take the launch picture down as soon as the app is ready, which cannot be changed. So the app holds the same art over itself for about two seconds as it opens, then fades it. This is in the installed app only, with the phone on its side, and plays again after signing in, since that reloads the app.
 - **The name is in a shipped font.** "Splendor" is set in Gelasio, which comes with the app, so it looks the same on every device and in the launch pictures.
-- **Each way up has its own layout.** Thanos sits over the name both ways. On its side the stones are spread from edge to edge; upright they are spread from top to bottom (`StackedArt` in `components/home/art.tsx`).
 - **Not covered:** iPads open on a plain dark screen. A phone that already has the app installed must remove and re-add it to pick up new pictures.
+
+**Turn-your-phone notice (done)**
+
+Every screen is laid out for landscape, so a phone held upright is shown a notice over everything: Thanos over the game's name and "Rotate your device to play", with the stones spread from top to bottom (`RotateNotice` in `components/LaunchArt.tsx`).
+
+- **It runs on past the bottom edge** by the height of the status bar. An installed iPhone app measures the screen that much short when upright, which left a black bar along the bottom. The page behind is the night sky's darkest blue for the same reason.
+- **Its pictures wait until it is shown.** It is drawn on every page, so its art is only fetched once the notice is on screen.
 
 **Phase 4 — stats and profiles**
 
