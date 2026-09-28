@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { cn } from "cn";
 import { LogOut, Settings, Swords, Trophy } from "lucide-react";
 
-import { AvengersArt, CardFanArt, GauntletArt } from "@/components/home/art";
+import { AvengersArt, CardFanArt } from "@/components/home/art";
+import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
 import { SettingsForm } from "@/components/lobby/SettingsForm";
+import { Stage, StageRows } from "@/components/Stage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
 const ICON_LINK =
@@ -23,21 +23,10 @@ const ICON_LINK =
 // Dialogs open outside the stage, so they carry the look themselves.
 const DIALOG = "dark max-h-[90dvh] overflow-y-auto border-2 border-gold-400 bg-cosmos-900 text-white";
 
-function Logo({ className }: { className?: string }) {
-  return (
-    <span className={cn("flex flex-col items-center leading-none", className)}>
-      <span className="font-serif text-[1em] font-bold text-gold italic">Splendor</span>
-      <span className="mt-[0.15em] bg-marvel px-[0.3em] py-[0.05em] text-[0.55em] font-black tracking-tighter text-white">
-        MARVEL
-      </span>
-    </span>
-  );
-}
-
 /** What a visitor sees before signing in. */
 export function WelcomeScreen() {
   return (
-    <main className="stage dark flex h-dvh w-full items-center justify-center overflow-hidden bg-cosmos text-white">
+    <Stage className="justify-center">
       <div className="frame-gold flex w-150 items-center gap-8 rounded-3xl px-10 py-8">
         <div className="relative h-54 w-60 shrink-0">
           <CardFanArt />
@@ -58,7 +47,7 @@ export function WelcomeScreen() {
           </Button>
         </div>
       </div>
-    </main>
+    </Stage>
   );
 }
 
@@ -67,15 +56,13 @@ interface HomeScreenProps {
   avatarUrl: string | null;
   wins: number;
   gamesPlayed: number;
-  onCreate: () => Promise<void>;
-  onJoin: (formData: FormData) => Promise<void>;
 }
 
 /** The main menu: who you are along the top, the ways to play below. */
-export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, onCreate, onJoin }: HomeScreenProps) {
+export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScreenProps) {
   return (
-    <main className="stage dark flex h-dvh w-full items-center overflow-hidden bg-cosmos text-white">
-      <div className="mx-auto flex h-100 w-full max-w-200 flex-col gap-5 px-6 py-5">
+    <Stage>
+      <StageRows>
         <header className="flex items-center gap-4">
           <Link href="/profile" className={`${PILL} pl-1 hover:bg-cosmos-500`}>
             <Avatar className="size-10 ring-2 ring-gold-400">
@@ -101,7 +88,7 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, onCreate, o
           </a>
         </header>
 
-        <div className="flex min-h-0 flex-1 gap-6">
+        <div className="flex min-h-0 flex-1 gap-8">
           <Dialog>
             <DialogTrigger asChild>
               <ModeTile label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
@@ -115,42 +102,18 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, onCreate, o
             </DialogContent>
           </Dialog>
 
-          <form action={onCreate} className="flex flex-1">
-            <ModeTile type="submit" label="Create Game" tone="from-sky-400 to-blue-800" art={<GauntletArt />} />
-          </form>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <ModeTile label="Join Game" tone="from-violet-400 to-purple-800" art={<AvengersArt />} />
-            </DialogTrigger>
-            <DialogContent className={DIALOG}>
-              <DialogHeader>
-                <DialogTitle>Join a game</DialogTitle>
-                <DialogDescription>Enter the code your friend shared.</DialogDescription>
-              </DialogHeader>
-              <form action={onJoin} className="flex gap-2">
-                <Input
-                  name="code"
-                  aria-label="Join code"
-                  placeholder="ABC234"
-                  required
-                  maxLength={6}
-                  autoComplete="off"
-                  autoCapitalize="characters"
-                  className="h-10 font-mono text-lg tracking-widest uppercase"
-                />
-                <Button type="submit" className="h-10 px-6">
-                  Join
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <ModeTile
+            href="/private"
+            label="Private Game"
+            tone="from-violet-400 to-purple-800"
+            art={<AvengersArt />}
+          />
         </div>
 
         <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
           Assemble the Avengers · Claim the Gauntlet
         </p>
-      </div>
-    </main>
+      </StageRows>
+    </Stage>
   );
 }

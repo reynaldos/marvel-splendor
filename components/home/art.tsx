@@ -12,7 +12,6 @@ function Piece({ src, className }: { src: string; className: string }) {
 }
 
 const CARD = "aspect-card w-27 rounded-lg ring-1 ring-black/40";
-const TOKEN = "aspect-square w-11 rounded-full";
 
 /** A hand of heroes. */
 export function CardFanArt() {
@@ -21,23 +20,6 @@ export function CardFanArt() {
       <Piece src="/cards/thor.png" className={cn(CARD, "top-7 left-[7%] -rotate-12")} />
       <Piece src="/cards/captain-america.png" className={cn(CARD, "top-7 right-[7%] rotate-12")} />
       <Piece src="/cards/iron-man.png" className={cn(CARD, "top-3 left-1/2 w-30 -translate-x-1/2")} />
-    </>
-  );
-}
-
-/** The Gauntlet, ringed by the stones. */
-export function GauntletArt() {
-  return (
-    <>
-      <Piece
-        src="/assets/infinity-gauntlet.jpg"
-        className="top-5 left-1/2 aspect-[1404/688] w-[86%] -translate-x-1/2 rounded-xl ring-2 ring-gold-400"
-      />
-      <Piece src="/assets/stones/mind-token.png" className={cn(TOKEN, "bottom-0 left-[8%]")} />
-      <Piece src="/assets/stones/space-token.png" className={cn(TOKEN, "bottom-2 left-[27%]")} />
-      <Piece src="/assets/stones/soul-token.png" className={cn(TOKEN, "bottom-3 left-1/2 -translate-x-1/2")} />
-      <Piece src="/assets/stones/reality-token.png" className={cn(TOKEN, "right-[27%] bottom-2")} />
-      <Piece src="/assets/stones/power-token.png" className={cn(TOKEN, "right-[8%] bottom-0")} />
     </>
   );
 }

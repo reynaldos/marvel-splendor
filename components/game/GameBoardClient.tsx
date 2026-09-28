@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Board } from "@/components/game/Board";
+import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
@@ -78,20 +79,6 @@ const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
 
-// Which side the phone's notch is on in landscape, for `.game-board`'s side
-// margins. "landscape-primary" is the device turned counter-clockwise, which
-// puts the top of the phone (and its notch) on the left.
-function subscribeOrientation(onChange: () => void) {
-  screen.orientation?.addEventListener("change", onChange);
-  return () => screen.orientation?.removeEventListener("change", onChange);
-}
-function getNotchSide(): "left" | "right" | undefined {
-  const type = screen.orientation?.type;
-  if (type === "landscape-primary") return "left";
-  if (type === "landscape-secondary") return "right";
-  return undefined;
-}
-
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -111,7 +98,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [botPlaying, setBotPlaying] = useState(false);
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
-  const notchSide = useSyncExternalStore(subscribeOrientation, getNotchSide, () => undefined);
+  const notchSide = useNotchSide();
 
   // Integration point for a later task (OpenAI banter bubbles): nothing
   // populates this yet, but the plumbing — state + setter + prop passthrough
