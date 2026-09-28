@@ -25,6 +25,7 @@ interface GamePlayerInfo {
   isBot: boolean;
   userId: string | null;
   name: string;
+  avatarUrl: string | null;
 }
 
 /** One move and the board right after it. */

@@ -7,6 +7,7 @@ import { gameEndsInMs, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { botName } from "@/lib/lobby-rules";
+import { publicAvatarUrl } from "@/lib/r2";
 
 /**
  * GET /api/games/[id] — the redacted view for whichever seat the requester
@@ -29,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     where: { id },
     include: {
       players: {
-        include: { user: { select: { username: true } } },
+        include: { user: { select: { username: true, avatarKey: true } } },
         orderBy: { seat: "asc" },
       },
       moves: { select: { ordinal: true, seat: true, payload: true }, orderBy: { ordinal: "asc" } },
@@ -84,6 +85,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       isBot: p.isBot,
       userId: p.userId,
       name: p.isBot ? botName(game.players, p.seat) : p.user?.username ?? p.guestName ?? "Player",
+      avatarUrl: publicAvatarUrl(p.user?.avatarKey),
     })),
     view: redactState(state, seatRow.seat),
     moves,

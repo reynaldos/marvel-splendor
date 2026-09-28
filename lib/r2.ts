@@ -109,8 +109,9 @@ export function publicAvatarUrl(key: string | null | undefined): string | null {
   if (!key) return null;
   const fromLibrary = libraryAvatarSrc(key);
   if (fromLibrary) return fromLibrary;
-  const base = requireEnv("R2_PUBLIC_BASE_URL").replace(/\/+$/, "");
-  return `${base}/${key}`;
+  // Without storage set up there is no picture to show; that must not take the page down.
+  const base = process.env.R2_PUBLIC_BASE_URL?.replace(/\/+$/, "");
+  return base ? `${base}/${key}` : null;
 }
 
 /** A key must live under the requesting user's own prefix — defends the confirm step. */

@@ -3,6 +3,14 @@ import { cn } from "cn";
 import { AssetImage } from "@/components/game/assets";
 import { AVATAR_LIBRARY } from "@/lib/avatars";
 
+/** "Rey Sanchez" is RS and "Bot 1" is B1; a single word gives its first two letters. */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 /** A player's picture in a gold ring, or their initials when they have none. Size it with `size-*`. */
 export function PlayerAvatar({
   src,
@@ -27,7 +35,7 @@ export function PlayerAvatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="size-full object-cover" />
       ) : (
-        name.slice(0, 2).toUpperCase()
+        initials(name)
       )}
     </span>
   );

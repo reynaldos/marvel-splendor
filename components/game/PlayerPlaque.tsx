@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { cn } from "cn";
 import { Star } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvengersIcon } from "@/components/game/assets";
 import { tokenMeta } from "@/components/game/stone-colors";
 import {
@@ -15,10 +14,13 @@ import {
 import type { RedactedPlayerState } from "@/lib/game-view";
 import { TurnTimer } from "@/components/game/TurnTimer";
 import { BanterBubble } from "@/components/game/BanterBubble";
+import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 
 interface PlayerPlaqueProps {
   player: RedactedPlayerState;
   name: string;
+  /** The player's picture; without one, their initials are shown. */
+  avatarUrl?: string | null;
   isCurrentTurn: boolean;
   /** When the current turn runs out (device clock); null when untimed. */
   turnEndsAt: number | null;
@@ -42,6 +44,7 @@ interface PlayerPlaqueProps {
 export function PlayerPlaque({
   player,
   name,
+  avatarUrl = null,
   isCurrentTurn,
   turnEndsAt,
   turnSeconds,
@@ -62,9 +65,7 @@ export function PlayerPlaque({
       )}
     >
       <div className="flex h-6 items-center gap-1 pr-6">
-        <Avatar size="sm">
-          <AvatarFallback>{initials(name)}</AvatarFallback>
-        </Avatar>
+        <PlayerAvatar src={avatarUrl} name={name} className="size-6 fs-2xs ring-1" />
         <span className="min-w-0 flex-1 truncate text-xs font-medium">{name}</span>
         {player.tags > 0 && !hideTags ? (
           <span className="flex items-center gap-0.5 fs-2xs font-bold" title="Avengers tags">
@@ -144,11 +145,4 @@ export function Holdings({
       })}
     </div>
   );
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
