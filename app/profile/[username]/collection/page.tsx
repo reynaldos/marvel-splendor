@@ -17,10 +17,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ use
   const session = await auth0.getSession();
   if (!session) redirect(`/auth/login?returnTo=${encodeURIComponent(path)}`);
 
-  const user = await prisma.user.findUnique({ where: { username }, select: { id: true, auth0Sub: true } });
+  const user = await prisma.user.findUnique({ where: { username }, select: { id: true } });
   if (!user) notFound();
-  // A player's own, for now. Take this line out to let everyone see everyone's.
-  if (user.auth0Sub !== session.user.sub) notFound();
 
   const found = await prisma.collectedCard.findMany({
     where: { userId: user.id },
