@@ -377,6 +377,18 @@ What these need before they can be built:
 - **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
 - **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. They ship with the app, in `public/assets/pfp`; Cloudflare is only for pictures players upload. To add one, put a square picture in that folder and give it a line in the list. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
 
+**User metrics**
+
+For the owner to review who is using the game and how much.
+
+- **Visits. Done.** Every signed-in request notes that the user is active (`lib/record-visit.ts`, called from `getOrCreateUser`). A visit is one stretch of activity from one IP address: a request within 30 minutes of the last carries the visit on, and a longer gap or a new address starts another. Each `UserVisit` row holds the user, IP address, browser, when it started and when the user was last active. `pnpm db:update` adds the table; until then nothing is recorded and nothing breaks.
+- **What is worked out from them.** Times joined is the number of visits, last joined is the latest, and time in the app is the length of every visit added up. Time spent playing comes from the saved games, so it needs nothing new.
+- **Written at most once a minute per user**, after the response has gone out, so it never slows a page or a move. A failure to record is logged and never fails the request.
+- **Switching network mid-visit counts as a new visit**, since the address changes.
+- **A closed tab is not detected.** A visit ends at the user's last request, so a visit of a single request has no length.
+- **IP addresses are personal data.** They are only ever shown on the admin page.
+- **Admin page. Planned, not started.** `/admin/users`, open only to the accounts listed in an `ADMIN_EMAILS` setting.
+
 ## 9. Testing & correctness strategy
 
 - Engine: property-style tests (token conservation invariants — supply + hands + spent always equals initial counts), scenario tests for every rulebook clause, full bot-vs-bot fuzz games from random seeds asserting no illegal state.

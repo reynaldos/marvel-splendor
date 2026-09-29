@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Prisma, type User } from "@/lib/generated/prisma/client";
+import { recordVisit } from "@/lib/record-visit";
 
 /**
  * The subset of the Auth0 ID token / userinfo claims we need to provision a
@@ -84,6 +85,12 @@ function isUniqueConstraintError(error: unknown, field: string): boolean {
  * `auth0.getSession()`.
  */
 export async function getOrCreateUser(profile: Auth0Profile): Promise<User> {
+  const user = await provisionUser(profile);
+  await recordVisit(user.id);
+  return user;
+}
+
+async function provisionUser(profile: Auth0Profile): Promise<User> {
   const existing = await prisma.user.findUnique({ where: { auth0Sub: profile.sub } });
   if (existing) {
     // Keeps the email in step with the sign-in, writing only when it has changed.
