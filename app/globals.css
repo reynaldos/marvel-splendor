@@ -540,6 +540,16 @@ body {
   mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
 }
 
+/* The same, for a list that runs off the bottom of the screen: faded at the top only, with
+   room under the last row to bring it up clear of the home bar. */
+.scroll-fade-top {
+  --fade: calc(var(--spacing) * 5);
+  padding-top: var(--fade);
+  padding-bottom: calc(var(--pad-b, 0px) + var(--spacing) * 10);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--fade));
+  mask-image: linear-gradient(to bottom, transparent, black var(--fade));
+}
+
 .fade-edges {
   --sides: linear-gradient(to right, transparent 2%, black 28%, black 80%, transparent 100%);
   --bottom: linear-gradient(to bottom, black 62%, transparent 96%);

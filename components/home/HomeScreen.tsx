@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Settings, Shield, Swords, Trophy } from "lucide-react";
+import { Layers, LogOut, Settings, Shield, Swords, Trophy } from "lucide-react";
 
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
@@ -64,6 +64,9 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, isAdmin }: 
             <span className="text-lg font-black tabular-nums">{gamesPlayed}</span>
           </span>
           <Logo className="mx-auto text-3xl" />
+          <Link href="/collection" aria-label="Collection" className={ICON_LINK}>
+            <Layers className="size-6" />
+          </Link>
           <Link href="/settings" aria-label="Settings" className={ICON_LINK}>
             <Settings className="size-6" />
           </Link>
