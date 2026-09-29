@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 // Bots must be able to finish a game with the real deck and tiles, not just the fixtures.
 vi.unmock("@/data/cards.json");
 vi.unmock("@/data/locations.json");
+// The hard bot thinks before each move, so a whole game of it takes a few seconds.
+vi.setConfig({ testTimeout: 60_000 });
 
 import { qualifiesForWin } from "@/lib/engine/rules";
 import type { BotDifficulty, PlayerState } from "@/lib/engine/types";
