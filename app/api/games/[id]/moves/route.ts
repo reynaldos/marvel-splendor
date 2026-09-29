@@ -13,6 +13,7 @@ import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameStats } from "@/lib/record-stats";
+import { saveCollectedCards } from "@/lib/save-collection";
 
 /** Tolerance for the client's countdown finishing a hair before the server's. */
 const TIMEOUT_GRACE_MS = 1000;
@@ -144,6 +145,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (finalState.status === "finished") {
     await recordFinishedGameStats(id, game.mode, finalState, game.players, localUser.id);
+    // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
+    await saveCollectedCards(id, game.players).catch((error) => console.error("collection not saved", id, error));
   }
 
   // The board as it stood after each move — the submitted one, then every
