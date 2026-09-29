@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Bot, DoorOpen, Flag, History, Hourglass, Menu, Settings, Star, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
+import { Rule } from "@/components/lobby/Rule";
+import { TimerIcon } from "@/components/lobby/TimerIcon";
 import type { GameSettings } from "@/lib/engine/types";
 
 interface GameMenuProps {
@@ -33,6 +35,14 @@ interface GameMenuProps {
   /** A move is being sent or played back, so forfeiting has to wait. */
   busy: boolean;
   onForfeit: () => void;
+}
+
+const HEADING = "font-display text-xl font-black tracking-wide text-gold-400 uppercase";
+const RULE_ICON = "size-8";
+const PILL = "flex h-11 flex-1 items-center justify-center rounded-full font-display text-sm font-black tracking-wide uppercase";
+
+function capitalize(s: string): string {
+  return s[0].toUpperCase() + s.slice(1);
 }
 
 /** The board's top-right menu: forfeit, move log, game settings, and leaving a finished game. */
@@ -48,16 +58,26 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
             <Menu />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="theme-cosmos dark w-40 border-2 border-gold-400">
-          <DropdownMenuItem onSelect={() => setOpen("moves")}>Moves</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setOpen("settings")}>Game settings</DropdownMenuItem>
+        <DropdownMenuContent align="end" className="theme-cosmos dark w-44 border-2 border-gold-400">
+          <DropdownMenuItem onSelect={() => setOpen("moves")}>
+            <History className="size-4 text-gold-400" />
+            Moves
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setOpen("settings")}>
+            <Settings className="size-4 text-gold-400" />
+            Game settings
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           {finished ? (
             <DropdownMenuItem asChild>
-              <Link href="/">Close game</Link>
+              <Link href="/">
+                <DoorOpen className="size-4" />
+                Close game
+              </Link>
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem variant="destructive" disabled={busy} onSelect={() => setOpen("forfeit")}>
+              <Flag className="size-4" />
               Forfeit game
             </DropdownMenuItem>
           )}
@@ -69,7 +89,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
           {open === "moves" ? (
             <>
               <DialogHeader>
-                <DialogTitle>Move log</DialogTitle>
+                <DialogTitle className={HEADING}>Move log</DialogTitle>
               </DialogHeader>
               <MoveLog entries={moveLog} players={players} viewerSeat={viewerSeat} />
             </>
@@ -78,48 +98,65 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
           {open === "settings" ? (
             <>
               <DialogHeader>
-                <DialogTitle>Game settings</DialogTitle>
+                <DialogTitle className={HEADING}>Game settings</DialogTitle>
               </DialogHeader>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-                <dt className="text-muted-foreground">Players</dt>
-                <dd>{players.length}</dd>
-                <dt className="text-muted-foreground">Points to win</dt>
-                <dd>{settings.targetPoints}</dd>
-                <dt className="text-muted-foreground">Turn timer</dt>
-                <dd>{settings.turnTimeSeconds === null ? "Untimed" : `${settings.turnTimeSeconds} seconds`}</dd>
-                <dt className="text-muted-foreground">Game clock</dt>
-                <dd>{settings.gameTimeMinutes === null ? "No overall clock" : `${settings.gameTimeMinutes} minutes`}</dd>
+              <div className="grid grid-cols-2 gap-4">
+                <Rule
+                  icon={<UsersRound className={`${RULE_ICON} fill-gold-400 text-gold-600`} />}
+                  label="Players"
+                  value={`${players.length}`}
+                />
+                <Rule
+                  icon={<Star className={`${RULE_ICON} fill-gold-400 text-gold-600`} />}
+                  label="Points to win"
+                  value={`${settings.targetPoints}`}
+                />
+                <Rule
+                  icon={<TimerIcon className={RULE_ICON} />}
+                  label="Turn timer"
+                  value={settings.turnTimeSeconds === null ? "Untimed" : `${settings.turnTimeSeconds} sec`}
+                />
+                <Rule
+                  icon={<Hourglass className={`${RULE_ICON} text-gold-400`} />}
+                  label="Game clock"
+                  value={settings.gameTimeMinutes === null ? "No clock" : `${settings.gameTimeMinutes} min`}
+                />
                 {hasBots ? (
-                  <>
-                    <dt className="text-muted-foreground">Bot difficulty</dt>
-                    <dd className="capitalize">{settings.botDifficulty ?? "normal"}</dd>
-                  </>
+                  <Rule
+                    icon={<Bot className={`${RULE_ICON} text-gold-400`} />}
+                    label="Bot difficulty"
+                    value={capitalize(settings.botDifficulty ?? "normal")}
+                  />
                 ) : null}
-              </dl>
+              </div>
             </>
           ) : null}
 
           {open === "forfeit" ? (
             <>
               <DialogHeader>
-                <DialogTitle>Forfeit this game?</DialogTitle>
+                <DialogTitle className={HEADING}>Forfeit this game?</DialogTitle>
                 <DialogDescription>You will lose and the game ends now. This can&apos;t be undone.</DialogDescription>
               </DialogHeader>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(null)}>
-                  Keep playing
-                </Button>
-                <Button
+              <DialogFooter className="flex-row gap-3">
+                <button
                   type="button"
-                  variant="destructive"
+                  onClick={() => setOpen(null)}
+                  className={`${PILL} bg-cosmos-800 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-700`}
+                >
+                  Keep playing
+                </button>
+                <button
+                  type="button"
                   disabled={busy}
                   onClick={() => {
                     setOpen(null);
                     onForfeit();
                   }}
+                  className={`${PILL} bg-marvel text-white hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300`}
                 >
                   Forfeit
-                </Button>
+                </button>
               </DialogFooter>
             </>
           ) : null}

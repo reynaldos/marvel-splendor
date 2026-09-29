@@ -1,6 +1,13 @@
 import { CARD_BY_ID } from "@/lib/engine/data";
 import type { GameState } from "@/lib/engine/types";
 
+/** The parts of a finished game's state `rankPlayers` reads — satisfied by both `GameState` and a live `RedactedGameState`. */
+export interface RankableState {
+  players: Array<{ seat: number; points: number; cards: string[]; tags: number }>;
+  winnerSeat: number | null;
+  sharedWinners: number[] | null;
+}
+
 export interface RankedPlayer {
   seat: number;
   name: string;
@@ -37,7 +44,7 @@ export interface Seated {
 }
 
 /** Winners first, then by points; level on points, the one with fewer cards is ahead. */
-export function rankPlayers(state: GameState, seated: Seated[]): RankedPlayer[] {
+export function rankPlayers(state: RankableState, seated: Seated[]): RankedPlayer[] {
   const ranked = state.players
     .map((p) => ({
       seat: p.seat,

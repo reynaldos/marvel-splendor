@@ -17,6 +17,7 @@ import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
 import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
+import { rankPlayers } from "@/lib/game-record";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
@@ -511,10 +512,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         onOpenChange={(open) => {
           if (!open) setGameOverDismissed(true);
         }}
-        winnerSeat={view.winnerSeat}
-        sharedWinners={view.sharedWinners}
+        standings={rankPlayers(view, players)}
         viewerSeat={view.viewerSeat}
-        nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`}
+        round={view.round}
       />
     </>
   );

@@ -1,70 +1,81 @@
 import Link from "next/link";
+import { cn } from "cn";
+import { Layers, Star } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AvengersIcon } from "@/components/game/assets";
+import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { RankedPlayer } from "@/lib/game-record";
 
 interface GameOverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  winnerSeat: number | null;
-  sharedWinners: number[] | null;
-  nameForSeat: (seat: number) => string;
+  standings: RankedPlayer[];
   viewerSeat: number;
+  round: number;
 }
 
-/** Shown when `status === "finished"` (ARCHITECTURE.md §1 tiebreak / shared victory). */
-export function GameOverDialog({
-  open,
-  onOpenChange,
-  winnerSeat,
-  sharedWinners,
-  nameForSeat,
-  viewerSeat,
-}: GameOverDialogProps) {
-  const isSharedVictory = Boolean(sharedWinners && sharedWinners.length > 1);
+/** Shown when `status === "finished"` — how the whole table finished, styled like the profile's Game Record results (components/profile/GameRecords.tsx). */
+export function GameOverDialog({ open, onOpenChange, standings, viewerSeat, round }: GameOverDialogProps) {
+  const viewer = standings.find((p) => p.seat === viewerSeat);
+  const won = viewer?.won ?? false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="theme-cosmos dark border-2 border-gold-400">
-        <DialogHeader>
-          <DialogTitle>Game over</DialogTitle>
-          <DialogDescription>
-            {isSharedVictory
-              ? "A true tie — victory is shared."
-              : winnerSeat !== null
-                ? `${nameForSeat(winnerSeat)} wins!`
-                : "The game has ended."}
-          </DialogDescription>
+      <DialogContent
+        className={cn(
+          "theme-cosmos dark max-h-[90dvh] gap-3 overflow-y-auto border-2 sm:max-w-lg",
+          won ? "border-gold-400" : "border-red-600",
+        )}
+      >
+        <DialogHeader className="items-center">
+          <DialogTitle
+            className={cn(
+              "font-display text-2xl font-black tracking-widest uppercase",
+              won ? "text-gold-400" : "text-red-400",
+            )}
+          >
+            {won ? "Victory" : "Defeat"}
+          </DialogTitle>
+          <DialogDescription>{round} rounds</DialogDescription>
         </DialogHeader>
 
-        {isSharedVictory ? (
-          <ul className="flex flex-col gap-1 text-sm">
-            {sharedWinners!.map((seat) => (
-              <li key={seat} className="font-medium">
-                {nameForSeat(seat)}
-                {seat === viewerSeat ? " (you)" : ""}
-              </li>
-            ))}
-          </ul>
-        ) : winnerSeat !== null ? (
-          <p className="text-sm font-medium">
-            {nameForSeat(winnerSeat)}
-            {winnerSeat === viewerSeat ? " — that's you!" : ""}
-          </p>
-        ) : null}
+        <ol className="flex flex-col gap-2">
+          {standings.map((player) => (
+            <li
+              key={player.seat}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2",
+                player.seat === viewerSeat ? "bg-gold-200 text-cosmos-950" : "bg-cosmos-800",
+              )}
+            >
+              <span className="w-5 text-center text-xl font-black">{player.place}</span>
+              <PlayerAvatar src={player.avatarUrl} name={player.name} className="size-10 text-sm" />
+              <span className="min-w-0 flex-1 truncate text-base font-bold">{player.name}</span>
+              <span className="flex items-center gap-3 rounded-full bg-cosmos-950 px-3 py-1 text-sm font-black text-white tabular-nums">
+                <span className="flex items-center gap-1" title="Infinity Points">
+                  <Star className="size-4 fill-gold-400 text-gold-400" />
+                  {player.points}
+                </span>
+                <span className="flex items-center gap-1" title="Cards">
+                  <Layers className="size-4 text-gold-400" />
+                  {player.cards}
+                </span>
+                <span className="flex items-center gap-1" title="Avengers badges">
+                  <AvengersIcon className="size-4 text-xs" />
+                  {player.tags}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
 
-        <DialogFooter>
-          <Button asChild>
-            <Link href="/">Back to home</Link>
-          </Button>
-        </DialogFooter>
+        <Link
+          href="/"
+          className="flex h-12 items-center justify-center rounded-full bg-gold-400 font-display text-base font-black tracking-wide text-cosmos-950 uppercase hover:bg-gold-200"
+        >
+          Back to home
+        </Link>
       </DialogContent>
     </Dialog>
   );

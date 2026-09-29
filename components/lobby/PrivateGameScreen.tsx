@@ -87,7 +87,7 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
                 aria-label="Room code"
                 placeholder="Or enter room code..."
                 required
-                maxLength={6}
+                maxLength={12}
                 autoComplete="off"
                 autoCapitalize="characters"
                 className="h-full min-w-0 flex-1 bg-transparent px-4 font-mono text-xl font-bold tracking-widest uppercase outline-none placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:text-cosmos-500 placeholder:normal-case"

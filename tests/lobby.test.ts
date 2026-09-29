@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/generated/prisma/client", () => ({ Prisma: {} }));
 
-import { nextFreeSeat, normalizeJoinCode } from "@/lib/lobby";
+import { extractCheatCode, nextFreeSeat, normalizeJoinCode } from "@/lib/lobby";
 
 describe("normalizeJoinCode", () => {
   it("accepts any case and surrounding whitespace", () => {
@@ -14,6 +14,19 @@ describe("normalizeJoinCode", () => {
     expect(normalizeJoinCode("ABC23")).toBeNull();
     expect(normalizeJoinCode("ABC2345")).toBeNull();
     expect(normalizeJoinCode("ABC-23")).toBeNull();
+  });
+});
+
+describe("extractCheatCode", () => {
+  it("strips a trailing +cheat in any case", () => {
+    expect(extractCheatCode("ABC234+cheat")).toEqual({ code: "ABC234", cheat: true });
+    expect(extractCheatCode("abc234+CHEAT")).toEqual({ code: "abc234", cheat: true });
+  });
+  it("leaves plain codes untouched", () => {
+    expect(extractCheatCode("ABC234")).toEqual({ code: "ABC234", cheat: false });
+  });
+  it("trims surrounding whitespace", () => {
+    expect(extractCheatCode("  ABC234+cheat  ")).toEqual({ code: "ABC234", cheat: true });
   });
 });
 

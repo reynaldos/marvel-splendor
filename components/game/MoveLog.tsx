@@ -22,13 +22,13 @@ interface MoveLogProps {
 export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProps) {
   return (
     <div className={className}>
-      <ScrollArea className="h-40 rounded-md bg-card p-2 ring-1 ring-foreground/10">
-        <ol className="flex flex-col gap-1">
+      <ScrollArea className="h-48 rounded-xl bg-cosmos-950/60 p-3 ring-2 ring-cosmos-500 ring-inset">
+        <ol className="flex flex-col gap-1.5">
           {entries.length === 0 ? (
-            <li className="text-xs text-muted-foreground">No moves yet.</li>
+            <li className="text-sm text-cosmos-300">No moves yet.</li>
           ) : (
             entries.map((entry) => (
-              <li key={entry.id} className="text-xs">
+              <li key={entry.id} className="text-sm">
                 {describeMove(entry, players, viewerSeat)}
               </li>
             ))
