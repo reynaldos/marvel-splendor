@@ -37,6 +37,18 @@ model User {
   players   GamePlayer[]
   stats     UserStats?
   visits    UserVisit[]
+  collected CollectedCard[]
+}
+
+// A card a player has recruited themselves, in a game played to the end.
+model CollectedCard {
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardId       String
+  times        Int      @default(1)
+  firstFoundAt DateTime @default(now())
+
+  @@id([userId, cardId])
 }
 
 // One stretch of activity from one IP address; a 30 minute gap starts a new one.

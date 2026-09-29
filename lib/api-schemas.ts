@@ -37,7 +37,6 @@ export const MoveSchema = z.union([
   z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
   z.object({ type: z.literal("TIMEOUT_SKIP"), present: z.literal(true).optional() }),
   z.object({ type: z.literal("FORFEIT") }),
-  z.object({ type: z.literal("REJOIN") }),
 ]);
 
 /** `POST /api/games` body — see ARCHITECTURE.md §4 `GameSettings`. */

@@ -81,6 +81,7 @@ You need Node 22 and pnpm.
 | `pnpm db:update` | Applies `prisma/schema.prisma` to the database and rebuilds the database client |
 | `pnpm images` | Refreshes the picture fingerprints. Runs by itself before `dev` and `build` |
 | `pnpm launch:images` | Retakes the iPhone launch pictures. Needs the dev server running, Google Chrome and a Mac |
+| `pnpm collection:backfill` | Shows what each player's collection would hold, from the games played to the end. Add `--yes` to save it |
 | `pnpm games:clear` | Shows what clearing every game would delete. Add `--yes` to delete; this cannot be undone |
 | `pnpm games:reset` | A fresh start: the same, and every player's stats set back to zero. Players, names and pictures are kept. Add `--yes` to do it |
 

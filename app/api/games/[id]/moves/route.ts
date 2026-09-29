@@ -5,7 +5,7 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
-import type { GameState, Move } from "@/lib/engine/types";
+import { isAway, type GameState, type Move } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
@@ -80,9 +80,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Only the player themselves can say they were there.
   const move: Move = sent.type === "TIMEOUT_SKIP" && seat !== viewerSeat ? { type: "TIMEOUT_SKIP" } : sent;
 
-  // Forfeiting and coming back don't wait for your turn.
-  const anytime = move.type === "FORFEIT" || move.type === "REJOIN";
-  if (!anytime && seat !== state.currentSeat) {
+  // A player removed for being away has no more say in the game, not even to forfeit it.
+  if (isAway(state.players[viewerSeat])) {
+    return NextResponse.json({ error: "You were removed from this game." }, { status: 403 });
+  }
+
+  // Forfeiting doesn't wait for your turn.
+  if (move.type !== "FORFEIT" && seat !== state.currentSeat) {
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
   }
 
@@ -123,9 +127,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
 
   const now = new Date();
-  // Coming back is no part of anyone's turn, and a move that leaves a choice
-  // to make hasn't ended one, so the turn clock keeps running through both.
-  const sameTurn = move.type === "REJOIN" || (finalState.status === "active" && finalState.pending !== null);
+  // A move that leaves a choice to make hasn't ended the turn, so its clock keeps running.
+  const sameTurn = finalState.status === "active" && finalState.pending !== null;
   const movedAt = sameTurn ? game.updatedAt : now;
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";
   const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt, status);

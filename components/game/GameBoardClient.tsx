@@ -490,11 +490,13 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
             <div className={NOTICE}>
               <p className="font-display text-base font-bold tracking-wide text-gold-400 uppercase">
-                A bot is playing for you
+                You were removed from this game
               </p>
-              <p className="text-xs text-muted-foreground">You missed {IDLE_TURNS} turns in a row.</p>
-              <Button disabled={submitting || botPlaying} onClick={() => void submitMove({ type: "REJOIN" })}>
-                I&apos;m back
+              <p className="text-xs text-muted-foreground">
+                You missed {IDLE_TURNS} turns in a row, so a bot is playing your seat to the end.
+              </p>
+              <Button asChild>
+                <Link href="/">Back to home</Link>
               </Button>
             </div>
           </div>

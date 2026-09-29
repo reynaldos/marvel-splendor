@@ -129,7 +129,7 @@ export type Move =
   | { type: "END_BY_CLOCK" }
   /** Any seat, any time: that seat loses and the game ends at once. */
   | { type: "FORFEIT" }
-  /** A seat a bot took over for being away: its player takes it back. */
+  /** A seat taken back from the bot. No longer offered; kept so that games which have one still replay. */
   | { type: "REJOIN" };
 
 export type MoveType = Move["type"];
