@@ -40,12 +40,13 @@
  * admiring it scores as well as consuming it, the bot never pulls the
  * trigger. `bestOpportunityScore` and `timeStoneScore` both bake this in.
  *
- * Difficulty tiers (`state.settings.botDifficulty`, default "normal") adjust
- * both the weight given to each factor and the search depth: "easy" ignores
- * level-3 opportunities in its general affordability scan and never looks
- * beyond the immediate move; "hard" adds a shallow extra-ply search that
- * rewards moves which open up a strong follow-up move.
+ * Difficulty tiers (`state.settings.botDifficulty`, default "normal"):
+ * "easy" ignores level-3 opportunities in its general affordability scan and
+ * never looks beyond the immediate move; "normal" adds a shallow extra-ply
+ * search that rewards moves which open up a strong follow-up move; "hard"
+ * doesn't use this file's scoring at all, and plans ahead in planner.ts.
  */
+import { planMove } from "@/lib/bot/planner";
 import { getCard } from "@/lib/engine/data";
 import { applyMove } from "@/lib/engine/apply";
 import { legalMoves } from "@/lib/engine/legal-moves";
@@ -77,7 +78,8 @@ interface Weights {
   affordabilityLevelCap: 1 | 2 | 3;
 }
 
-const WEIGHTS: Record<BotDifficulty, Weights> = {
+// The hard bot plans ahead instead, in planner.ts.
+const WEIGHTS: Record<Exclude<BotDifficulty, "hard">, Weights> = {
   easy: {
     points: 1,
     colorSet: 0.6,
@@ -91,20 +93,8 @@ const WEIGHTS: Record<BotDifficulty, Weights> = {
     futurePlan: 0,
     affordabilityLevelCap: 2,
   },
+  // Looks one move further than easy does, and cares more about what a win takes.
   normal: {
-    points: 1,
-    colorSet: 1.2,
-    timeStone: 1.5,
-    tags: 0.6,
-    tokenPenalty: 0.45,
-    affordability: 1.0,
-    reserveBurden: 0.2,
-    recruitBias: 0.15,
-    supplyCare: 0.25,
-    futurePlan: 0,
-    affordabilityLevelCap: 3,
-  },
-  hard: {
     points: 1,
     colorSet: 1.5,
     timeStone: 1.8,
@@ -123,6 +113,7 @@ const HOARD_THRESHOLD = 5;
 
 export function chooseBotMove(state: GameState, seat: number): Move {
   const difficulty = state.settings.botDifficultyBySeat?.[seat] ?? state.settings.botDifficulty ?? "normal";
+  if (difficulty === "hard") return planMove(state, seat);
   const weights = WEIGHTS[difficulty];
 
   const candidates = legalMoves(state, seat);

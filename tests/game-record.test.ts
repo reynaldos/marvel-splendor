@@ -64,6 +64,8 @@ describe("gameRecord", () => {
   it("is told from the seat it belongs to", () => {
     expect(gameRecord(game, 0, seated)).toMatchObject({ won: false, place: 3, rounds: 28, seat: 0 });
     expect(gameRecord(game, 1, seated)).toMatchObject({ won: true, place: 1 });
+    const withCards = finished({ winnerSeat: 0, players: [makePlayer(0, { cards: ["a", "b"] }), makePlayer(1), makePlayer(2)] });
+    expect(gameRecord({ ...game, state: withCards }, 0, seated)?.team).toEqual(["a", "b"]);
   });
   it("is nothing for a seat that wasn't in the game", () => {
     expect(gameRecord(game, 3, seated)).toBeNull();

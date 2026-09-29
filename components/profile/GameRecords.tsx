@@ -5,6 +5,7 @@ import { cn } from "cn";
 import { Star, Timer, UsersRound } from "lucide-react";
 
 import { Standings } from "@/components/game/Standings";
+import { TeamMarquee } from "@/components/profile/TeamMarquee";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ordinal, timeAgo, type GameRecord } from "@/lib/game-record";
 
@@ -91,7 +92,7 @@ function Results({ game }: { game: GameRecord }) {
   return (
     <DialogContent
       className={cn(
-        "theme-cosmos dark max-h-[90dvh] gap-3 overflow-y-auto border-2 sm:max-w-lg",
+        "theme-cosmos dark max-h-[96dvh] gap-2 overflow-y-auto border-2 sm:max-w-lg",
         game.won ? "border-gold-400" : "border-red-600",
       )}
     >
@@ -109,6 +110,7 @@ function Results({ game }: { game: GameRecord }) {
         </DialogDescription>
       </DialogHeader>
       <Standings players={game.players} seat={game.seat} />
+      <TeamMarquee cardIds={game.team} />
     </DialogContent>
   );
 }

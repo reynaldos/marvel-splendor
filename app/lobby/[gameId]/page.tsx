@@ -1,3 +1,4 @@
+import { TopBar } from "@/components/TopBar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -67,6 +68,7 @@ export default async function LobbyPage({
 
   return (
     <>
+      <TopBar />
       <LobbyLive gameId={game.id} />
       <LobbyScreen
         joinCode={game.joinCode}

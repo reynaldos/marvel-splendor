@@ -1,3 +1,4 @@
+import { TopBar } from "@/components/TopBar";
 import { redirect } from "next/navigation";
 
 import { SettingsScreen } from "@/components/profile/SettingsScreen";
@@ -17,12 +18,16 @@ export default async function SettingsPage() {
   const user = await getOrCreateUser(session.user);
 
   return (
-    <SettingsScreen
-      username={user.username}
-      name={user.name}
-      avatarUrl={publicAvatarUrl(user.avatarKey)}
-      onCheckUsername={checkUsernameAction}
-      onSave={saveProfileAction}
-    />
+    <>
+      <TopBar />
+      <SettingsScreen
+        username={user.username}
+        name={user.name}
+        avatarUrl={publicAvatarUrl(user.avatarKey)}
+        onCheckUsername={checkUsernameAction}
+        onSave={saveProfileAction}
+      />
+  
+    </>
   );
 }

@@ -1,15 +1,7 @@
-import Link from "next/link";
-import { LogOut, Settings, Shield, Swords, Trophy } from "lucide-react";
-
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
-import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Stage, StageRows } from "@/components/Stage";
-
-const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
-const ICON_LINK =
-  "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
 
 /** What a visitor sees before signing in. */
 export function WelcomeScreen() {
@@ -37,66 +29,19 @@ export function WelcomeScreen() {
   );
 }
 
-interface HomeScreenProps {
-  username: string;
-  avatarUrl: string | null;
-  wins: number;
-  gamesPlayed: number;
-  isAdmin: boolean;
-}
-
-/** The main menu: who you are along the top, the ways to play below. */
-export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, isAdmin }: HomeScreenProps) {
+/** The main menu: the ways to play. */
+export function HomeScreen() {
   return (
     <Stage>
       <StageRows>
-        <header className="flex items-center gap-4">
-          <Link href={`/profile/${username}`} className={`${PILL} pl-1 hover:bg-cosmos-500`}>
-            <PlayerAvatar src={avatarUrl} name={username} />
-            <span className="max-w-40 truncate text-base font-bold">{username}</span>
-          </Link>
-          <span className={PILL} title="Games won">
-            <Trophy className="size-6 text-gold-400" />
-            <span className="text-lg font-black tabular-nums">{wins}</span>
-          </span>
-          <span className={PILL} title="Games played">
-            <Swords className="size-6 text-gold-400" />
-            <span className="text-lg font-black tabular-nums">{gamesPlayed}</span>
-          </span>
-          <Logo className="mx-auto text-3xl" />
-          <Link href="/settings" aria-label="Settings" className={ICON_LINK}>
-            <Settings className="size-6" />
-          </Link>
-          <a href="/auth/logout" aria-label="Sign out" className={ICON_LINK}>
-            <LogOut className="size-6" />
-          </a>
-        </header>
-
-        <div className="flex min-h-0 flex-1 gap-8">
+        <div className="flex h-64 gap-6">
           <ModeTile href="/solo" label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
-
-          <ModeTile
-            href="/private"
-            label="Private Game"
-            tone="from-violet-400 to-purple-800"
-            art={<AvengersArt />}
-          />
+          <ModeTile href="/private" label="Private Game" tone="from-violet-400 to-purple-800" art={<AvengersArt />} />
         </div>
 
-        <footer className="relative">
-          <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
-            Assemble the Avengers · Claim the Gauntlet
-          </p>
-          {isAdmin ? (
-            <Link
-              href="/admin/users"
-              aria-label="Admin"
-              className="absolute right-0 -bottom-2 flex size-9 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
-            >
-              <Shield className="size-5" />
-            </Link>
-          ) : null}
-        </footer>
+        <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
+          Assemble the Avengers · Claim the Gauntlet
+        </p>
       </StageRows>
     </Stage>
   );

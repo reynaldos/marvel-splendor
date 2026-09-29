@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { cn } from "cn";
 import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
 
-import { Logo } from "@/components/home/Logo";
 import { BotLevel } from "@/components/lobby/BotLevel";
 import { Rule } from "@/components/lobby/Rule";
 import { ShareCode } from "@/components/lobby/ShareCode";
@@ -117,10 +116,9 @@ export function LobbyScreen({
   return (
     <Stage>
       <StageRows>
-        <header className="flex items-center justify-between">
-          <Logo className="text-3xl" />
+        <div className="flex justify-center">
           <ShareCode code={joinCode} />
-        </header>
+        </div>
 
         <ol className="flex items-start justify-evenly">
           {seats.map((seat, i) => (

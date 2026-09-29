@@ -35,10 +35,7 @@ function decimal(value: number | null): string {
   return value === null ? NONE : value.toFixed(1);
 }
 
-function tabs(
-  stats: UserStatsSnapshot,
-  career: CareerStats,
-): Array<{ name: string; stats: Stat[] }> {
+function tabs(stats: UserStatsSnapshot, career: CareerStats, records: CareerStats): Array<{ name: string; stats: Stat[] }> {
   return [
     {
       name: "Statistics",
@@ -69,36 +66,18 @@ function tabs(
     },
     {
       name: "Records",
+      // From games against other people only.
       stats: [
-        {
-          label: "Highest score",
-          icon: <Star className={cn(ICON, "fill-gold-400")} />,
-          value: stats.bestPoints,
-        },
-        {
-          label: "Best win",
-          icon: <Trophy className={ICON} />,
-          value: career.bestWinPoints ?? NONE,
-        },
-        {
-          label: "Average win",
-          icon: <Swords className={ICON} />,
-          value: decimal(career.averageWinPoints),
-        },
-        {
-          label: "Lowest loss",
-          icon: <TrendingDown className={ICON} />,
-          value: career.lowestLossPoints ?? NONE,
-        },
+        { label: "Highest score", icon: <Star className={cn(ICON, "fill-gold-400")} />, value: records.bestPoints },
+        { label: "Best win", icon: <Trophy className={ICON} />, value: records.bestWinPoints ?? NONE },
+        { label: "Average win", icon: <Swords className={ICON} />, value: decimal(records.averageWinPoints) },
+        { label: "Lowest loss", icon: <TrendingDown className={ICON} />, value: records.lowestLossPoints ?? NONE },
         {
           label: "Fastest win",
           icon: <Timer className={ICON} />,
-          value:
-            stats.fastestWinTurns != null
-              ? `${stats.fastestWinTurns} turns`
-              : NONE,
+          value: records.fastestWinTurns != null ? `${records.fastestWinTurns} turns` : NONE,
         },
-        { label: "Most badges", icon: badge, value: career.mostTags },
+        { label: "Most badges", icon: badge, value: records.mostTags },
       ],
     },
     {
@@ -124,15 +103,17 @@ function tabs(
 interface StatsTabsProps {
   stats: UserStatsSnapshot;
   career: CareerStats;
+  /** The same stats, from games against other people only. */
+  records: CareerStats;
   games: GameRecord[];
 }
 
-const PANEL = "h-44 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
+const PANEL = "h-50 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
 
 /** A player's stats, a few at a time, then their games: tabs along the top. */
-export function StatsTabs({ stats, career, games }: StatsTabsProps) {
+export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
   const [open, setOpen] = useState(0);
-  const all = tabs(stats, career);
+  const all = tabs(stats, career, records);
   const shown = all.at(open);
 
   return (
@@ -160,16 +141,24 @@ export function StatsTabs({ stats, career, games }: StatsTabsProps) {
           role="tabpanel"
           className={cn(
             PANEL,
-            "grid content-center gap-x-5 gap-y-3 px-5",
+            "grid content-center gap-x-5 gap-y-5 px-5",
             shown.stats.length > 4 ? "grid-cols-3" : "grid-cols-2",
           )}
         >
           {shown.stats.map((stat) => (
             <div key={stat.label} className="flex min-w-0 flex-col gap-1">
               <dt className="truncate px-3 text-sm font-bold">{stat.label}</dt>
-              <dd className="relative flex h-10 items-center justify-center rounded-full bg-cosmos-900 px-10 ring-2 ring-cosmos-500 ring-inset">
+              <dd className="relative flex h-10 items-center justify-center rounded-full bg-cosmos-900 pr-3 pl-10 ring-2 ring-cosmos-500 ring-inset">
                 <span className="absolute left-3 flex">{stat.icon}</span>
-                <span className="truncate text-xl font-black text-gold-400 tabular-nums">{stat.value}</span>
+                {/* Words are set smaller than numbers, to fit beside the icon. */}
+                <span
+                  className={cn(
+                    "truncate font-black text-gold-400 tabular-nums",
+                    typeof stat.value === "number" ? "text-xl" : "text-base",
+                  )}
+                >
+                  {stat.value}
+                </span>
               </dd>
             </div>
           ))}

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Bot, Hourglass, Star, UsersRound } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
-import { Logo } from "@/components/home/Logo";
 import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
@@ -31,13 +30,13 @@ type Picks = { [K in Setting]: number };
 /** Where each setting starts, as a place in its list: the first value, except the bot on normal. */
 const START: Picks = { playerCount: 0, botDifficulty: 1, targetPoints: 0, turnTimeSeconds: 0, gameTimeMinutes: 0 };
 
-const ICON = "size-20";
+const ICON = "size-24";
 const ICONS: Record<Setting, ReactNode> = {
   playerCount: <UsersRound className={`${ICON} fill-gold-400 text-gold-600`} />,
-  botDifficulty: <Bot className={`${ICON} text-gold-400`} />,
+  botDifficulty: <Bot className={`${ICON} fill-gold-400 text-gold-600`} />,
   targetPoints: <Star className={`${ICON} fill-gold-400 text-gold-600`} />,
   turnTimeSeconds: <TimerIcon className={ICON} />,
-  gameTimeMinutes: <Hourglass className={`${ICON} text-gold-400`} />,
+  gameTimeMinutes: <Hourglass className={`${ICON} fill-gold-400 text-gold-600`} />,
 };
 
 /** What is sent to start the game. */
@@ -89,11 +88,6 @@ export function SoloGameScreen() {
   return (
     <Stage>
       <StageRows>
-        <header className="flex items-center justify-between">
-          <Logo className="text-3xl" />
-          <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">VS Computer</h1>
-        </header>
-
         <div className="flex justify-evenly">
           {(Object.keys(SOLO_OPTIONS) as Setting[]).map((key) => {
             const { label, values, show } = SOLO_OPTIONS[key];

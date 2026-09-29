@@ -1,3 +1,4 @@
+import { TopBar } from "@/components/TopBar";
 import { redirect } from "next/navigation";
 
 import { PrivateGameScreen } from "@/components/lobby/PrivateGameScreen";
@@ -12,5 +13,10 @@ export default async function PrivateGamePage() {
   const session = await auth0.getSession();
   if (!session) redirect("/auth/login?returnTo=/private");
 
-  return <PrivateGameScreen onCreate={createGameAction} onJoin={joinGameAction} />;
+  return (
+    <>
+      <TopBar />
+      <PrivateGameScreen onCreate={createGameAction} onJoin={joinGameAction} />
+    </>
+  );
 }

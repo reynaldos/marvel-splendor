@@ -326,6 +326,12 @@ body {
   pointer-events: none;
 }
 
+/* A row that scrolls sideways, whose cards fade out at either end instead of being cut off. */
+.fade-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
 /* Something shown large over the board: the board dims as it arrives, and all of it fades when tapped away. */
 @keyframes zoom-dim {
   from { opacity: 0; }
@@ -538,6 +544,16 @@ body {
   padding-block: var(--fade);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
   mask-image: linear-gradient(to bottom, transparent, black var(--fade), black calc(100% - var(--fade)), transparent);
+}
+
+/* The same, for a list that runs off the bottom of the screen: faded at the top only, with
+   room under the last row to bring it up clear of the home bar. */
+.scroll-fade-top {
+  --fade: calc(var(--spacing) * 5);
+  padding-top: var(--fade);
+  padding-bottom: calc(var(--pad-b, 0px) + var(--spacing) * 10);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--fade));
+  mask-image: linear-gradient(to bottom, transparent, black var(--fade));
 }
 
 .fade-edges {
