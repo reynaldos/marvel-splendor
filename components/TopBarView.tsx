@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Menu, Settings, Shield, Trophy } from "lucide-react";
+import { LogOut, Menu, ScrollText, Settings, Shield, Trophy } from "lucide-react";
 
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { markUpdatesSeen, NewDot, unseenCount, UpdateLog, useSeenUpdate } from "@/components/UpdateLog";
 import { useNotchSide } from "@/components/use-notch-side";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
@@ -23,6 +24,11 @@ interface TopBarViewProps {
 /** The top bar as drawn. It lies over the top of the screen's canvas, and scales with it. */
 export function TopBarView({ username, avatarUrl, wins, isAdmin }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const seen = useSeenUpdate();
+  // What had been seen when the log was opened, so the new ones stay marked while it is read.
+  const [since, setSince] = useState(seen);
+  const hasNew = unseenCount(seen) > 0;
   const close = () => setOpen(false);
 
   return (
@@ -48,9 +54,10 @@ export function TopBarView({ username, avatarUrl, wins, isAdmin }: TopBarViewPro
           type="button"
           aria-label="Menu"
           onClick={() => setOpen(true)}
-          className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+          className="relative flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
         >
           <Menu className="size-6" />
+          {hasNew ? <NewDot className="absolute top-0 right-0" /> : null}
         </button>
       </header>
 
@@ -66,6 +73,20 @@ export function TopBarView({ username, avatarUrl, wins, isAdmin }: TopBarViewPro
             <Settings className="size-5 text-gold-200" />
             Profile settings
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              close();
+              setSince(seen);
+              markUpdatesSeen();
+              setUpdatesOpen(true);
+            }}
+            className={CHOICE}
+          >
+            <ScrollText className="size-5 text-gold-200" />
+            What&apos;s new
+            {hasNew ? <NewDot className="ml-auto" /> : null}
+          </button>
           {isAdmin ? (
             <Link href="/admin/users" onClick={close} className={CHOICE}>
               <Shield className="size-5 text-gold-200" />
@@ -78,6 +99,9 @@ export function TopBarView({ username, avatarUrl, wins, isAdmin }: TopBarViewPro
             Log out
           </a>
         </DialogContent>
+      </Dialog>
+      <Dialog open={updatesOpen} onOpenChange={setUpdatesOpen}>
+        <UpdateLog since={since} />
       </Dialog>
     </div>
   );

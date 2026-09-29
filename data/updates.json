@@ -1,0 +1,193 @@
+[
+  {
+    "version": "0.9.0",
+    "date": "2026-09-29",
+    "title": "What's new",
+    "summary": "See what has changed in the game,",
+    "pulls": [],
+    "new": [
+      "An update log in the menu, with every release so far"
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
+    "version": "0.8.0",
+    "date": "2026-09-29",
+    "title": "Collections and smarter bots",
+    "summary": "Collect every card you recruit, and face a tougher hard bot.",
+    "pulls": [
+      16,
+      17,
+      18,
+      19
+    ],
+    "new": [
+      "A collection of every card you have recruited",
+      "Sort your collection by level, team or alliance",
+      "Past games show the team you built",
+      "A hard bot that plans ahead and blocks you"
+    ],
+    "improved": [
+      "The same top bar on every menu screen",
+      "Records only count games against people"
+    ],
+    "fixed": [
+      "Players removed for being away can no longer rejoin"
+    ]
+  },
+  {
+    "version": "0.7.0",
+    "date": "2026-09-29",
+    "title": "Table chat",
+    "summary": "Send emojis and quick messages to the table while you play.",
+    "pulls": [
+      15
+    ],
+    "new": [
+      "Emojis and quick messages during a game",
+      "A new loading screen for the board"
+    ],
+    "improved": [
+      "A glow shows whose turn it is"
+    ],
+    "fixed": [
+      "The turn timer no longer restarts when you make a choice"
+    ]
+  },
+  {
+    "version": "0.6.0",
+    "date": "2026-09-29",
+    "title": "Board animations",
+    "summary": "The board comes to life, and winning feels like winning.",
+    "pulls": [
+      14
+    ],
+    "new": [
+      "A win screen with falling stones, and Thanos when you lose",
+      "Look back at the board after a game ends",
+      "An outline shows what each player picked",
+      "Locations, the Avengers tile and the Time Stone are announced"
+    ],
+    "improved": [
+      "Cards glide in and open bigger"
+    ],
+    "fixed": [
+      "The rule for winning the game",
+      "Animations now work in Safari"
+    ]
+  },
+  {
+    "version": "0.5.1",
+    "date": "2026-09-28",
+    "title": "Small fixes",
+    "summary": "A small fix behind the scenes.",
+    "pulls": [
+      13
+    ],
+    "new": [],
+    "improved": [],
+    "fixed": [
+      "A small fix behind the scenes"
+    ]
+  },
+  {
+    "version": "0.5.0",
+    "date": "2026-09-28",
+    "title": "Profile pictures",
+    "summary": "Pick a character as your picture, and see everyone's at the table.",
+    "pulls": [
+      12
+    ],
+    "new": [
+      "Character pictures to choose from for your profile",
+      "Each player's picture shows on the board and in the lobby"
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
+    "version": "0.4.0",
+    "date": "2026-09-28",
+    "title": "Profiles and the home screen app",
+    "summary": "Your own profile, and the game on your home screen like an app.",
+    "pulls": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "new": [
+      "Profiles with your stats and every game you've finished",
+      "Change your username, name and picture",
+      "Add the game to your iPhone's home screen",
+      "A game clock you can turn on",
+      "A bot fills in for anyone who misses 3 turns"
+    ],
+    "improved": [
+      "Pictures load faster",
+      "A new welcome screen and login page"
+    ],
+    "fixed": [
+      "No black flash between pages",
+      "Lots of small fixes on the board"
+    ]
+  },
+  {
+    "version": "0.3.0",
+    "date": "2026-09-27",
+    "title": "The box-art look",
+    "summary": "A new look, taken from the game's box art.",
+    "pulls": [
+      6
+    ],
+    "new": [
+      "The box-art look on the board and menus",
+      "A new lobby, with a difficulty for each bot"
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
+    "version": "0.2.0",
+    "date": "2026-09-27",
+    "title": "Game menu",
+    "summary": "A menu on the board, and a way to look over your team.",
+    "pulls": [
+      3,
+      4,
+      5
+    ],
+    "new": [
+      "A game menu: forfeit, move log and settings",
+      "Swipe through the cards you have recruited",
+      "Stone art for the tokens you hold"
+    ],
+    "improved": [
+      "A tidier board that is easier to read"
+    ],
+    "fixed": [
+      "An error that flashed while the board loaded"
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "date": "2026-09-27",
+    "title": "First release",
+    "summary": "The game is playable, against the computer or with friends.",
+    "pulls": [
+      1,
+      2
+    ],
+    "new": [
+      "Play against the computer",
+      "Private games with a room code",
+      "Made for a phone held on its side"
+    ],
+    "improved": [],
+    "fixed": [
+      "Players were being logged out by accident"
+    ]
+  }
+]
