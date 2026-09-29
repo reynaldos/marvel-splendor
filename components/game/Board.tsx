@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
 import { CardMarket } from "@/components/game/CardMarket";
@@ -37,6 +38,8 @@ interface BoardProps {
   banterBySeat: Record<number, string | null>;
   /** Top-right menu button (owned by GameBoardClient). */
   menu: ReactNode;
+  /** The chat button beside the viewer's name; left out where nothing can be sent. */
+  chat?: ReactNode;
   onStageTokenColor: (color: Stone) => void;
   onUnstageTokenColor: (color: Stone) => void;
   onStageReserveMarket: (level: CardLevel, cardId: string) => void;
@@ -77,6 +80,7 @@ export function Board({
   submitting,
   banterBySeat,
   menu,
+  chat,
   onStageTokenColor,
   onUnstageTokenColor,
   onStageReserveMarket,
@@ -197,7 +201,12 @@ export function Board({
           turnSeconds={view.settings.turnTimeSeconds}
           banterText={banterBySeat[viewerSeat] ?? null}
           hideTags
-          className={`w-40 ${TRAY_PANEL}`}
+          headerExtra={chat}
+          // With the button the name has a strip of its own, standing above the trays; the
+          // points hang off its corner, clear of the name.
+          className={cn("w-40", TRAY_PANEL, chat ? "h-28 self-end" : null)}
+          headerClassName={chat ? "pr-4" : undefined}
+          pointsClassName={chat ? "-right-5" : undefined}
         >
           <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} />
         </PlayerPlaque>

@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useState } from "react";
 
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
+import { ChatButton } from "@/components/game/ChatButton";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import type { BoardEvent } from "@/lib/board-events";
 import { createGame } from "@/lib/engine/setup";
@@ -112,6 +113,7 @@ export function BoardPreview({ show, at }: { show?: string; /** Milliseconds in.
           submitting={false}
           banterBySeat={{}}
           menu={null}
+          chat={<ChatButton waiting={false} onSend={noop} defaultOpen={show === "Chat"} />}
           onStageTokenColor={noop}
           onUnstageTokenColor={noop}
           onStageReserveMarket={noop}

@@ -34,6 +34,8 @@ interface PlayerPlaqueProps {
   /** Replaces the default holdings grid (the viewer's are in the HandTray). */
   children?: ReactNode;
   className?: string;
+  headerClassName?: string;
+  pointsClassName?: string;
 }
 
 /**
@@ -53,6 +55,8 @@ export function PlayerPlaque({
   hideTags,
   children,
   className,
+  headerClassName,
+  pointsClassName,
 }: PlayerPlaqueProps) {
   return (
     <div
@@ -64,7 +68,7 @@ export function PlayerPlaque({
           "shadow-[0_0_calc(var(--spacing)*4)_calc(var(--spacing)*0.5)_rgb(255_255_255/0.55)] ring-2 ring-primary",
       )}
     >
-      <div className="flex h-6 items-center gap-1 pr-6">
+      <div className={cn("flex h-6 shrink-0 items-center gap-1 pr-6", headerClassName)}>
         <PlayerAvatar src={avatarUrl} name={name} className="size-6 fs-2xs ring-1" />
         <span className="min-w-0 flex-1 truncate text-xs font-medium">{name}</span>
         {player.tags > 0 && !hideTags ? (
@@ -77,7 +81,10 @@ export function PlayerPlaque({
       </div>
 
       {/* Hangs off the corner so the name gets the header's full width. */}
-      <span className="absolute -top-2 -right-2 flex size-9 items-center justify-center" title="Points">
+      <span
+        className={cn("absolute -top-2 -right-2 flex size-9 items-center justify-center", pointsClassName)}
+        title="Points"
+      >
         <Star className="absolute size-full fill-gold-400 text-gold-600" />
         <span className="relative text-xs font-black text-cosmos-950 tabular-nums">{player.points}</span>
       </span>

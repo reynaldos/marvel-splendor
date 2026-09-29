@@ -25,7 +25,9 @@ export const ChatSchema = z.union([
   z.object({ kind: z.literal("TEXT"), body: z.enum(MESSAGES) }),
 ]);
 
-export type ChatBubble = z.infer<typeof ChatSchema> & { seat: number };
+/** What a player picks to send. */
+export type ChatSend = z.infer<typeof ChatSchema>;
+export type ChatBubble = ChatSend & { seat: number };
 
 /** How long until this player may send again; 0 when they may. */
 export function cooldownLeftMs(lastSentAt: number | null, now = Date.now()): number {

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { BoardSkeleton } from "@/components/game/BoardSkeleton";
+import { ChatButton } from "@/components/game/ChatButton";
+import { CHAT_COOLDOWN_MS, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { useNotchSide } from "@/components/use-notch-side";
@@ -66,6 +68,7 @@ interface MovesPostResponse {
 
 interface GameData {
   id: string;
+  mode: string;
   players: GamePlayerInfo[];
   view: RedactedGameState;
   /** When the current turn runs out, on this device's clock; null when untimed. */
@@ -130,6 +133,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // to PlayerPlaque/BanterBubble — is wired up so that task can just call
   // `setBanterBySeat` when content arrives.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [chatWaiting, setChatWaiting] = useState(false);
   const [banterBySeat, setBanterBySeat] = useState<Record<number, string | null>>({});
 
   // Latest values for the async flows below, which outlive the render that started them.
@@ -214,6 +218,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         setMoveLog(data.moves.map(toLogEntry));
         commit({
           id: data.id,
+          mode: data.mode,
           players: data.players,
           view: data.view,
           turnEndsAt: toDeadline(data.turnEndsInMs),
@@ -393,6 +398,22 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [submitMove],
   );
 
+  const sendChat = useCallback(
+    async (chat: ChatSend) => {
+      setChatWaiting(true);
+      const response = await fetch(`/api/games/${gameId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(chat),
+      }).catch(() => null);
+      // Sent too soon, as from a second device: wait out what the server says is left.
+      const tooSoon = response?.status === 429 ? await response.json().catch(() => null) : null;
+      if (!response?.ok && !tooSoon) toast.error("That couldn't be sent.");
+      setTimeout(() => setChatWaiting(false), tooSoon?.retryInMs ?? CHAT_COOLDOWN_MS);
+    },
+    [gameId],
+  );
+
   // Loading until there is a board or an error: a fetch that was skipped
   // because another was already running must not end the wait.
   if (!gameData && !fatalError) {
@@ -416,6 +437,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
   // The last move is announced before the results come up.
   const gameOverOpen = view.status === "finished" && !gameOverDismissed && !announcement;
+
+  // Still open once the game is over, for a "Good game!".
+  const canChat = gameData.mode === "MULTIPLAYER" && !gameData.abandoned && viewer !== undefined && !viewer.away;
 
   const owesTokens = view.pending?.type === "RETURN_TOKENS";
   const afterPick = viewer ? tokensAfter(staged, viewer.tokens, view.supply) : null;
@@ -508,6 +532,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             disabled={disabled}
             submitting={submitting}
             banterBySeat={banterBySeat}
+            chat={canChat ? <ChatButton waiting={chatWaiting} onSend={sendChat} /> : null}
             menu={
               <GameMenu
                 moveLog={moveLog}

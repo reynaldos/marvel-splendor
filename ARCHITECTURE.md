@@ -309,9 +309,12 @@ Players in a private game can send an emoji or a short message to the table. It 
 | Step | State |
 |---|---|
 | 1. Sending: the lists, the send route and the limit | Done |
-| 2. The player's card: more room for the username, and the two buttons | Not started |
+| 2. The player's card: the name on a strip of its own, with the chat button beside it | Done |
 | 3. Bubbles: shown live to everyone, popping in and out, and on `/preview/board` | Not started |
 
+- **The button.** One round smiley beside the player's own name (`components/game/ChatButton.tsx`). It opens a list above it: the emojis in a row, the messages under them in two columns. One tap sends. There is one button, not two, because the name row has no room for a second without cutting the name short.
+- **The player's own card.** Where there is a button, the name has a strip of its own standing above the trays, and the points hang off its corner, so the name and the button share the full width. The part level with the trays is left to the tokens being taken. Without a button, as in a game against the computer, the card is as it always was. The card is given its height outright: pulling it up with a margin is what Safari drew wrongly. To look at it with the list open, go to `/preview/board?show=Chat`.
+- **Off while waiting.** The button is off for 3 seconds after a send. If the server says it is too soon, as when sending from a second device, it stays off for as long as it says is left.
 - **Only what is on the lists can be sent.** A short list of emojis and one of messages, in `lib/chat.ts`. Nothing is typed, so nothing needs moderating. A message is at most 20 characters, to fit across a name.
 - **One send every 3 seconds per player.** The server checks it against the player's last saved send, so it holds across devices and servers (`app/api/games/[id]/chat/route.ts`).
 - **Who can send.** A player in a private game that is in play or finished, so "Good game!" can be said at the end. Not a player marked away, and not in a game against the computer.
