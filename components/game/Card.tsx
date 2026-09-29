@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { cn } from "cn";
 
 import { Button } from "@/components/ui/button";
-import { ASSETS, AssetImage, AvengersIcon, LargeImages } from "@/components/game/assets";
+import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
+import { ZoomedView } from "@/components/game/Zoomable";
 import { STONE_COLORS } from "@/components/game/stone-colors";
 import { STONES, type Card as CardType } from "@/lib/engine/types";
 
@@ -57,7 +58,9 @@ export function Card({
   className,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
-  const [viewing, setViewing] = useState(false);
+  // Where the card sat when View was tapped, for the large one to come from; null while not viewing.
+  const [viewing, setViewing] = useState<DOMRect | null>(null);
+  const root = useRef<HTMLDivElement>(null);
   const showBack = faceDown || !card;
 
   if (showBack) {
@@ -80,11 +83,12 @@ export function Card({
   const showReserve = !disabled && reserveAction && !reserveAction.disabled;
   const close = () => {
     setExpanded(false);
-    setViewing(false);
+    setViewing(null);
   };
 
   return (
     <div
+      ref={root}
       className={cn("relative aspect-card w-16 shrink-0 rounded-md", traced && "trace", expanded && "z-50", className)}
       onKeyDown={(e) => {
         if (e.key === "Escape") close();
@@ -107,14 +111,14 @@ export function Card({
           "@container relative block size-full overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10 transition-transform disabled:cursor-default",
           affordable && "ring-2 ring-primary",
           selected && "ring-2 ring-offset-2 ring-offset-background outline outline-primary",
-          expanded && "scale-110",
+          expanded && "scale-125",
         )}
       >
         <CardArt card={card} />
       </button>
 
       {expanded && !viewing ? (
-        <div className="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-col gap-1.5">
+        <div className="absolute top-1/2 left-full ml-4 flex -translate-y-1/2 flex-col gap-1.5">
           {showRecruit ? (
             <Button
               type="button"
@@ -140,24 +144,22 @@ export function Card({
               {reserveAction.label}
             </Button>
           ) : null}
-          <Button type="button" size="lg" variant="secondary" onClick={() => setViewing(true)}>
+          <Button type="button" size="lg" variant="secondary" onClick={() => setViewing(root.current?.getBoundingClientRect() ?? null)}>
             View
           </Button>
         </div>
       ) : null}
 
       {viewing ? (
-        <button
-          type="button"
-          autoFocus
-          aria-label={`Close ${card.name}`}
-          onClick={close}
-          className="fixed inset-0 flex cursor-default items-center justify-center bg-black/75 outline-none backdrop-blur-xs"
+        <ZoomedView
+          from={viewing}
+          closeLabel={`Close ${card.name}`}
+          // The card settles back as the large one fades.
+          onClosing={() => setExpanded(false)}
+          onClose={close}
         >
-          <LargeImages>
-            <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
-          </LargeImages>
-        </button>
+          <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
+        </ZoomedView>
       ) : null}
     </div>
   );

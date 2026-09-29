@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "rea
 import { cn } from "cn";
 
 import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
+import { glideFrom } from "@/components/game/glide";
 import { LocationTile } from "@/components/game/LocationTile";
 import type { BoardEvent } from "@/lib/board-events";
 import { getLocation } from "@/lib/engine/data";
@@ -72,7 +73,12 @@ export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) 
     line = `${name} assembled the Avengers`;
     if (event.from !== null) detail = `Taken from ${nameForSeat(event.from)}`;
   } else {
-    piece = <Eye />;
+    // Room under it, so its casing stands clear of the line beneath.
+    piece = (
+      <div className="pb-8">
+        <Eye />
+      </div>
+    );
     line = `${name} has acquired the Time Stone`;
   }
 
@@ -106,24 +112,10 @@ function Glide({ origin, children }: { origin: TileOrigin | null; children: Reac
     const holder = ref.current;
     if (!holder) return;
     if (origin) holder.append(origin.copy);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return () => origin?.copy.remove();
-
-    const here = holder.getBoundingClientRect();
-    const from = origin?.rect;
-    const flight = holder.animate(
-      [
-        {
-          transform: from
-            ? `translate(${from.x + from.width / 2 - (here.x + here.width / 2)}px, ${from.y + from.height / 2 - (here.y + here.height / 2)}px) scale(${from.width / here.width})`
-            : "scale(0.3)",
-        },
-        { transform: "none" },
-      ],
-      { duration: GLIDE_MS, easing: "cubic-bezier(0.3, 0, 0.2, 1)", fill: "backwards" },
-    );
+    const flight = glideFrom(holder, origin?.rect ?? null, GLIDE_MS);
     return () => {
       // Taken back, so a second start measures from where the tile rests, not from mid-flight.
-      flight.cancel();
+      flight?.cancel();
       origin?.copy.remove();
     };
   }, [origin]);

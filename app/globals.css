@@ -326,6 +326,18 @@ body {
   pointer-events: none;
 }
 
+/* Something shown large over the board: the board dims as it arrives, and all of it fades when tapped away. */
+@keyframes zoom-dim {
+  from { opacity: 0; }
+}
+@keyframes zoom-out {
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .zoom-dim { animation: zoom-dim 0.3s ease-out both; }
+  .zoom-out { animation: zoom-out 0.2s ease-in both; pointer-events: none; }
+}
+
 /* An announcement: the board dims, the piece and its line hold, then all of it goes. */
 /* At rest the Eye is open: its halves parted, the bars swung clear, the light up. */
 .eye-lid-top { translate: 0 -101%; }
