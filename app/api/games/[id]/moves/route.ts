@@ -45,7 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       { status: 400 },
     );
   }
-  const move: Move = parsedMove.data;
+  const sent: Move = parsedMove.data;
 
   const game = await prisma.game.findUnique({
     where: { id },
@@ -68,7 +68,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // The game clock is checked whenever anyone moves. Once it has run out, that
   // is recorded first, and the round in progress becomes the last.
   const clockLeft = gameEndsInMs(stored.settings, game.createdAt);
-  const clockRanOut = clockLeft !== null && clockLeft <= 0 && !stored.clockExpired && move.type !== "FORFEIT";
+  const clockRanOut = clockLeft !== null && clockLeft <= 0 && !stored.clockExpired && sent.type !== "FORFEIT";
   const clockMove: AppliedMove[] = clockRanOut
     ? [{ seat: stored.currentSeat, move: { type: "END_BY_CLOCK" }, ordinal: stored.moveCount }]
     : [];
@@ -76,7 +76,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const viewerSeat = seatRow.seat;
   // A timeout is the one move made on someone else's behalf: any player may
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
-  const seat = move.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
+  const seat = sent.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
+  // Only the player themselves can say they were there.
+  const move: Move = sent.type === "TIMEOUT_SKIP" && seat !== viewerSeat ? { type: "TIMEOUT_SKIP" } : sent;
 
   // Forfeiting and coming back don't wait for your turn.
   const anytime = move.type === "FORFEIT" || move.type === "REJOIN";
@@ -85,9 +87,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   if (move.type === "TIMEOUT_SKIP") {
-    // ponytail: the turn is timed from the game row's last write, so resolving
-    // a pending sub-move restarts the clock. Store a per-turn deadline in the
-    // state if that slack ever matters.
     const left = turnEndsInMs(state, game.updatedAt);
     const required = viewerSeat === seat ? -TIMEOUT_GRACE_MS : OTHERS_CLAIM_DELAY_MS;
     if (left === null || -left < required) {
@@ -124,8 +123,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
 
   const now = new Date();
-  // Coming back is no part of anyone's turn, so the turn clock keeps running.
-  const movedAt = move.type === "REJOIN" ? game.updatedAt : now;
+  // Coming back is no part of anyone's turn, and a move that leaves a choice
+  // to make hasn't ended one, so the turn clock keeps running through both.
+  const sameTurn = move.type === "REJOIN" || (finalState.status === "active" && finalState.pending !== null);
+  const movedAt = sameTurn ? game.updatedAt : now;
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";
   const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt, status);
   if (!persisted) {

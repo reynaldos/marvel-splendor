@@ -440,6 +440,7 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 - **The count lives in the game state.** Each seat carries `missedTurns`; a timed-out turn adds one and a played turn clears it. Coming back is logged as a `REJOIN` move.
 - **A turn skipped for having no legal move does not count.** It is logged as `TIMEOUT_SKIP` with `stuck: true`, which only the server can set.
+- **Only a turn nobody showed up for counts as missed.** A player whose time runs out with something picked was there: the skip is logged with `present: true`, which only that player's own device can set, and is not counted. Nor is a skip that finds a choice still waiting, since the player had already moved.
 - **The stand-in bot plays at the game's bot level**, or normal when the game has none.
 - **Bot-played turns count in that player's stats.** A win earned by the stand-in bot is recorded as the player's win.
 - **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
@@ -455,7 +456,11 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 **Turn timers**
 
-- **The clock restarts on a sub-move.** A turn is timed from the game row's last write (`Game.updatedAt`), so returning tokens or choosing a Location gives that turn a fresh clock.
+- **Tokens held when the time runs out are taken.** The pick is played as a normal move, so the turn is not a missed one.
+- **Unless they would take the player over 10.** There is no time left to choose what to give back, so the pick is not played: the turn is skipped, the player holds what they held before, and it is not counted as missed. The same goes for running out of time with the give-back popup open.
+- **A choice doesn't restart the clock.** A move that leaves tokens to give back, or a Location to choose, hasn't ended the turn, so the clock carries on from where it was. Both popups show the turn's timer, as they cover the player's card.
+- **If the time runs out with tokens owed on the server**, as when a device drops out between taking and giving back, the move is undone: what it took goes back. After reserving a card only the S.H.I.E.L.D. token goes back and the card stays reserved, since the card that replaced it on the board has been seen. A Location left unchosen is chosen for the player.
+- **Games in progress from before this** lose move playback if they had a turn time out with a choice waiting, as the count of missed turns no longer matches. They jump straight to the latest board instead.
 - **Timing out another player waits a few seconds.** A player's own device ends their turn at zero. Other devices wait about 3 seconds longer before doing it for them, so there is a short pause when someone has left.
 
 **Move playback**

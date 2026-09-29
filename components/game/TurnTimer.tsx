@@ -8,13 +8,14 @@ interface TurnTimerProps {
   endsAt: number | null;
   /** The turn's full length; the count holds here until the turn banner has gone. */
   seconds: number | null;
+  className?: string;
 }
 
 /**
  * Countdown to a deadline the server set, so every device shows the same
  * time left. Presentational only — GameBoardClient ends the turn.
  */
-export function TurnTimer({ endsAt, seconds }: TurnTimerProps) {
+export function TurnTimer({ endsAt, seconds, className }: TurnTimerProps) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export function TurnTimer({ endsAt, seconds }: TurnTimerProps) {
       className={cn(
         "flex size-7 items-center justify-center rounded-full fs-2xs font-bold tabular-nums ring-2",
         remaining <= 5 ? "text-destructive ring-destructive" : "text-foreground ring-foreground/20",
+        className,
       )}
       title="Turn time remaining"
     >

@@ -86,7 +86,11 @@ describe("Hand limit (RETURN_TOKENS pending)", () => {
 
     // One over the limit (11): pending is set and the turn does not advance.
     const overLimit = applyMove(state, 0, { type: "TAKE_TOKENS", colors: ["power", "reality", "mind"] });
-    expect(overLimit.pending).toEqual({ type: "RETURN_TOKENS", mustReturn: 1 });
+    expect(overLimit.pending).toEqual({
+      type: "RETURN_TOKENS",
+      mustReturn: 1,
+      taken: { mind: 1, power: 1, reality: 1 },
+    });
     expect(overLimit.currentSeat).toBe(0); // turn hasn't advanced yet
   });
 

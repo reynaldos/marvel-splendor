@@ -314,8 +314,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // When a turn's time runs out, end it: straight away if it's the viewer's
   // own, after a short wait if it's someone else's who may have walked away.
   // The viewer's own turn plays whatever they had picked; with nothing picked,
-  // or a pick the server won't take, it is skipped. The server re-checks the
-  // time itself, so this can't skip a turn early.
+  // or a pick the server won't take, it is skipped. A pick that leaves tokens
+  // to give back isn't played, as there is no time left to choose them. The
+  // server re-checks the time itself, so this can't skip a turn early.
   const stagedRef = useRef(staged);
   useEffect(() => {
     stagedRef.current = staged;
@@ -329,8 +330,17 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
     const timer = setTimeout(async () => {
       const picked = isMine ? stagedRef.current : null;
-      if (picked && (await submitMove(stagedActionToMove(picked), true))) return;
-      void submitMove({ type: "TIMEOUT_SKIP" });
+      const mine = gameRef.current?.view.players.find((p) => p.seat === gameRef.current?.view.viewerSeat);
+      const supply = gameRef.current?.view.supply;
+      const goesOver = picked && mine && supply && totalTokens(tokensAfter(picked, mine.tokens, supply)) > HAND_LIMIT;
+      if (picked && !goesOver && (await submitMove(stagedActionToMove(picked), true))) return;
+      // Having picked something, the player was there: the turn is lost, but not counted as missed.
+      const owed = isMine && gameRef.current?.view.pending?.type === "RETURN_TOKENS";
+      const skipped = await submitMove(picked ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" });
+      if (skipped && (goesOver || owed)) {
+        setChoosingReturn(false);
+        toast.info("Time ran out before you chose what to give back, so your pick was put back.");
+      }
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
@@ -574,6 +584,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           }
           viewerTokens={owesTokens || !afterPick ? viewer.tokens : afterPick}
           submitting={submitting}
+          turnEndsAt={gameData.turnEndsAt}
+          turnSeconds={view.settings.turnTimeSeconds}
           returnOpen={owesTokens ? returnClosedAt !== view.moveCount : choosingReturn}
           onReturnOpenChange={(open) =>
             owesTokens ? setReturnClosedAt(open ? null : view.moveCount) : setChoosingReturn(open)
