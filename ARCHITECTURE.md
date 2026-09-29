@@ -417,11 +417,14 @@ For the owner to review who is using the game and how much.
 - **IP addresses are personal data.** They are only ever shown on the admin page. A country or city can be worked out from them later, so neither is stored.
 - **Admin page. Done.** `/admin/users` (`app/admin/users/page.tsx`, numbers from `lib/user-metrics.ts`). Admins get an Admin button at the bottom right of the main menu; nobody else is shown it.
   - **Who may open it.** The emails in the `ADMIN_EMAILS` setting, separated by commas, and only once the sign-in has verified the email. Everyone else is told the page doesn't exist. With the setting empty, nobody can open it.
-  - **Now.** Who is online (seen in the last 5 minutes), games in play (moved in within the last 10 minutes), lobbies waiting, and visits in the last 24 hours. Below them, the 50 most recently touched games and lobbies with their players, round and last move. A game nobody has moved in for 10 minutes shows as "Left open".
+  - **Along the top,** seven boxes: who is online (seen in the last 5 minutes), games in play (moved in within the last 10 minutes), lobbies waiting, visits in the last 24 hours, users, and games finished and abandoned.
+  - **Under them, three tabs in a row,** with the chosen one's view beneath: Open tables, Every user, Most sent. Open tables shows first. They are drawn like the tabs on the profile's stats (`components/admin/AdminTabs.tsx`).
+  - **Open tables.** The 50 most recently touched games and lobbies with their players, round and last move. A game nobody has moved in for 10 minutes shows as "Left open".
   - **Every user**, latest seen first: sign-up date and how they sign in, visits, last joined, last seen, time in the app, time playing, games, wins, device and IP address. Hovering over Games or the IP address shows the split and every address used.
   - **Most sent.** Every emoji and message on the lists with how many times it has been sent, most first. One never sent shows 0, and one taken off the lists keeps its count. Clearing games clears the counts, as what was sent is saved with its game.
   - **Time playing** is each game's first move to its last, added up, so a lobby or a tab left open adds nothing. Clearing games clears it.
-  - **It reloads itself every minute.**
+  - **It fetches its numbers again every minute, in place** (`components/admin/AutoRefresh.tsx`): the chosen tab and the place scrolled to are kept. It rests while its browser tab is out of sight and catches up when looked at again. It used to reload the whole page, in sight or not; one reload failing, as when the computer had slept, left an error page that never tried again.
+  - **A load that fails shows a notice and tries again in a minute.**
   - **It reads every user and every visit each time.** Fine at this size; with thousands of users, show them a page at a time and add the visits up in the database.
 
 ## 9. Testing & correctness strategy

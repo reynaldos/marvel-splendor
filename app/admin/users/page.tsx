@@ -4,19 +4,26 @@ import { notFound, redirect } from "next/navigation";
 import { cn } from "cn";
 import { ArrowLeft } from "lucide-react";
 
+import { AdminTabs } from "@/components/admin/AdminTabs";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { timeAgo } from "@/lib/game-record";
 import { pageMetadata } from "@/lib/site";
 import { formatDuration, loadUserMetrics } from "@/lib/user-metrics";
 
-export const metadata = pageMetadata("Users", "Who is playing, and how much.", true);
+export const metadata = pageMetadata("Admin dashboard", "Who is playing, and how much.", true);
 
 const REFRESH_SECONDS = 60;
 const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
 
 const ago = (date: Date | null) => (date ? timeAgo(date.getTime()) : "Never");
-const day = (date: Date) => date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+const day = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
 function Tile({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
@@ -25,15 +32,6 @@ function Tile({ label, value, note }: { label: string; value: number; note?: str
       <span className="text-2xl font-black text-gold-400 tabular-nums">{value}</span>
       {note ? <span className="text-xs text-cosmos-300">{note}</span> : null}
     </li>
-  );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="font-display text-lg font-black tracking-widest text-gold-400 uppercase">{title}</h2>
-      {children}
-    </section>
   );
 }
 
@@ -73,11 +71,27 @@ export default async function AdminUsersPage() {
   // Anyone else is told the page doesn't exist.
   if (!isAdmin(session.user)) notFound();
 
-  const { totals, tables, users, sent } = await loadUserMetrics();
+  // A load that fails, as when the database is slow to wake, leaves the page up to try again.
+  const metrics = await loadUserMetrics().catch((error) => {
+    console.error("admin metrics", error);
+    return null;
+  });
+  if (!metrics) {
+    return (
+      <main className="dark flex min-h-dvh flex-col items-center justify-center gap-2 bg-cosmos px-6 text-center text-white">
+        <AutoRefresh seconds={REFRESH_SECONDS} />
+        <p className="font-display text-lg font-black tracking-widest text-gold-400 uppercase">
+          Couldn&apos;t load the numbers
+        </p>
+        <p className="text-sm text-cosmos-300">Trying again in a minute.</p>
+      </main>
+    );
+  }
+  const { totals, tables, users, sent } = metrics;
 
   return (
     <main className="dark min-h-dvh bg-cosmos px-6 py-8 text-white">
-      <meta httpEquiv="refresh" content={String(REFRESH_SECONDS)} />
+      <AutoRefresh seconds={REFRESH_SECONDS} />
       <div className="mx-auto flex max-w-7xl flex-col gap-8">
         <header className="flex items-center gap-4">
           <Link
@@ -87,7 +101,7 @@ export default async function AdminUsersPage() {
           >
             <ArrowLeft className="size-5" />
           </Link>
-          <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">Users</h1>
+          <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">Admin dashboard</h1>
           <p className="ml-auto text-xs text-cosmos-300">Refreshes every minute.</p>
         </header>
 
@@ -101,98 +115,109 @@ export default async function AdminUsersPage() {
           <Tile label="Games abandoned" value={totals.abandoned} />
         </ul>
 
-        <Section title="Open tables">
-          {tables.length === 0 ? (
-            <p className="text-sm font-bold text-cosmos-300">No games or lobbies are open.</p>
-          ) : (
-            <Table head={["Status", "Kind", "Players", "Round", "Room code", "Opened", "Last move"]}>
-              {tables.map((table) => (
-                <tr key={table.id}>
-                  <td>
-                    <Dot
-                      on={table.live}
-                      label={table.status === "LOBBY" ? "Lobby" : table.live ? "In play" : "Left open"}
-                    />
-                  </td>
-                  <td>{MODE[table.mode]}</td>
-                  <td>{table.players.join(", ")}</td>
-                  <td>{table.status === "LOBBY" ? "" : table.round}</td>
-                  <td className="font-mono">{table.mode === "MULTIPLAYER" ? table.joinCode : ""}</td>
-                  <td>{ago(table.createdAt)}</td>
-                  <td>{ago(table.updatedAt)}</td>
-                </tr>
-              ))}
-            </Table>
-          )}
-        </Section>
-
-        <Section title="Most sent">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Table head={["Emoji", "Times sent"]}>
-              {sent.emojis.map((emoji) => (
-                <tr key={emoji.body}>
-                  <td className="text-xl">{emoji.body}</td>
-                  <td>{emoji.count}</td>
-                </tr>
-              ))}
-            </Table>
-            <Table head={["Message", "Times sent"]}>
-              {sent.messages.map((message) => (
-                <tr key={message.body}>
-                  <td>{message.body}</td>
-                  <td>{message.count}</td>
-                </tr>
-              ))}
-            </Table>
-          </div>
-        </Section>
-
-        <Section title="Every user">
-          <Table
-            head={[
-              "User",
-              "Email",
-              "Signed up",
-              "Visits",
-              "Last joined",
-              "Last seen",
-              "Time in app",
-              "Time playing",
-              "Games",
-              "Wins",
-              "Device",
-              "IP address",
-            ]}
-          >
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <Link href={`/profile/${user.username}`} className="font-bold text-gold-200 hover:underline">
-                    <Dot on={user.online} label={user.name ?? user.username} />
-                  </Link>
-                </td>
-                <td>{user.email}</td>
-                <td>
-                  {day(user.signedUpAt)}, {user.signIn}
-                </td>
-                <td>{user.count}</td>
-                <td>{ago(user.lastJoinedAt)}</td>
-                <td>{ago(user.lastSeenAt)}</td>
-                <td>{formatDuration(user.timeInAppMs)}</td>
-                <td>{formatDuration(user.playingMs)}</td>
-                <td title={`${user.finished} finished, ${user.inPlay} open, ${user.abandoned} abandoned`}>
-                  {user.finished + user.inPlay + user.abandoned}
-                </td>
-                <td>{user.wins}</td>
-                <td>{user.device}</td>
-                <td className="font-mono" title={user.ips.join("\n")}>
-                  {user.ips[0]}
-                  {user.ips.length > 1 ? ` +${user.ips.length - 1}` : ""}
-                </td>
-              </tr>
-            ))}
-          </Table>
-        </Section>
+        {/* The chosen tab is kept when the numbers are fetched again. */}
+        <AdminTabs
+          tabs={[
+            {
+              name: "Open tables",
+              view:
+                tables.length === 0 ? (
+                  <p className="text-sm font-bold text-cosmos-300">No games or lobbies are open.</p>
+                ) : (
+                  <Table head={["Status", "Kind", "Players", "Round", "Room code", "Opened", "Last move"]}>
+                    {tables.map((table) => (
+                      <tr key={table.id}>
+                        <td>
+                          <Dot
+                            on={table.live}
+                            label={table.status === "LOBBY" ? "Lobby" : table.live ? "In play" : "Left open"}
+                          />
+                        </td>
+                        <td>{MODE[table.mode]}</td>
+                        <td>{table.players.join(", ")}</td>
+                        <td>{table.status === "LOBBY" ? "" : table.round}</td>
+                        <td className="font-mono">{table.mode === "MULTIPLAYER" ? table.joinCode : ""}</td>
+                        <td>{ago(table.createdAt)}</td>
+                        <td>{ago(table.updatedAt)}</td>
+                      </tr>
+                    ))}
+                  </Table>
+                ),
+            },
+            {
+              name: "Every user",
+              view: (
+                <Table
+                  head={[
+                    "User",
+                    "Email",
+                    "Signed up",
+                    "Visits",
+                    "Last joined",
+                    "Last seen",
+                    "Time in app",
+                    "Time playing",
+                    "Games",
+                    "Wins",
+                    "Device",
+                    "IP address",
+                  ]}
+                >
+                  {users.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <Link href={`/profile/${user.username}`} className="font-bold text-gold-200 hover:underline">
+                          <Dot on={user.online} label={user.name ?? user.username} />
+                        </Link>
+                      </td>
+                      <td>{user.email}</td>
+                      <td>
+                        {day(user.signedUpAt)}, {user.signIn}
+                      </td>
+                      <td>{user.count}</td>
+                      <td>{ago(user.lastJoinedAt)}</td>
+                      <td>{ago(user.lastSeenAt)}</td>
+                      <td>{formatDuration(user.timeInAppMs)}</td>
+                      <td>{formatDuration(user.playingMs)}</td>
+                      <td title={`${user.finished} finished, ${user.inPlay} open, ${user.abandoned} abandoned`}>
+                        {user.finished + user.inPlay + user.abandoned}
+                      </td>
+                      <td>{user.wins}</td>
+                      <td>{user.device}</td>
+                      <td className="font-mono" title={user.ips.join("\n")}>
+                        {user.ips[0]}
+                        {user.ips.length > 1 ? ` +${user.ips.length - 1}` : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </Table>
+              ),
+            },
+            {
+              name: "Most sent",
+              view: (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Table head={["Emoji", "Times sent"]}>
+                    {sent.emojis.map((emoji) => (
+                      <tr key={emoji.body}>
+                        <td className="text-xl">{emoji.body}</td>
+                        <td>{emoji.count}</td>
+                      </tr>
+                    ))}
+                  </Table>
+                  <Table head={["Message", "Times sent"]}>
+                    {sent.messages.map((message) => (
+                      <tr key={message.body}>
+                        <td>{message.body}</td>
+                        <td>{message.count}</td>
+                      </tr>
+                    ))}
+                  </Table>
+                </div>
+              ),
+            },
+          ]}
+        />
       </div>
     </main>
   );
