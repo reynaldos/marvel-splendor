@@ -145,16 +145,16 @@ const LEAN = -22;
  * `to` are how far round the ring is, closed and open, clockwise from there.
  */
 const RINGS = [
-  { name: "blue", ring: 45.8, ends: 35.5, middle: 26, thick: [4, 5.5], from: -22, to: 170, time: 4.2 },
-  { name: "yellow", ring: 46.8, ends: -2.5, middle: 12.5, thick: [3.5, 5], from: 76, to: -22, time: 3.8 },
-  { name: "purple", ring: 47.8, ends: 23, middle: 13.5, thick: [5, 4], from: -150, to: -27, time: 4.1 },
-  { name: "red", ring: 49, ends: 30, middle: 17, thick: [4.5, 5.5], from: -125, to: -203, time: 3.9 },
+  { name: "blue", ring: 45.8, ends: 35.5, middle: 26, thick: [10, 3], from: -10, to: 175, time: 4.5 },
+  { name: "yellow", ring: 46.8, ends: -0, middle:12, thick: [10, 3], from: 105, to: -20, time: 4.1 },
+  { name: "purple", ring: 47.8, ends: 18, middle: 13.5, thick: [10, 5], from: -175, to:-20, time: 4.4 },
+  { name: "red", ring: 49, ends: 24, middle: 17, thick: [10, 5], from: -130, to: -195, time: 4.2 },
 ];
 
 /** A bar's outline: two curves from rim to rim, further apart where it is thicker. */
 function bar({ ring, ends, middle, thick }: (typeof RINGS)[number]): string {
   // Each bar runs from one side of its own ring to the other.
-  const reach = Math.sqrt(ring ** 2 - ends ** 2);
+  const reach = Math.sqrt(ring ** 2 - ends ** 2) + 4;
   // A curve's middle is halfway between its ends and the point it is pulled towards.
   const edge = (side: number) => {
     const atEnds = 50 - ends + (side * thick[0]) / 2;
@@ -205,8 +205,8 @@ function Eye() {
               } as CSSProperties
             }
           >
-            <circle cx="50" cy="50" r={ring.ring} fill="none" stroke="#94a3b8" strokeWidth="1.4" />
-            <path d={bar(ring)} fill="#a9b4c6" stroke="#1e293b" strokeWidth="0.8" strokeLinejoin="round" />
+            <circle cx="50" cy="50" r={ring.ring} fill="none" stroke={ring.name} strokeWidth="1.4" />
+            <path d={bar(ring)} fill={ring.name} stroke="#1e293b" strokeWidth="0.8" strokeLinejoin="round" />
           </svg>
         ))}
       </div>
