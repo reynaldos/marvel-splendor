@@ -33,6 +33,8 @@ export interface GameRecord {
   rounds: number;
   /** Cards recruited at level 1, 2 and 3. */
   cardsByLevel: [number, number, number];
+  /** The ids of the cards the player recruited. */
+  team: string[];
   /** Everyone at the table, best first. */
   players: RankedPlayer[];
 }
@@ -78,6 +80,7 @@ export function gameRecord(
     won: mine.won,
     place: mine.place,
     rounds: game.state.round,
+    team: game.state.players[seat].cards,
     cardsByLevel: [1, 2, 3].map((level) => levels.filter((l) => l === level).length) as [number, number, number],
     players,
   };

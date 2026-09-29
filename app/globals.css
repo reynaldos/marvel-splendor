@@ -326,6 +326,12 @@ body {
   pointer-events: none;
 }
 
+/* A row that scrolls sideways, whose cards fade out at either end instead of being cut off. */
+.fade-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
 /* Something shown large over the board: the board dims as it arrives, and all of it fades when tapped away. */
 @keyframes zoom-dim {
   from { opacity: 0; }
