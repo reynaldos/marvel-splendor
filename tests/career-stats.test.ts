@@ -6,7 +6,7 @@ import { careerStats, type FinishedGame } from "@/lib/career-stats";
 import { ALL_CARDS } from "@/lib/engine/data";
 
 const idOf = (name: string) => ALL_CARDS.find((c) => c.name === name)!.id;
-const game = (over: Partial<FinishedGame>): FinishedGame => ({ cards: [], points: 0, tags: 0, won: false, ...over });
+const game = (over: Partial<FinishedGame>): FinishedGame => ({ cards: [], points: 0, tags: 0, won: false, turns: 30, ...over });
 
 describe("careerStats", () => {
   it("has nothing to show before a game is finished", () => {
@@ -20,6 +20,8 @@ describe("careerStats", () => {
       lowestLossPoints: null,
       averageTags: null,
       mostTags: 0,
+      bestPoints: 0,
+      fastestWinTurns: null,
     });
   });
 
@@ -67,5 +69,15 @@ describe("careerStats", () => {
     const stats = careerStats([game({ tags: 5 }), game({ tags: 0 }), game({ tags: 1 })]);
     expect(stats.averageTags).toBe(2);
     expect(stats.mostTags).toBe(5);
+  });
+
+  it("keeps the highest score from any game, and the fastest from wins only", () => {
+    const stats = careerStats([
+      game({ won: true, points: 16, turns: 31 }),
+      game({ won: true, points: 17, turns: 26 }),
+      game({ won: false, points: 19, turns: 12 }),
+    ]);
+    expect(stats.bestPoints).toBe(19);
+    expect(stats.fastestWinTurns).toBe(26);
   });
 });

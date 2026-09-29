@@ -17,12 +17,13 @@ interface ProfileScreenProps {
   joined: string;
   stats: UserStatsSnapshot;
   career: CareerStats;
+  records: CareerStats;
   games: GameRecord[];
   isOwn: boolean;
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
-export function ProfileScreen({ username, name, avatarUrl, joined, stats, career, games, isOwn }: ProfileScreenProps) {
+export function ProfileScreen({ username, name, avatarUrl, joined, stats, career, records, games, isOwn }: ProfileScreenProps) {
   return (
     <Stage>
       <StageRows>
@@ -42,7 +43,7 @@ export function ProfileScreen({ username, name, avatarUrl, joined, stats, career
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
             <p className="text-xs font-bold text-cosmos-300">Joined {joined}</p>
           </div>
-          <StatsTabs stats={stats} career={career} games={games} />
+          <StatsTabs stats={stats} career={career} records={records} games={games} />
         </div>
 
         <footer className="flex items-center justify-between">

@@ -33,10 +33,10 @@ const START: Picks = { playerCount: 0, botDifficulty: 1, targetPoints: 0, turnTi
 const ICON = "size-24";
 const ICONS: Record<Setting, ReactNode> = {
   playerCount: <UsersRound className={`${ICON} fill-gold-400 text-gold-600`} />,
-  botDifficulty: <Bot className={`${ICON} text-gold-400`} />,
+  botDifficulty: <Bot className={`${ICON} fill-gold-400 text-gold-600`} />,
   targetPoints: <Star className={`${ICON} fill-gold-400 text-gold-600`} />,
   turnTimeSeconds: <TimerIcon className={ICON} />,
-  gameTimeMinutes: <Hourglass className={`${ICON} text-gold-400`} />,
+  gameTimeMinutes: <Hourglass className={`${ICON} fill-gold-400 text-gold-600`} />,
 };
 
 /** What is sent to start the game. */

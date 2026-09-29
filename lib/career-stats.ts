@@ -8,6 +8,8 @@ export interface FinishedGame {
   /** Avengers tags held at the end. */
   tags: number;
   won: boolean;
+  /** Turns the game lasted. */
+  turns: number;
 }
 
 export interface MostUsed {
@@ -25,6 +27,10 @@ export interface CareerStats {
   lowestLossPoints: number | null;
   averageTags: number | null;
   mostTags: number;
+  /** The most points in any game, won or lost. */
+  bestPoints: number;
+  /** The fewest turns a win has taken. */
+  fastestWinTurns: number | null;
 }
 
 function average(values: number[]): number | null {
@@ -49,7 +55,8 @@ export function careerStats(games: FinishedGame[]): CareerStats {
     if (card.side !== "hero") villains.set(card.name, (villains.get(card.name) ?? 0) + 1);
   }
   const total = (times: Map<string, number>) => [...times.values()].reduce((sum, n) => sum + n, 0);
-  const winPoints = games.filter((g) => g.won).map((g) => g.points);
+  const wins = games.filter((g) => g.won);
+  const winPoints = wins.map((g) => g.points);
   const lossPoints = games.filter((g) => !g.won).map((g) => g.points);
 
   return {
@@ -62,5 +69,7 @@ export function careerStats(games: FinishedGame[]): CareerStats {
     lowestLossPoints: lossPoints.length ? Math.min(...lossPoints) : null,
     averageTags: average(games.map((g) => g.tags)),
     mostTags: Math.max(0, ...games.map((g) => g.tags)),
+    bestPoints: Math.max(0, ...games.map((g) => g.points)),
+    fastestWinTurns: wins.length ? Math.min(...wins.map((g) => g.turns)) : null,
   };
 }

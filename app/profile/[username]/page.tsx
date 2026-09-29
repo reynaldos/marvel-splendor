@@ -32,6 +32,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         joined={user.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         stats={user.stats ?? defaultUserStatsSnapshot}
         career={history.career}
+        records={history.records}
         games={history.games}
         isOwn={session?.user.sub === user.auth0Sub}
       />

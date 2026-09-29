@@ -11,7 +11,12 @@ import { publicAvatarUrl } from "@/lib/r2";
  * ponytail: reads every finished game the player was in, and clearing games
  * clears both. Keep running totals on UserStats if either ever matters.
  */
-export async function loadGameHistory(userId: string): Promise<{ games: GameRecord[]; career: CareerStats }> {
+export async function loadGameHistory(userId: string): Promise<{
+  games: GameRecord[];
+  career: CareerStats;
+  /** The same, from games against at least one other person: beating bots sets no records. */
+  records: CareerStats;
+}> {
   const seats = await prisma.gamePlayer.findMany({
     where: { userId, game: { status: "FINISHED" } },
     orderBy: { game: { updatedAt: "desc" } },
@@ -43,13 +48,23 @@ export async function loadGameHistory(userId: string): Promise<{ games: GameReco
         avatarUrl: publicAvatarUrl(p.user?.avatarKey),
       })),
     );
-    return record ? [{ record, mine: state.players[seat] }] : [];
+    const againstPeople = game.players.some((p) => !p.isBot && p.seat !== seat);
+    return record ? [{ record, mine: state.players[seat], againstPeople }] : [];
   });
+  const stats = (games: typeof played) =>
+    careerStats(
+      games.map(({ record, mine }) => ({
+        cards: mine.cards,
+        points: mine.points,
+        tags: mine.tags,
+        won: record.won,
+        turns: record.rounds,
+      })),
+    );
 
   return {
     games: played.map((p) => p.record),
-    career: careerStats(
-      played.map(({ record, mine }) => ({ cards: mine.cards, points: mine.points, tags: mine.tags, won: record.won })),
-    ),
+    career: stats(played),
+    records: stats(played.filter((p) => p.againstPeople)),
   };
 }

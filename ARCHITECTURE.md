@@ -388,7 +388,7 @@ Every screen is laid out for landscape, so a phone held upright is shown a notic
 
 **Phase 4 — stats and profiles**
 
-Player stats, shown on the profile page. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.
+Player stats, shown on the profile page. The Records tab counts only games against at least one other person, as beating bots sets no records; a game with people and bots at the table counts. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.
 
 | Stat | Meaning |
 |---|---|
