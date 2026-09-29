@@ -296,6 +296,93 @@ body {
 }
 
 /*
+ * What another player just picked, outlined clockwise from the top before it
+ * leaves the board. Put it on a positioned element with the corners to follow.
+ */
+@property --trace {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+@property --trace-end {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.trace::after {
+  --edge: calc(var(--spacing) * 0.45);
+  content: "";
+  position: absolute;
+  z-index: 10;
+  inset: calc(var(--edge) * -1);
+  padding: var(--edge);
+  border-radius: inherit;
+  /* A line from its end round to its tip. */
+  background: conic-gradient(transparent var(--trace-end), var(--color-gold-200) 0 var(--trace), transparent 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: drop-shadow(0 0 calc(var(--spacing) * 0.6) var(--color-gold-400));
+  pointer-events: none;
+}
+
+/* An announcement: the board dims, the piece and its line hold, then all of it goes. */
+/* At rest the Eye is open: its halves parted, the bars swung clear, the light up. */
+.eye-lid-top { translate: 0 -101%; }
+.eye-lid-bottom { translate: 0 101%; }
+.eye-ring { rotate: var(--to); }
+.eye-flash { opacity: 0; }
+@keyframes announce-dim {
+  0%, 100% { opacity: 0; }
+  12%, 85% { opacity: 1; }
+}
+@keyframes announce-hold {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.announce-dim { animation: announce-dim both ease-out; }
+.announce-hold { animation: announce-hold both ease-in; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Drawn clockwise from the top until it is whole; only then taken up, the same way round. */
+  @keyframes trace {
+    0% { --trace: 0deg; --trace-end: 0deg; }
+    45% { --trace: 360deg; --trace-end: 0deg; }
+    55% { --trace: 360deg; --trace-end: 0deg; }
+    100% { --trace: 360deg; --trace-end: 360deg; }
+  }
+  .trace::after { animation: trace 1.5s linear both; }
+
+  @keyframes announce-line {
+    from { opacity: 0; scale: 1 0.4; }
+  }
+  .announce-line { animation: announce-line 0.4s 0.5s ease-out both; }
+
+  /*
+   * The Eye opens slowly, everything easing in and out. The rings turn from
+   * the start; part of the way round the sphere splits and its halves part
+   * all the way. The light comes up only as they part, and once it is open
+   * the screen takes a green cast for a moment.
+   */
+  @keyframes eye-ring {
+    from { rotate: var(--from); }
+  }
+  .eye-ring { animation: eye-ring 0.3s ease-in-out both; }
+  @keyframes eye-lid {
+    from { translate: 0 0; }
+  }
+  .eye-lid { animation: eye-lid 2.4s 1.4s ease-in-out both; }
+  @keyframes eye-glow {
+    from { opacity: 0; }
+  }
+  .eye-glow { animation: eye-glow 1.6s 2.2s ease-in-out both; }
+  @keyframes eye-flash {
+    0%, 100% { opacity: 0; }
+    30% { opacity: 0.3; }
+  }
+  .eye-flash { animation: eye-flash 1.4s 4s ease-in-out both; }
+}
+
+/*
  * The end of a game. All of it is decoration, so it is left out for anyone
  * who has asked their device for less motion.
  */

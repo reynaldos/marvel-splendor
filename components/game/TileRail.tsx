@@ -1,5 +1,6 @@
 "use client";
 
+import { LargeImages } from "@/components/game/assets";
 import { AvengersTile } from "@/components/game/AvengersTile";
 import { LocationTile } from "@/components/game/LocationTile";
 import { Zoomable } from "@/components/game/Zoomable";
@@ -75,6 +76,8 @@ export function TileRail({ locations, avengersHolder, players, nameForSeat, heig
   );
 
   return (
+    // Loaded large enough to be carried to the middle of the screen when one is claimed.
+    <LargeImages sizes="22vw">
     <div className="flex min-h-0 flex-1 items-center justify-center gap-1">
       <div className="flex flex-col gap-1" style={width}>
         {locationGroup(tiles.slice(0, firstColumn))}
@@ -87,5 +90,6 @@ export function TileRail({ locations, avengersHolder, players, nameForSeat, heig
         </div>
       ) : null}
     </div>
+    </LargeImages>
   );
 }

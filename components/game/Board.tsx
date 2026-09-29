@@ -120,6 +120,7 @@ export function Board({
                 headerExtra={
                   <ReserveTray
                     reserved={p.reserved}
+                    seat={p.seat}
                     ownerName={nameForSeat(p.seat)}
                     className="gap-0.5"
                     cardClassName="w-4 rounded-sm"

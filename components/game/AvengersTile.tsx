@@ -25,6 +25,7 @@ export function AvengersTile({ avengersHolder, players, nameForSeat, className }
   return (
     <div
       title="Avengers Assemble"
+      data-tile="avengers"
       className={cn(
         "@container relative aspect-square w-full overflow-hidden rounded-tile bg-muted ring-1 ring-foreground/10",
         className,
@@ -46,7 +47,7 @@ export function AvengersTile({ avengersHolder, players, nameForSeat, className }
       {/* The holder changes during play, so it's drawn over art too. The
           unclaimed hint is only for the drawn tile; art carries its own text. */}
       {avengersHolder !== null || !ASSETS.avengersTile ? (
-        <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-black/60 px-[5cqw] py-[3cqw] text-[length:10.5cqw] leading-tight font-bold text-white uppercase">
+        <span data-caption className="absolute inset-x-0 bottom-0 line-clamp-2 bg-black/60 px-[5cqw] py-[3cqw] text-[length:10.5cqw] leading-tight font-bold text-white uppercase">
           {avengersHolder !== null
             ? `${nameForSeat(avengersHolder)} (${holderTags})`
             : `First to ${TAGS_TO_CLAIM_AVENGERS} tags`}

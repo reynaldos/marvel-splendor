@@ -1,7 +1,10 @@
+"use client";
+
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
 import { Card, CardView } from "@/components/game/Card";
+import { useTracedMove } from "@/components/game/traced-move";
 import { Zoomable } from "@/components/game/Zoomable";
 import { getCard } from "@/lib/engine/data";
 import { MAX_RESERVED } from "@/lib/engine/types";
@@ -9,6 +12,8 @@ import type { RedactedReservedCard } from "@/lib/game-view";
 
 interface ReserveTrayProps {
   reserved: RedactedReservedCard[];
+  /** Whose cards these are, to outline the one they recruit. */
+  seat: number;
   /** Whose cards these are, for the enlarged view's heading. */
   ownerName: string;
   className?: string;
@@ -37,11 +42,22 @@ function ReservedCard({ entry, className }: { entry: RedactedReservedCard; class
  * them all large, side by side. The viewer's own reserved cards live in
  * `ReservedCards`.
  */
-export function ReserveTray({ reserved, ownerName, className, cardClassName = "w-12" }: ReserveTrayProps) {
+export function ReserveTray({ reserved, seat, ownerName, className, cardClassName = "w-12" }: ReserveTrayProps) {
   const slots = Array.from({ length: MAX_RESERVED }, (_, i) => reserved[i]);
+  const played = useTracedMove();
+  const recruited =
+    played?.seat === seat && played.move.type === "RECRUIT" && played.move.from === "reserve"
+      ? getCard(played.move.cardId)
+      : null;
+  // A card reserved blind is known only by its level, so the first of that level stands for it.
+  const traced = recruited
+    ? reserved.findIndex((r) => ("cardId" in r ? r.cardId === recruited.id : r.level === recruited.level))
+    : -1;
   const tray = slots.map((entry, i) =>
     entry ? (
-      <ReservedCard key={i} entry={entry} className={cardClassName} />
+      <span key={i} className={cn("relative flex rounded-sm", i === traced && "trace")}>
+        <ReservedCard entry={entry} className={cardClassName} />
+      </span>
     ) : (
       <div key={i} className={cn("aspect-card shrink-0 rounded-md border border-dashed border-foreground/15", cardClassName)} />
     ),

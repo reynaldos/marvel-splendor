@@ -24,6 +24,8 @@ interface CardProps {
   affordable?: boolean;
   /** Highlights the card as the one currently staged for an action. */
   selected?: boolean;
+  /** Outlines the card as the one another player has just picked. */
+  traced?: boolean;
   disabled?: boolean;
   reserveAction?: CardActionProps;
   recruitAction?: CardActionProps;
@@ -48,6 +50,7 @@ export function Card({
   faceDown,
   affordable,
   selected,
+  traced,
   disabled,
   reserveAction,
   recruitAction,
@@ -82,7 +85,7 @@ export function Card({
 
   return (
     <div
-      className={cn("relative aspect-card w-16 shrink-0", expanded && "z-50", className)}
+      className={cn("relative aspect-card w-16 shrink-0 rounded-md", traced && "trace", expanded && "z-50", className)}
       onKeyDown={(e) => {
         if (e.key === "Escape") close();
       }}
