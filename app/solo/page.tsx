@@ -1,3 +1,4 @@
+import { TopBar } from "@/components/TopBar";
 import { redirect } from "next/navigation";
 
 import { SoloGameScreen } from "@/components/lobby/SoloGameScreen";
@@ -10,5 +11,10 @@ export default async function SoloGamePage() {
   const session = await auth0.getSession();
   if (!session) redirect("/auth/login?returnTo=/solo");
 
-  return <SoloGameScreen />;
+  return (
+    <>
+      <TopBar />
+      <SoloGameScreen />
+    </>
+  );
 }

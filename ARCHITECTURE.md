@@ -328,6 +328,15 @@ Players in a private game can send an emoji or a short message to the table. It 
 - **Everything sent is saved** in `ChatMessage`, with `kind` `REACTION` for an emoji and `TEXT` for a message. Clearing games clears it.
 - **It travels in the live signal**, as the `chat` event on the game's channel, since it is meant for everyone at the table. If the live connection is down it is not shown later: it is only worth seeing in the moment.
 
+**Menu screens: one layout (done)**
+
+Every menu screen is laid out the same way, so they keep the same margins and the same top bar.
+
+- **The top bar** (`components/TopBar.tsx`) shows the player's profile button, their wins, the game's name in the middle, and a menu button on the right. The menu opens a popup with Profile settings and Log out, and Admin for an admin. It is on the home screen, the profile, Profile settings, VS Computer, Private Game and the lobby. It is not on the board, the collection, the admin pages or the previews, and a visitor who isn't signed in doesn't see it.
+- **A page adds it** by putting `<TopBar />` beside its screen. It fetches the player itself.
+- **`StageRows`** leaves room for the bar and sets the margins: 4 steps at the sides and 3 at the bottom. The last thing in it is the footer; everything before it is the content, which sits in the middle of the room between the bar and the footer, with as much space over it as under. Screens have no header or title of their own.
+- **The sizes** come from a canvas 100 steps tall and 200 wide that scales to the screen. The bar takes 17 of the 100, a footer about 13, leaving about 64 for a screen's content.
+
 **Still to do**
 
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.

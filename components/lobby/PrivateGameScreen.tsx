@@ -6,7 +6,6 @@ import { Star } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
-import { Logo } from "@/components/home/Logo";
 import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
@@ -33,11 +32,6 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
   return (
     <Stage>
       <StageRows>
-        <header className="flex items-center justify-between">
-          <Logo className="text-3xl" />
-          <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">Private game</h1>
-        </header>
-
         <div className="flex items-end justify-around gap-6">
           <div className="flex gap-4">
             <Option

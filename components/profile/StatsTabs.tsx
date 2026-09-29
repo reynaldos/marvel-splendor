@@ -127,7 +127,7 @@ interface StatsTabsProps {
   games: GameRecord[];
 }
 
-const PANEL = "h-44 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
+const PANEL = "h-50 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
 
 /** A player's stats, a few at a time, then their games: tabs along the top. */
 export function StatsTabs({ stats, career, games }: StatsTabsProps) {
@@ -160,7 +160,7 @@ export function StatsTabs({ stats, career, games }: StatsTabsProps) {
           role="tabpanel"
           className={cn(
             PANEL,
-            "grid content-center gap-x-5 gap-y-3 px-5",
+            "grid content-center gap-x-5 gap-y-5 px-5",
             shown.stats.length > 4 ? "grid-cols-3" : "grid-cols-2",
           )}
         >
