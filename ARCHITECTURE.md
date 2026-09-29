@@ -294,6 +294,10 @@ So nobody has to guess what another player did, the board shows it.
 - **Turn clocks.** A turn's clock starts once the animations before it are over, as it already did for a bot's thinking time. The player who moved skips the outline of their own pick, so their device is a second and a half ahead of the others'. That is inside the three seconds a device waits before timing another player out.
 - **Less motion.** For anyone who has asked their device for less motion, the outline and announcements appear without moving.
 
+**Loading the board (done)**
+
+While a game loads, the board is drawn in outline on the night sky: the player cards, the three decks and their cards, the token piles, the tiles, the trays and End Turn, each in its own place and shape (`components/game/BoardSkeleton.tsx`). They pulse gently, and stay still for anyone who has asked their device for less motion. It shows two other players, as the number at the table isn't known until the game has loaded. To look at it, open `/preview/loading`.
+
 **Cheat mode**
 
 For testing: it outlines the cards the player can afford. It is on when the board's address has `?cheat=true`. Typing `+cheat` after a room's code when joining, or on its own in the room code box when creating a room, turns it on; the lobby carries it on to the board. It only changes what that one player is shown.

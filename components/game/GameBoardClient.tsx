@@ -5,9 +5,9 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
+import { BoardSkeleton } from "@/components/game/BoardSkeleton";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { useNotchSide } from "@/components/use-notch-side";
@@ -396,13 +396,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // Loading until there is a board or an error: a fetch that was skipped
   // because another was already running must not end the wait.
   if (!gameData && !fatalError) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    );
+    return <BoardSkeleton />;
   }
 
   if (fatalError || !gameData) {
