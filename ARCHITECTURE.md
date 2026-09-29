@@ -353,6 +353,21 @@ Measured by playing them against each other, each deal twice with the seats swap
 - **To measure a change**, keep a copy of the bot as it was and play the two against each other over many deals, counting wins and rounds.
 - **A language model was weighed and turned down** for choosing moves: it is slower, costs money on every move, and plays a game of counting worse than a search does. It suits bot banter, which is on the list below.
 
+**Releases and the update log**
+
+Every release has a number, `0.MINOR.PATCH`, and an entry in `data/updates.json`, latest first. The menu's What's new button shows them (`components/UpdateLog.tsx`), one box to a release, closed until tapped. A gold dot sits on the menu button and on What's new when there are releases the player hasn't seen; opening the log clears it, and shows those releases open, in gold, marked New. The last release seen is remembered on the device, not the account, so a new phone shows the dot once.
+
+| What the release holds | What changes | Example |
+|---|---|---|
+| Something new for players | MINOR goes up, PATCH back to 0 | 0.8.0 to 0.9.0 |
+| Only fixes or small changes | PATCH goes up | 0.9.0 to 0.9.1 |
+| The roadmap below is finished | 1.0.0 | |
+
+- One release is one branch's work, however many pull requests it took to merge; `pulls` lists them.
+- Each entry has a date, a short title, one sentence that sums it up, and no more than about seven changes under `new`, `improved` and `fixed`, in words a player would use.
+- Leave out what players can't see: admin pages, previews, tests, scripts and notes.
+- With each release, add the entry and set `version` in `package.json` to match.
+
 **Still to do**
 
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
