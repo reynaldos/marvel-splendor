@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { BoardSkeleton } from "@/components/game/BoardSkeleton";
+import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
-import { CHAT_COOLDOWN_MS, type ChatSend } from "@/lib/chat";
+import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { useNotchSide } from "@/components/use-notch-side";
@@ -128,13 +129,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [choosingReturn, setChoosingReturn] = useState(false);
   const notchSide = useNotchSide();
 
-  // Integration point for a later task (OpenAI banter bubbles): nothing
-  // populates this yet, but the plumbing — state + setter + prop passthrough
-  // to PlayerPlaque/BanterBubble — is wired up so that task can just call
-  // `setBanterBySeat` when content arrives.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [chatWaiting, setChatWaiting] = useState(false);
-  const [banterBySeat, setBanterBySeat] = useState<Record<number, string | null>>({});
+  const [bubbles, showBubble] = useChatBubbles();
 
   // Latest values for the async flows below, which outlive the render that started them.
   const gameRef = useRef<GameData | null>(null);
@@ -245,7 +241,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   }, [fetchGame]);
 
   // Another player moved, or the safety-net timer fired.
-  useGameUpdates(gameId, () => void fetchGame(true));
+  useGameUpdates(
+    gameId,
+    () => void fetchGame(true),
+    (arrived) => {
+      const sent = ChatBubbleSchema.safeParse(arrived);
+      // The player's own is shown as it is sent, so it isn't shown again when it comes round.
+      if (sent.success && sent.data.seat !== gameRef.current?.view.viewerSeat) showBubble(sent.data.seat, sent.data);
+    },
+  );
 
   useEffect(() => {
     void fetchGame();
@@ -409,9 +413,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       // Sent too soon, as from a second device: wait out what the server says is left.
       const tooSoon = response?.status === 429 ? await response.json().catch(() => null) : null;
       if (!response?.ok && !tooSoon) toast.error("That couldn't be sent.");
+      const seat = gameRef.current?.view.viewerSeat;
+      if (response?.ok && seat !== undefined) showBubble(seat, chat);
       setTimeout(() => setChatWaiting(false), tooSoon?.retryInMs ?? CHAT_COOLDOWN_MS);
     },
-    [gameId],
+    [gameId, showBubble],
   );
 
   // Loading until there is a board or an error: a fetch that was skipped
@@ -531,7 +537,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             staged={over ? null : staged}
             disabled={disabled}
             submitting={submitting}
-            banterBySeat={banterBySeat}
+            bubbles={bubbles}
             chat={canChat ? <ChatButton waiting={chatWaiting} onSend={sendChat} /> : null}
             menu={
               <GameMenu

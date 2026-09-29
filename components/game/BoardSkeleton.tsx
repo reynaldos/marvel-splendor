@@ -30,7 +30,10 @@ export function BoardSkeleton() {
         <div className="flex min-h-0 flex-1 justify-between gap-2">
           <div className="flex flex-col gap-1.5">
             {times(2).map((plaque) => (
-              <Piece key={plaque} className="h-21 w-50 rounded-lg bg-card" />
+              <div key={plaque} className="relative mt-7 flex h-14 w-50 shrink-0">
+                <Piece className="absolute bottom-full left-0 h-7 w-30 rounded-t-xl rounded-b-none bg-card" />
+                <Piece className="flex-1 rounded-lg rounded-tl-none bg-card" />
+              </div>
             ))}
           </div>
 
@@ -69,7 +72,11 @@ export function BoardSkeleton() {
         </div>
 
         <div className="flex h-20 items-stretch gap-2">
-          <Piece className="w-40 rounded-t-2xl rounded-b-none bg-card" />
+          {/* The player's own card: the name's tab standing on the card. */}
+          <div className="relative flex w-40 shrink-0">
+            <Piece className="absolute bottom-full left-0 h-8 w-32 rounded-t-xl rounded-b-none bg-card" />
+            <Piece className="flex-1 rounded-tl-none rounded-tr-2xl rounded-b-none bg-card" />
+          </div>
           <Piece className="mx-auto w-126 rounded-t-2xl rounded-b-none bg-card" />
           <div className="flex w-28 flex-col justify-end pb-2">
             <Piece className="h-12 rounded-full" />

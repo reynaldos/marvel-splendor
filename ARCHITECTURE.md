@@ -296,13 +296,13 @@ So nobody has to guess what another player did, the board shows it.
 
 **Loading the board (done)**
 
-While a game loads, the board is drawn in outline on the night sky: the player cards, the three decks and their cards, the token piles, the tiles, the trays and End Turn, each in its own place and shape (`components/game/BoardSkeleton.tsx`). They pulse gently, and stay still for anyone who has asked their device for less motion. It shows two other players, as the number at the table isn't known until the game has loaded. To look at it, open `/preview/loading`.
+While a game loads, the board is drawn in outline on the night sky: the player cards, each with the tab for its name, the three decks and their cards, the token piles, the tiles, the trays and End Turn, each in its own place and shape (`components/game/BoardSkeleton.tsx`). They pulse gently, and stay still for anyone who has asked their device for less motion. It shows two other players, as the number at the table isn't known until the game has loaded. To look at it, open `/preview/loading`.
 
 **Cheat mode**
 
 For testing: it outlines the cards the player can afford. It is on when the board's address has `?cheat=true`. Typing `+cheat` after a room's code when joining, or on its own in the room code box when creating a room, turns it on; the lobby carries it on to the board. It only changes what that one player is shown.
 
-**Chat and emoji reactions (in progress)**
+**Chat and emoji reactions (done)**
 
 Players in a private game can send an emoji or a short message to the table. It pops in on the sender's card and pops out again.
 
@@ -310,11 +310,17 @@ Players in a private game can send an emoji or a short message to the table. It 
 |---|---|
 | 1. Sending: the lists, the send route and the limit | Done |
 | 2. The player's card: the name on a strip of its own, with the chat button beside it | Done |
-| 3. Bubbles: shown live to everyone, popping in and out, and on `/preview/board` | Not started |
+| 3. Bubbles: shown live to everyone, popping in and out, and on `/preview/board` | Done |
 
-- **The button.** One round smiley beside the player's own name (`components/game/ChatButton.tsx`). It opens a list above it: the emojis in a row, the messages under them in two columns. One tap sends. There is one button, not two, because the name row has no room for a second without cutting the name short.
-- **The player's own card.** Where there is a button, the name has a strip of its own standing above the trays, and the points hang off its corner, so the name and the button share the full width. The part level with the trays is left to the tokens being taken. Without a button, as in a game against the computer, the card is as it always was. The card is given its height outright: pulling it up with a margin is what Safari drew wrongly. To look at it with the list open, go to `/preview/board?show=Chat`.
+- **The button.** One small round smiley on the top right corner of the name's tab, to the left of the points (`components/game/ChatButton.tsx`). It opens a list above it: the emojis in a row, the messages under them in two columns. One tap sends.
+- **Every player's card.** The picture and name stand on a tab on the card's top edge, narrower than the card, so they are easy to pick out. The card under it holds the tokens and bonuses, with the points on its top right corner. Tab and card are always outlined, with a line between them: the same faint edge as the trays, and gold, thicker and glowing on that player's turn. Both are edged with borders, the tab's foot lying on the card's top line, so the two line up whichever thickness is showing. The turn timer sits low on the card's edge, clear of the points.
+- **The picture is larger than its tab on purpose.** It is a step and a half taller than the tab and sits over it, standing out the same amount over the tab's top and its foot, and a little over its left side. It is always a circle. It is drawn over the tab, not in it, so cutting off the tab's glow on a turn doesn't cut the picture.
+- **Another player's card** also shows their Avengers tags on the tab, and their reserved cards standing on the card's top edge between the tab and the points. It is no taller than it was, so four players still fit.
+- **The player's own card** is level with the trays and is left to the tokens being taken. The chat button is only there where something can be sent, so not in a game against the computer. To look at it on the player's turn, go to `/preview/board?show=MyTurn`, or `?show=Chat` for the list.
 - **Off while waiting.** The button is off for 3 seconds after a send. If the server says it is too soon, as when sending from a second device, it stays off for as long as it says is left.
+- **What is sent shows beside the sender's card** for 3 seconds (`components/game/ChatBubble.tsx`): it pops in, holds and pops out. Another player's shows to the right of their card, level with the name on its tab. The player's own shows to the right of the button, above the points. It is only as wide as what it says, so an emoji is a small round bubble. Nothing on the player cards is covered. It does pass over the edge of the market's decks for those 3 seconds, and a tap goes through it to the deck. A new one from the same player takes the place of the last. For anyone who has asked their device for less motion it appears and goes without the pop.
+- **The sender sees their own as soon as it is sent**, and everyone else when it arrives, so it is not shown twice to the sender.
+- **To look at them without playing**, open `/preview/board` and press Emoji or Message: it shows on every card at once, with the longest message on the list. `?show=Message&at=1500` holds it still.
 - **Only what is on the lists can be sent.** A short list of emojis and one of messages, in `lib/chat.ts`. Nothing is typed, so nothing needs moderating. A message is at most 20 characters, to fit across a name.
 - **One send every 3 seconds per player.** The server checks it against the player's last saved send, so it holds across devices and servers (`app/api/games/[id]/chat/route.ts`).
 - **Who can send.** A player in a private game that is in play or finished, so "Good game!" can be said at the end. Not a player marked away, and not in a game against the computer.
@@ -329,7 +335,6 @@ Players in a private game can send an emoji or a short message to the table. It 
 - **A "squad pic" at the end of a game.** A picture of the player's recruited team to keep or share. To decide first: put together from the card art the game already has, or drawn by an image model. The second costs money per picture and needs care over the use of Marvel's characters.
 - **A gallery of past teams.** A page, or a tab on the profile, showing the team the player recruited in each finished game, latest first. The teams are already saved with each game, so it needs no database change; the squad pics would show here once they exist, which does need somewhere to keep them.
 - End-to-end tests.
-- Chat and emoji reactions.
 - Bot banter.
 - Level, coins and rank.
 

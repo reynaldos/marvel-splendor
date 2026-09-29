@@ -4,7 +4,9 @@ import { useEffect, useEffectEvent, useState } from "react";
 
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
+import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
+import { EMOJIS, MESSAGES, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import type { BoardEvent } from "@/lib/board-events";
 import { createGame } from "@/lib/engine/setup";
@@ -29,6 +31,11 @@ const MOVES: Record<string, Move> = {
   "Reserve blind": { type: "RESERVE", from: "deck", level: 1 },
   "Recruit reserved": { type: "RECRUIT", from: "reserve", cardId: state.decks[2][0] },
 };
+// Shown on every card at once, the longest message among them.
+const SENDS: Record<string, ChatSend> = {
+  Emoji: { kind: "REACTION", body: EMOJIS[0] },
+  Message: { kind: "TEXT", body: MESSAGES.reduce((longest, body) => (body.length > longest.length ? body : longest)) },
+};
 const EVENTS: Record<string, BoardEvent> = {
   Location: { kind: "location", seat: 1, locationId: view.locations[0] },
   Avengers: { kind: "avengers", seat: 1, from: 2 },
@@ -40,6 +47,10 @@ const noop = () => {};
 /** The board's animations, without playing a game: choose one and it plays. */
 export function BoardPreview({ show, at }: { show?: string; /** Milliseconds in. */ at?: number }) {
   const [traced, setTraced] = useState<TracedMove | null>(null);
+  const [bubbles, showBubble] = useChatBubbles();
+  // `?show=MyTurn` gives the first seat the turn, with a clock, to look at its card lit up.
+  const [myTurnEndsAt] = useState(() => (show === "MyTurn" ? Date.now() + 20_000 : null));
+  const send = (chat: ChatSend) => players.forEach((p) => showBubble(p.seat, chat));
   const [announced, setAnnounced] = useState<{ event: BoardEvent; origin: TileOrigin | null; key: number } | null>(null);
 
   const trace = (move: Move) => {
@@ -56,6 +67,7 @@ export function BoardPreview({ show, at }: { show?: string; /** Milliseconds in.
   const played = useEffectEvent(() => {
     if (show && MOVES[show]) trace(MOVES[show]);
     if (show && EVENTS[show]) announce(EVENTS[show]);
+    if (show && SENDS[show]) send(SENDS[show]);
     // With a time as well, everything is stopped that far in, to be looked at.
     if (at !== undefined) {
       setTimeout(() => {
@@ -92,6 +104,16 @@ export function BoardPreview({ show, at }: { show?: string; /** Milliseconds in.
             {label}
           </button>
         ))}
+        {Object.entries(SENDS).map(([label, chat]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => send(chat)}
+            className="rounded-full bg-cosmos-300 px-2 py-0.5 fs-2xs font-black text-cosmos-950 hover:bg-white"
+          >
+            {label}
+          </button>
+        ))}
         {Object.entries(EVENTS).map(([label, event]) => (
           <button
             key={label}
@@ -105,15 +127,15 @@ export function BoardPreview({ show, at }: { show?: string; /** Milliseconds in.
       </div>
       <TracedMoveProvider value={traced}>
         <Board
-          view={view}
-          turnEndsAt={null}
+          view={myTurnEndsAt ? { ...view, currentSeat: 0 } : view}
+          turnEndsAt={myTurnEndsAt}
           players={players}
           staged={null}
           disabled
           submitting={false}
-          banterBySeat={{}}
+          bubbles={bubbles}
           menu={null}
-          chat={<ChatButton waiting={false} onSend={noop} defaultOpen={show === "Chat"} />}
+          chat={<ChatButton waiting={false} onSend={(chat) => showBubble(0, chat)} defaultOpen={show === "Chat"} />}
           onStageTokenColor={noop}
           onUnstageTokenColor={noop}
           onStageReserveMarket={noop}

@@ -28,9 +28,9 @@ export function ChatButton({ waiting, onSend, defaultOpen }: ChatButtonProps) {
           type="button"
           aria-label="Send an emoji or a message"
           disabled={waiting}
-          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-1 ring-cosmos-500 ring-inset hover:bg-cosmos-500 disabled:opacity-40 disabled:hover:bg-cosmos-700"
+          className="flex size-5 shrink-0 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-1 ring-cosmos-500 ring-inset hover:bg-cosmos-500 disabled:opacity-40 disabled:hover:bg-cosmos-700"
         >
-          <Smile className="size-4" />
+          <Smile className="size-3.5" />
         </button>
       </DropdownMenuTrigger>
       {/* Drawn outside the board, so it names the theme again and sets its own width. */}

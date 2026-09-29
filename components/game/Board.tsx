@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
 import { CardMarket } from "@/components/game/CardMarket";
+import type { Bubbles } from "@/components/game/ChatBubble";
 import { EndTurnBar } from "@/components/game/EndTurnBar";
 import { HandTray, StagedTokens } from "@/components/game/HandTray";
 import { PlayerPlaque } from "@/components/game/PlayerPlaque";
@@ -35,7 +35,8 @@ interface BoardProps {
   /** True while resolving a pending sub-move, submitting, or replaying bot moves. */
   disabled: boolean;
   submitting: boolean;
-  banterBySeat: Record<number, string | null>;
+  /** What each seat has just sent to the table. */
+  bubbles: Bubbles;
   /** Top-right menu button (owned by GameBoardClient). */
   menu: ReactNode;
   /** The chat button beside the viewer's name; left out where nothing can be sent. */
@@ -78,7 +79,7 @@ export function Board({
   staged,
   disabled,
   submitting,
-  banterBySeat,
+  bubbles,
   menu,
   chat,
   onStageTokenColor,
@@ -120,8 +121,10 @@ export function Board({
                 isCurrentTurn={turnSeat === p.seat}
                 turnEndsAt={turnEndsAt}
                 turnSeconds={view.settings.turnTimeSeconds}
-                banterText={banterBySeat[p.seat] ?? null}
-                headerExtra={
+                bubble={bubbles[p.seat]}
+                // Room above the card for its tab.
+                className="mt-7"
+                beside={
                   <ReserveTray
                     reserved={p.reserved}
                     seat={p.seat}
@@ -199,14 +202,15 @@ export function Board({
           isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
           turnSeconds={view.settings.turnTimeSeconds}
-          banterText={banterBySeat[viewerSeat] ?? null}
+          bubble={bubbles[viewerSeat]}
           hideTags
-          headerExtra={chat}
-          // With the button the name has a strip of its own, standing above the trays; the
-          // points hang off its corner, clear of the name.
-          className={cn("w-40", TRAY_PANEL, chat ? "h-28 self-end" : null)}
-          headerClassName={chat ? "pr-4" : undefined}
-          pointsClassName={chat ? "-right-5" : undefined}
+          // The button sits on the corner of the name's tab, left of the points, and what is
+          // sent shows to the right of it, above the points.
+          tabExtra={chat ? <div className="absolute -top-2 -right-2">{chat}</div> : null}
+          // Named after the tray's corners, or they undo it. No bottom edge: it runs off the screen.
+          className={`w-40 ${TRAY_PANEL} rounded-tl-none border-b-0 [--tab:calc(var(--spacing)*8)]`}
+          tabClassName="w-32"
+          bubbleClassName="top-auto bottom-full left-32 mb-4 ml-4"
         >
           <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} />
         </PlayerPlaque>

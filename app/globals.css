@@ -464,6 +464,17 @@ body {
   .result-loom { animation: result-loom 1.2s ease-out both; }
 }
 
+/* What a player sent to the table: pops in, holds, pops out. Its length is set where it is used. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes chat-pop {
+    0% { opacity: 0; scale: 0.4; }
+    8% { opacity: 1; scale: 1.12; }
+    13%, 88% { opacity: 1; scale: 1; }
+    100% { opacity: 0; scale: 0.4; }
+  }
+  .chat-pop { animation: chat-pop both ease-out; }
+}
+
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
 @keyframes turn-banner {
   0% { opacity: 0; transform: scaleY(0.4); }
