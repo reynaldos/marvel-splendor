@@ -296,8 +296,10 @@ function Eye() {
         style={{ background: "radial-gradient(circle, rgb(74 222 128 / 0.7), rgb(74 222 128 / 0.35) 25%, transparent 65%)" }}
       />
       {/* A box as big as the casing, with its shadow a plain one: Safari cuts off what is drawn outside
-          a drawing's box, and draws a filtered drawing wrongly while it is growing. */}
-      <div className="absolute -top-[8%] -left-[35%] h-[116%] w-[170%]">
+          a drawing's box, and draws a filtered drawing wrongly while it is growing. It is also given
+          a layer of its own, as the rim is: left without, Safari paints them into the layer of the
+          light before them, where they fade and shrink with it. */}
+      <div className="absolute -top-[8%] -left-[35%] h-[116%] w-[170%] will-change-transform">
       <span className="absolute inset-x-[6%] inset-y-[10%] rounded-[50%] shadow-[0_0.5rem_2rem_0.5rem_black]" />
       <svg viewBox="-35 -8 170 116" width="100%" height="100%" className="absolute inset-0 block">
         <linearGradient id="brass-casing" x1="0" y1="0" x2="0" y2="1">
@@ -327,7 +329,7 @@ function Eye() {
       </svg>
       </div>
       {/* The rim the cage sits in. */}
-      <span className="absolute inset-[4%] rounded-full bg-conic from-gold-600 via-gold-200 to-gold-600 shadow-[0_0_0.4rem_black]" />
+      <span className="absolute inset-[4%] rounded-full bg-conic from-gold-600 via-gold-200 to-gold-600 shadow-[0_0_0.4rem_black] will-change-transform" />
       <div
         className="absolute inset-[8%] overflow-hidden rounded-full shadow-[inset_0_0_1rem_black]"
         // The plate behind the cage: dark brass, brighter towards the middle.
