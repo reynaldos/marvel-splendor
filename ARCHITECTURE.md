@@ -386,8 +386,14 @@ For the owner to review who is using the game and how much.
 - **Written at most once a minute per user**, after the response has gone out, so it never slows a page or a move. A failure to record is logged and never fails the request.
 - **Switching network mid-visit counts as a new visit**, since the address changes.
 - **A closed tab is not detected.** A visit ends at the user's last request, so a visit of a single request has no length.
-- **IP addresses are personal data.** They are only ever shown on the admin page.
-- **Admin page. Planned, not started.** `/admin/users`, open only to the accounts listed in an `ADMIN_EMAILS` setting.
+- **IP addresses are personal data.** They are only ever shown on the admin page. A country or city can be worked out from them later, so neither is stored.
+- **Admin page. Done.** `/admin/users` (`app/admin/users/page.tsx`, numbers from `lib/user-metrics.ts`). Admins get an Admin button at the bottom right of the main menu; nobody else is shown it.
+  - **Who may open it.** The emails in the `ADMIN_EMAILS` setting, separated by commas, and only once the sign-in has verified the email. Everyone else is told the page doesn't exist. With the setting empty, nobody can open it.
+  - **Now.** Who is online (seen in the last 5 minutes), games in play (moved in within the last 10 minutes), lobbies waiting, and visits in the last 24 hours. Below them, the 50 most recently touched games and lobbies with their players, round and last move. A game nobody has moved in for 10 minutes shows as "Left open".
+  - **Every user**, latest seen first: sign-up date and how they sign in, visits, last joined, last seen, time in the app, time playing, games, wins, device and IP address. Hovering over Games or the IP address shows the split and every address used.
+  - **Time playing** is each game's first move to its last, added up, so a lobby or a tab left open adds nothing. Clearing games clears it.
+  - **It reloads itself every minute.**
+  - **It reads every user and every visit each time.** Fine at this size; with thousands of users, show them a page at a time and add the visits up in the database.
 
 ## 9. Testing & correctness strategy
 
