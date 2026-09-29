@@ -12,6 +12,7 @@
     "games:clear": "node scripts/clear-games.mjs",
     "games:reset": "node scripts/clear-games.mjs --stats",
     "db:update": "prisma db push && prisma generate",
+    "collection:backfill": "npx tsx scripts/backfill-collection.ts",
     "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {
