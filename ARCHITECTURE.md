@@ -277,9 +277,29 @@ Built for a landscape phone first: one non-scrolling canvas, 100 spacing steps t
 
 **Phase 3 — polish (post-v1 candidates)**: spectators, rematch, game history/replay viewer (we already store the move log), leaderboards, OpenAI post-game recaps and AI avatars.
 
+**The end of a game (done)**
+
+The popup at the end of a game shows how the whole table finished, with the viewer's row in gold (`components/game/GameOverDialog.tsx`). A win is gold: the Avengers badge in turning rays, with the stones raining down. A loss is red: Thanos, looming. The title lands with a bounce and the rows arrive one at a time. "View board" closes it to look over the final board, where a "Results" button brings it back. The standings list is shared with the profile's Game Record (`components/game/Standings.tsx`). All of the movement is left out for anyone who has asked their device for less motion. To look at it without playing a game, open `/preview/game-over`: it plays the screen with a made-up table, for a win, a loss or a shared win, with two to four players.
+
+**Animations on the board (done)**
+
+So nobody has to guess what another player did, the board shows it.
+
+- **An outline on what was picked.** Tokens, a card, a deck or a reserved card another player picks is outlined in gold for a second and a half before it leaves the board. The outline is a line drawn clockwise from the top until it is whole; only then is it taken up, the same way round, until it is gone. A player's own picks are not outlined. A bot's outline comes out of its thinking time, so bots are no slower.
+- **Announcements.** Claiming a Location, taking or stealing the Avengers tile, and getting the Time Stone each stop the game for everyone: three seconds for a tile, five for the Time Stone, whose announcement fades away together with its light. A tile is carried from its place on the board to the middle of the screen: it is a copy of the very tile that was on the board, so there is nothing to load and no flash. The Time Stone is shown by the Eye of Agamotto, drawn in aged brass cut with markings, with a casing the shape of an eye and the works of a skeleton clock behind the cage (the markings are strokes, not letters, so no device needs a font for them): a gold sphere splits along a slit and its halves part all the way to show the stone, behind a cage of four rings stacked one on another. Each ring carries one bar and turns about the middle of the Eye, the next the opposite way to the last and none at quite the same pace. They start with their bars crossed over the sphere and come to rest with two along the top of the opening and two along the bottom, like the lids of an eye. The bars' shapes, starting places and order in the stack were measured off frames of the real thing. The green light comes up only as it opens, then spreads from the stone out over the screen and fades. Behind the cage small wheels turn under a brass ring. Nothing in the Eye is blurred or filtered, and nothing is drawn outside its own box: Safari gets both wrong on a piece that is growing. The casing and the rim each have a layer of their own (`will-change-transform`); without one Safari paints them into the layer of the light behind them, and they vanish with it. The "Your turn" banner and the results wait until they are over.
+- **Where it lives.** `lib/board-events.ts` works out what a move brought about by comparing the board before and after. `components/game/Announcement.tsx` draws it, and `playSteps` in `GameBoardClient.tsx` plays it. The outline is the `trace` style in `globals.css`.
+- **Looking closer.** Tapping the win tile, a Location, the Avengers tile, a player's reserved cards or team, or a card's View glides it from its place on the board to the middle of the screen, and tapping it away fades it (`ZoomedView` in `components/game/Zoomable.tsx`). It shares its glide with the announcements (`components/game/glide.ts`).
+- **To look at them without playing**, open `/preview/board`. Adding `?show=TimeStone&at=300` to the address plays one and stops it that many milliseconds in.
+- **The glide is taken back when it is set up twice.** In development every effect is run twice; the second start used to measure the tile mid-flight and leave it standing in the middle of the screen.
+- **Turn clocks.** A turn's clock starts once the animations before it are over, as it already did for a bot's thinking time. The player who moved skips the outline of their own pick, so their device is a second and a half ahead of the others'. That is inside the three seconds a device waits before timing another player out.
+- **Less motion.** For anyone who has asked their device for less motion, the outline and announcements appear without moving.
+
+**Cheat mode**
+
+For testing: it outlines the cards the player can afford. It is on when the board's address has `?cheat=true`. Typing `+cheat` after a room's code when joining, or on its own in the room code box when creating a room, turns it on; the lobby carries it on to the board. It only changes what that one player is shown.
+
 **Still to do**
 
-- **Style the win screen.** The popup at the end of a game is still plain: a title, the winner's name and a button. Give it the box-art theme, and show how the whole table finished, as the results popup on the profile's Game Record does.
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
 - **Sound effects and background music.** None yet. Sounds for taking tokens, recruiting, reserving, your turn, the timer running low, and winning or losing; music on the menus and the board. Needs a mute control that is remembered, and sound files the project has the right to use. Phones only play sound after the player's first tap.
 - **Team against team at the end of a game.** A comparison of the teams each player recruited: heroes against villains, points, bonuses by stone, Avengers badges, and the strongest card on each side. It can be worked out from the saved game, as the stats are.
@@ -352,7 +372,7 @@ Profile:
 What these need before they can be built:
 
 - **Hero or villain per card.** Done: every card in `data/cards.json` has `side`: `"hero"`, `"villain"`, or `"both"` for one that could go either way. A `"both"` card counts once as a hero and once as a villain. A new card must be given one.
-- **New stat columns.** Not needed today. The stats read every finished game the player was in, and clearing games (`pnpm games:clear`) clears them. If either ever matters, keep running totals on `UserStats` instead.
+- **New stat columns.** Not needed today. The stats read every finished game the player was in, and clearing games (`pnpm games:clear`) clears them. `pnpm games:reset` clears the games and sets the seven older stats back to zero as well, so every stat starts again together. If either ever matters, keep running totals on `UserStats` instead.
 - **Past games.** Done: covered by reading finished games.
 - **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
 - **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. They ship with the app, in `public/assets/pfp`; Cloudflare is only for pictures players upload. To add one, put a square picture in that folder and give it a line in the list. Uploaded pictures are saved under `avatars/`, so the two can't be confused.

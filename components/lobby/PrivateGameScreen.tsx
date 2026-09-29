@@ -28,6 +28,7 @@ const STONES_AROUND = [
 export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin: Action }) {
   const [turnTime, setTurnTime] = useState(TURN_TIME_OPTIONS[0]);
   const [points, setPoints] = useState(POINT_OPTIONS[0]);
+  const [code, setCode] = useState("");
 
   return (
     <Stage>
@@ -70,6 +71,8 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
             <form action={onCreate} className="flex">
               <input type="hidden" name="turnTimeSeconds" value={turnTime} />
               <input type="hidden" name="targetPoints" value={points} />
+              {/* Sent along for what may be typed there besides a room's code. */}
+              <input type="hidden" name="code" value={code} />
               <button
                 type="submit"
                 className="h-12 flex-1 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500"
@@ -84,10 +87,12 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
             >
               <input
                 name="code"
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
                 aria-label="Room code"
                 placeholder="Or enter room code..."
                 required
-                maxLength={6}
+                maxLength={12}
                 autoComplete="off"
                 autoCapitalize="characters"
                 className="h-full min-w-0 flex-1 bg-transparent px-4 font-mono text-xl font-bold tracking-widest uppercase outline-none placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:text-cosmos-500 placeholder:normal-case"

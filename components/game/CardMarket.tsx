@@ -7,6 +7,7 @@ import { ASSETS, AssetImage } from "@/components/game/assets";
 import { Card } from "@/components/game/Card";
 import { PileLayers } from "@/components/game/PileLayers";
 import { estimateAffordability } from "@/components/game/affordability";
+import { useTracedMove } from "@/components/game/traced-move";
 import { getCard } from "@/lib/engine/data";
 import { MAX_RESERVED, type CardLevel, type StoneCounts, type TokenCounts } from "@/lib/engine/types";
 import type { StagedAction } from "@/components/game/staged-action";
@@ -42,6 +43,10 @@ export function CardMarket({
   onStageRecruit,
 }: CardMarketProps) {
   const canReserve = viewerReservedCount < MAX_RESERVED;
+  const picked = useTracedMove()?.move;
+  const fromDeck = picked?.type === "RESERVE" && picked.from === "deck" && picked.level === level;
+  const pickedCard =
+    (picked?.type === "RESERVE" || picked?.type === "RECRUIT") && picked.from === "market" ? picked.cardId : null;
 
   return (
     <div className="flex items-center gap-2">
@@ -49,6 +54,7 @@ export function CardMarket({
         level={level}
         count={deckCount}
         selected={staged?.kind === "reserve" && staged.from === "deck" && staged.level === level}
+        traced={fromDeck}
         disabled={disabled || !canReserve}
         onClick={() => onStageReserveDeck(level)}
       />
@@ -58,6 +64,7 @@ export function CardMarket({
             key={`${level}-${slotIndex}-${cardId}`}
             level={level}
             cardId={cardId}
+            traced={cardId === pickedCard}
             viewerTokens={viewerTokens}
             viewerBonuses={viewerBonuses}
             canReserve={canReserve}
@@ -81,6 +88,7 @@ function DeckIndicator({
   level,
   count,
   selected,
+  traced,
   disabled,
   onClick,
 }: {
@@ -88,6 +96,7 @@ function DeckIndicator({
   /** Cards left in the deck. */
   count: number;
   selected: boolean;
+  traced: boolean;
   disabled?: boolean;
   onClick: () => void;
 }) {
@@ -102,7 +111,7 @@ function DeckIndicator({
   return (
     // Only an empty deck fades; one you can't draw from right now looks the same.
     // The margin is room for the pile's spread, clear of the first market card.
-    <div className={cn("relative mr-2 aspect-card w-16 shrink-0", count === 0 && "opacity-40")}>
+    <div className={cn("relative mr-2 aspect-card w-16 shrink-0 rounded-md", traced && "trace", count === 0 && "opacity-40")}>
       <PileLayers count={count} max={2} dx={0.4} dy={0.4} tilt={1.5} className="size-full">
         <span className={cn("relative", CARD)}>{face}</span>
       </PileLayers>
@@ -127,6 +136,7 @@ function DeckIndicator({
 function MarketCard({
   level,
   cardId,
+  traced,
   viewerTokens,
   viewerBonuses,
   canReserve,
@@ -137,6 +147,7 @@ function MarketCard({
 }: {
   level: CardLevel;
   cardId: string;
+  traced: boolean;
   viewerTokens: TokenCounts;
   viewerBonuses: StoneCounts;
   canReserve: boolean;
@@ -158,6 +169,7 @@ function MarketCard({
       card={card}
       affordable={cheat && affordable}
       selected={selected}
+      traced={traced}
       disabled={disabled}
       reserveAction={{
         label: "Reserve",

@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "cn";
-import { Layers, Star, Timer, UsersRound } from "lucide-react";
+import { Star, Timer, UsersRound } from "lucide-react";
 
-import { AvengersIcon } from "@/components/game/assets";
-import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { Standings } from "@/components/game/Standings";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ordinal, timeAgo, type GameRecord } from "@/lib/game-record";
 
@@ -109,35 +108,7 @@ function Results({ game }: { game: GameRecord }) {
           {MODE[game.mode]} · {game.rounds} rounds · {timeAgo(game.endedAt)}
         </DialogDescription>
       </DialogHeader>
-      <ol className="flex flex-col gap-2">
-        {game.players.map((player) => (
-          <li
-            key={player.seat}
-            className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2",
-              player.seat === game.seat ? "bg-gold-200 text-cosmos-950" : "bg-cosmos-800",
-            )}
-          >
-            <span className="w-5 text-center text-xl font-black">{player.place}</span>
-            <PlayerAvatar src={player.avatarUrl} name={player.name} className="size-10 text-sm" />
-            <span className="min-w-0 flex-1 truncate text-base font-bold">{player.name}</span>
-            <span className="flex items-center gap-3 rounded-full bg-cosmos-950 px-3 py-1 text-sm font-black text-white tabular-nums">
-              <span className="flex items-center gap-1" title="Infinity Points">
-                <Star className={cn("size-4", GOLD_ICON)} />
-                {player.points}
-              </span>
-              <span className="flex items-center gap-1" title="Cards">
-                <Layers className="size-4 text-gold-400" />
-                {player.cards}
-              </span>
-              <span className="flex items-center gap-1" title="Avengers badges">
-                <AvengersIcon className="size-4 text-xs" />
-                {player.tags}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ol>
+      <Standings players={game.players} seat={game.seat} />
     </DialogContent>
   );
 }

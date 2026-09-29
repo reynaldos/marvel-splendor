@@ -295,6 +295,175 @@ body {
   }
 }
 
+/*
+ * What another player just picked, outlined clockwise from the top before it
+ * leaves the board. Put it on a positioned element with the corners to follow.
+ */
+@property --trace {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+@property --trace-end {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.trace::after {
+  --edge: calc(var(--spacing) * 0.45);
+  content: "";
+  position: absolute;
+  z-index: 10;
+  inset: calc(var(--edge) * -1);
+  padding: var(--edge);
+  border-radius: inherit;
+  /* A line from its end round to its tip. */
+  background: conic-gradient(transparent var(--trace-end), var(--color-gold-200) 0 var(--trace), transparent 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: drop-shadow(0 0 calc(var(--spacing) * 0.6) var(--color-gold-400));
+  pointer-events: none;
+}
+
+/* Something shown large over the board: the board dims as it arrives, and all of it fades when tapped away. */
+@keyframes zoom-dim {
+  from { opacity: 0; }
+}
+@keyframes zoom-out {
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .zoom-dim { animation: zoom-dim 0.3s ease-out both; }
+  .zoom-out { animation: zoom-out 0.2s ease-in both; pointer-events: none; }
+}
+
+/* An announcement: the board dims, the piece and its line hold, then all of it goes. */
+/* At rest the Eye is open: its halves parted, the bars swung clear, the light up. */
+.eye-lid-top { translate: 0 -101%; }
+.eye-lid-bottom { translate: 0 101%; }
+.eye-ring { rotate: var(--to); }
+.eye-cast { opacity: 0; }
+@keyframes announce-dim {
+  0%, 100% { opacity: 0; }
+  12%, 85% { opacity: 1; }
+}
+@keyframes announce-hold {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.announce-dim { animation: announce-dim both ease-out; }
+.announce-hold { animation: announce-hold both ease-in; }
+/* The Eye's announcement fades with its light: from when the light is at its height until it is gone. */
+@keyframes announce-dim-eye {
+  0%, 100% { opacity: 0; }
+  8%, 64% { opacity: 1; }
+}
+@keyframes announce-hold-eye {
+  0%, 64% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.announce-dim.announce-eye { animation: announce-dim-eye both ease-in-out; }
+.announce-hold.announce-eye { animation: announce-hold-eye both ease-in-out; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Drawn clockwise from the top until it is whole; only then taken up, the same way round. */
+  @keyframes trace {
+    0% { --trace: 0deg; --trace-end: 0deg; }
+    45% { --trace: 360deg; --trace-end: 0deg; }
+    55% { --trace: 360deg; --trace-end: 0deg; }
+    100% { --trace: 360deg; --trace-end: 360deg; }
+  }
+  .trace::after { animation: trace 1.5s linear both; }
+
+  @keyframes announce-line {
+    from { opacity: 0; scale: 1 0.4; }
+  }
+  .announce-line { animation: announce-line 0.4s 0.5s ease-out both; }
+
+  /*
+   * The Eye opens slowly, everything easing in and out. The rings turn from
+   * the start; part of the way round the sphere splits and its halves part
+   * all the way. The light comes up only as they part, then spreads out
+   * over the screen and fades.
+   */
+  @keyframes eye-ring {
+    from { rotate: var(--from); }
+  }
+  /* A slow start and a slow stop, with the speed in between. */
+  .eye-ring { animation: eye-ring 0.3s cubic-bezier(0.7, 0, 0.3, 1) both; }
+  @keyframes eye-lid {
+    from { translate: 0 0; }
+  }
+  .eye-lid { animation: eye-lid 2.4s 1.4s cubic-bezier(0.7, 0, 0.3, 1) both; }
+  @keyframes eye-glow {
+    from { opacity: 0; }
+  }
+  .eye-glow { animation: eye-glow 1.6s 1.7s ease-in-out both; }
+  /* Grows out of the stone as the light inside comes up, so the one runs into the other. */
+  @keyframes eye-cast {
+    0% { opacity: 0; scale: 0.05; }
+    40% { opacity: 1; }
+    100% { opacity: 0; scale: 1; }
+  }
+  .eye-cast { animation: eye-cast 3s 2s ease-in-out both; }
+  /* The wheels of the clock, turning about their own middles. */
+  @keyframes eye-gear {
+    to { rotate: 360deg; }
+  }
+  .eye-gear { animation: eye-gear linear infinite; }
+}
+
+/*
+ * The end of a game. All of it is decoration, so it is left out for anyone
+ * who has asked their device for less motion.
+ */
+.result-glow-gold { box-shadow: 0 0 4rem rgb(246 201 69 / 0.45); }
+.result-glow-red { box-shadow: 0 0 4rem rgb(237 29 36 / 0.45); }
+.result-rays {
+  background: repeating-conic-gradient(rgb(246 201 69 / 0.4) 0 9deg, transparent 9deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, black 15%, transparent 68%);
+  mask-image: radial-gradient(circle, black 15%, transparent 68%);
+}
+.result-rain { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Lands with a bounce. */
+  @keyframes result-pop {
+    0% { opacity: 0; scale: 0.4; }
+    60% { opacity: 1; scale: 1.12; }
+    100% { scale: 1; }
+  }
+  .result-pop { animation: result-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+  @keyframes result-row {
+    from { opacity: 0; translate: 2rem 0; }
+  }
+  .result-row { animation: result-row 0.45s ease-out both; }
+
+  @keyframes result-rays {
+    to { rotate: 360deg; }
+  }
+  .result-rays { animation: result-rays 20s linear infinite; }
+
+  @keyframes result-rain {
+    0% { opacity: 0; translate: 0 0; rotate: 0deg; }
+    10%, 85% { opacity: 1; }
+    100% { opacity: 0; translate: 0 100dvh; rotate: 540deg; }
+  }
+  .result-rain { animation: result-rain linear infinite; }
+
+  @keyframes result-pulse {
+    50% { opacity: 0.35; }
+  }
+  .result-pulse { animation: result-pulse 2.4s ease-in-out infinite; }
+
+  /* Thanos rises into view, then breathes. */
+  @keyframes result-loom {
+    0% { opacity: 0; scale: 1.25; translate: 0 8%; }
+    100% { opacity: 1; scale: 1; translate: 0 0; }
+  }
+  .result-loom { animation: result-loom 1.2s ease-out both; }
+}
+
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
 @keyframes turn-banner {
   0% { opacity: 0; transform: scaleY(0.4); }

@@ -5,6 +5,7 @@ import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
 
 import { Logo } from "@/components/home/Logo";
 import { BotLevel } from "@/components/lobby/BotLevel";
+import { Rule } from "@/components/lobby/Rule";
 import { ShareCode } from "@/components/lobby/ShareCode";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
@@ -94,19 +95,6 @@ function Place({
       </span>
       {below}
     </li>
-  );
-}
-
-/** A rule the room was opened with. */
-function Rule({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
-  return (
-    <span className="flex items-center gap-2">
-      {icon}
-      <span className="flex flex-col gap-0.5">
-        <span className="font-display text-xs font-bold tracking-wide text-gold-400 uppercase">{label}</span>
-        <span className="text-xl leading-none font-black">{value}</span>
-      </span>
-    </span>
   );
 }
 

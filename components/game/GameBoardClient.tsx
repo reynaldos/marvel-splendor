@@ -6,7 +6,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
+import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
+import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
@@ -17,6 +20,7 @@ import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
 import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
+import { rankPlayers } from "@/lib/game-record";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
@@ -81,6 +85,8 @@ function toLogEntry(step: { seat: number; move: Move }): MoveLogEntry {
   return { id: crypto.randomUUID(), seat: step.seat, move: step.move, timestamp: Date.now() };
 }
 
+/** How long what another player picked is outlined before it leaves the board: the time the outline takes to be drawn and taken up. */
+const TRACE_MS = 1500;
 /** How long each bot appears to think before its move lands. */
 const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
@@ -108,6 +114,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [botPlaying, setBotPlaying] = useState(false);
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
+  // What another player has just picked, while it is outlined on the board.
+  const [traced, setTraced] = useState<TracedMove | null>(null);
+  const [announcement, setAnnouncement] = useState<{ event: BoardEvent; origin: TileOrigin | null; key: string } | null>(
+    null,
+  );
   // The move the return-tokens popup was closed on; a later one opens it afresh.
   const [returnClosedAt, setReturnClosedAt] = useState<number | null>(null);
   // Choosing what to give back for a pick that isn't played yet; closing it keeps the pick.
@@ -136,16 +147,37 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   /** Runs at the end of every flow; refetches if a signal was missed during it. */
   const catchUp = useRef(() => {});
 
-  /** Shows each step in turn, pausing before a bot's so it appears to think. */
-  const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[]) => {
+  /**
+   * Shows each step in turn, from the board `from`. A bot pauses first, so it
+   * appears to think. What another player picked is outlined before it leaves
+   * the board, and a Location, the Avengers tile or the Time Stone changing
+   * hands is announced to everyone once the move has landed.
+   */
+  const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[], from: RedactedGameState) => {
+    let shown = from;
     for (const step of steps) {
       const away = step.view.players.find((p) => p.seat === step.seat)?.away;
+      // The viewer knows what they picked themselves.
+      const outlined = leavesATrace(step.move) && (away || step.seat !== from.viewerSeat);
       if (away || players.find((p) => p.seat === step.seat)?.isBot) {
         setBotPlaying(true);
-        await delay(BOT_THINK_MS);
+        await delay(BOT_THINK_MS - (outlined ? TRACE_MS : 0));
       }
+      if (outlined) {
+        setTraced({ seat: step.seat, move: step.move });
+        await delay(TRACE_MS);
+        setTraced(null);
+      }
+      // Where each tile sits is read now, while it is still on the board.
+      const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
       setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
       setMoveLog((log) => [...log, toLogEntry(step)]);
+      shown = step.view;
+      for (const [i, announced] of events.entries()) {
+        setAnnouncement({ ...announced, key: `${step.view.moveCount}-${i}` });
+        await delay(announceMs(announced.event));
+      }
+      setAnnouncement(null);
     }
     setBotPlaying(false);
   }, []);
@@ -177,7 +209,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
         if (shown) {
           setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
-          await playSteps(data.steps, data.players);
+          await playSteps(data.steps, data.players, shown.view);
         }
         setMoveLog(data.moves.map(toLogEntry));
         commit({
@@ -249,7 +281,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         setStaged(null);
         // The request is done; what follows is the moves playing back.
         setSubmitting(false);
-        await playSteps(steps, shown.players);
+        await playSteps(steps, shown.players, shown.view);
         commit({
           ...shown,
           view,
@@ -388,7 +420,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const isMyTurn = view.currentSeat === view.viewerSeat;
   const over = gameData.abandoned || view.status !== "active";
   const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
-  const gameOverOpen = view.status === "finished" && !gameOverDismissed;
+  // The last move is announced before the results come up.
+  const gameOverOpen = view.status === "finished" && !gameOverDismissed && !announcement;
 
   const owesTokens = view.pending?.type === "RETURN_TOKENS";
   const afterPick = viewer ? tokensAfter(staged, viewer.tokens, view.supply) : null;
@@ -432,7 +465,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             </div>
           </div>
         ) : null}
-        {isMyTurn && !over && !botPlaying && !view.pending ? (
+        {announcement ? (
+          <Announcement
+            key={announcement.key}
+            event={announcement.event}
+            origin={announcement.origin}
+            nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`}
+          />
+        ) : null}
+        {isMyTurn && !over && !botPlaying && !view.pending && !announcement ? (
           // Keyed by turn, so it plays once each time the turn comes round.
           <div
             key={view.moveCount}
@@ -449,45 +490,56 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           {gameData.gameEndsAt !== null && !over ? (
             <GameClock endsAt={gameData.gameEndsAt} lastRound={view.clockExpired} />
           ) : null}
+          {view.status === "finished" && gameOverDismissed ? (
+            <button
+              type="button"
+              onClick={() => setGameOverDismissed(false)}
+              className="pointer-events-auto rounded-full bg-gold-400 px-4 py-1 font-display text-xs font-black tracking-wide text-cosmos-950 uppercase shadow-md hover:bg-gold-200"
+            >
+              Results
+            </button>
+          ) : null}
           {botPlaying ? (
             <span className="rounded-full bg-popover px-3 py-1 font-display text-xs font-bold tracking-wide text-gold-400 uppercase shadow-md ring-2 ring-cosmos-500 ring-inset">
               Bot is thinking…
             </span>
           ) : null}
         </div>
-        <Board
-          view={view}
-          turnEndsAt={botPlaying ? null : gameData.turnEndsAt}
-          players={players}
-          staged={over ? null : staged}
-          disabled={disabled}
-          submitting={submitting}
-          banterBySeat={banterBySeat}
-          menu={
-            <GameMenu
-              moveLog={moveLog}
-              players={players}
-              viewerSeat={view.viewerSeat}
-              settings={view.settings}
-              finished={view.status === "finished"}
-              busy={submitting || botPlaying}
-              onForfeit={() => void submitMove({ type: "FORFEIT" })}
-            />
-          }
-          onStageTokenColor={stageTokenColor}
-          onUnstageTokenColor={unstageTokenColor}
-          onStageReserveMarket={stageReserveMarket}
-          onStageReserveDeck={stageReserveDeck}
-          onStageRecruit={stageRecruit}
-          onConfirm={confirmStaged}
-          onReturn={
-            owesTokens && !over
-              ? () => setReturnClosedAt(null)
-              : pickGoesOver
-                ? () => setChoosingReturn(true)
-                : undefined
-          }
-        />
+        <TracedMoveProvider value={traced}>
+          <Board
+            view={view}
+            turnEndsAt={botPlaying ? null : gameData.turnEndsAt}
+            players={players}
+            staged={over ? null : staged}
+            disabled={disabled}
+            submitting={submitting}
+            banterBySeat={banterBySeat}
+            menu={
+              <GameMenu
+                moveLog={moveLog}
+                players={players}
+                viewerSeat={view.viewerSeat}
+                settings={view.settings}
+                finished={view.status === "finished"}
+                busy={submitting || botPlaying}
+                onForfeit={() => void submitMove({ type: "FORFEIT" })}
+              />
+            }
+            onStageTokenColor={stageTokenColor}
+            onUnstageTokenColor={unstageTokenColor}
+            onStageReserveMarket={stageReserveMarket}
+            onStageReserveDeck={stageReserveDeck}
+            onStageRecruit={stageRecruit}
+            onConfirm={confirmStaged}
+            onReturn={
+              owesTokens && !over
+                ? () => setReturnClosedAt(null)
+                : pickGoesOver
+                  ? () => setChoosingReturn(true)
+                  : undefined
+            }
+          />
+        </TracedMoveProvider>
       </div>
 
       {viewer && !over ? (
@@ -511,10 +563,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         onOpenChange={(open) => {
           if (!open) setGameOverDismissed(true);
         }}
-        winnerSeat={view.winnerSeat}
-        sharedWinners={view.sharedWinners}
+        standings={rankPlayers(view, players)}
         viewerSeat={view.viewerSeat}
-        nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat}`}
+        round={view.round}
       />
     </>
   );
