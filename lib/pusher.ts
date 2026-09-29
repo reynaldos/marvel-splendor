@@ -6,6 +6,7 @@
  */
 import Pusher from "pusher";
 
+import { CHAT_EVENT, type ChatBubble } from "@/lib/chat";
 import { GAME_UPDATED_EVENT, gameChannel } from "@/lib/game-channel";
 
 let client: Pusher | null | undefined;
@@ -32,8 +33,17 @@ function getClient(): Pusher | null {
  * delays what they see.
  */
 export async function notifyGame(gameId: string): Promise<void> {
+  await trigger(gameId, GAME_UPDATED_EVENT, {});
+}
+
+/** Shows everyone at the table what a player sent. It is meant for all of them, so it travels in the signal. */
+export async function notifyChat(gameId: string, bubble: ChatBubble): Promise<void> {
+  await trigger(gameId, CHAT_EVENT, bubble);
+}
+
+async function trigger(gameId: string, event: string, payload: object): Promise<void> {
   try {
-    await getClient()?.trigger(gameChannel(gameId), GAME_UPDATED_EVENT, {});
+    await getClient()?.trigger(gameChannel(gameId), event, payload);
   } catch (error) {
     console.error("Pusher trigger failed", error);
   }

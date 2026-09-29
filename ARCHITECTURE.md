@@ -298,6 +298,22 @@ So nobody has to guess what another player did, the board shows it.
 
 For testing: it outlines the cards the player can afford. It is on when the board's address has `?cheat=true`. Typing `+cheat` after a room's code when joining, or on its own in the room code box when creating a room, turns it on; the lobby carries it on to the board. It only changes what that one player is shown.
 
+**Chat and emoji reactions (in progress)**
+
+Players in a private game can send an emoji or a short message to the table. It pops in on the sender's card and pops out again.
+
+| Step | State |
+|---|---|
+| 1. Sending: the lists, the send route and the limit | Done |
+| 2. The player's card: more room for the username, and the two buttons | Not started |
+| 3. Bubbles: shown live to everyone, popping in and out, and on `/preview/board` | Not started |
+
+- **Only what is on the lists can be sent.** A short list of emojis and one of messages, in `lib/chat.ts`. Nothing is typed, so nothing needs moderating. A message is at most 20 characters, to fit across a name.
+- **One send every 3 seconds per player.** The server checks it against the player's last saved send, so it holds across devices and servers (`app/api/games/[id]/chat/route.ts`).
+- **Who can send.** A player in a private game that is in play or finished, so "Good game!" can be said at the end. Not a player marked away, and not in a game against the computer.
+- **Everything sent is saved** in `ChatMessage`, with `kind` `REACTION` for an emoji and `TEXT` for a message. Clearing games clears it.
+- **It travels in the live signal**, as the `chat` event on the game's channel, since it is meant for everyone at the table. If the live connection is down it is not shown later: it is only worth seeing in the moment.
+
 **Still to do**
 
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
@@ -391,6 +407,7 @@ For the owner to review who is using the game and how much.
   - **Who may open it.** The emails in the `ADMIN_EMAILS` setting, separated by commas, and only once the sign-in has verified the email. Everyone else is told the page doesn't exist. With the setting empty, nobody can open it.
   - **Now.** Who is online (seen in the last 5 minutes), games in play (moved in within the last 10 minutes), lobbies waiting, and visits in the last 24 hours. Below them, the 50 most recently touched games and lobbies with their players, round and last move. A game nobody has moved in for 10 minutes shows as "Left open".
   - **Every user**, latest seen first: sign-up date and how they sign in, visits, last joined, last seen, time in the app, time playing, games, wins, device and IP address. Hovering over Games or the IP address shows the split and every address used.
+  - **Most sent.** Every emoji and message on the lists with how many times it has been sent, most first. One never sent shows 0, and one taken off the lists keeps its count. Clearing games clears the counts, as what was sent is saved with its game.
   - **Time playing** is each game's first move to its last, added up, so a lobby or a tab left open adds nothing. Clearing games clears it.
   - **It reloads itself every minute.**
   - **It reads every user and every visit each time.** Fine at this size; with thousands of users, show them a page at a time and add the visits up in the database.

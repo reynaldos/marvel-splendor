@@ -73,7 +73,7 @@ export default async function AdminUsersPage() {
   // Anyone else is told the page doesn't exist.
   if (!isAdmin(session.user)) notFound();
 
-  const { totals, tables, users } = await loadUserMetrics();
+  const { totals, tables, users, sent } = await loadUserMetrics();
 
   return (
     <main className="dark min-h-dvh bg-cosmos px-6 py-8 text-white">
@@ -124,6 +124,27 @@ export default async function AdminUsersPage() {
               ))}
             </Table>
           )}
+        </Section>
+
+        <Section title="Most sent">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Table head={["Emoji", "Times sent"]}>
+              {sent.emojis.map((emoji) => (
+                <tr key={emoji.body}>
+                  <td className="text-xl">{emoji.body}</td>
+                  <td>{emoji.count}</td>
+                </tr>
+              ))}
+            </Table>
+            <Table head={["Message", "Times sent"]}>
+              {sent.messages.map((message) => (
+                <tr key={message.body}>
+                  <td>{message.body}</td>
+                  <td>{message.count}</td>
+                </tr>
+              ))}
+            </Table>
+          </div>
         </Section>
 
         <Section title="Every user">

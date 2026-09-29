@@ -1,3 +1,4 @@
+import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
 import type { GameState } from "@/lib/engine/types";
 import { botName } from "@/lib/lobby-rules";
@@ -74,6 +75,12 @@ export function summarizeVisits(visits: Visit[]) {
   };
 }
 
+/** Most sent first. What is on the list but never sent is there with 0; what was sent and since taken off the list is kept. */
+export function rankSends(list: readonly string[], sent: Array<{ body: string; count: number }>) {
+  const counts = new Map([...list.map((body) => [body, 0] as const), ...sent.map((s) => [s.body, s.count] as const)]);
+  return [...counts].map(([body, count]) => ({ body, count })).sort((a, b) => b.count - a.count);
+}
+
 /**
  * Everything the admin page shows: who is here now, the open tables, and every user.
  *
@@ -81,7 +88,7 @@ export function summarizeVisits(visits: Visit[]) {
  * add the visits up in the database once there are thousands.
  */
 export async function loadUserMetrics(now = Date.now()) {
-  const [users, moveTimes, gameCounts, openGames] = await Promise.all([
+  const [users, moveTimes, gameCounts, openGames, sends] = await Promise.all([
     prisma.user.findMany({
       select: {
         id: true,
@@ -118,12 +125,15 @@ export async function loadUserMetrics(now = Date.now()) {
         },
       },
     }),
+    prisma.chatMessage.groupBy({ by: ["kind", "body"], _count: { _all: true } }),
   ]);
 
   // A game is timed from its first move to its last, so waiting in a lobby or an open tab adds nothing.
   const playedMs = new Map(
     moveTimes.map((g) => [g.gameId, (g._max.createdAt?.getTime() ?? 0) - (g._min.createdAt?.getTime() ?? 0)]),
   );
+  const sentOf = (kind: string) =>
+    sends.filter((s) => s.kind === kind).map((s) => ({ body: s.body, count: s._count._all }));
   const gamesWith = (status: string) => gameCounts.find((g) => g.status === status)?._count._all ?? 0;
 
   const rows = users
@@ -170,5 +180,9 @@ export async function loadUserMetrics(now = Date.now()) {
     },
     tables,
     users: rows,
+    sent: {
+      emojis: rankSends(EMOJIS, sentOf("REACTION")),
+      messages: rankSends(MESSAGES, sentOf("TEXT")),
+    },
   };
 }
