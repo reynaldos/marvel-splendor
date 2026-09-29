@@ -8,8 +8,17 @@ export const metadata = pageMetadata("Board animations preview", undefined, true
 export default async function BoardPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ show?: string; at?: string }>;
+  searchParams: Promise<{ show?: string; at?: string; players?: string }>;
 }) {
-  const { show, at } = await searchParams;
-  return <BoardPreview show={show} at={at === undefined ? undefined : Number(at)} />;
+  const { show, at, players } = await searchParams;
+  const count = Number(players);
+  return (
+    <BoardPreview
+      // Remade for each table size, so nothing is left over from the last.
+      key={players}
+      show={show}
+      at={at === undefined ? undefined : Number(at)}
+      count={[2, 3, 4].includes(count) ? count : 3}
+    />
+  );
 }

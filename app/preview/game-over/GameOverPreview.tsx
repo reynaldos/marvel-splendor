@@ -8,6 +8,7 @@ import { BackLink } from "@/components/BackLink";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Stage, StageRows } from "@/components/Stage";
 
+import { PreviewBarRow } from "../PreviewBar";
 import { RESULTS, standingsFor, type Result } from "./standings";
 
 const LABEL = { win: "Win", loss: "Loss", shared: "Shared win" };
@@ -56,6 +57,7 @@ export function GameOverPreview({ result, players }: { result: Result; players: 
           </button>
         </footer>
       </StageRows>
+      <PreviewBarRow />
       <GameOverDialog
         key={showing}
         open={showing !== null}

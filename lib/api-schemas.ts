@@ -35,7 +35,7 @@ export const MoveSchema = z.union([
     tokens: z.partialRecord(TokenColorSchema, z.number().int().nonnegative()),
   }),
   z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
-  z.object({ type: z.literal("TIMEOUT_SKIP") }),
+  z.object({ type: z.literal("TIMEOUT_SKIP"), present: z.literal(true).optional() }),
   z.object({ type: z.literal("FORFEIT") }),
   z.object({ type: z.literal("REJOIN") }),
 ]);

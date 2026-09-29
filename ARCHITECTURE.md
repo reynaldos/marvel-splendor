@@ -290,13 +290,43 @@ So nobody has to guess what another player did, the board shows it.
 - **Where it lives.** `lib/board-events.ts` works out what a move brought about by comparing the board before and after. `components/game/Announcement.tsx` draws it, and `playSteps` in `GameBoardClient.tsx` plays it. The outline is the `trace` style in `globals.css`.
 - **Looking closer.** Tapping the win tile, a Location, the Avengers tile, a player's reserved cards or team, or a card's View glides it from its place on the board to the middle of the screen, and tapping it away fades it (`ZoomedView` in `components/game/Zoomable.tsx`). It shares its glide with the announcements (`components/game/glide.ts`).
 - **To look at them without playing**, open `/preview/board`. Adding `?show=TimeStone&at=300` to the address plays one and stops it that many milliseconds in.
+- **The preview pages** are the board (`/preview/board`), its loading screen (`/preview/loading`) and the end of a game (`/preview/game-over`). Each has a bar along the bottom (`app/preview/PreviewBar.tsx`): back to the main menu, the three pages to move between, and a `?` that lists everything a page takes in its address, each value a link that goes there. The board takes `?players=2`, `3` or `4` for how many are at the table, three when left out. A button on its bar shows the number and goes round them: 2, 3, 4, and back to 2. The list in the help is checked against what the pages take, so neither drifts from the other.
 - **The glide is taken back when it is set up twice.** In development every effect is run twice; the second start used to measure the tile mid-flight and leave it standing in the middle of the screen.
 - **Turn clocks.** A turn's clock starts once the animations before it are over, as it already did for a bot's thinking time. The player who moved skips the outline of their own pick, so their device is a second and a half ahead of the others'. That is inside the three seconds a device waits before timing another player out.
 - **Less motion.** For anyone who has asked their device for less motion, the outline and announcements appear without moving.
 
+**Loading the board (done)**
+
+While a game loads, the board is drawn in outline on the night sky: the player cards, each with the tab for its name, the three decks and their cards, the token piles, the tiles, the trays and End Turn, each in its own place and shape (`components/game/BoardSkeleton.tsx`). They pulse gently, and stay still for anyone who has asked their device for less motion. It shows two other players, as the number at the table isn't known until the game has loaded. To look at it, open `/preview/loading`.
+
 **Cheat mode**
 
 For testing: it outlines the cards the player can afford. It is on when the board's address has `?cheat=true`. Typing `+cheat` after a room's code when joining, or on its own in the room code box when creating a room, turns it on; the lobby carries it on to the board. It only changes what that one player is shown.
+
+**Chat and emoji reactions (done)**
+
+Players in a private game can send an emoji or a short message to the table. It pops in on the sender's card and pops out again.
+
+| Step | State |
+|---|---|
+| 1. Sending: the lists, the send route and the limit | Done |
+| 2. The player's card: the name on a strip of its own, with the chat button beside it | Done |
+| 3. Bubbles: shown live to everyone, popping in and out, and on `/preview/board` | Done |
+
+- **The button.** One small round smiley on the top right corner of the name's tab, to the left of the points (`components/game/ChatButton.tsx`). It opens a list above it: the emojis in a row, the messages under them in two columns. One tap sends.
+- **Every player's card.** The picture and name stand on a tab on the card's top edge, narrower than the card, so they are easy to pick out. The card under it holds the tokens and bonuses, with the points on its top right corner. Tab and card are always outlined, with a line between them: the same faint edge as the trays, and gold, thicker and glowing on that player's turn. The glow is one glow cast by the tab and the card together, on a layer of its own under them (`.turn-glow` in `globals.css`): a glow on each met in a bright bar where the two join. The layer is edged in gold like the card, so the glow starts outside the edge, and its middle is cut out, so it never lies over what the card holds. The card itself is not filtered, which would trap the enlarged view of its reserved cards inside it. Both are edged with borders, the tab's foot lying on the card's top line, so the two line up whichever thickness is showing. The turn timer sits low on the card's edge, clear of the points.
+- **The picture is larger than its tab on purpose.** It is a step and a half taller than the tab and sits over it, standing out the same amount over the tab's top and its foot, and a little over its left side. It is always a circle. It is drawn over the tab, not in it, so cutting off the tab's glow on a turn doesn't cut the picture.
+- **Another player's card** also shows their Avengers tags on the tab, and their reserved cards standing on the card's top edge between the tab and the points. It is no taller than it was, so four players still fit.
+- **The player's own card** is level with the trays and is left to the tokens being taken. The chat button is only there where something can be sent, so not in a game against the computer. To look at it on the player's turn, go to `/preview/board?show=MyTurn`, or `?show=Chat` for the list.
+- **Off while waiting.** The button is off for 3 seconds after a send. If the server says it is too soon, as when sending from a second device, it stays off for as long as it says is left.
+- **What is sent shows beside the sender's card** for 3 seconds (`components/game/ChatBubble.tsx`): it pops in, holds and pops out. Another player's shows on the top edge of their card, level with the name on its tab and straight after their reserved cards, so it reads as theirs. The player's own shows to the right of the button, above the points. It is only as wide as what it says, so an emoji is a small round bubble. Nothing on the player cards is covered. An emoji stays within the card's width. A message is longer and passes over the edge of the market's decks for those 3 seconds, and a tap goes through it to the deck. A new one from the same player takes the place of the last. For anyone who has asked their device for less motion it appears and goes without the pop.
+- **The sender sees their own as soon as it is sent**, and everyone else when it arrives, so it is not shown twice to the sender.
+- **To look at them without playing**, open `/preview/board` and press Emoji or Message: it shows on every card at once, with the longest message on the list. `?show=Message&at=1500` holds it still.
+- **Only what is on the lists can be sent.** A short list of emojis and one of messages, in `lib/chat.ts`. Nothing is typed, so nothing needs moderating. A message is at most 20 characters, to fit across a name.
+- **One send every 3 seconds per player.** The server checks it against the player's last saved send, so it holds across devices and servers (`app/api/games/[id]/chat/route.ts`).
+- **Who can send.** A player in a private game that is in play or finished, so "Good game!" can be said at the end. Not a player marked away, and not in a game against the computer.
+- **Everything sent is saved** in `ChatMessage`, with `kind` `REACTION` for an emoji and `TEXT` for a message. Clearing games clears it.
+- **It travels in the live signal**, as the `chat` event on the game's channel, since it is meant for everyone at the table. If the live connection is down it is not shown later: it is only worth seeing in the moment.
 
 **Still to do**
 
@@ -306,7 +336,6 @@ For testing: it outlines the cards the player can afford. It is on when the boar
 - **A "squad pic" at the end of a game.** A picture of the player's recruited team to keep or share. To decide first: put together from the card art the game already has, or drawn by an image model. The second costs money per picture and needs care over the use of Marvel's characters.
 - **A gallery of past teams.** A page, or a tab on the profile, showing the team the player recruited in each finished game, latest first. The teams are already saved with each game, so it needs no database change; the squad pics would show here once they exist, which does need somewhere to keep them.
 - End-to-end tests.
-- Chat and emoji reactions.
 - Bot banter.
 - Level, coins and rank.
 
@@ -377,6 +406,29 @@ What these need before they can be built:
 - **A name and an email on the user.** `name String?` and `email String?` are in `prisma/schema.prisma`; `pnpm db:update` adds them to the database. The email is copied from the sign-in, and updated if it changes there. It is not unique, as one person can sign in more than one way, and it is never shown on a profile.
 - **A picture library.** Done, with no schema change: the pictures are listed in `lib/avatars.ts`, and a chosen one is saved in `avatarKey` as `library/<id>`. They ship with the app, in `public/assets/pfp`; Cloudflare is only for pictures players upload. To add one, put a square picture in that folder and give it a line in the list. Uploaded pictures are saved under `avatars/`, so the two can't be confused.
 
+**User metrics**
+
+For the owner to review who is using the game and how much.
+
+- **Visits. Done.** Every signed-in request notes that the user is active (`lib/record-visit.ts`, called from `getOrCreateUser`). A visit is one stretch of activity from one IP address: a request within 30 minutes of the last carries the visit on, and a longer gap or a new address starts another. Each `UserVisit` row holds the user, IP address, browser, when it started and when the user was last active. `pnpm db:update` adds the table; until then nothing is recorded and nothing breaks.
+- **What is worked out from them.** Times joined is the number of visits, last joined is the latest, and time in the app is the length of every visit added up. Time spent playing comes from the saved games, so it needs nothing new.
+- **Written at most once a minute per user**, after the response has gone out, so it never slows a page or a move. A failure to record is logged and never fails the request.
+- **Switching network mid-visit counts as a new visit**, since the address changes.
+- **A closed tab is not detected.** A visit ends at the user's last request, so a visit of a single request has no length.
+- **IP addresses are personal data.** They are only ever shown on the admin page. A country or city can be worked out from them later, so neither is stored.
+- **Admin page. Done.** `/admin/users` (`app/admin/users/page.tsx`, numbers from `lib/user-metrics.ts`). Admins get an Admin button at the bottom right of the main menu; nobody else is shown it.
+  - **A Previews button** in its heading goes to the preview pages.
+  - **Who may open it.** The emails in the `ADMIN_EMAILS` setting, separated by commas, and only once the sign-in has verified the email. Everyone else is told the page doesn't exist. With the setting empty, nobody can open it.
+  - **Along the top,** seven boxes: who is online (seen in the last 5 minutes), games in play (moved in within the last 10 minutes), lobbies waiting, visits in the last 24 hours, users, and games finished and abandoned.
+  - **Under them, three tabs in a row,** with the chosen one's view beneath: Open tables, Every user, Most sent. Open tables shows first. They are drawn like the tabs on the profile's stats (`components/admin/AdminTabs.tsx`).
+  - **Open tables.** The 50 most recently touched games and lobbies with their players, round and last move. A game nobody has moved in for 10 minutes shows as "Left open".
+  - **Every user**, latest seen first: sign-up date and how they sign in, visits, last joined, last seen, time in the app, time playing, games, wins, device and IP address. Hovering over Games or the IP address shows the split and every address used.
+  - **Most sent.** Every emoji and message on the lists with how many times it has been sent, most first. One never sent shows 0, and one taken off the lists keeps its count. Clearing games clears the counts, as what was sent is saved with its game.
+  - **Time playing** is each game's first move to its last, added up, so a lobby or a tab left open adds nothing. Clearing games clears it.
+  - **It fetches its numbers again every minute, in place** (`components/admin/AutoRefresh.tsx`): the chosen tab and the place scrolled to are kept. It rests while its browser tab is out of sight and catches up when looked at again. It used to reload the whole page, in sight or not; one reload failing, as when the computer had slept, left an error page that never tried again.
+  - **A load that fails shows a notice and tries again in a minute.**
+  - **It reads every user and every visit each time.** Fine at this size; with thousands of users, show them a page at a time and add the visits up in the database.
+
 ## 9. Testing & correctness strategy
 
 - Engine: property-style tests (token conservation invariants — supply + hands + spent always equals initial counts), scenario tests for every rulebook clause, full bot-vs-bot fuzz games from random seeds asserting no illegal state.
@@ -393,6 +445,7 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 - **The count lives in the game state.** Each seat carries `missedTurns`; a timed-out turn adds one and a played turn clears it. Coming back is logged as a `REJOIN` move.
 - **A turn skipped for having no legal move does not count.** It is logged as `TIMEOUT_SKIP` with `stuck: true`, which only the server can set.
+- **Only a turn nobody showed up for counts as missed.** A player whose time runs out with something picked was there: the skip is logged with `present: true`, which only that player's own device can set, and is not counted. Nor is a skip that finds a choice still waiting, since the player had already moved.
 - **The stand-in bot plays at the game's bot level**, or normal when the game has none.
 - **Bot-played turns count in that player's stats.** A win earned by the stand-in bot is recorded as the player's win.
 - **Untimed games never close on their own.** The rule counts timed-out turns, and an untimed game has none. An untimed game also cannot move past a player who has walked away.
@@ -408,7 +461,11 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 **Turn timers**
 
-- **The clock restarts on a sub-move.** A turn is timed from the game row's last write (`Game.updatedAt`), so returning tokens or choosing a Location gives that turn a fresh clock.
+- **Tokens held when the time runs out are taken.** The pick is played as a normal move, so the turn is not a missed one.
+- **Unless they would take the player over 10.** There is no time left to choose what to give back, so the pick is not played: the turn is skipped, the player holds what they held before, and it is not counted as missed. The same goes for running out of time with the give-back popup open.
+- **A choice doesn't restart the clock.** A move that leaves tokens to give back, or a Location to choose, hasn't ended the turn, so the clock carries on from where it was. Both popups show the turn's timer, as they cover the player's card.
+- **If the time runs out with tokens owed on the server**, as when a device drops out between taking and giving back, the move is undone: what it took goes back. After reserving a card only the S.H.I.E.L.D. token goes back and the card stays reserved, since the card that replaced it on the board has been seen. A Location left unchosen is chosen for the player.
+- **Games in progress from before this** lose move playback if they had a turn time out with a choice waiting, as the count of missed turns no longer matches. They jump straight to the latest board instead.
 - **Timing out another player waits a few seconds.** A player's own device ends their turn at zero. Other devices wait about 3 seconds longer before doing it for them, so there is a short pause when someone has left.
 
 **Move playback**

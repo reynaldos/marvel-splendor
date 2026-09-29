@@ -5,9 +5,12 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
+import { BoardSkeleton } from "@/components/game/BoardSkeleton";
+import { useChatBubbles } from "@/components/game/ChatBubble";
+import { ChatButton } from "@/components/game/ChatButton";
+import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { useNotchSide } from "@/components/use-notch-side";
@@ -66,6 +69,7 @@ interface MovesPostResponse {
 
 interface GameData {
   id: string;
+  mode: string;
   players: GamePlayerInfo[];
   view: RedactedGameState;
   /** When the current turn runs out, on this device's clock; null when untimed. */
@@ -125,12 +129,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [choosingReturn, setChoosingReturn] = useState(false);
   const notchSide = useNotchSide();
 
-  // Integration point for a later task (OpenAI banter bubbles): nothing
-  // populates this yet, but the plumbing — state + setter + prop passthrough
-  // to PlayerPlaque/BanterBubble — is wired up so that task can just call
-  // `setBanterBySeat` when content arrives.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [banterBySeat, setBanterBySeat] = useState<Record<number, string | null>>({});
+  const [chatWaiting, setChatWaiting] = useState(false);
+  const [bubbles, showBubble] = useChatBubbles();
 
   // Latest values for the async flows below, which outlive the render that started them.
   const gameRef = useRef<GameData | null>(null);
@@ -214,6 +214,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         setMoveLog(data.moves.map(toLogEntry));
         commit({
           id: data.id,
+          mode: data.mode,
           players: data.players,
           view: data.view,
           turnEndsAt: toDeadline(data.turnEndsInMs),
@@ -240,7 +241,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   }, [fetchGame]);
 
   // Another player moved, or the safety-net timer fired.
-  useGameUpdates(gameId, () => void fetchGame(true));
+  useGameUpdates(
+    gameId,
+    () => void fetchGame(true),
+    (arrived) => {
+      const sent = ChatBubbleSchema.safeParse(arrived);
+      // The player's own is shown as it is sent, so it isn't shown again when it comes round.
+      if (sent.success && sent.data.seat !== gameRef.current?.view.viewerSeat) showBubble(sent.data.seat, sent.data);
+    },
+  );
 
   useEffect(() => {
     void fetchGame();
@@ -305,8 +314,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // When a turn's time runs out, end it: straight away if it's the viewer's
   // own, after a short wait if it's someone else's who may have walked away.
   // The viewer's own turn plays whatever they had picked; with nothing picked,
-  // or a pick the server won't take, it is skipped. The server re-checks the
-  // time itself, so this can't skip a turn early.
+  // or a pick the server won't take, it is skipped. A pick that leaves tokens
+  // to give back isn't played, as there is no time left to choose them. The
+  // server re-checks the time itself, so this can't skip a turn early.
   const stagedRef = useRef(staged);
   useEffect(() => {
     stagedRef.current = staged;
@@ -320,8 +330,17 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
     const timer = setTimeout(async () => {
       const picked = isMine ? stagedRef.current : null;
-      if (picked && (await submitMove(stagedActionToMove(picked), true))) return;
-      void submitMove({ type: "TIMEOUT_SKIP" });
+      const mine = gameRef.current?.view.players.find((p) => p.seat === gameRef.current?.view.viewerSeat);
+      const supply = gameRef.current?.view.supply;
+      const goesOver = picked && mine && supply && totalTokens(tokensAfter(picked, mine.tokens, supply)) > HAND_LIMIT;
+      if (picked && !goesOver && (await submitMove(stagedActionToMove(picked), true))) return;
+      // Having picked something, the player was there: the turn is lost, but not counted as missed.
+      const owed = isMine && gameRef.current?.view.pending?.type === "RETURN_TOKENS";
+      const skipped = await submitMove(picked ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" });
+      if (skipped && (goesOver || owed)) {
+        setChoosingReturn(false);
+        toast.info("Time ran out before you chose what to give back, so your pick was put back.");
+      }
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
@@ -393,16 +412,28 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [submitMove],
   );
 
+  const sendChat = useCallback(
+    async (chat: ChatSend) => {
+      setChatWaiting(true);
+      const response = await fetch(`/api/games/${gameId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(chat),
+      }).catch(() => null);
+      // Sent too soon, as from a second device: wait out what the server says is left.
+      const tooSoon = response?.status === 429 ? await response.json().catch(() => null) : null;
+      if (!response?.ok && !tooSoon) toast.error("That couldn't be sent.");
+      const seat = gameRef.current?.view.viewerSeat;
+      if (response?.ok && seat !== undefined) showBubble(seat, chat);
+      setTimeout(() => setChatWaiting(false), tooSoon?.retryInMs ?? CHAT_COOLDOWN_MS);
+    },
+    [gameId, showBubble],
+  );
+
   // Loading until there is a board or an error: a fetch that was skipped
   // because another was already running must not end the wait.
   if (!gameData && !fatalError) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    );
+    return <BoardSkeleton />;
   }
 
   if (fatalError || !gameData) {
@@ -422,6 +453,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
   // The last move is announced before the results come up.
   const gameOverOpen = view.status === "finished" && !gameOverDismissed && !announcement;
+
+  // Still open once the game is over, for a "Good game!".
+  const canChat = gameData.mode === "MULTIPLAYER" && !gameData.abandoned && viewer !== undefined && !viewer.away;
 
   const owesTokens = view.pending?.type === "RETURN_TOKENS";
   const afterPick = viewer ? tokensAfter(staged, viewer.tokens, view.supply) : null;
@@ -513,7 +547,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             staged={over ? null : staged}
             disabled={disabled}
             submitting={submitting}
-            banterBySeat={banterBySeat}
+            bubbles={bubbles}
+            chat={canChat ? <ChatButton waiting={chatWaiting} onSend={sendChat} /> : null}
             menu={
               <GameMenu
                 moveLog={moveLog}
@@ -549,6 +584,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           }
           viewerTokens={owesTokens || !afterPick ? viewer.tokens : afterPick}
           submitting={submitting}
+          turnEndsAt={gameData.turnEndsAt}
+          turnSeconds={view.settings.turnTimeSeconds}
           returnOpen={owesTokens ? returnClosedAt !== view.moveCount : choosingReturn}
           onReturnOpenChange={(open) =>
             owesTokens ? setReturnClosedAt(open ? null : view.moveCount) : setChoosingReturn(open)

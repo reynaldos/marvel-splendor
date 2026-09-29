@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Settings, Swords, Trophy } from "lucide-react";
+import { LogOut, Settings, Shield, Swords, Trophy } from "lucide-react";
 
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
@@ -42,10 +42,11 @@ interface HomeScreenProps {
   avatarUrl: string | null;
   wins: number;
   gamesPlayed: number;
+  isAdmin: boolean;
 }
 
 /** The main menu: who you are along the top, the ways to play below. */
-export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScreenProps) {
+export function HomeScreen({ username, avatarUrl, wins, gamesPlayed, isAdmin }: HomeScreenProps) {
   return (
     <Stage>
       <StageRows>
@@ -82,9 +83,20 @@ export function HomeScreen({ username, avatarUrl, wins, gamesPlayed }: HomeScree
           />
         </div>
 
-        <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
-          Assemble the Avengers · Claim the Gauntlet
-        </p>
+        <footer className="relative">
+          <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
+            Assemble the Avengers · Claim the Gauntlet
+          </p>
+          {isAdmin ? (
+            <Link
+              href="/admin/users"
+              aria-label="Admin"
+              className="absolute right-0 -bottom-2 flex size-9 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+            >
+              <Shield className="size-5" />
+            </Link>
+          ) : null}
+        </footer>
       </StageRows>
     </Stage>
   );

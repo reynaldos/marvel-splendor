@@ -98,7 +98,12 @@ export function isAway(player: { missedTurns?: number }): boolean {
 
 /** A decision the current player must make before their turn can end. */
 export type PendingAction =
-  | { type: "RETURN_TOKENS"; mustReturn: number }
+  | {
+      type: "RETURN_TOKENS";
+      mustReturn: number;
+      /** What this turn's move took, to put back if the time runs out before the player chooses. */
+      taken?: Partial<TokenCounts>;
+    }
   | { type: "CHOOSE_LOCATION"; options: string[] };
 
 export type Move =
@@ -113,7 +118,13 @@ export type Move =
   | { type: "RETURN_TOKENS"; tokens: Partial<TokenCounts> }
   | { type: "CHOOSE_LOCATION"; locationId: string }
   /** Server-initiated: current player timed out; resolves pendings with defaults and passes. */
-  | { type: "TIMEOUT_SKIP"; /** Skipped for having no move, not for being late. */ stuck?: true }
+  | {
+      type: "TIMEOUT_SKIP";
+      /** Skipped for having no move, not for being late. */
+      stuck?: true;
+      /** The player was there, with something picked that couldn't be played in time. */
+      present?: true;
+    }
   /** Server-initiated: game clock expired; finishes the game after the current round. */
   | { type: "END_BY_CLOCK" }
   /** Any seat, any time: that seat loses and the game ends at once. */

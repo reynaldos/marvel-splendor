@@ -36,6 +36,20 @@ model User {
   createdAt DateTime     @default(now())
   players   GamePlayer[]
   stats     UserStats?
+  visits    UserVisit[]
+}
+
+// One stretch of activity from one IP address; a 30 minute gap starts a new one.
+model UserVisit {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip         String?
+  userAgent  String?
+  startedAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId, lastSeenAt])
 }
 
 model UserStats {

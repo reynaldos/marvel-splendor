@@ -28,6 +28,7 @@ import {
   type PendingAction,
   type PlayerState,
   type TokenColor,
+  type TokenCounts,
 } from "./types";
 
 export function applyMove(state: GameState, seat: number, move: Move): GameState {
@@ -62,7 +63,9 @@ export function applyMove(state: GameState, seat: number, move: Move): GameState
 
   if (move.type === "TIMEOUT_SKIP") {
     const actingSeat = next.currentSeat;
-    if (!move.stuck) {
+    // Only a turn nobody showed up for is a missed one. A choice left waiting
+    // means the player had already moved.
+    if (!move.stuck && !move.present && !next.pending) {
       next.players[actingSeat].missedTurns = (next.players[actingSeat].missedTurns ?? 0) + 1;
     }
     while (next.pending) {
@@ -122,7 +125,9 @@ function applyTakeTokens(state: GameState, seat: number, colors: readonly (typeo
     supply[c] -= 1;
   }
   const players = replacePlayer(state.players, seat, { ...player, tokens });
-  return runHandLimitCheck({ ...state, players, supply }, seat);
+  const taken: Partial<TokenCounts> = {};
+  for (const c of colors) taken[c] = (taken[c] ?? 0) + 1;
+  return runHandLimitCheck({ ...state, players, supply }, seat, taken);
 }
 
 function applyReserve(state: GameState, seat: number, move: Extract<Move, { type: "RESERVE" }>): GameState {
@@ -147,14 +152,17 @@ function applyReserve(state: GameState, seat: number, move: Extract<Move, { type
 
   const tokens = { ...player.tokens };
   const supply = { ...state.supply };
-  if (supply.shield > 0) {
+  const tookShield = supply.shield > 0;
+  if (tookShield) {
     tokens.shield += 1;
     supply.shield -= 1;
   }
 
   const reserved = [...player.reserved, { cardId, hidden }];
   const players = replacePlayer(state.players, seat, { ...player, reserved, tokens });
-  return runHandLimitCheck({ ...state, players, market, decks, supply }, seat);
+  // ponytail: only the token is put back on a timeout, the card stays reserved. Taking the
+  // card back too would mean un-dealing the one that replaced it, which has been seen.
+  return runHandLimitCheck({ ...state, players, market, decks, supply }, seat, tookShield ? { shield: 1 } : undefined);
 }
 
 function applyRecruit(state: GameState, seat: number, move: Extract<Move, { type: "RECRUIT" }>): GameState {
@@ -275,10 +283,10 @@ function claimLocation(state: GameState, seat: number, locationId: string): Game
   return { ...state, players, locations, pending: null };
 }
 
-function runHandLimitCheck(state: GameState, seat: number): GameState {
+function runHandLimitCheck(state: GameState, seat: number, taken?: Partial<TokenCounts>): GameState {
   const total = totalTokens(state.players[seat].tokens);
   if (total <= HAND_LIMIT) return { ...state, pending: null };
-  return { ...state, pending: { type: "RETURN_TOKENS", mustReturn: total - HAND_LIMIT } };
+  return { ...state, pending: { type: "RETURN_TOKENS", mustReturn: total - HAND_LIMIT, ...(taken ? { taken } : {}) } };
 }
 
 /** Server default for TIMEOUT_SKIP: resolve whatever is pending. */
@@ -287,6 +295,8 @@ function resolvePendingWithDefault(state: GameState, seat: number): GameState {
   if (!pending) return state;
 
   if (pending.type === "RETURN_TOKENS") {
+    // The move is undone: what it took goes back, and the player holds what they held before.
+    if (pending.taken) return applyReturnTokens(state, seat, pending.taken);
     const tokens = state.players[seat].tokens;
     const candidates = TOKEN_COLORS.filter((c) => c !== "time");
     const toReturn: Partial<Record<TokenColor, number>> = {};

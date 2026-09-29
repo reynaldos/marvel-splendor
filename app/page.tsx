@@ -1,5 +1,6 @@
 
 import { HomeScreen, WelcomeScreen } from "@/components/home/HomeScreen";
+import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -18,6 +19,7 @@ export default async function Home() {
       avatarUrl={publicAvatarUrl(user.avatarKey)}
       wins={stats?.wins ?? 0}
       gamesPlayed={stats?.gamesPlayed ?? 0}
+      isAdmin={isAdmin(session.user)}
     />
   );
 }

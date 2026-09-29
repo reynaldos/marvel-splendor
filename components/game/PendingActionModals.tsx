@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LocationTile } from "@/components/game/LocationTile";
 import { TokenChip } from "@/components/game/TokenChip";
+import { TurnTimer } from "@/components/game/TurnTimer";
 import { tokenMeta } from "@/components/game/stone-colors";
 import { getLocation } from "@/lib/engine/data";
 import { HAND_LIMIT, totalTokens, type PendingAction, type TokenColor, type TokenCounts } from "@/lib/engine/types";
@@ -17,6 +18,9 @@ interface PendingActionModalsProps {
   pending: PendingAction | null;
   viewerTokens: TokenCounts;
   submitting?: boolean;
+  /** When the turn runs out (device clock), and its full length; null when untimed. */
+  turnEndsAt: number | null;
+  turnSeconds: number | null;
   /** The return-tokens popup can be closed to look at the board, and reopened. */
   returnOpen: boolean;
   onReturnOpenChange: (open: boolean) => void;
@@ -35,17 +39,22 @@ export function PendingActionModals({
   pending,
   viewerTokens,
   submitting,
+  turnEndsAt,
+  turnSeconds,
   returnOpen,
   onReturnOpenChange,
   onSubmitReturnTokens,
   onSubmitChooseLocation,
 }: PendingActionModalsProps) {
+  // The popups cover the player's card, so they carry the turn's timer themselves.
+  const timer = <TurnTimer endsAt={turnEndsAt} seconds={turnSeconds} className="size-9 shrink-0 text-sm" />;
   return (
     <>
       <ReturnTokensDialog
         pending={pending?.type === "RETURN_TOKENS" ? pending : null}
         viewerTokens={viewerTokens}
         submitting={submitting}
+        timer={timer}
         open={returnOpen}
         onOpenChange={onReturnOpenChange}
         onSubmit={onSubmitReturnTokens}
@@ -53,6 +62,7 @@ export function PendingActionModals({
       <ChooseLocationDialog
         pending={pending?.type === "CHOOSE_LOCATION" ? pending : null}
         submitting={submitting}
+        timer={timer}
         onSubmit={onSubmitChooseLocation}
       />
     </>
@@ -63,6 +73,7 @@ function ReturnTokensDialog({
   pending,
   viewerTokens,
   submitting,
+  timer,
   open,
   onOpenChange,
   onSubmit,
@@ -70,6 +81,7 @@ function ReturnTokensDialog({
   pending: { type: "RETURN_TOKENS"; mustReturn: number } | null;
   viewerTokens: TokenCounts;
   submitting?: boolean;
+  timer: ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (tokens: Partial<Record<TokenColor, number>>) => void;
@@ -84,6 +96,7 @@ function ReturnTokensDialog({
             mustReturn={pending.mustReturn}
             tokens={viewerTokens}
             submitting={submitting}
+            timer={timer}
             onSubmit={onSubmit}
           />
         ) : null}
@@ -116,11 +129,13 @@ export function ReturnTokens({
   mustReturn,
   tokens,
   submitting,
+  timer,
   onSubmit,
 }: {
   mustReturn: number;
   tokens: TokenCounts;
   submitting?: boolean;
+  timer?: ReactNode;
   onSubmit: (tokens: Partial<Record<TokenColor, number>>) => void;
 }) {
   const [returning, setReturning] = useState<Partial<Record<TokenColor, number>>>({});
@@ -132,7 +147,8 @@ export function ReturnTokens({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-display tracking-wide text-gold-400 uppercase">
+        <DialogTitle className="flex items-center gap-3 font-display tracking-wide text-gold-400 uppercase">
+          {timer}
           Too many tokens
         </DialogTitle>
         <DialogDescription>
@@ -205,10 +221,12 @@ export function ReturnTokens({
 function ChooseLocationDialog({
   pending,
   submitting,
+  timer,
   onSubmit,
 }: {
   pending: { type: "CHOOSE_LOCATION"; options: string[] } | null;
   submitting?: boolean;
+  timer: ReactNode;
   onSubmit: (locationId: string) => void;
 }) {
   return (
@@ -220,7 +238,10 @@ function ChooseLocationDialog({
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Choose a Location</DialogTitle>
+          <DialogTitle className="flex items-center gap-3">
+            {timer}
+            Choose a Location
+          </DialogTitle>
           <DialogDescription>
             You qualify for more than one Location tile — pick the one to claim.
           </DialogDescription>
