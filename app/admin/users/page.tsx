@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { cn } from "cn";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
@@ -103,6 +103,13 @@ export default async function AdminUsersPage() {
           </Link>
           <h1 className="font-display text-2xl font-black tracking-widest text-gold-400 uppercase">Admin dashboard</h1>
           <p className="ml-auto text-xs text-cosmos-300">Refreshes every minute.</p>
+          <Link
+            href="/preview/board"
+            className="flex h-9 items-center gap-2 rounded-full bg-cosmos-700 px-4 text-sm font-bold text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+          >
+            <Eye className="size-5" />
+            Previews
+          </Link>
         </header>
 
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
