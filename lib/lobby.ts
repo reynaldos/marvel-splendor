@@ -30,6 +30,11 @@ export function extractCheatCode(raw: string): { code: string; cheat: boolean } 
   return { code: trimmed.replace(CHEAT_SUFFIX, ""), cheat };
 }
 
+/** An address, with cheat mode carried along when it is on. */
+export function withCheat(path: string, cheat: boolean): string {
+  return cheat ? `${path}?cheat=true` : path;
+}
+
 /** The lowest seat number nobody holds yet, or null when the table is full. */
 export function nextFreeSeat(takenSeats: number[]): number | null {
   for (let seat = 0; seat < MAX_SEATS; seat++) {

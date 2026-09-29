@@ -10,7 +10,7 @@ import { BOT_DIFFICULTIES, DEFAULT_SETTINGS, type GameSettings } from "@/lib/eng
 import { runServerTurnLoop } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { MAX_SEATS, nextFreeSeat } from "@/lib/lobby";
+import { MAX_SEATS, nextFreeSeat, withCheat } from "@/lib/lobby";
 import { tableOrder } from "@/lib/lobby-rules";
 import { notifyGame } from "@/lib/pusher";
 
@@ -96,7 +96,7 @@ export async function leaveAction(gameId: string) {
   redirect("/");
 }
 
-export async function startGameAction(gameId: string) {
+export async function startGameAction(gameId: string, cheat: boolean) {
   const { game, isHost } = await requireLobbySeat(gameId);
   if (!isHost || game.players.length < 2 || game.players.length > MAX_SEATS) return;
 
@@ -155,5 +155,5 @@ export async function startGameAction(gameId: string) {
   });
 
   if (started) await notifyGame(gameId);
-  redirect(`/play/${gameId}`);
+  redirect(withCheat(`/play/${gameId}`, cheat));
 }

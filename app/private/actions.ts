@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { auth0 } from "@/lib/auth0";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { createLobby } from "@/lib/lobby";
+import { createLobby, extractCheatCode, withCheat } from "@/lib/lobby";
 import { POINT_OPTIONS, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
 
 /** The submitted number if it is one of the choices on offer, else the first choice. */
@@ -20,7 +20,9 @@ export async function createGameAction(formData: FormData) {
     targetPoints: pick(POINT_OPTIONS, formData.get("targetPoints")),
     turnTimeSeconds: pick(TURN_TIME_OPTIONS, formData.get("turnTimeSeconds")),
   });
-  redirect(`/lobby/${gameId}`);
+  // "+cheat" typed where a room code goes turns cheat mode on for the host.
+  const { cheat } = extractCheatCode(String(formData.get("code") ?? ""));
+  redirect(withCheat(`/lobby/${gameId}`, cheat));
 }
 
 // The join page does the joining and the sign-in check.

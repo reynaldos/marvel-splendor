@@ -8,7 +8,7 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { MAX_SEATS } from "@/lib/lobby";
+import { MAX_SEATS, withCheat } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
 import { pageMetadata } from "@/lib/site";
@@ -24,8 +24,16 @@ import {
 export const metadata = pageMetadata("Game Lobby", "Waiting for players to take their seats.", true);
 
 // Server-rendered; LobbyLive re-renders it whenever the table changes.
-export default async function LobbyPage({ params }: { params: Promise<{ gameId: string }> }) {
+export default async function LobbyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ gameId: string }>;
+  searchParams: Promise<{ cheat?: string }>;
+}) {
   const { gameId } = await params;
+  // Carried from the lobby on to the board.
+  const cheat = (await searchParams).cheat === "true";
 
   const session = await auth0.getSession();
   if (!session) {
@@ -53,7 +61,7 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
   const mySeat = game.players.find((p) => p.userId === user.id);
   // Not seated yet: the join page seats you, or explains why it can't.
   if (!mySeat) redirect(`/join/${game.joinCode}`);
-  if (game.status !== "LOBBY") redirect(`/play/${game.id}`);
+  if (game.status !== "LOBBY") redirect(withCheat(`/play/${game.id}`, cheat));
 
   const settings = { ...DEFAULT_SETTINGS, ...(game.settings as unknown as Partial<GameSettings>) };
 
@@ -81,7 +89,7 @@ export default async function LobbyPage({ params }: { params: Promise<{ gameId: 
         onAddBot={addBotAction.bind(null, game.id)}
         onRemoveBot={(seat) => removeBotAction.bind(null, game.id, seat)}
         onSetBotDifficulty={(seat) => setBotDifficultyAction.bind(null, game.id, seat)}
-        onStart={startGameAction.bind(null, game.id)}
+        onStart={startGameAction.bind(null, game.id, cheat)}
         onLeave={leaveAction.bind(null, game.id)}
       />
     </>

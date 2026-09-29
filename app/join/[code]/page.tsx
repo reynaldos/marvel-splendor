@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
 import { auth0 } from "@/lib/auth0";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { extractCheatCode, joinLobby, normalizeJoinCode } from "@/lib/lobby";
+import { extractCheatCode, joinLobby, normalizeJoinCode, withCheat } from "@/lib/lobby";
 import { pageMetadata } from "@/lib/site";
 
 type Props = { params: Promise<{ code: string }> };
@@ -42,7 +42,7 @@ export default async function JoinPage({ params }: Props) {
   const result = await joinLobby(user.id, rawCode);
   if (result.ok) {
     const target = result.status === "LOBBY" ? `/lobby/${result.gameId}` : `/play/${result.gameId}`;
-    redirect(cheat ? `${target}?cheat=true` : target);
+    redirect(withCheat(target, cheat));
   }
 
   return (

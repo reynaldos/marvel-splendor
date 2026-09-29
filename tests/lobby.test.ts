@@ -39,3 +39,16 @@ describe("nextFreeSeat", () => {
     expect(nextFreeSeat([0, 1, 2, 3])).toBeNull();
   });
 });
+
+describe("cheat mode", () => {
+  it("is asked for by +cheat, alone or after a room's code", async () => {
+    const { extractCheatCode, withCheat } = await import("@/lib/lobby");
+    expect(extractCheatCode("+cheat")).toEqual({ code: "", cheat: true });
+    expect(extractCheatCode(" +CHEAT ")).toEqual({ code: "", cheat: true });
+    expect(extractCheatCode("ABC234+cheat")).toEqual({ code: "ABC234", cheat: true });
+    expect(extractCheatCode("ABC234")).toEqual({ code: "ABC234", cheat: false });
+    expect(extractCheatCode("")).toEqual({ code: "", cheat: false });
+    expect(withCheat("/lobby/g1", true)).toBe("/lobby/g1?cheat=true");
+    expect(withCheat("/lobby/g1", false)).toBe("/lobby/g1");
+  });
+});
