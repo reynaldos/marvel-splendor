@@ -137,8 +137,8 @@ export function PlayerPlaque({
 
       {children ?? <Holdings bonuses={player.bonuses} tokens={player.tokens} />}
 
-      {/* Level with the name. */}
-      <ChatBubble bubble={bubble} className={cn("-top-6.5", bubbleClassName)} />
+      {/* Level with the name, straight after the reserved cards, its foot clear of the points. */}
+      <ChatBubble bubble={bubble} className={cn("-top-7.5 left-44 ml-1", bubbleClassName)} />
 
       {isCurrentTurn ? (
         // Low on the card's edge, clear of the points on its corner.
