@@ -48,12 +48,15 @@ export function ProfileScreen({ username, name, avatarUrl, joined, stats, career
 
         <footer className="flex items-center justify-between">
           <BackLink />
+          {/* Only a player's own can be opened, for now. */}
+          {isOwn ? (
             <Link
-              href="/collection"
+              href={`/profile/${username}/collection`}
               className="flex h-11 items-center justify-center rounded-full bg-gold-400 px-10 indent-[0.025em] font-display text-base font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200"
             >
               Collection
             </Link>
+          ) : null}
         </footer>
       </StageRows>
     </Stage>

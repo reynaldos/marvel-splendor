@@ -19,6 +19,8 @@ const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing
 interface CollectionScreenProps {
   /** How many times the player has recruited each card they have found, by card id. */
   found: Record<string, number>;
+  /** The profile it belongs to, for the way back. */
+  backTo: string;
 }
 
 /**
@@ -26,7 +28,7 @@ interface CollectionScreenProps {
  * the rest are empty spaces marked with a question mark. Seen as one grid,
  * or in rows by level, by group or by alliance.
  */
-export function CollectionScreen({ found }: CollectionScreenProps) {
+export function CollectionScreen({ found, backTo }: CollectionScreenProps) {
   const [view, setView] = useState<CollectionView>("grid");
   // Shown large from here, not from inside the list, whose faded edges would cut it off.
   const [viewing, setViewing] = useState<{ card: Card; from: DOMRect } | null>(null);
@@ -38,7 +40,7 @@ export function CollectionScreen({ found }: CollectionScreenProps) {
           and the list running on under the home bar to the very bottom. */}
       <div className="flex h-lvh w-full flex-col gap-1 self-start px-3 pt-2">
         <header className="flex items-center justify-between gap-4">
-          <BackLink />
+          <BackLink href={backTo} />
           <div role="group" aria-label="View" className="flex rounded-full bg-cosmos-950 p-1 ring-2 ring-cosmos-500 ring-inset">
             {COLLECTION_VIEWS.map((option) => (
               <button
