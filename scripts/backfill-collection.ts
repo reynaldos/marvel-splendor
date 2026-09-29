@@ -13,6 +13,7 @@ import "dotenv/config";
 import { cardsRecruited } from "@/lib/collection";
 import { prisma } from "@/lib/db";
 import type { Move } from "@/lib/engine/types";
+import { writeCollected } from "@/lib/save-collection";
 
 async function main() {
   const games = await prisma.game.findMany({
@@ -49,16 +50,7 @@ async function main() {
     return;
   }
 
-  // Together or not at all.
-  await prisma.$transaction(
-    rows.map(({ userId, cardId, times, firstFoundAt }) =>
-      prisma.collectedCard.upsert({
-        where: { userId_cardId: { userId, cardId } },
-        create: { userId, cardId, times, firstFoundAt },
-        update: { times, firstFoundAt },
-      }),
-    ),
-  );
+  await writeCollected(rows, "set");
   console.log(`\nSaved. The table now holds ${await prisma.collectedCard.count()} cards.`);
 }
 
