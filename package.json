@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "eslint",
     "games:clear": "node scripts/clear-games.mjs",
+    "games:reset": "node scripts/clear-games.mjs --stats",
     "db:update": "prisma db push && prisma generate",
     "launch:images": "node scripts/launch-images.mjs"
   },

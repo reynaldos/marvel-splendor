@@ -450,6 +450,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           {gameData.gameEndsAt !== null && !over ? (
             <GameClock endsAt={gameData.gameEndsAt} lastRound={view.clockExpired} />
           ) : null}
+          {view.status === "finished" && gameOverDismissed ? (
+            <button
+              type="button"
+              onClick={() => setGameOverDismissed(false)}
+              className="pointer-events-auto rounded-full bg-gold-400 px-4 py-1 font-display text-xs font-black tracking-wide text-cosmos-950 uppercase shadow-md hover:bg-gold-200"
+            >
+              Results
+            </button>
+          ) : null}
           {botPlaying ? (
             <span className="rounded-full bg-popover px-3 py-1 font-display text-xs font-bold tracking-wide text-gold-400 uppercase shadow-md ring-2 ring-cosmos-500 ring-inset">
               Bot is thinking…

@@ -295,6 +295,57 @@ body {
   }
 }
 
+/*
+ * The end of a game. All of it is decoration, so it is left out for anyone
+ * who has asked their device for less motion.
+ */
+.result-glow-gold { box-shadow: 0 0 4rem rgb(246 201 69 / 0.45); }
+.result-glow-red { box-shadow: 0 0 4rem rgb(237 29 36 / 0.45); }
+.result-rays {
+  background: repeating-conic-gradient(rgb(246 201 69 / 0.4) 0 9deg, transparent 9deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, black 15%, transparent 68%);
+  mask-image: radial-gradient(circle, black 15%, transparent 68%);
+}
+.result-rain { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Lands with a bounce. */
+  @keyframes result-pop {
+    0% { opacity: 0; scale: 0.4; }
+    60% { opacity: 1; scale: 1.12; }
+    100% { scale: 1; }
+  }
+  .result-pop { animation: result-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+  @keyframes result-row {
+    from { opacity: 0; translate: 2rem 0; }
+  }
+  .result-row { animation: result-row 0.45s ease-out both; }
+
+  @keyframes result-rays {
+    to { rotate: 360deg; }
+  }
+  .result-rays { animation: result-rays 20s linear infinite; }
+
+  @keyframes result-rain {
+    0% { opacity: 0; translate: 0 0; rotate: 0deg; }
+    10%, 85% { opacity: 1; }
+    100% { opacity: 0; translate: 0 100dvh; rotate: 540deg; }
+  }
+  .result-rain { animation: result-rain linear infinite; }
+
+  @keyframes result-pulse {
+    50% { opacity: 0.35; }
+  }
+  .result-pulse { animation: result-pulse 2.4s ease-in-out infinite; }
+
+  /* Thanos rises into view, then breathes. */
+  @keyframes result-loom {
+    0% { opacity: 0; scale: 1.25; translate: 0 8%; }
+    100% { opacity: 1; scale: 1; translate: 0 0; }
+  }
+  .result-loom { animation: result-loom 1.2s ease-out both; }
+}
+
 /* The "Your turn" banner: sweeps in, holds, fades. Its length is set where it is used. */
 @keyframes turn-banner {
   0% { opacity: 0; transform: scaleY(0.4); }
