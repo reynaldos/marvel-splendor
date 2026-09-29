@@ -464,6 +464,23 @@ body {
   .result-loom { animation: result-loom 1.2s ease-out both; }
 }
 
+/*
+ * The glow round the card of whoever's turn it is, cast by shapes the size of its tab and
+ * card. The middle is cut out, so it never lies over what the card holds; the cut stops
+ * short of the card's edge, where the corners are rounded, and leaves only its padding covered.
+ */
+.turn-glow {
+  --in: calc(var(--spacing) * 1.5);
+  --far: calc(100% - var(--in));
+  filter: drop-shadow(0 0 calc(var(--spacing) * 1.5) rgb(255 255 255 / 0.6))
+    drop-shadow(0 0 calc(var(--spacing) * 3) rgb(255 255 255 / 0.4));
+  clip-path: polygon(
+    evenodd,
+    -50% -200%, 150% -200%, 150% 300%, -50% 300%, -50% -200%,
+    var(--in) var(--in), var(--in) var(--far), var(--far) var(--far), var(--far) var(--in), var(--in) var(--in)
+  );
+}
+
 /* What a player sent to the table: pops in, holds, pops out. Its length is set where it is used. */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes chat-pop {

@@ -39,11 +39,16 @@ interface PlayerPlaqueProps {
   className?: string;
   tabClassName?: string;
   bubbleClassName?: string;
+  /** No bottom edge, for a card that runs off the bottom of the board. */
+  openBottom?: boolean;
 }
 
-const TURN_GLOW = "shadow-[0_0_calc(var(--spacing)*4)_calc(var(--spacing)*0.5)_rgb(255_255_255/0.55)]";
+const TAB = "absolute bottom-full h-(--tab) w-30 rounded-t-xl bg-card";
 /** The tab and its card are edged alike, in the trays' own edge; `--edge` is how thick. */
-const EDGE = "border-(length:--edge) border-foreground/10";
+const EDGE_WIDTH = "border-(length:--edge)";
+const EDGE = `${EDGE_WIDTH} border-foreground/10`;
+/** The tab's side carries on the card's, and its foot lies on the card's top line: one line between the two. */
+const TAB_LEFT = "left-[calc(var(--edge)*-1)]";
 
 /**
  * A player's plaque: the picture and name on a tab standing on the card's top
@@ -66,6 +71,7 @@ export function PlayerPlaque({
   className,
   tabClassName,
   bubbleClassName,
+  openBottom,
 }: PlayerPlaqueProps) {
   return (
     <div
@@ -74,18 +80,32 @@ export function PlayerPlaque({
         "relative flex w-50 flex-col gap-1 rounded-lg rounded-tl-none bg-card p-1.5 transition-shadow [--edge:1px] [--pfp:calc(var(--tab)+var(--spacing)*1.5)] [--tab:calc(var(--spacing)*7)]",
         EDGE,
         className,
-        // The glow is what picks out whose turn it is from across the table.
-        isCurrentTurn && `border-primary [--edge:2px] ${TURN_GLOW}`,
+        openBottom && "border-b-0",
+        isCurrentTurn && "border-primary [--edge:2px]",
       )}
     >
+      {isCurrentTurn ? (
+        // One glow cast by the tab and the card together: a glow on each met in a bright bar where they join.
+        <span aria-hidden className="turn-glow pointer-events-none absolute inset-0 rounded-[inherit]">
+          {/* Edged like the card and the tab, or the glow would lie over their edges and wash them out. */}
+          <span
+            className={cn(
+              "absolute inset-[calc(var(--edge)*-1)] rounded-[inherit] border-primary bg-card",
+              EDGE_WIDTH,
+              openBottom && "border-b-0",
+            )}
+          />
+          <span className={cn(TAB, TAB_LEFT, EDGE_WIDTH, "border-primary", tabClassName)} />
+        </span>
+      ) : null}
       <div
         className={cn(
-          // Its side carries on the card's, and its foot lies on the card's top line: one line between the two.
-          "absolute bottom-full left-[calc(var(--edge)*-1)] flex h-(--tab) w-30 items-center gap-1 rounded-t-xl bg-card pr-1.5 pl-(--pfp)",
+          TAB,
+          TAB_LEFT,
+          "flex items-center gap-1 pr-1.5 pl-(--pfp)",
           EDGE,
           tabClassName,
-          // The tab's glow is cut off at its foot, or it would fall across the card.
-          isCurrentTurn && `border-primary ${TURN_GLOW} [clip-path:inset(-50%_-50%_0_-50%)]`,
+          isCurrentTurn && "border-primary",
         )}
       >
         <span className="min-w-0 flex-1 truncate text-xs font-medium">{name}</span>

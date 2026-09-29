@@ -207,8 +207,9 @@ export function Board({
           // The button sits on the corner of the name's tab, left of the points, and what is
           // sent shows to the right of it, above the points.
           tabExtra={chat ? <div className="absolute -top-2 -right-2">{chat}</div> : null}
-          // Named after the tray's corners, or they undo it. No bottom edge: it runs off the screen.
-          className={`w-40 ${TRAY_PANEL} rounded-tl-none border-b-0 [--tab:calc(var(--spacing)*8)]`}
+          // Named after the tray's corners, or they undo it.
+          className={`w-40 ${TRAY_PANEL} rounded-tl-none [--tab:calc(var(--spacing)*8)]`}
+          openBottom
           tabClassName="w-32"
           bubbleClassName="top-auto bottom-full left-32 mb-4 ml-4"
         >
