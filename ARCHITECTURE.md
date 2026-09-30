@@ -431,7 +431,7 @@ Cosmetic only at every tier, for cards and for the account-level frame alike —
 - **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins (done, above) and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide.
 - End-to-end tests.
 - Bot banter.
-- **Level-up UI.** No notification or animation yet for reaching a new account level, rank tier, or card level.
+- **Level-up UI.** No notification or animation yet for reaching a new account level, rank tier, or card level. The results screen shows each player's rating change; what the game gave each player is saved on their seat (`GamePlayer.rewards`, `prisma/sql/2026-09-30-rewards.sql`; `GameRewards` in `lib/game-record.ts`, put together by `lib/record-rewards.ts` from what the stats, rank, coins and collection recorders each changed), so it can be shown again later and is there for the coins and XP animation to come. Games finished before the column was added get theirs from `pnpm rewards:backfill`, which replays every finished game in order.
 - **Ranked matchmaking (Quick Play).** A public queue that pairs players by rank for a multiplayer game, instead of needing a room code. Depends on rank existing. To decide: how wide a rating gap to accept and whether it widens the longer someone waits, whether it's 2-player only or fills a 3–4 table, and how the queue itself is run (likely the same Pusher presence pattern as the lobby).
 
 **Corners**

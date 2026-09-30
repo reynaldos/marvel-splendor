@@ -4,6 +4,7 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
 import { gameEndsInMs, replaySteps, turnEndsInMs } from "@/lib/game-replay";
+import type { GameRewards } from "@/lib/game-record";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { botName } from "@/lib/lobby-rules";
@@ -86,6 +87,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       userId: p.userId,
       name: p.isBot ? botName(game.players, p.seat) : p.user?.username ?? p.guestName ?? "Player",
       avatarUrl: publicAvatarUrl(p.user?.avatarKey),
+      rewards: p.rewards as unknown as GameRewards | null,
     })),
     view: redactState(state, seatRow.seat),
     moves,

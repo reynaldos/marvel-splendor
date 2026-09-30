@@ -8,7 +8,7 @@ export const CARD_LEVEL_XP = 5;
 /** XP from card levels, given how many times each collected card has been recruited. */
 export function cardLevelXp(timesRecruited: number[]): number {
   return timesRecruited.reduce(
-    (xp, times) => xp + CARD_LEVEL_XP * (CARD_LEVEL_TIER_MIN_TIMES.filter((min) => times >= min).length - 1),
+    (xp, times) => xp + CARD_LEVEL_XP * Math.max(0, CARD_LEVEL_TIER_MIN_TIMES.filter((min) => times >= min).length - 1),
     0,
   );
 }

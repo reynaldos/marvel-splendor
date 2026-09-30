@@ -12,10 +12,12 @@ import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { cardLevelXpByUser } from "@/lib/load-card-xp";
 import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameRating } from "@/lib/record-rating";
+import { recordGameRewards } from "@/lib/record-rewards";
 import { recordGameStats, type PlayerGameOutcome } from "@/lib/record-stats";
 import { saveCollectedCards } from "@/lib/save-collection";
 
@@ -149,11 +151,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (finalState.status === "finished") {
     const outcomes = await buildHumanOutcomes(id, finalState, game.players, localUser.id);
-    if (outcomes.length > 0) await recordGameStats({ mode: game.mode, players: outcomes });
-    await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
-    await recordFinishedGameCoins(id, finalState.settings, game.players, outcomes);
+    const stats = await recordGameStats({ mode: game.mode, players: outcomes });
+    const rating = await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
+    const coins = await recordFinishedGameCoins(id, finalState.settings, game.players, outcomes);
+    const cardXpBefore = await cardLevelXpByUser(outcomes.map((o) => o.userId));
     // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
-    await saveCollectedCards(id, game.players).catch((error) => console.error("collection not saved", id, error));
+    const cards = await saveCollectedCards(id, game.players).catch((error) => {
+      console.error("collection not saved", id, error);
+      return [];
+    });
+    await recordGameRewards(id, game.players, { stats, rating, coins, cardXpBefore, cards });
+    // The other players fetched the final move before the rewards were there.
+    if (game.mode === "MULTIPLAYER") await notifyGame(id);
   }
 
   // The board as it stood after each move — the submitted one, then every
@@ -259,10 +268,10 @@ async function recordFinishedGameRating(
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
   fallbackHumanUserId: string,
 ) {
-  if (mode !== "MULTIPLAYER") return;
+  if (mode !== "MULTIPLAYER") return [];
 
   const humanPlayers = players.filter((p) => !p.isBot && p.userId);
-  if (humanPlayers.length < 2) return;
+  if (humanPlayers.length < 2) return [];
 
   const ranked = rankPlayers(finalState, []);
   const placements = humanPlayers.map((p) => ({
@@ -270,7 +279,7 @@ async function recordFinishedGameRating(
     place: ranked.find((r) => r.seat === p.seat)!.place,
   }));
 
-  await recordGameRating(placements);
+  return recordGameRating(placements);
 }
 
 async function recordFinishedGameCoins(
@@ -279,9 +288,7 @@ async function recordFinishedGameCoins(
   players: Array<{ seat: number; isBot: boolean }>,
   outcomes: Array<PlayerGameOutcome & { seat: number }>,
 ) {
-  if (outcomes.length === 0) return;
-
-  await recordGameCoins(
+  return recordGameCoins(
     gameId,
     settings,
     players,

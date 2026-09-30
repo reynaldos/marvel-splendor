@@ -1,5 +1,5 @@
 // Kept apart from the screen, so the page can read the list of results on the server.
-import type { RankedPlayer } from "@/lib/game-record";
+import type { GameRewards, RankedPlayer } from "@/lib/game-record";
 
 export const RESULTS = ["win", "loss", "shared"] as const;
 export type Result = (typeof RESULTS)[number];
@@ -11,6 +11,19 @@ const TABLE = [
   { name: "Bot 1", avatarUrl: null, points: 11, cards: 10, tags: 3 },
   { name: "Bot 2", avatarUrl: null, points: 8, cards: 9, tags: 1 },
 ];
+
+/** Made-up rewards for the two people at the table: a win is worth 18 rating and 50 coins, a loss costs 18 and pays 20; a shared win moves nobody. */
+export function rewardsFor(standings: RankedPlayer[]): Map<number, GameRewards> {
+  const winners = standings.filter((p) => p.won).length;
+  return new Map(
+    standings
+      .filter((p) => p.avatarUrl)
+      .map((p) => {
+        const swing = p.won ? (winners > 1 ? 0 : 18) : -18;
+        return [p.seat, { rating: { before: 1000, after: 1000 + swing }, coins: p.won ? 50 : 20, xp: { before: 250, after: 280 }, cardLevelUps: [] }];
+      }),
+  );
+}
 
 /** The made-up standings for a result: on a loss the viewer comes second, and a shared win has two winners. */
 export function standingsFor(result: Result, players: number): { standings: RankedPlayer[]; viewerSeat: number } {

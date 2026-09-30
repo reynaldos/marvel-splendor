@@ -23,7 +23,7 @@ import { PendingActionModals } from "@/components/game/PendingActionModals";
 import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
 import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
-import { rankPlayers } from "@/lib/game-record";
+import { rankPlayers, type GameRewards } from "@/lib/game-record";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
 
@@ -33,6 +33,8 @@ interface GamePlayerInfo {
   userId: string | null;
   name: string;
   avatarUrl: string | null;
+  /** Once the game has finished, what it gave this player; null for a bot or an older game. */
+  rewards: GameRewards | null;
 }
 
 /** One move and the board right after it. */
@@ -603,6 +605,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           if (!open) setGameOverDismissed(true);
         }}
         standings={rankPlayers(view, players)}
+        rewards={new Map(players.filter((p) => p.rewards).map((p) => [p.seat, p.rewards!]))}
         viewerSeat={view.viewerSeat}
         round={view.round}
       />

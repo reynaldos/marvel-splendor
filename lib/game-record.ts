@@ -1,4 +1,5 @@
 import { CARD_BY_ID } from "@/lib/engine/data";
+import type { FrameTier } from "@/lib/frame-tier";
 import type { GameState } from "@/lib/engine/types";
 
 /** The parts of a finished game's state `rankPlayers` reads — satisfied by both `GameState` and a live `RedactedGameState`. */
@@ -37,6 +38,17 @@ export interface GameRecord {
   team: string[];
   /** Everyone at the table, best first. */
   players: RankedPlayer[];
+}
+
+/** What a finished game gave one player, saved on their seat so the results can show it any time. */
+export interface GameRewards {
+  /** Only for a rated game: 2+ signed-in humans, multiplayer. */
+  rating?: { before: number; after: number };
+  coins: number;
+  /** Account score, which the level and frame come from. */
+  xp: { before: number; after: number };
+  /** Cards whose level went up in this game. */
+  cardLevelUps: Array<{ cardId: string; from: FrameTier; to: FrameTier }>;
 }
 
 export interface Seated {

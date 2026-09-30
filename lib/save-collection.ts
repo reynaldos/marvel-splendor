@@ -3,16 +3,24 @@ import { prisma } from "@/lib/db";
 import type { Move } from "@/lib/engine/types";
 import { Prisma } from "@/lib/generated/prisma/client";
 
+export interface CardCountChange {
+  userId: string;
+  cardId: string;
+  before: number;
+  after: number;
+}
+
 /**
- * Adds the cards each person recruited in a game to their collection. Call it
- * once, when the game has been played to the end; an abandoned game adds nothing.
+ * Adds the cards each person recruited in a game to their collection, and says
+ * how each card's count changed. Call it once, when the game has been played
+ * to the end; an abandoned game adds nothing.
  */
 export async function saveCollectedCards(
   gameId: string,
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
-): Promise<void> {
+): Promise<CardCountChange[]> {
   const people = players.filter((p) => !p.isBot && p.userId);
-  if (people.length === 0) return;
+  if (people.length === 0) return [];
 
   const moves = await prisma.move.findMany({
     where: { gameId },
@@ -24,9 +32,17 @@ export async function saveCollectedCards(
   const found = people.flatMap(({ seat, userId }) =>
     [...(recruited.get(seat) ?? [])].map(([cardId, times]) => ({ userId: userId!, cardId, times })),
   );
-  if (found.length === 0) return;
+  if (found.length === 0) return [];
 
+  const had = await prisma.collectedCard.findMany({
+    where: { OR: found.map(({ userId, cardId }) => ({ userId, cardId })) },
+    select: { userId: true, cardId: true, times: true },
+  });
   await writeCollected(found, "add");
+  return found.map(({ userId, cardId, times }) => {
+    const before = had.find((c) => c.userId === userId && c.cardId === cardId)?.times ?? 0;
+    return { userId, cardId, before, after: before + times };
+  });
 }
 
 export interface Collected {

@@ -12,12 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { STONES } from "@/lib/engine/types";
-import type { RankedPlayer } from "@/lib/game-record";
+import type { GameRewards, RankedPlayer } from "@/lib/game-record";
 
 interface GameOverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   standings: RankedPlayer[];
+  /** By seat, for the players whose rewards are saved. */
+  rewards: Map<number, GameRewards>;
   viewerSeat: number;
   round: number;
 }
@@ -44,7 +46,7 @@ const BUTTON =
  * the stones raining down. A loss is red: Thanos, looming. Then how the whole
  * table finished, arriving one row at a time.
  */
-export function GameOverDialog({ open, onOpenChange, standings, viewerSeat, round }: GameOverDialogProps) {
+export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerSeat, round }: GameOverDialogProps) {
   const winners = standings.filter((p) => p.won);
   const won = winners.some((p) => p.seat === viewerSeat);
 
@@ -117,7 +119,12 @@ export function GameOverDialog({ open, onOpenChange, standings, viewerSeat, roun
             </DialogDescription>
           </DialogHeader>
 
-          <Standings players={standings} seat={viewerSeat} animated />
+          <Standings
+            players={standings}
+            seat={viewerSeat}
+            ratingSwings={new Map([...rewards].flatMap(([seat, r]) => (r.rating ? [[seat, r.rating.after - r.rating.before]] : [])))}
+            animated
+          />
         </div>
       </DialogContent>
     </Dialog>

@@ -90,10 +90,13 @@ export function nextUserStats(
  * updated transactionally when a game reaches FINISHED"). Not wired up to
  * anything yet — the game loop that would call this lives in future phases.
  */
-export async function recordGameStats(result: FinishedGameResult): Promise<void> {
-  if (result.players.length === 0) return;
+export async function recordGameStats(
+  result: FinishedGameResult,
+): Promise<Array<{ userId: string; prev: UserStatsSnapshot; next: UserStatsSnapshot }>> {
+  if (result.players.length === 0) return [];
 
-  await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
+    const changes = [];
     for (const outcome of result.players) {
       const existing = await tx.userStats.findUnique({ where: { userId: outcome.userId } });
       const prev = existing ?? defaultUserStatsSnapshot;
@@ -104,6 +107,8 @@ export async function recordGameStats(result: FinishedGameResult): Promise<void>
         create: { userId: outcome.userId, ...next },
         update: next,
       });
+      changes.push({ userId: outcome.userId, prev, next });
     }
+    return changes;
   });
 }

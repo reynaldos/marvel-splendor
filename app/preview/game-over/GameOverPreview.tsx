@@ -9,7 +9,7 @@ import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Stage, StageRows } from "@/components/Stage";
 
 import { PreviewBarRow } from "../PreviewBar";
-import { RESULTS, standingsFor, type Result } from "./standings";
+import { RESULTS, rewardsFor, standingsFor, type Result } from "./standings";
 
 const LABEL = { win: "Win", loss: "Loss", shared: "Shared win" };
 
@@ -63,6 +63,7 @@ export function GameOverPreview({ result, players }: { result: Result; players: 
         open={showing !== null}
         onOpenChange={(open) => !open && setShowing(null)}
         standings={standings}
+        rewards={rewardsFor(standings)}
         viewerSeat={viewerSeat}
         round={27}
       />

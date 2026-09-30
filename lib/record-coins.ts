@@ -14,14 +14,15 @@ function startOfToday(): Date {
   return date;
 }
 
-/** Awards coins for every human outcome in a finished game, transactionally. Caller excludes bots. */
+/** Awards coins for every human outcome in a finished game, transactionally, and says who got how many. Caller excludes bots. */
 export async function recordGameCoins(
   gameId: string,
   settings: GameSettings,
   players: Array<{ seat: number; isBot: boolean }>,
   outcomes: FinishedGameCoinOutcome[],
-): Promise<void> {
-  if (outcomes.length === 0) return;
+): Promise<Map<string, number>> {
+  const awarded = new Map<string, number>();
+  if (outcomes.length === 0) return awarded;
 
   await prisma.$transaction(async (tx) => {
     for (const outcome of outcomes) {
@@ -47,6 +48,8 @@ export async function recordGameCoins(
         create: { userId: outcome.userId, balance: amount },
         update: { balance: { increment: amount } },
       });
+      awarded.set(outcome.userId, amount);
     }
   });
+  return awarded;
 }
