@@ -1,7 +1,7 @@
 import { pageMetadata } from "@/lib/site";
 
 import { GameOverPreview } from "./GameOverPreview";
-import { RESULTS, type Result } from "./standings";
+import { CARD_LEVEL_UPS, RESULTS, type Result } from "./standings";
 
 export const metadata = pageMetadata("End of game preview", undefined, true);
 
@@ -9,17 +9,19 @@ export const metadata = pageMetadata("End of game preview", undefined, true);
 export default async function GameOverPreviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ result?: string; players?: string }>;
+  searchParams: Promise<{ result?: string; players?: string; cards?: string }>;
 }) {
-  const { result, players } = await searchParams;
+  const { result, players, cards } = await searchParams;
   const count = Number(players);
+  const levelUps = Number(cards);
 
   return (
     <GameOverPreview
       // Remade for each choice, so the screen plays from the start.
-      key={`${result}-${players}`}
+      key={`${result}-${players}-${cards}`}
       result={RESULTS.find((r) => r === result) ?? ("win" satisfies Result)}
       players={[2, 3, 4].includes(count) ? count : 3}
+      cards={Number.isInteger(levelUps) ? Math.min(Math.max(levelUps, 0), CARD_LEVEL_UPS.length) : 1}
     />
   );
 }

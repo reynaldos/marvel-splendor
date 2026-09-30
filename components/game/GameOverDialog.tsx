@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
+import { RewardsPanel } from "@/components/game/RewardsPanel";
 import { Standings } from "@/components/game/Standings";
 import {
   Dialog,
@@ -125,6 +126,8 @@ export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerS
             ratingSwings={new Map([...rewards].flatMap(([seat, r]) => (r.rating ? [[seat, r.rating.after - r.rating.before]] : [])))}
             animated
           />
+          {/* After the last row has landed. */}
+          {rewards.has(viewerSeat) ? <RewardsPanel rewards={rewards.get(viewerSeat)!} delay={0.5 + standings.length * 0.18 + 0.3} /> : null}
         </div>
       </DialogContent>
     </Dialog>

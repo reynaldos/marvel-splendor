@@ -35,12 +35,23 @@ export function accountFrameTier(level: number): FrameTier {
   return frameTierFor(level, ACCOUNT_FRAME_TIER_MIN_LEVEL);
 }
 
-/** Where a player stands: their level, and how far through it they are, in XP. */
-export function accountProgress(stats: UserStatsSnapshot, cardXp: number): { level: number; into: number; span: number } {
-  const score = accountScore(stats, cardXp);
+export interface Progress {
+  level: number;
+  /** XP into this level, and how much the level spans. */
+  into: number;
+  span: number;
+}
+
+/** Where a score stands: its level, and how far through it, in XP. */
+export function progressForScore(score: number): Progress {
   const level = accountLevel(score);
   const from = scoreForLevel(level);
   return { level, into: score - from, span: scoreForLevel(level + 1) - from };
+}
+
+/** Where a player stands: their level, and how far through it they are, in XP. */
+export function accountProgress(stats: UserStatsSnapshot, cardXp: number): Progress {
+  return progressForScore(accountScore(stats, cardXp));
 }
 
 /** The frame tier a player's stats earn them. */
