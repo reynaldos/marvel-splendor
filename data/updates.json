@@ -1,5 +1,23 @@
 [
   {
+    "version": "0.11.0",
+    "date": "2026-09-30",
+    "title": "Rewards at the end of a game",
+    "summary": "See what every game gives you: coins, XP, rank and the cards that ranked up.",
+    "pulls": [],
+    "new": [
+      "The results show how each player's rank moved",
+      "Your coins, XP and rank count up on the results screen, with a flash when you reach a new level",
+      "A full-screen showcase of the cards that ranked up, each flaring into its new tier",
+      "XP for every level a card in your collection climbs"
+    ],
+    "improved": [
+      "The leaderboard is now the rank leaderboard",
+      "Every game you have already played shows its rewards"
+    ],
+    "fixed": []
+  },
+  {
     "version": "0.10.0",
     "date": "2026-09-30",
     "title": "Rank, levels and coins",
