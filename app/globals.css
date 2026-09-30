@@ -220,7 +220,7 @@ body {
   border: calc(var(--spacing) * 0.8) solid transparent;
   background:
     var(--frame-fill, linear-gradient(var(--color-cosmos-800), var(--color-cosmos-900))) padding-box,
-    linear-gradient(135deg, var(--color-gold-200), var(--color-gold-400) 30%, var(--color-gold-600) 60%, var(--color-gold-200)) border-box;
+    var(--frame-border, linear-gradient(135deg, var(--color-gold-200), var(--color-gold-400) 30%, var(--color-gold-600) 60%, var(--color-gold-200))) border-box;
   box-shadow: 0 calc(var(--spacing) * 1) calc(var(--spacing) * 3) rgb(0 0 0 / 0.5);
 }
 

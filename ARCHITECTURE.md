@@ -392,7 +392,7 @@ The player-card frame and card-level frames are deliberately the same idea appli
 
 Guardrails: a game must reach at least 4 turns per player to pay out (blocks an instant-forfeit loop); coins earned from bot games are capped at 150/day (bots are free and instant to spin up, so uncapped bot income is a grinding exploit; human games are naturally rate-limited by needing another person and aren't capped). Needs a `CoinTransaction` ledger (`userId`, `delta`, `reason`, `gameId?`, `createdAt`) as the source of truth plus a cached balance for fast reads — the ledger is what makes a disputed balance debuggable once the shop can spend it down. Awarded in the same transaction as `recordGameStats` (`lib/record-stats.ts`), never on the client's say-so.
 
-*XP / account level — building later.* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
+*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`).* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -495,7 +495,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) is done, on the player card. Coins, account level (the player-card frame) and card levels are designed but not started.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) and account level (the player-card frame) are done, on the player card. Coins and card levels are designed but not started.
 
 What these need before they can be built:
 

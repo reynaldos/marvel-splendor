@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
+import type { CSSProperties } from "react";
 
 import { BackLink } from "@/components/BackLink";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
@@ -7,8 +8,10 @@ import { RankBadge } from "@/components/profile/RankBadge";
 import { StatsTabs } from "@/components/profile/StatsTabs";
 import { Stage, StageRows } from "@/components/Stage";
 import type { CareerStats } from "@/lib/career-stats";
+import { FRAME_BORDER } from "@/lib/frame-tier";
 import type { GameRecord } from "@/lib/game-record";
 import type { UserStatsSnapshot } from "@/lib/record-stats";
+import { accountFrameTier, accountLevel, accountScore } from "@/lib/xp";
 
 interface ProfileScreenProps {
   username: string;
@@ -27,11 +30,18 @@ interface ProfileScreenProps {
 
 /** A player's page: who they are on a card, beside how they have played. */
 export function ProfileScreen({ username, name, avatarUrl, joined, rating, stats, career, records, games, isOwn }: ProfileScreenProps) {
+  const level = accountLevel(accountScore(stats));
+  const frameBorder = FRAME_BORDER[accountFrameTier(level)];
+
   return (
     <Stage>
       <StageRows>
         <div className="flex items-end gap-6">
-          <div className="frame-gold relative flex h-58 w-48 shrink-0 flex-col items-center justify-center gap-1 rounded-3xl px-3 text-center">
+          <div
+            className="frame-gold relative flex h-58 w-48 shrink-0 flex-col items-center justify-center gap-1 rounded-3xl px-3 text-center"
+            style={frameBorder ? ({ "--frame-border": frameBorder } as CSSProperties) : undefined}
+            title={`Level ${level}`}
+          >
             {isOwn ? (
               <Link
                 href="/settings"
