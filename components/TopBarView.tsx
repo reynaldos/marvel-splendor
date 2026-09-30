@@ -13,7 +13,7 @@ import { FRAME_STYLE, type FrameTier } from "@/lib/frame-tier";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
 const CHOICE =
-  "flex h-12 items-center gap-3 rounded-full bg-cosmos-700 px-5 text-base font-bold ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
+  "flex h-12 items-center gap-3 rounded-full bg-cosmos-700 px-5 text-base font-bold ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400";
 
 interface TopBarViewProps {
   username: string;
