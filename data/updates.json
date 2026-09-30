@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.10.0",
+    "date": "2026-09-30",
+    "title": "Rank, levels and coins",
+    "summary": "Climb the leaderboard, level up your frames, and earn coins for every game.",
+    "pulls": [],
+    "new": [
+      "A rank from games against people, shown on your profile",
+      "A leaderboard of the top 100 players by rank",
+      "Coins earned for every game played to the end",
+      "An account level that grows with every game",
+      "Ten gem-cut tier frames, from Bronze up to Mastered, with crystal, twinkle and holographic effects",
+      "Level frames on your player card and profile picture, with switches in settings to turn them on",
+      "A level frame on every card in your collection, from how often you have recruited it"
+    ],
+    "improved": [
+      "Coins and level progress shown in the top bar",
+      "Every game you have already played counts towards your rank and coins"
+    ],
+    "fixed": [
+      "What's new in the menu no longer shows a stray outline"
+    ]
+  },
+  {
     "version": "0.9.0",
     "date": "2026-09-29",
     "title": "What's new",
