@@ -38,6 +38,7 @@ model User {
   stats     UserStats?
   visits    UserVisit[]
   collected CollectedCard[]
+  rating    UserRating?
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -74,6 +75,16 @@ model UserStats {
   fastestWinTurns  Int?
   avengersTilesWon Int    @default(0)
   locationsClaimed Int    @default(0)
+}
+
+// An ELO-style rank, from multiplayer games with another human only. No season or decay:
+// it only moves when a rated game finishes.
+model UserRating {
+  userId     String   @id
+  user       User     @relation(fields: [userId], references: [id])
+  rating     Int      @default(1000)
+  gamesRated Int      @default(0)
+  updatedAt  DateTime @updatedAt
 }
 
 model Game {

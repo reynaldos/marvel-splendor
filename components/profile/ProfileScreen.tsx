@@ -3,6 +3,7 @@ import { Pencil } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { RankBadge } from "@/components/profile/RankBadge";
 import { StatsTabs } from "@/components/profile/StatsTabs";
 import { Stage, StageRows } from "@/components/Stage";
 import type { CareerStats } from "@/lib/career-stats";
@@ -15,6 +16,8 @@ interface ProfileScreenProps {
   avatarUrl: string | null;
   /** Already worded, such as "March 2026". */
   joined: string;
+  /** Null before a player's first rated game. */
+  rating: number | null;
   stats: UserStatsSnapshot;
   career: CareerStats;
   records: CareerStats;
@@ -23,7 +26,7 @@ interface ProfileScreenProps {
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
-export function ProfileScreen({ username, name, avatarUrl, joined, stats, career, records, games, isOwn }: ProfileScreenProps) {
+export function ProfileScreen({ username, name, avatarUrl, joined, rating, stats, career, records, games, isOwn }: ProfileScreenProps) {
   return (
     <Stage>
       <StageRows>
@@ -42,6 +45,7 @@ export function ProfileScreen({ username, name, avatarUrl, joined, stats, career
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
             <p className="text-xs font-bold text-cosmos-300">Joined {joined}</p>
+            <RankBadge rating={rating} className="mt-1" />
           </div>
           <StatsTabs stats={stats} career={career} records={records} games={games} />
         </div>

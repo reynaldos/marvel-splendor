@@ -10,8 +10,10 @@ import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { recordGameRating } from "@/lib/record-rating";
 import { recordGameStats } from "@/lib/record-stats";
 import { saveCollectedCards } from "@/lib/save-collection";
 
@@ -145,6 +147,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (finalState.status === "finished") {
     await recordFinishedGameStats(id, game.mode, finalState, game.players, localUser.id);
+    await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
     // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
     await saveCollectedCards(id, game.players).catch((error) => console.error("collection not saved", id, error));
   }
@@ -249,4 +252,25 @@ async function recordFinishedGameStats(
 
 function isTurnPrimary(type: string | undefined): boolean {
   return type === "TAKE_TOKENS" || type === "RESERVE" || type === "RECRUIT" || type === "TIMEOUT_SKIP";
+}
+
+/** Rank only moves for a multiplayer game with 2+ humans — a bot-filled seat is never a rated opponent. */
+async function recordFinishedGameRating(
+  mode: "VS_BOT" | "MULTIPLAYER",
+  finalState: GameState,
+  players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
+  fallbackHumanUserId: string,
+) {
+  if (mode !== "MULTIPLAYER") return;
+
+  const humanPlayers = players.filter((p) => !p.isBot && p.userId);
+  if (humanPlayers.length < 2) return;
+
+  const ranked = rankPlayers(finalState, []);
+  const placements = humanPlayers.map((p) => ({
+    userId: p.userId ?? fallbackHumanUserId,
+    place: ranked.find((r) => r.seat === p.seat)!.place,
+  }));
+
+  await recordGameRating(placements);
 }

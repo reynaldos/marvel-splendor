@@ -404,7 +404,7 @@ Guardrails: a game must reach at least 4 turns per player to pay out (blocks an 
 |---|---|---|---|---|---|---|---|---|
 | Account level | 1 | 2–3 | 4–5 | 6–8 | 9–11 | 12–15 | 16–20 | 21+ |
 
-*Rank — building now, badge only; matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as a small badge (not a frame, per the table above), using its own tier names so it never reads as the same ladder as the collector frames:
+*Rank — done: badge and rating built (`lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`); matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as a small badge (not a frame, per the table above), using its own tier names so it never reads as the same ladder as the collector frames:
 
 | Badge tier | Rookie | Contender | Veteran | Elite | Legend |
 |---|---|---|---|---|---|
@@ -495,7 +495,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) is building now; coins, account level (the player-card frame) and card levels are designed but not started. None exist in the game yet; the results popup and the player card are where they'll show.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) is done, on the player card. Coins, account level (the player-card frame) and card levels are designed but not started.
 
 What these need before they can be built:
 
