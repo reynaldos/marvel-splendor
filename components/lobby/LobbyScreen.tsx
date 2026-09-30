@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { cn } from "cn";
 import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
 
+import { AwayTimer } from "@/components/lobby/AwayTimer";
 import { BotLevel } from "@/components/lobby/BotLevel";
 import { Rule } from "@/components/lobby/Rule";
 import { ShareCode } from "@/components/lobby/ShareCode";
@@ -27,6 +28,8 @@ type Action = (formData: FormData) => Promise<void>;
 
 interface LobbyScreenProps {
   joinCode: string;
+  /** When the room closes unless the host is back; null while they are in it. */
+  hostAwayUntil: number | null;
   /** One entry per place at the table, people first; null is an open place. */
   seats: Array<LobbySeat | null>;
   /** True when the viewer is hosting and may change the table. */
@@ -45,11 +48,14 @@ const NAME_PILL = "flex h-8 w-full items-center justify-center rounded-full px-3
 function Place({
   seat,
   isHost,
+  away,
   below,
   children,
 }: {
   seat: LobbySeat | null;
   isHost: boolean;
+  /** The player has stepped out; their place is drawn dimmed until they are back. */
+  away?: boolean;
   /** Shown under the name. */
   below?: ReactNode;
   /** Drawn over the picture. */
@@ -57,7 +63,7 @@ function Place({
 }) {
   const Icon = seat?.isBot ? Bot : UserRound;
   return (
-    <li className="flex w-38 flex-col items-center gap-2">
+    <li className={cn("flex w-38 flex-col items-center gap-2", away && "opacity-50 grayscale")}>
       <span
         className={cn(
           "relative flex size-30 items-center justify-center rounded-3xl",
@@ -100,6 +106,7 @@ function Place({
 /** The table before a game: the code to share, who has sat down, and the host's controls. */
 export function LobbyScreen({
   joinCode,
+  hostAwayUntil,
   seats,
   isHost,
   targetPoints,
@@ -126,8 +133,11 @@ export function LobbyScreen({
               key={seat?.seat ?? `open-${i}`}
               seat={seat}
               isHost={isHost}
+              away={seat?.isHost && hostAwayUntil !== null}
               below={
-                isHost && seat?.isBot ? (
+                seat?.isHost && hostAwayUntil !== null ? (
+                  <AwayTimer until={hostAwayUntil} />
+                ) : isHost && seat?.isBot ? (
                   <BotLevel level={seat.difficulty ?? "normal"} action={onSetBotDifficulty(seat.seat)} />
                 ) : seat?.isBot ? (
                   <span className="flex h-7 items-center rounded-full bg-cosmos-950 px-3 text-xs font-bold text-gold-200 uppercase">
@@ -167,7 +177,7 @@ export function LobbyScreen({
               <span className="flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
                 <ArrowLeft className="size-6" />
               </span>
-              {isHost ? "Cancel" : "Leave"}
+              {isHost ? "Cancel lobby" : "Leave"}
             </button>
           </form>
 
