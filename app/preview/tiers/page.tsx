@@ -22,13 +22,14 @@ const LEADERBOARD = [
   {
     place: 1,
     username: "rival",
-    name: "A Rival",
+    level: 8,
+    xp: 1852,
     avatarUrl: null,
     avatarTier: "Gold" as const,
     rating: 1240,
     gamesRated: 18,
   },
-  { place: 2, username: "you", name: "You", avatarUrl: null, rating: 1180, gamesRated: 9 },
+  { place: 2, username: "you", level: 4, xp: 520, avatarUrl: null, rating: 1180, gamesRated: 9 },
 ];
 
 /** Every frame tier and rank badge side by side, with what earns each, to look at without earning them. */

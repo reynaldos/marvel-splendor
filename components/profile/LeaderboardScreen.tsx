@@ -9,7 +9,9 @@ import type { FrameTier } from "@/lib/frame-tier";
 export interface LeaderboardEntry {
   place: number;
   username: string;
-  name: string | null;
+  /** Account level, and the total XP behind it. */
+  level: number;
+  xp: number;
   avatarUrl: string | null;
   /** The level frame on their picture, when they have it turned on. */
   avatarTier?: FrameTier;
@@ -37,7 +39,12 @@ export function LeaderboardRow({ row, own }: { row: LeaderboardEntry; own: strin
       >
         <span className="w-8 text-center text-xl font-black tabular-nums">{row.place}</span>
         <PlayerAvatar src={row.avatarUrl} name={row.username} tier={row.avatarTier} className="size-8 text-xs" />
-        <span className="min-w-0 flex-1 truncate text-base font-bold">{row.name ?? row.username}</span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-base leading-tight font-bold">{row.username}</span>
+          <span className="text-xs leading-tight font-bold tabular-nums opacity-70">
+            Lv {row.level} · {row.xp.toLocaleString()} XP
+          </span>
+        </span>
         <span
           className="flex items-center gap-3 rounded-full bg-cosmos-950 px-3 py-1 text-sm font-black text-white tabular-nums"
           title={`${row.gamesRated} rated games`}

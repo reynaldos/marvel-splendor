@@ -7,7 +7,7 @@ import { publicAvatarUrl } from "@/lib/r2";
 import { placeByRating } from "@/lib/rating";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
 import { pageMetadata } from "@/lib/site";
-import { accountTierFor } from "@/lib/xp";
+import { accountFrameTier, accountLevel, accountScore } from "@/lib/xp";
 
 export const metadata = pageMetadata("Leaderboard", "The top-ranked Marvel Splendor players.");
 
@@ -20,7 +20,7 @@ export default async function LeaderboardPage() {
       take: 100,
       include: {
         user: {
-          select: { id: true, username: true, name: true, avatarKey: true, auth0Sub: true, xpAvatarStyle: true, stats: true },
+          select: { id: true, username: true, avatarKey: true, auth0Sub: true, xpAvatarStyle: true, stats: true },
         },
       },
     }),
@@ -28,14 +28,19 @@ export default async function LeaderboardPage() {
   const cardXp = await cardLevelXpByUser(rated.map((r) => r.user.id));
 
   const rows = placeByRating(
-    rated.map(({ user, rating, gamesRated }) => ({
-      username: user.username,
-      name: user.name,
-      avatarUrl: publicAvatarUrl(user.avatarKey),
-      avatarTier: user.xpAvatarStyle ? accountTierFor(user.stats ?? defaultUserStatsSnapshot, cardXp.get(user.id) ?? 0) : undefined,
-      rating,
-      gamesRated,
-    })),
+    rated.map(({ user, rating, gamesRated }) => {
+      const xp = accountScore(user.stats ?? defaultUserStatsSnapshot, cardXp.get(user.id) ?? 0);
+      const level = accountLevel(xp);
+      return {
+        username: user.username,
+        level,
+        xp,
+        avatarUrl: publicAvatarUrl(user.avatarKey),
+        avatarTier: user.xpAvatarStyle ? accountFrameTier(level) : undefined,
+        rating,
+        gamesRated,
+      };
+    }),
   );
   const own = rated.find((r) => r.user.auth0Sub === session?.user.sub)?.user.username ?? null;
 
