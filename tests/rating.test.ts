@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defaultRatingSnapshot, nextRatings, rankTierFor, type RatedPlayer } from "@/lib/rating";
+import { defaultRatingSnapshot, nextRatings, type RatedPlayer } from "@/lib/rating";
 
 const player = (over: Partial<RatedPlayer>): RatedPlayer => ({
   userId: "u",
@@ -73,19 +73,5 @@ describe("nextRatings", () => {
 
   it("starts everyone unranked at the default snapshot", () => {
     expect(defaultRatingSnapshot).toEqual({ rating: 1000, gamesRated: 0 });
-  });
-});
-
-describe("rankTierFor", () => {
-  it("matches the tier boundaries in ARCHITECTURE.md", () => {
-    expect(rankTierFor(999)).toBe("Rookie");
-    expect(rankTierFor(1000)).toBe("Contender");
-    expect(rankTierFor(1199)).toBe("Contender");
-    expect(rankTierFor(1200)).toBe("Veteran");
-    expect(rankTierFor(1399)).toBe("Veteran");
-    expect(rankTierFor(1400)).toBe("Elite");
-    expect(rankTierFor(1599)).toBe("Elite");
-    expect(rankTierFor(1600)).toBe("Legend");
-    expect(rankTierFor(2000)).toBe("Legend");
   });
 });

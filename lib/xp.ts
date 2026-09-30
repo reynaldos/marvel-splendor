@@ -7,7 +7,7 @@ export function accountScore(stats: UserStatsSnapshot): number {
 }
 
 /** Score needed for `level`: 100×(level−1)^1.5, matching the table in ARCHITECTURE.md. */
-function scoreForLevel(level: number): number {
+export function scoreForLevel(level: number): number {
   return Math.round(100 * (level - 1) ** 1.5);
 }
 
@@ -17,7 +17,7 @@ export function accountLevel(score: number): number {
   return level;
 }
 
-const ACCOUNT_FRAME_TIER_MIN_LEVEL = [1, 2, 4, 6, 9, 12, 16, 21];
+export const ACCOUNT_FRAME_TIER_MIN_LEVEL = [1, 2, 4, 6, 8, 10, 13, 16, 20, 25];
 
 export function accountFrameTier(level: number): FrameTier {
   return frameTierFor(level, ACCOUNT_FRAME_TIER_MIN_LEVEL);

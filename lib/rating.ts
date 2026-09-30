@@ -65,23 +65,6 @@ export function nextRatings(
   });
 }
 
-const RANK_TIERS = [
-  { name: "Rookie", min: -Infinity },
-  { name: "Contender", min: 1000 },
-  { name: "Veteran", min: 1200 },
-  { name: "Elite", min: 1400 },
-  { name: "Legend", min: 1600 },
-] as const;
-
-export type RankTier = (typeof RANK_TIERS)[number]["name"];
-
-/** The badge tier a rating falls in. */
-export function rankTierFor(rating: number): RankTier {
-  let tier: RankTier = RANK_TIERS[0].name;
-  for (const t of RANK_TIERS) if (rating >= t.min) tier = t.name;
-  return tier;
-}
-
 /** Places for rows already sorted by rating, highest first. Equal ratings share a place: 1, 2, 2, 4. */
 export function placeByRating<T extends { rating: number }>(rows: T[]): Array<T & { place: number }> {
   let place = 0;

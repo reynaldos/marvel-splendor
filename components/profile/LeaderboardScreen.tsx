@@ -3,10 +3,9 @@ import { cn } from "cn";
 
 import { BackLink } from "@/components/BackLink";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
-import { RankBadge } from "@/components/profile/RankBadge";
 import { Stage, StageRows } from "@/components/Stage";
 
-interface LeaderboardRow {
+export interface LeaderboardEntry {
   place: number;
   username: string;
   name: string | null;
@@ -17,9 +16,35 @@ interface LeaderboardRow {
 
 interface LeaderboardScreenProps {
   /** Best first, already placed. */
-  rows: LeaderboardRow[];
+  rows: LeaderboardEntry[];
   /** The viewer's username when they are on the list, so their row is picked out in gold. */
   own: string | null;
+}
+
+/** One player on the list. The viewer's own row is picked out in gold. */
+export function LeaderboardRow({ row, own }: { row: LeaderboardEntry; own: string | null }) {
+  return (
+    <li>
+      <Link
+        href={`/profile/${row.username}`}
+        className={cn(
+          "flex items-center gap-3 rounded-xl px-3 py-1 hover:brightness-125",
+          row.username === own ? "bg-gold-200 text-cosmos-950" : "bg-cosmos-800",
+        )}
+      >
+        <span className="w-8 text-center text-xl font-black tabular-nums">{row.place}</span>
+        <PlayerAvatar src={row.avatarUrl} name={row.username} className="size-8 text-xs" />
+        <span className="min-w-0 flex-1 truncate text-base font-bold">{row.name ?? row.username}</span>
+        <span
+          className="flex items-center gap-3 rounded-full bg-cosmos-950 px-3 py-1 text-sm font-black text-white tabular-nums"
+          title={`${row.gamesRated} rated games`}
+        >
+          {row.rating}
+          <span className="text-cosmos-300">{row.gamesRated}g</span>
+        </span>
+      </Link>
+    </li>
+  );
 }
 
 /** Every rated player in order. Tapping a row goes to that player's profile. */
@@ -38,27 +63,7 @@ export function LeaderboardScreen({ rows, own }: LeaderboardScreenProps) {
           ) : (
             <ol className="scroll-fade flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {rows.map((row) => (
-                <li key={row.username}>
-                  <Link
-                    href={`/profile/${row.username}`}
-                    className={cn(
-                      "flex items-center gap-3 rounded-xl px-3 py-1 hover:brightness-125",
-                      row.username === own ? "bg-gold-200 text-cosmos-950" : "bg-cosmos-800",
-                    )}
-                  >
-                    <span className="w-8 text-center text-xl font-black tabular-nums">{row.place}</span>
-                    <PlayerAvatar src={row.avatarUrl} name={row.username} className="size-8 text-xs" />
-                    <span className="min-w-0 flex-1 truncate text-base font-bold">{row.name ?? row.username}</span>
-                    <RankBadge rating={row.rating} />
-                    <span
-                      className="flex items-center gap-3 rounded-full bg-cosmos-950 px-3 py-1 text-sm font-black text-white tabular-nums"
-                      title={`${row.gamesRated} rated games`}
-                    >
-                      {row.rating}
-                      <span className="text-cosmos-300">{row.gamesRated}g</span>
-                    </span>
-                  </Link>
-                </li>
+                <LeaderboardRow key={row.username} row={row} own={own} />
               ))}
             </ol>
           )}

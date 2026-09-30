@@ -21,6 +21,7 @@ const PAGES = [
   { name: "Loading", href: "/preview/loading" },
   { name: "Board", href: "/preview/board" },
   { name: "Game over", href: "/preview/game-over" },
+  { name: "Tiers", href: "/preview/tiers" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
@@ -111,6 +112,9 @@ function Help() {
 
         <h3 className={HEADING}>Loading</h3>
         <p className="text-cosmos-300">Takes nothing: it is the board&apos;s loading screen, held still.</p>
+
+        <h3 className={HEADING}>Tiers</h3>
+        <p className="text-cosmos-300">Takes nothing: every frame tier, the rank badge and the leaderboard rows, side by side.</p>
       </DialogContent>
     </Dialog>
   );

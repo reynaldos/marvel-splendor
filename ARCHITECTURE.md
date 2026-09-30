@@ -401,24 +401,25 @@ Guardrails: a game must reach at least 4 turns per player to pay out (blocks an 
 
 (Curve is `100×(level−1)^1.5`, continuing the same way past 10 — always climbing, never capped.) Level maps to the player-card frame tier, replacing the hardcoded `frame-gold` in `components/profile/ProfileScreen.tsx`:
 
-| Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Diamond | Prismatic | Mastered |
-|---|---|---|---|---|---|---|---|---|
-| Account level | 1 | 2–3 | 4–5 | 6–8 | 9–11 | 12–15 | 16–20 | 21+ |
+| Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Account level | 1 | 2–3 | 4–5 | 6–7 | 8–9 | 10–12 | 13–15 | 16–19 | 20–24 | 25+ |
 
 *Rank — done: badge and rating built (`lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`), and the leaderboard (`/leaderboard`, from the top-bar menu: the top 100 by rating, equal ratings sharing a place); matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as the number itself in a small badge (not a frame, per the table above) — no tier names, so it never reads as the same ladder as the collector frames. It's what the leaderboard orders by and what matchmaking will pair on.
 
 No season and no decay — rank only ever moves when a rated game finishes. Past games are rated from scratch by `pnpm rating:backfill`: every player starts at the default, and each finished multiplayer game is rated in the order it ended, so later games use the ratings earlier ones produced.
 
-*Card levels — done: frame built (`lib/card-level.ts`), shown on each recruited card in the collection (`components/profile/CollectionScreen.tsx`). Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band, sparkles), from Platinum light moves along the border, and from Diamond a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).* Uses `CollectedCard.times`, already tracked, no schema change. Same 8-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
+*Card levels — done: frame built (`lib/card-level.ts`), shown on each recruited card in the collection (`components/profile/CollectionScreen.tsx`). Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band), from Silver sparkles that come and go, from Platinum the gem tiers get angled facets of light and light moving along the border, and from Diamond a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).* Uses `CollectedCard.times`, already tracked, no schema change. Same 10-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
 
-| Tier | Recruited | Bronze | Silver | Gold | Platinum | Diamond | Prismatic | Mastered |
-|---|---|---|---|---|---|---|---|---|
-| Times recruited | 1 | 5 | 10 | 20 | 35 | 55 | 80 | 120 |
+| Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Times recruited | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
 
 Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
 
 **Still to do**
 
+- **Tier frames in a shader.** The frames are CSS for now: gradients, a sheen, sparkles, facets. A WebGL pass (three.js, or a fragment shader) could do real refraction and foil that turns with the phone or follows a finger.
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
 - **Sound effects and background music.** None yet. Sounds for taking tokens, recruiting, reserving, your turn, the timer running low, and winning or losing; music on the menus and the board. Needs a mute control that is remembered, and sound files the project has the right to use. Phones only play sound after the player's first tap.
 - **Team against team at the end of a game.** A comparison of the teams each player recruited: heroes against villains, points, bonuses by stone, Avengers badges, and the strongest card on each side. It can be worked out from the saved game, as the stats are.
