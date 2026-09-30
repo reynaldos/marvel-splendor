@@ -412,7 +412,7 @@ Guardrails: a game must reach at least 4 turns per player to pay out (blocks an 
 
 No season and no decay — rank only ever moves when a rated game finishes.
 
-*Card levels — building later, alongside coins/XP.* Uses `CollectedCard.times`, already tracked, no schema change. Same 8-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
+*Card levels — done: frame built (`lib/card-level.ts`), shown on each recruited card in the collection (`components/profile/CollectionScreen.tsx`).* Uses `CollectedCard.times`, already tracked, no schema change. Same 8-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
 
 | Tier | Recruited | Bronze | Silver | Gold | Platinum | Diamond | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|
@@ -431,7 +431,7 @@ Cosmetic only at every tier, for cards and for the account-level frame alike —
 - **A collection.** A page of every card in the game: the ones the player has recruited at least once are shown, and the rest are empty spaces with dotted outlines and a question mark. Three ways to look at it: one big grid; by level; or by group. By level and by group are laid out like a chart, with the level or group named down the side and its cards, found and not yet found, in a row beside it. What each player has found is kept in its own table, `CollectedCard`, so it outlasts the games: a card counts when the player recruited it themselves in a game played to the end. Abandoned games don't count, nor does anything the stand-in bot recruited. The table is added by `prisma/sql/2026-09-29-collected-cards.sql` and filled from past games by `pnpm collection:backfill`; `lib/collection.ts` reads the cards from a game's moves. When a game is played to the end its cards are saved then and there (`lib/save-collection.ts`, called from the moves route); a game ended by a forfeit counts, as it is finished, not abandoned. The backfill sets each count afresh from the games, so it also puts right anything that failed to save. The page is `/profile/<username>/collection`, under the profile it belongs to, and shows that player's cards to anyone signed in. It is reached from the Collection button on any profile (`components/profile/CollectionScreen.tsx`). The cards are given the whole screen: the page has no logo or footer, the way back sits in the header, each row is filled from edge to edge, and the list runs off the bottom of the screen, fading only at the top. It has four views: one grid, by level, by group and by alliance (hero, villain or either side). The groups are the teams each card is marked with in `data/cards.json`, three at most: a team with three or more cards gets a row, and the rest go under Others. So marking new cards with a new team, such as X-Men, makes its row once it has three. A card in two teams is in both rows.
 - **Friends.** Add friends by username, see their profiles, and invite them to a game. An invite sends a notification; opening it asks whether to join that game's lobby. Needs new tables for friendships and invites, which is a schema change. Notifications inside the app can use the live connection already there; ones that reach a phone with the app closed need web push, which on an iPhone only works once the app is on the home screen. To decide: whether a friendship needs accepting, and whether profiles stay open to everyone or only to friends.
 - **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide. See "Coins, XP, rank and card levels" above for how coins are earned.
-- **Coins, XP and card levels.** Fully designed above; not started.
+- **Coins.** Fully designed above; not started. XP and card levels are done.
 - End-to-end tests.
 - Bot banter.
 - **Rank leaderboard.** A page ranking players by rank.
@@ -495,7 +495,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) and account level (the player-card frame) are done, on the player card. Coins and card levels are designed but not started.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge), account level (the player-card frame) and card levels (the frame on each recruited card in the Collection) are done. Coins are designed but not started.
 
 What these need before they can be built:
 
