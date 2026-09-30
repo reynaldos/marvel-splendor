@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { MoveSchema } from "@/lib/api-schemas";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { recordGameCoins } from "@/lib/record-coins";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
-import { isAway, type GameState, type Move } from "@/lib/engine/types";
+import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
@@ -14,7 +15,7 @@ import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameRating } from "@/lib/record-rating";
-import { recordGameStats } from "@/lib/record-stats";
+import { recordGameStats, type PlayerGameOutcome } from "@/lib/record-stats";
 import { saveCollectedCards } from "@/lib/save-collection";
 
 /** Tolerance for the client's countdown finishing a hair before the server's. */
@@ -146,8 +147,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (game.mode === "MULTIPLAYER") await notifyGame(id);
 
   if (finalState.status === "finished") {
-    await recordFinishedGameStats(id, game.mode, finalState, game.players, localUser.id);
+    const outcomes = await buildHumanOutcomes(id, finalState, game.players, localUser.id);
+    if (outcomes.length > 0) await recordGameStats({ mode: game.mode, players: outcomes });
     await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
+    await recordFinishedGameCoins(id, finalState.settings, game.players, outcomes);
     // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
     await saveCollectedCards(id, game.players).catch((error) => console.error("collection not saved", id, error));
   }
@@ -213,22 +216,21 @@ async function persistMoves(
 
 class StaleVersionError extends Error {}
 
-async function recordFinishedGameStats(
+async function buildHumanOutcomes(
   gameId: string,
-  mode: "VS_BOT" | "MULTIPLAYER",
   finalState: GameState,
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
   fallbackHumanUserId: string,
-) {
+): Promise<Array<PlayerGameOutcome & { seat: number }>> {
   const humanPlayers = players.filter((p) => !p.isBot && p.userId);
-  if (humanPlayers.length === 0) return;
+  if (humanPlayers.length === 0) return [];
 
   const primaryMoves = await prisma.move.findMany({
     where: { gameId },
     select: { seat: true, payload: true },
   });
 
-  const outcomes = humanPlayers.map((p) => {
+  return humanPlayers.map((p) => {
     const seat = p.seat;
     const player = finalState.players[seat];
     const isWinner =
@@ -238,6 +240,7 @@ async function recordFinishedGameStats(
     ).length;
 
     return {
+      seat,
       userId: p.userId ?? fallbackHumanUserId,
       isWinner,
       points: player.points,
@@ -246,8 +249,6 @@ async function recordFinishedGameStats(
       locationsClaimed: player.locations.length,
     };
   });
-
-  await recordGameStats({ mode, players: outcomes });
 }
 
 function isTurnPrimary(type: string | undefined): boolean {
@@ -273,4 +274,20 @@ async function recordFinishedGameRating(
   }));
 
   await recordGameRating(placements);
+}
+
+async function recordFinishedGameCoins(
+  gameId: string,
+  settings: GameSettings,
+  players: Array<{ seat: number; isBot: boolean }>,
+  outcomes: Array<PlayerGameOutcome & { seat: number }>,
+) {
+  if (outcomes.length === 0) return;
+
+  await recordGameCoins(
+    gameId,
+    settings,
+    players,
+    outcomes.map((o) => ({ userId: o.userId, seat: o.seat, isWinner: o.isWinner, turns: o.turns })),
+  );
 }

@@ -25,20 +25,22 @@ enum ChatKind {
 }
 
 model User {
-  id        String       @id @default(cuid())
-  auth0Sub  String       @unique
-  username  String       @unique
-  name      String?
+  id               String            @id @default(cuid())
+  auth0Sub         String            @unique
+  username         String            @unique
+  name             String?
   // As last seen at sign-in. Not unique: one person can sign in more than one way.
-  email     String?
+  email            String?
   // An uploaded picture's storage key, or "library/<id>" for one from the library.
-  avatarKey String?
-  createdAt DateTime     @default(now())
-  players   GamePlayer[]
-  stats     UserStats?
-  visits    UserVisit[]
-  collected CollectedCard[]
-  rating    UserRating?
+  avatarKey        String?
+  createdAt        DateTime          @default(now())
+  players          GamePlayer[]
+  stats            UserStats?
+  visits           UserVisit[]
+  collected        CollectedCard[]
+  rating           UserRating?
+  coins            UserCoins?
+  coinTransactions CoinTransaction[]
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -85,6 +87,28 @@ model UserRating {
   rating     Int      @default(1000)
   gamesRated Int      @default(0)
   updatedAt  DateTime @updatedAt
+}
+
+// Cached balance for fast reads — CoinTransaction below is the source of truth.
+model UserCoins {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+// One award (or future spend) of coins. reason is "game:<opponentTier>:<win|loss>" for
+// now, e.g. "game:human:win" or "game:hard:loss"; a shop spend will add its own reasons later.
+model CoinTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delta     Int
+  reason    String
+  gameId    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model Game {

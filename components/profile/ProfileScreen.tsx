@@ -3,6 +3,7 @@ import { Pencil } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { BackLink } from "@/components/BackLink";
+import { CoinBalance } from "@/components/profile/CoinBalance";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { RankBadge } from "@/components/profile/RankBadge";
 import { StatsTabs } from "@/components/profile/StatsTabs";
@@ -21,6 +22,7 @@ interface ProfileScreenProps {
   joined: string;
   /** Null before a player's first rated game. */
   rating: number | null;
+  coins: number;
   stats: UserStatsSnapshot;
   career: CareerStats;
   records: CareerStats;
@@ -29,7 +31,7 @@ interface ProfileScreenProps {
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
-export function ProfileScreen({ username, name, avatarUrl, joined, rating, stats, career, records, games, isOwn }: ProfileScreenProps) {
+export function ProfileScreen({ username, name, avatarUrl, joined, rating, coins, stats, career, records, games, isOwn }: ProfileScreenProps) {
   const level = accountLevel(accountScore(stats));
   const frameBorder = FRAME_BORDER[accountFrameTier(level)];
 
@@ -55,7 +57,10 @@ export function ProfileScreen({ username, name, avatarUrl, joined, rating, stats
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
             <p className="text-xs font-bold text-cosmos-300">Joined {joined}</p>
-            <RankBadge rating={rating} className="mt-1" />
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-1.5">
+              <RankBadge rating={rating} />
+              <CoinBalance balance={coins} />
+            </div>
           </div>
           <StatsTabs stats={stats} career={career} records={records} games={games} />
         </div>
