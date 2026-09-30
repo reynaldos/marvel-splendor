@@ -43,7 +43,8 @@ export function TopBarView({
   isAdmin,
 }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
-  const [updatesOpen, setUpdatesOpen] = useState(false);
+  // The menu and the log share one dialog: two overlapping ones left stale pointer locks on touch.
+  const [view, setView] = useState<"menu" | "updates">("menu");
   const seen = useSeenUpdate();
   // What had been seen when the log was opened, so the new ones stay marked while it is read.
   const [since, setSince] = useState(seen);
@@ -99,7 +100,10 @@ export function TopBarView({
         <button
           type="button"
           aria-label="Menu"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setView("menu");
+            setOpen(true);
+          }}
           className="relative flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
         >
           <Menu className="size-6" />
@@ -108,50 +112,56 @@ export function TopBarView({
       </header>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="theme-cosmos dark gap-3 border-2 border-gold-400 sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
-              Menu
-            </DialogTitle>
-            <DialogDescription className="sr-only">The leaderboard, settings, and signing out.</DialogDescription>
-          </DialogHeader>
-          <Link href="/leaderboard" onClick={close} className={CHOICE}>
-            <Medal className="size-5 text-gold-200" />
-            Leaderboard
-          </Link>
-          <Link href="/settings" onClick={close} className={CHOICE}>
-            <Settings className="size-5 text-gold-200" />
-            Profile settings
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              close();
-              setSince(seen);
-              markUpdatesSeen();
-              setUpdatesOpen(true);
-            }}
-            className={CHOICE}
-          >
-            <ScrollText className="size-5 text-gold-200" />
-            What&apos;s new
-            {hasNew ? <NewDot className="ml-auto" /> : null}
-          </button>
-          {isAdmin ? (
-            <Link href="/admin/users" onClick={close} className={CHOICE}>
-              <Shield className="size-5 text-gold-200" />
-              Admin
-            </Link>
-          ) : null}
-          {/* A plain link: signing out is a trip to the server, not a page of the app. */}
-          <a href="/auth/logout" className={CHOICE}>
-            <LogOut className="size-5 text-gold-200" />
-            Log out
-          </a>
+        <DialogContent
+          className={`theme-cosmos dark border-2 border-gold-400 ${
+            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : "gap-3 sm:max-w-xs"
+          }`}
+        >
+          {view === "updates" ? (
+            <UpdateLog since={since} />
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
+                  Menu
+                </DialogTitle>
+                <DialogDescription className="sr-only">The leaderboard, settings, and signing out.</DialogDescription>
+              </DialogHeader>
+              <Link href="/leaderboard" onClick={close} className={CHOICE}>
+                <Medal className="size-5 text-gold-200" />
+                Ranked Leaderboard
+              </Link>
+              <Link href="/settings" onClick={close} className={CHOICE}>
+                <Settings className="size-5 text-gold-200" />
+                Profile settings
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setSince(seen);
+                  markUpdatesSeen();
+                  setView("updates");
+                }}
+                className={CHOICE}
+              >
+                <ScrollText className="size-5 text-gold-200" />
+                What&apos;s new
+                {hasNew ? <NewDot className="ml-auto" /> : null}
+              </button>
+              {isAdmin ? (
+                <Link href="/admin/users" onClick={close} className={CHOICE}>
+                  <Shield className="size-5 text-gold-200" />
+                  Admin
+                </Link>
+              ) : null}
+              {/* A plain link: signing out is a trip to the server, not a page of the app. */}
+              <a href="/auth/logout" className={CHOICE}>
+                <LogOut className="size-5 text-gold-200" />
+                Log out
+              </a>
+            </>
+          )}
         </DialogContent>
-      </Dialog>
-      <Dialog open={updatesOpen} onOpenChange={setUpdatesOpen}>
-        <UpdateLog since={since} />
       </Dialog>
     </div>
   );
