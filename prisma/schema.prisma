@@ -141,6 +141,8 @@ model GamePlayer {
   guestName  String?
   isBot      Boolean @default(false)
   guestToken String?
+  // What the game gave this player at the end — see `GameRewards` in lib/game-record.ts. Null until it finishes.
+  rewards    Json?
 
   @@unique([gameId, seat])
   @@index([userId])

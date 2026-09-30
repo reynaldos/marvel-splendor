@@ -2,6 +2,7 @@ import { LeaderboardScreen } from "@/components/profile/LeaderboardScreen";
 import { TopBar } from "@/components/TopBar";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { cardLevelXpByUser } from "@/lib/load-card-xp";
 import { publicAvatarUrl } from "@/lib/r2";
 import { placeByRating } from "@/lib/rating";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
@@ -19,18 +20,19 @@ export default async function LeaderboardPage() {
       take: 100,
       include: {
         user: {
-          select: { username: true, name: true, avatarKey: true, auth0Sub: true, xpAvatarStyle: true, stats: true },
+          select: { id: true, username: true, name: true, avatarKey: true, auth0Sub: true, xpAvatarStyle: true, stats: true },
         },
       },
     }),
   ]);
+  const cardXp = await cardLevelXpByUser(rated.map((r) => r.user.id));
 
   const rows = placeByRating(
     rated.map(({ user, rating, gamesRated }) => ({
       username: user.username,
       name: user.name,
       avatarUrl: publicAvatarUrl(user.avatarKey),
-      avatarTier: user.xpAvatarStyle ? accountTierFor(user.stats ?? defaultUserStatsSnapshot) : undefined,
+      avatarTier: user.xpAvatarStyle ? accountTierFor(user.stats ?? defaultUserStatsSnapshot, cardXp.get(user.id) ?? 0) : undefined,
       rating,
       gamesRated,
     })),

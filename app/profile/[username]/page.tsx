@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProfileScreen } from "@/components/profile/ProfileScreen";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { cardLevelXpByUser } from "@/lib/load-card-xp";
 import { loadGameHistory } from "@/lib/load-game-history";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
 import { publicAvatarUrl } from "@/lib/r2";
@@ -20,7 +21,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const user = await prisma.user.findUnique({ where: { username }, include: { stats: true, rating: true } });
   if (!user) notFound();
 
-  const [session, history] = await Promise.all([auth0.getSession(), loadGameHistory(user.id)]);
+  const [session, history, cardXp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), cardLevelXpByUser([user.id])]);
 
   return (
     <>
@@ -33,6 +34,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         xpAvatarStyle={user.xpAvatarStyle}
         xpCardStyle={user.xpCardStyle}
         stats={user.stats ?? defaultUserStatsSnapshot}
+        cardXp={cardXp.get(user.id) ?? 0}
         career={history.career}
         records={history.records}
         games={history.games}

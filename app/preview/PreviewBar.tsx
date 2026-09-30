@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { RESULTS } from "./game-over/standings";
+import { CARD_LEVEL_UPS, RESULTS } from "./game-over/standings";
 
 const PAGES = [
   { name: "Loading", href: "/preview/loading" },
@@ -32,6 +32,8 @@ export const SHOWS = {
   "The player's own card": ["MyTurn", "Chat"],
 };
 export const TABLE_SIZES = [2, 3, 4];
+/** How many cards the game-over preview shows going up a level; its bar button goes round these. */
+export const CARD_COUNTS = [0, 1, 3, CARD_LEVEL_UPS.length];
 
 const PILL = "rounded-full px-2 py-0.5 fs-2xs font-black ring-1 ring-inset";
 const OPTION = "rounded-md bg-cosmos-950 px-1.5 py-0.5 font-mono text-gold-200 hover:bg-cosmos-700";
@@ -107,6 +109,10 @@ function Help() {
           <Entry option="?players=">
             How many played. Three when left out.
             <Options to={(n) => `/preview/game-over?players=${n}`} values={TABLE_SIZES} />
+          </Entry>
+          <Entry option="?cards=">
+            How many of the viewer&apos;s cards went up a level, up to {CARD_LEVEL_UPS.length}. One when left out.
+            <Options to={(n) => `/preview/game-over?cards=${n}`} values={CARD_COUNTS} />
           </Entry>
         </dl>
 

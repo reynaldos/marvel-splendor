@@ -30,6 +30,8 @@ interface ProfileScreenProps {
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
   stats: UserStatsSnapshot;
+  /** XP from card levels, on top of what the stats give. */
+  cardXp: number;
   career: CareerStats;
   records: CareerStats;
   games: GameRecord[];
@@ -45,12 +47,13 @@ export function ProfileScreen({
   xpAvatarStyle,
   xpCardStyle,
   stats,
+  cardXp,
   career,
   records,
   games,
   isOwn,
 }: ProfileScreenProps) {
-  const score = accountScore(stats);
+  const score = accountScore(stats, cardXp);
   const level = accountLevel(score);
   const tier = accountFrameTier(level);
 

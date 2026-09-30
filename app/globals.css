@@ -230,6 +230,10 @@ body {
 @utility rounded-frame {
   border-radius: calc(var(--radius-md) + var(--spacing) * 0.8);
 }
+/* Round a card drawn large (`rounded-[10%/7.1%]`): the card's corners plus the frame's width, so the two run concentric. */
+@utility rounded-frame-lg {
+  border-radius: calc(10% + var(--spacing) * 0.8) / calc(7.1% + var(--spacing) * 0.8);
+}
 
 /* Over the face, past Recruited: a vignette in the tier's colour (`--frame-glow`) and still light (`--frame-sheen`). */
 @utility frame-face {
@@ -528,6 +532,25 @@ body {
     from { opacity: 0; translate: 2rem 0; }
   }
   .result-row { animation: result-row 0.45s ease-out both; }
+
+  /* A card rising into place. */
+  @keyframes card-arrive {
+    from { opacity: 0; translate: 0 3rem; scale: 0.8; }
+  }
+  .card-arrive { animation: card-arrive 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+  /* The next tier's frame flaring over the old one, then settling. */
+  @keyframes tier-up {
+    0% { opacity: 0; scale: 1.12; filter: brightness(3); }
+    50% { opacity: 1; scale: 1.06; filter: brightness(1.8); }
+    100% { scale: 1; filter: brightness(1); }
+  }
+  .tier-up { animation: tier-up 0.8s ease-out both; }
+  /* The old frame going out under it, so its light doesn't show through the new one. */
+  @keyframes tier-out {
+    to { opacity: 0; }
+  }
+  .tier-out { animation: tier-out 0.8s ease-out both; }
 
   @keyframes result-rays {
     to { rotate: 360deg; }

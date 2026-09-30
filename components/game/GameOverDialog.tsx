@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
+import { CardLevelUps } from "@/components/game/CardLevelUps";
+import { RewardsPanel } from "@/components/game/RewardsPanel";
 import { Standings } from "@/components/game/Standings";
 import {
   Dialog,
@@ -12,12 +17,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { STONES } from "@/lib/engine/types";
-import type { RankedPlayer } from "@/lib/game-record";
+import type { GameRewards, RankedPlayer } from "@/lib/game-record";
 
 interface GameOverDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   standings: RankedPlayer[];
+  /** By seat, for the players whose rewards are saved. */
+  rewards: Map<number, GameRewards>;
   viewerSeat: number;
   round: number;
 }
@@ -44,9 +51,11 @@ const BUTTON =
  * the stones raining down. A loss is red: Thanos, looming. Then how the whole
  * table finished, arriving one row at a time.
  */
-export function GameOverDialog({ open, onOpenChange, standings, viewerSeat, round }: GameOverDialogProps) {
+export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerSeat, round }: GameOverDialogProps) {
   const winners = standings.filter((p) => p.won);
   const won = winners.some((p) => p.seat === viewerSeat);
+  const mine = rewards.get(viewerSeat);
+  const [showingCards, setShowingCards] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,8 +126,18 @@ export function GameOverDialog({ open, onOpenChange, standings, viewerSeat, roun
             </DialogDescription>
           </DialogHeader>
 
-          <Standings players={standings} seat={viewerSeat} animated />
+          <Standings
+            players={standings}
+            seat={viewerSeat}
+            ratingSwings={new Map([...rewards].flatMap(([seat, r]) => (r.rating ? [[seat, r.rating.after - r.rating.before]] : [])))}
+            animated
+          />
+          {/* After the last row has landed. */}
+          {mine ? (
+            <RewardsPanel rewards={mine} delay={0.5 + standings.length * 0.18 + 0.3} onShowCards={() => setShowingCards(true)} />
+          ) : null}
         </div>
+        {showingCards && mine ? <CardLevelUps ups={mine.cardLevelUps} onClose={() => setShowingCards(false)} /> : null}
       </DialogContent>
     </Dialog>
   );

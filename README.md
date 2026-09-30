@@ -84,6 +84,7 @@ You need Node 22 and pnpm.
 | `pnpm collection:backfill` | Shows what each player's collection would hold, from the games played to the end. Add `--yes` to save it |
 | `pnpm rating:backfill` | Shows what each player's rank would be, rating every multiplayer game played to the end in order. Add `--verbose` to see each game and every player's swing, `--yes` to save it |
 | `pnpm coins:backfill` | Shows what each player's coins would be, paying out every game played to the end in order. Add `--verbose` to see each payout, `--yes` to save it |
+| `pnpm rewards:backfill` | Shows what each finished game gave each player, replaying rank, coins and XP in order. Add `--verbose` to see every game, `--yes` to save it |
 | `pnpm games:clear` | Shows what clearing every game would delete. Add `--yes` to delete; this cannot be undone |
 | `pnpm games:reset` | A fresh start: the same, and every player's stats set back to zero. Players, names and pictures are kept. Add `--yes` to do it |
 
