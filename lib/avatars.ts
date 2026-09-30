@@ -40,6 +40,11 @@ export function libraryAvatarKey(id: string): string | null {
   return AVATAR_LIBRARY.some((a) => a.id === id) ? PREFIX + id : null;
 }
 
+/** A library picture picked at random, for a new player to start with. */
+export function randomLibraryAvatarKey(): string {
+  return PREFIX + AVATAR_LIBRARY[Math.floor(Math.random() * AVATAR_LIBRARY.length)].id;
+}
+
 /** The picture a saved key stands for, or null when the key isn't a library one. */
 export function libraryAvatarSrc(key: string | null | undefined): string | null {
   if (!key?.startsWith(PREFIX)) return null;

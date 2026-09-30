@@ -1,3 +1,4 @@
+import { randomLibraryAvatarKey } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { Prisma, type User } from "@/lib/generated/prisma/client";
 import { recordVisit } from "@/lib/record-visit";
@@ -112,6 +113,7 @@ async function provisionUser(profile: Auth0Profile): Promise<User> {
           auth0Sub: profile.sub,
           username,
           email: profile.email,
+          avatarKey: randomLibraryAvatarKey(),
           stats: { create: {} },
         },
       });
