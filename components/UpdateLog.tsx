@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import updates from "@/data/updates.json";
 
 const KINDS = [
@@ -61,12 +61,12 @@ export function NewDot({ className = "" }: { className?: string }) {
 const day = (date: string) =>
   new Date(date).toLocaleDateString("en", { day: "numeric", month: "short", timeZone: "UTC" });
 
-/** Every release, latest first, with the ones new since `since` marked and open. Goes inside a Dialog. */
+/** Every release, latest first, with the ones new since `since` marked and open. Goes inside a column-laid-out DialogContent. */
 export function UpdateLog({ since }: { since: string | null }) {
   const unseen = unseenCount(since);
 
   return (
-    <DialogContent className="theme-cosmos dark flex max-h-[90dvh] flex-col gap-0 border-2 border-gold-400 sm:max-w-lg">
+    <>
       <DialogHeader>
         <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
           What&apos;s new
@@ -120,6 +120,6 @@ export function UpdateLog({ since }: { since: string | null }) {
           );
         })}
       </ol>
-    </DialogContent>
+    </>
   );
 }
