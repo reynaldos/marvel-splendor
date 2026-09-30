@@ -1,7 +1,7 @@
 import { careerStats, type CareerStats } from "@/lib/career-stats";
 import { prisma } from "@/lib/db";
 import type { GameState } from "@/lib/engine/types";
-import { gameRecord, type GameRecord } from "@/lib/game-record";
+import { gameRecord, type GameRecord, type GameRewards } from "@/lib/game-record";
 import { botName } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
 
@@ -29,7 +29,13 @@ export async function loadGameHistory(userId: string): Promise<{
           updatedAt: true,
           state: true,
           players: {
-            select: { seat: true, isBot: true, guestName: true, user: { select: { username: true, avatarKey: true } } },
+            select: {
+              seat: true,
+              isBot: true,
+              guestName: true,
+              rewards: true,
+              user: { select: { username: true, avatarKey: true } },
+            },
           },
         },
       },
@@ -40,7 +46,13 @@ export async function loadGameHistory(userId: string): Promise<{
     const state = game.state as unknown as GameState;
     if (!state.players?.[seat]) return [];
     const record = gameRecord(
-      { id: game.id, mode: game.mode, endedAt: game.updatedAt.getTime(), state },
+      {
+        id: game.id,
+        mode: game.mode,
+        endedAt: game.updatedAt.getTime(),
+        state,
+        rewards: game.players.flatMap((p) => (p.rewards ? [[p.seat, p.rewards as unknown as GameRewards] as const] : [])),
+      },
       seat,
       game.players.map((p) => ({
         seat: p.seat,

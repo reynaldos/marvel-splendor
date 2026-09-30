@@ -38,6 +38,8 @@ export interface GameRecord {
   team: string[];
   /** Everyone at the table, best first. */
   players: RankedPlayer[];
+  /** By seat, for the players whose rewards are saved. */
+  rewards: Array<[seat: number, rewards: GameRewards]>;
 }
 
 /** What a finished game gave one player, saved on their seat so the results can show it any time. */
@@ -76,7 +78,7 @@ export function rankPlayers(state: RankableState, seated: Seated[]): RankedPlaye
 
 /** Null when the seat isn't in the game. */
 export function gameRecord(
-  game: { id: string; mode: GameRecord["mode"]; endedAt: number; state: GameState },
+  game: { id: string; mode: GameRecord["mode"]; endedAt: number; state: GameState; rewards: GameRecord["rewards"] },
   seat: number,
   seated: Seated[],
 ): GameRecord | null {
@@ -95,6 +97,7 @@ export function gameRecord(
     team: game.state.players[seat].cards,
     cardsByLevel: [1, 2, 3].map((level) => levels.filter((l) => l === level).length) as [number, number, number],
     players,
+    rewards: game.rewards,
   };
 }
 
