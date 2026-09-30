@@ -57,7 +57,7 @@ export function LeaderboardScreen({ rows, own }: LeaderboardScreenProps) {
       <StageRows>
         <div className="flex h-full min-h-0 flex-col gap-2">
           <h1 className="text-center font-display text-base font-black tracking-widest text-gold-400 uppercase">
-            Leaderboard
+            Rank Leaderboard
           </h1>
           {rows.length === 0 ? (
             <p className="m-auto text-base font-bold text-cosmos-300">
