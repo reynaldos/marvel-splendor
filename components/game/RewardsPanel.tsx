@@ -87,20 +87,25 @@ export function RewardsPanel({ rewards, delay, onShowCards }: { rewards: GameRew
           </span>
         ) : null}
       </div>
-      {cardLevelUps.length > 0 && t === 1 ? (
-        <button
-          type="button"
-          onClick={onShowCards}
-          className="result-pop flex h-9 items-center justify-center gap-2 rounded-full bg-gold-400 text-sm font-black text-cosmos-950 hover:bg-gold-200"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <Layers className="size-4" />
-          View cards ranked up
-          <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-cosmos-950 px-1.5 text-xs text-gold-400 tabular-nums">
-            {cardLevelUps.length}
-          </span>
-          <ChevronRight className="size-4" />
-        </button>
+      {/* The row is there from the start, so the button pops into space already made. */}
+      {cardLevelUps.length > 0 ? (
+        <div className="h-9">
+          {t === 1 ? (
+            <button
+              type="button"
+              onClick={onShowCards}
+              className="result-pop flex h-9 w-full items-center justify-center gap-2 rounded-full bg-gold-400 text-sm font-black text-cosmos-950 hover:bg-gold-200"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <Layers className="size-4" />
+              View cards ranked up
+              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-cosmos-950 px-1.5 text-xs text-gold-400 tabular-nums">
+                {cardLevelUps.length}
+              </span>
+              <ChevronRight className="size-4" />
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
