@@ -27,6 +27,8 @@ interface GameOverDialogProps {
   rewards: Map<number, GameRewards>;
   viewerSeat: number;
   round: number;
+  /** "View board" on the board itself. */
+  closeLabel?: string;
 }
 
 // Stones raining down on a win. Placed by hand so they don't fall in step: where across, how big, how long, how late.
@@ -51,7 +53,15 @@ const BUTTON =
  * the stones raining down. A loss is red: Thanos, looming. Then how the whole
  * table finished, arriving one row at a time.
  */
-export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerSeat, round }: GameOverDialogProps) {
+export function GameOverDialog({
+  open,
+  onOpenChange,
+  standings,
+  rewards,
+  viewerSeat,
+  round,
+  closeLabel = "View board",
+}: GameOverDialogProps) {
   const winners = standings.filter((p) => p.won);
   const won = winners.some((p) => p.seat === viewerSeat);
   const mine = rewards.get(viewerSeat);
@@ -99,9 +109,9 @@ export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerS
           )}
           {/* Under the art, so the standings have the column's whole height on a short screen. */}
           <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2">
-            {/* Closes the results to look over the final board; the board has a button to bring them back. */}
+            {/* On the board, this uncovers the final table; the board has a button to bring the results back. */}
             <DialogClose className={cn(BUTTON, "bg-cosmos-700 text-white ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500")}>
-              View board
+              {closeLabel}
             </DialogClose>
             <Link href="/" className={cn(BUTTON, "bg-gold-400 text-cosmos-950 hover:bg-gold-200")}>
               Back to home

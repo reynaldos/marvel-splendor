@@ -59,7 +59,7 @@ describe("gameRecord", () => {
     winnerSeat: 1,
     players: [makePlayer(0, { points: 12 }), makePlayer(1, { points: 17 }), makePlayer(2, { points: 15 })],
   });
-  const game = { id: "g1", mode: "MULTIPLAYER" as const, endedAt: 0, state };
+  const game = { id: "g1", mode: "MULTIPLAYER" as const, endedAt: 0, state, rewards: [] };
 
   it("is told from the seat it belongs to", () => {
     expect(gameRecord(game, 0, seated)).toMatchObject({ won: false, place: 3, rounds: 28, seat: 0 });

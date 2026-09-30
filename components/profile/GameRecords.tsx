@@ -4,9 +4,7 @@ import { useState } from "react";
 import { cn } from "cn";
 import { Star, Timer, UsersRound } from "lucide-react";
 
-import { Standings } from "@/components/game/Standings";
-import { TeamMarquee } from "@/components/profile/TeamMarquee";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { ordinal, timeAgo, type GameRecord } from "@/lib/game-record";
 
 const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
@@ -22,7 +20,7 @@ function Figure({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
-/** A player's finished games, latest first. Tapping one shows how the table finished. */
+/** A player's finished games, latest first. Tapping one replays the end of the game. */
 export function GameRecords({ games }: { games: GameRecord[] }) {
   const [open, setOpen] = useState<GameRecord | null>(null);
 
@@ -80,37 +78,17 @@ export function GameRecords({ games }: { games: GameRecord[] }) {
         ))}
       </ul>
 
-      <Dialog open={open !== null} onOpenChange={(isOpen) => !isOpen && setOpen(null)}>
-        {open ? <Results game={open} /> : null}
-      </Dialog>
+      {open ? (
+        <GameOverDialog
+          open
+          onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+          standings={open.players}
+          rewards={new Map(open.rewards)}
+          viewerSeat={open.seat}
+          round={open.rounds}
+          closeLabel="Close"
+        />
+      ) : null}
     </>
-  );
-}
-
-/** How the table finished: everyone in order, with the record's owner picked out. */
-function Results({ game }: { game: GameRecord }) {
-  return (
-    <DialogContent
-      className={cn(
-        "theme-cosmos dark max-h-[96dvh] gap-2 overflow-y-auto border-2 sm:max-w-lg",
-        game.won ? "border-gold-400" : "border-red-600",
-      )}
-    >
-      <DialogHeader className="items-center">
-        <DialogTitle
-          className={cn(
-            "font-display text-2xl font-black tracking-widest uppercase",
-            game.won ? "text-gold-400" : "text-red-400",
-          )}
-        >
-          {game.won ? "Victory" : "Defeat"}
-        </DialogTitle>
-        <DialogDescription>
-          {MODE[game.mode]} · {game.rounds} rounds · {timeAgo(game.endedAt)}
-        </DialogDescription>
-      </DialogHeader>
-      <Standings players={game.players} seat={game.seat} />
-      <TeamMarquee cardIds={game.team} />
-    </DialogContent>
   );
 }
