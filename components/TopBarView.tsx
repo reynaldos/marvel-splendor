@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Menu, ScrollText, Settings, Shield, Trophy } from "lucide-react";
+import { LogOut, Medal, Menu, ScrollText, Settings, Shield, Trophy } from "lucide-react";
 
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
@@ -67,8 +67,12 @@ export function TopBarView({ username, avatarUrl, wins, isAdmin }: TopBarViewPro
             <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
               Menu
             </DialogTitle>
-            <DialogDescription className="sr-only">Settings, and signing out.</DialogDescription>
+            <DialogDescription className="sr-only">The leaderboard, settings, and signing out.</DialogDescription>
           </DialogHeader>
+          <Link href="/leaderboard" onClick={close} className={CHOICE}>
+            <Medal className="size-5 text-gold-200" />
+            Leaderboard
+          </Link>
           <Link href="/settings" onClick={close} className={CHOICE}>
             <Settings className="size-5 text-gold-200" />
             Profile settings

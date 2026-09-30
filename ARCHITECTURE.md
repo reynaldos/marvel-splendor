@@ -217,6 +217,7 @@ app/
   join/[code]/page.tsx           # join flow (auth or guest name)
   lobby/[gameId]/page.tsx        # pre-game lobby
   profile/[username]/page.tsx    # public profile + stats
+  leaderboard/page.tsx           # players ranked by rating
   settings/page.tsx              # own profile edit, avatar upload
   api/
     auth/[auth0]/route.ts        # Auth0 handlers
@@ -404,7 +405,7 @@ Guardrails: a game must reach at least 4 turns per player to pay out (blocks an 
 |---|---|---|---|---|---|---|---|---|
 | Account level | 1 | 2–3 | 4–5 | 6–8 | 9–11 | 12–15 | 16–20 | 21+ |
 
-*Rank — done: badge and rating built (`lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`); matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as a small badge (not a frame, per the table above), using its own tier names so it never reads as the same ladder as the collector frames:
+*Rank — done: badge and rating built (`lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`), and the leaderboard (`/leaderboard`, from the top-bar menu: the top 100 by rating, equal ratings sharing a place); matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as a small badge (not a frame, per the table above), using its own tier names so it never reads as the same ladder as the collector frames:
 
 | Badge tier | Rookie | Contender | Veteran | Elite | Legend |
 |---|---|---|---|---|---|
@@ -433,7 +434,6 @@ Cosmetic only at every tier, for cards and for the account-level frame alike —
 - **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins (done, above) and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide.
 - End-to-end tests.
 - Bot banter.
-- **Rank leaderboard.** A page ranking players by rank.
 - **Level-up UI.** No notification or animation yet for reaching a new account level, rank tier, or card level.
 - **Ranked matchmaking (Quick Play).** A public queue that pairs players by rank for a multiplayer game, instead of needing a room code. Depends on rank existing. To decide: how wide a rating gap to accept and whether it widens the longer someone waits, whether it's 2-player only or fills a 3–4 table, and how the queue itself is run (likely the same Pusher presence pattern as the lobby).
 

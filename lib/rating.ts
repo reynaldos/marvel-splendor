@@ -81,3 +81,12 @@ export function rankTierFor(rating: number): RankTier {
   for (const t of RANK_TIERS) if (rating >= t.min) tier = t.name;
   return tier;
 }
+
+/** Places for rows already sorted by rating, highest first. Equal ratings share a place: 1, 2, 2, 4. */
+export function placeByRating<T extends { rating: number }>(rows: T[]): Array<T & { place: number }> {
+  let place = 0;
+  return rows.map((row, i) => {
+    if (i === 0 || rows[i - 1].rating !== row.rating) place = i + 1;
+    return { ...row, place };
+  });
+}
