@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { MoveSchema } from "@/lib/api-schemas";
 import { auth0 } from "@/lib/auth0";
+import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { recordGameCoins } from "@/lib/record-coins";
 import { applyMove } from "@/lib/engine/apply";
@@ -249,10 +250,6 @@ async function buildHumanOutcomes(
       locationsClaimed: player.locations.length,
     };
   });
-}
-
-function isTurnPrimary(type: string | undefined): boolean {
-  return type === "TAKE_TOKENS" || type === "RESERVE" || type === "RECRUIT" || type === "TIMEOUT_SKIP";
 }
 
 /** Rank only moves for a multiplayer game with 2+ humans — a bot-filled seat is never a rated opponent. */

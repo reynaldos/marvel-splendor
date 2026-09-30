@@ -14,6 +14,7 @@
     "db:update": "prisma db push && prisma generate",
     "collection:backfill": "npx tsx scripts/backfill-collection.ts",
     "rating:backfill": "npx tsx scripts/backfill-rating.ts",
+    "coins:backfill": "npx tsx scripts/backfill-coins.ts",
     "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {

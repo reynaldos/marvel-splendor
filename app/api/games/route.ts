@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { CreateGameSchema } from "@/lib/api-schemas";
 import { auth0 } from "@/lib/auth0";
+import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, type GameSettings, type GameState } from "@/lib/engine/types";
@@ -168,8 +169,4 @@ async function recordFinishedGameStats(
       },
     ],
   });
-}
-
-function isTurnPrimary(type: string): boolean {
-  return type === "TAKE_TOKENS" || type === "RESERVE" || type === "RECRUIT" || type === "TIMEOUT_SKIP";
 }

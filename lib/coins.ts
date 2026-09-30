@@ -32,6 +32,11 @@ export function opponentTierFor(
   }, "easy");
 }
 
+/** A move that takes the seat's turn — what counts as a turn played for the payout minimum. */
+export function isTurnPrimary(type: string | undefined): boolean {
+  return type === "TAKE_TOKENS" || type === "RESERVE" || type === "RECRUIT" || type === "TIMEOUT_SKIP";
+}
+
 /** Coins for one player's finished-game outcome; 0 if it didn't reach the minimum turns to pay out. */
 export function coinsForOutcome(tier: OpponentTier, isWinner: boolean, turns: number): number {
   if (turns < MIN_TURNS_TO_PAY) return 0;
