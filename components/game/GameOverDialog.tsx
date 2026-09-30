@@ -1,7 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
+import { CardLevelUps } from "@/components/game/CardLevelUps";
 import { RewardsPanel } from "@/components/game/RewardsPanel";
 import { Standings } from "@/components/game/Standings";
 import {
@@ -50,6 +54,8 @@ const BUTTON =
 export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerSeat, round }: GameOverDialogProps) {
   const winners = standings.filter((p) => p.won);
   const won = winners.some((p) => p.seat === viewerSeat);
+  const mine = rewards.get(viewerSeat);
+  const [showingCards, setShowingCards] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,8 +133,11 @@ export function GameOverDialog({ open, onOpenChange, standings, rewards, viewerS
             animated
           />
           {/* After the last row has landed. */}
-          {rewards.has(viewerSeat) ? <RewardsPanel rewards={rewards.get(viewerSeat)!} delay={0.5 + standings.length * 0.18 + 0.3} /> : null}
+          {mine ? (
+            <RewardsPanel rewards={mine} delay={0.5 + standings.length * 0.18 + 0.3} onShowCards={() => setShowingCards(true)} />
+          ) : null}
         </div>
+        {showingCards && mine ? <CardLevelUps ups={mine.cardLevelUps} onClose={() => setShowingCards(false)} /> : null}
       </DialogContent>
     </Dialog>
   );

@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "cn";
-import { ArrowDown, ArrowUp, Coins, Medal, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronRight, Coins, Layers, Medal, Sparkles } from "lucide-react";
 
-import { CardView } from "@/components/game/Card";
-import { CARD_BY_ID } from "@/lib/engine/data";
-import { FRAME_STYLE, type FrameTier } from "@/lib/frame-tier";
+import { FRAME_STYLE } from "@/lib/frame-tier";
 import type { GameRewards } from "@/lib/game-record";
 import { accountFrameTier, progressForScore } from "@/lib/xp";
 
@@ -36,21 +34,12 @@ function useCountUp(ms: number, delayMs: number): number {
   return t;
 }
 
-/** A tier's name in its own colour: gold reads gold, ruby reads ruby. Recruited has no colour of its own. */
-function TierName({ tier }: { tier: FrameTier }) {
-  return (
-    <span className="font-black" style={{ ...FRAME_STYLE[tier], color: "var(--frame-glow, var(--color-cosmos-300))" }}>
-      {tier}
-    </span>
-  );
-}
-
 /**
  * What the game gave the viewer, counted up on the results screen: coins, then
  * the XP bar filling from where they were to where they are, wrapping and
- * flashing the new level when it crosses one, then any card that went up a level.
+ * flashing the new level when it crosses one, then a button for the cards that went up a tier.
  */
-export function RewardsPanel({ rewards, delay }: { rewards: GameRewards; delay: number }) {
+export function RewardsPanel({ rewards, delay, onShowCards }: { rewards: GameRewards; delay: number; onShowCards: () => void }) {
   const t = useCountUp(COUNT_MS, delay * 1000);
   const { coins, xp, rating, cardLevelUps } = rewards;
   const swing = rating ? rating.after - rating.before : 0;
@@ -99,29 +88,19 @@ export function RewardsPanel({ rewards, delay }: { rewards: GameRewards; delay: 
         ) : null}
       </div>
       {cardLevelUps.length > 0 && t === 1 ? (
-        <>
-          <p className="result-row text-center text-sm font-bold text-gold-200">Cards levelled up</p>
-          <ul className="grid grid-cols-3 gap-x-3 gap-y-2">
-          {cardLevelUps.map((up, i) => {
-            const card = CARD_BY_ID.get(up.cardId);
-            return card ? (
-              <li key={up.cardId} className="result-row flex items-center gap-2" style={{ animationDelay: `${0.15 + i * 0.15}s` }}>
-                <span className="frame-gold aspect-card w-10 shrink-0 rounded-frame" style={FRAME_STYLE[up.to]}>
-                  <CardView card={card} className="size-full" />
-                </span>
-                <span className="flex min-w-0 flex-col font-bold">
-                  <span className="truncate text-xs">{card.name}</span>
-                  <span className="fs-2xs whitespace-nowrap">
-                    <TierName tier={up.from} />
-                    <span className="text-cosmos-300"> → </span>
-                    <TierName tier={up.to} />
-                  </span>
-                </span>
-              </li>
-            ) : null;
-          })}
-          </ul>
-        </>
+        <button
+          type="button"
+          onClick={onShowCards}
+          className="result-pop flex h-9 items-center justify-center gap-2 rounded-full bg-gold-400 text-sm font-black text-cosmos-950 hover:bg-gold-200"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <Layers className="size-4" />
+          View cards ranked up
+          <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-cosmos-950 px-1.5 text-xs text-gold-400 tabular-nums">
+            {cardLevelUps.length}
+          </span>
+          <ChevronRight className="size-4" />
+        </button>
       ) : null}
     </div>
   );
