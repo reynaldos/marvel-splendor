@@ -368,6 +368,58 @@ Every release has a number, `0.MINOR.PATCH`, and an entry in `data/updates.json`
 - Leave out what players can't see: admin pages, previews, tests, scripts and notes.
 - With each release, add the entry and set `version` in `package.json` to match.
 
+**Coins, XP, rank and card levels**
+
+Four related but independent progression systems. None share a formula with another — they're computed separately even though the same finished game feeds all of them. What each is for:
+
+| System | Measures | Shows as | Can go down? |
+|---|---|---|---|
+| Coins | Currency to spend | Balance, shop | No (spending aside) |
+| XP / account level | How much you've played | Player-card frame | No |
+| Rank | How good you are vs. people | Small badge | Yes |
+| Card level | Dedication to one card | Frame on that card | No |
+
+The player-card frame and card-level frames are deliberately the same idea applied twice: both read as "a collector's flex that only ever grows," so both use the same tier ladder and both are driven by a count that only goes up (games played; times recruited). Rank is the opposite kind of number — it moves both ways because it's measuring current skill, not accumulated effort — so it stays off the frame and lives as a separate badge instead. Keeping them visually and verbally distinct (different tier names, different UI treatment) is intentional: it's what stops "how much I've played" and "how good I am" from reading as the same stat.
+
+*Coins — building later, per the shop item below.* Awarded once per finished game (`FINISHED` only; `ABANDONED` pays nothing), to signed-in human participants only. Amount depends on the toughest opponent actually at the table — a bot-filled seat in an otherwise-solo private game still only pays the bot rate, so filling a "multiplayer" room with bots can't be used to farm the human rate:
+
+| Opponent tier | Win | Loss |
+|---|---|---|
+| ≥1 human opponent | 50 | 20 |
+| Bot — Hard | 30 | 12 |
+| Bot — Normal | 18 | 7 |
+| Bot — Easy | 10 | 4 |
+
+Guardrails: a game must reach at least 4 turns per player to pay out (blocks an instant-forfeit loop); coins earned from bot games are capped at 150/day (bots are free and instant to spin up, so uncapped bot income is a grinding exploit; human games are naturally rate-limited by needing another person and aren't capped). Needs a `CoinTransaction` ledger (`userId`, `delta`, `reason`, `gameId?`, `createdAt`) as the source of truth plus a cached balance for fast reads — the ledger is what makes a disputed balance debuggable once the shop can spend it down. Awarded in the same transaction as `recordGameStats` (`lib/record-stats.ts`), never on the client's say-so.
+
+*XP / account level — building later.* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
+
+| Level | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Score needed | 0 | 100 | 283 | 520 | 800 | 1118 | 1470 | 1852 | 2263 | 2700 |
+
+(Curve is `100×(level−1)^1.5`, continuing the same way past 10 — always climbing, never capped.) Level maps to the player-card frame tier, replacing the hardcoded `frame-gold` in `components/profile/ProfileScreen.tsx`:
+
+| Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|
+| Account level | 1 | 2–3 | 4–5 | 6–8 | 9–11 | 12–15 | 16–20 | 21+ |
+
+*Rank — building now, badge only; matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as a small badge (not a frame, per the table above), using its own tier names so it never reads as the same ladder as the collector frames:
+
+| Badge tier | Rookie | Contender | Veteran | Elite | Legend |
+|---|---|---|---|---|---|
+| Rating | <1000 | 1000–1199 | 1200–1399 | 1400–1599 | 1600+ |
+
+No season and no decay — rank only ever moves when a rated game finishes.
+
+*Card levels — building later, alongside coins/XP.* Uses `CollectedCard.times`, already tracked, no schema change. Same 8-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
+
+| Tier | Recruited | Bronze | Silver | Gold | Platinum | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|
+| Times recruited | 1 | 5 | 10 | 20 | 35 | 55 | 80 | 120 |
+
+Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
+
 **Still to do**
 
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
@@ -378,11 +430,13 @@ Every release has a number, `0.MINOR.PATCH`, and an entry in `data/updates.json`
 - **The squad in the Game Record.** Done: opening a game in the profile's Game Record shows the team the player recruited in it, under how the table finished, strongest first, in a row that drifts sideways for ever. It is an ordinary scrolling row that is moved along a little at a time, so it can be swiped either way as well; it waits while it is touched and for a moment after. Tapping a card shows it large (`components/profile/TeamMarquee.tsx`). The gallery above is the same teams on a page of their own.
 - **A collection.** A page of every card in the game: the ones the player has recruited at least once are shown, and the rest are empty spaces with dotted outlines and a question mark. Three ways to look at it: one big grid; by level; or by group. By level and by group are laid out like a chart, with the level or group named down the side and its cards, found and not yet found, in a row beside it. What each player has found is kept in its own table, `CollectedCard`, so it outlasts the games: a card counts when the player recruited it themselves in a game played to the end. Abandoned games don't count, nor does anything the stand-in bot recruited. The table is added by `prisma/sql/2026-09-29-collected-cards.sql` and filled from past games by `pnpm collection:backfill`; `lib/collection.ts` reads the cards from a game's moves. When a game is played to the end its cards are saved then and there (`lib/save-collection.ts`, called from the moves route); a game ended by a forfeit counts, as it is finished, not abandoned. The backfill sets each count afresh from the games, so it also puts right anything that failed to save. The page is `/profile/<username>/collection`, under the profile it belongs to, and shows that player's cards to anyone signed in. It is reached from the Collection button on any profile (`components/profile/CollectionScreen.tsx`). The cards are given the whole screen: the page has no logo or footer, the way back sits in the header, each row is filled from edge to edge, and the list runs off the bottom of the screen, fading only at the top. It has four views: one grid, by level, by group and by alliance (hero, villain or either side). The groups are the teams each card is marked with in `data/cards.json`, three at most: a team with three or more cards gets a row, and the rest go under Others. So marking new cards with a new team, such as X-Men, makes its row once it has three. A card in two teams is in both rows.
 - **Friends.** Add friends by username, see their profiles, and invite them to a game. An invite sends a notification; opening it asks whether to join that game's lobby. Needs new tables for friendships and invites, which is a schema change. Notifications inside the app can use the live connection already there; ones that reach a phone with the app closed need web push, which on an iPhone only works once the app is on the home screen. To decide: whether a friendship needs accepting, and whether profiles stay open to everyone or only to friends.
-- **A shop, paid for in coins.** Categories: backgrounds, card packs, Location tiles, and background music tracks. Depends on coins (below) and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Coins must be given and spent on the server only, never on the device's say-so. To decide: how coins are earned; whether card packs and Location tiles change how they look or add new ones to the game, since new ones change the rules and everyone at a table must play with the same set; and whether coins can ever be bought, which would make the game commercial and needs the rights to the characters.
-- **Levelling up cards.** A card in a player's collection gains levels the more times they recruit it. The count is kept already, as `times` on `CollectedCard`, so it needs no database change. To decide: how many recruits each level takes, what a level shows or gives, and whether it only changes how the card looks; anything that changes play would give long-time players an edge over new ones.
+- **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide. See "Coins, XP, rank and card levels" above for how coins are earned.
+- **Coins, XP and card levels.** Fully designed above; not started.
 - End-to-end tests.
 - Bot banter.
-- Level, coins and rank.
+- **Rank leaderboard.** A page ranking players by rank.
+- **Level-up UI.** No notification or animation yet for reaching a new account level, rank tier, or card level.
+- **Ranked matchmaking (Quick Play).** A public queue that pairs players by rank for a multiplayer game, instead of needing a room code. Depends on rank existing. To decide: how wide a rating gap to accept and whether it widens the longer someone waits, whether it's 2-player only or fills a 3–4 table, and how the queue itself is run (likely the same Pusher presence pattern as the lobby).
 
 **Corners**
 
@@ -441,7 +495,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins and rank. Planned, not started. None of these exist in the game yet; the results popup and the player card are where they would show.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). Rank (badge) is building now; coins, account level (the player-card frame) and card levels are designed but not started. None exist in the game yet; the results popup and the player card are where they'll show.
 
 What these need before they can be built:
 
