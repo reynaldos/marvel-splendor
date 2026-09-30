@@ -52,6 +52,7 @@ import { applyMove } from "@/lib/engine/apply";
 import { legalMoves } from "@/lib/engine/legal-moves";
 import { recruitCost } from "@/lib/engine/rules";
 import {
+  botDifficultyForSeat,
   MAX_RESERVED,
   STONES,
   TAGS_TO_CLAIM_AVENGERS,
@@ -112,7 +113,7 @@ const WEIGHTS: Record<Exclude<BotDifficulty, "hard">, Weights> = {
 const HOARD_THRESHOLD = 5;
 
 export function chooseBotMove(state: GameState, seat: number): Move {
-  const difficulty = state.settings.botDifficultyBySeat?.[seat] ?? state.settings.botDifficulty ?? "normal";
+  const difficulty = botDifficultyForSeat(state.settings, seat);
   if (difficulty === "hard") return planMove(state, seat);
   const weights = WEIGHTS[difficulty];
 

@@ -1,6 +1,6 @@
 {
   "name": "marvel-splendor",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
@@ -13,6 +13,8 @@
     "games:reset": "node scripts/clear-games.mjs --stats",
     "db:update": "prisma db push && prisma generate",
     "collection:backfill": "npx tsx scripts/backfill-collection.ts",
+    "rating:backfill": "npx tsx scripts/backfill-rating.ts",
+    "coins:backfill": "npx tsx scripts/backfill-coins.ts",
     "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {

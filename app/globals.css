@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" theme(static);
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -217,11 +217,95 @@ body {
 
 /* The box's gold frame. Fill it by setting --frame-fill to a color or gradient. */
 @utility frame-gold {
-  border: calc(var(--spacing) * 0.8) solid transparent;
+  border: var(--frame-width, calc(var(--spacing) * 0.8)) solid transparent;
   background:
     var(--frame-fill, linear-gradient(var(--color-cosmos-800), var(--color-cosmos-900))) padding-box,
-    linear-gradient(135deg, var(--color-gold-200), var(--color-gold-400) 30%, var(--color-gold-600) 60%, var(--color-gold-200)) border-box;
-  box-shadow: 0 calc(var(--spacing) * 1) calc(var(--spacing) * 3) rgb(0 0 0 / 0.5);
+    var(--frame-border, linear-gradient(135deg, var(--color-gold-200), var(--color-gold-400) 30%, var(--color-gold-600) 60%, var(--color-gold-200))) border-box;
+  box-shadow:
+    0 0 calc(var(--spacing) * 3) calc(var(--spacing) * 0.25) var(--frame-glow, transparent),
+    0 calc(var(--spacing) * 1) calc(var(--spacing) * 3) rgb(0 0 0 / 0.5);
+}
+
+/* A frame round a card as drawn on the board: the card's own corners, plus the border. */
+@utility rounded-frame {
+  border-radius: calc(var(--radius-md) + var(--spacing) * 0.8);
+}
+
+/* Over the face, past Recruited: a vignette in the tier's colour (`--frame-glow`) and still light (`--frame-sheen`). */
+@utility frame-face {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: var(--face-opacity, 1);
+    box-shadow: inset 0 0 calc(var(--spacing) * 4) calc(var(--spacing) * 0.25) var(--frame-glow, transparent);
+    background: var(--frame-sheen, none);
+  }
+}
+
+/* Sparkles that come and go, for the tiers without the holographic sheen. */
+@utility frame-twinkle {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--frame-spark);
+    animation: frame-twinkle 2.4s ease-in-out infinite alternate;
+  }
+}
+
+/* Light crossing a higher tier's border, as on a foil card. */
+@utility frame-shine {
+  background-size: auto, 250% 250%;
+  animation: frame-shine 6s ease-in-out infinite alternate;
+}
+
+/* The top tiers refract light across the face too, as on a holographic card: a sheen in the tier's
+   tint (`--frame-holo`) moving over fine prizm lines. */
+@utility frame-holo {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: var(--face-opacity, 1);
+    background:
+      var(--frame-holo),
+      repeating-linear-gradient(115deg, transparent 0 calc(var(--spacing) * 1.5), rgb(255 255 255 / 0.14) calc(var(--spacing) * 1.5) calc(var(--spacing) * 1.75));
+    background-size: 250% 250%, auto;
+    animation: frame-holo 6s ease-in-out infinite alternate;
+  }
+}
+
+/* The count on a card, cut as a gem in the frame's own colour. */
+@utility gem-badge {
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.35)), var(--frame-border, var(--color-gold-400));
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.8);
+}
+
+@keyframes frame-twinkle {
+  from { opacity: calc(0.2 * var(--face-opacity, 1)); }
+  to { opacity: var(--face-opacity, 1); }
+}
+@keyframes frame-shine {
+  from { background-position: 0 0, 0% 0%; }
+  to { background-position: 0 0, 100% 100%; }
+}
+@keyframes frame-holo {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
 }
 
 /* Gold lettering, as on the box's title. */
@@ -531,7 +615,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .drift,
-  .glow-gold {
+  .glow-gold,
+  .frame-shine,
+  .frame-twinkle::after,
+  .frame-holo::after {
     animation: none;
   }
 }

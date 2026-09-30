@@ -69,6 +69,10 @@ export const DEFAULT_SETTINGS: GameSettings = {
   targetPoints: 16,
 };
 
+export function botDifficultyForSeat(settings: GameSettings, seat: number): BotDifficulty {
+  return settings.botDifficultyBySeat?.[seat] ?? settings.botDifficulty ?? "normal";
+}
+
 export interface ReservedCard {
   cardId: string;
   /** true when blind-reserved from the top of a deck — hidden from opponents. */

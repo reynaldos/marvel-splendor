@@ -217,7 +217,8 @@ app/
   join/[code]/page.tsx           # join flow (auth or guest name)
   lobby/[gameId]/page.tsx        # pre-game lobby
   profile/[username]/page.tsx    # public profile + stats
-  settings/page.tsx              # own profile edit, avatar upload
+  leaderboard/page.tsx           # players ranked by rating
+  settings/page.tsx              # own profile edit, avatar upload, level-frame switches
   api/
     auth/[auth0]/route.ts        # Auth0 handlers
     games/route.ts               # POST create
@@ -290,7 +291,7 @@ So nobody has to guess what another player did, the board shows it.
 - **Where it lives.** `lib/board-events.ts` works out what a move brought about by comparing the board before and after. `components/game/Announcement.tsx` draws it, and `playSteps` in `GameBoardClient.tsx` plays it. The outline is the `trace` style in `globals.css`.
 - **Looking closer.** Tapping the win tile, a Location, the Avengers tile, a player's reserved cards or team, or a card's View glides it from its place on the board to the middle of the screen, and tapping it away fades it (`ZoomedView` in `components/game/Zoomable.tsx`). It shares its glide with the announcements (`components/game/glide.ts`).
 - **To look at them without playing**, open `/preview/board`. Adding `?show=TimeStone&at=300` to the address plays one and stops it that many milliseconds in.
-- **The preview pages** are the board (`/preview/board`), its loading screen (`/preview/loading`) and the end of a game (`/preview/game-over`). Each has a bar along the bottom (`app/preview/PreviewBar.tsx`): back to the main menu, the three pages to move between, and a `?` that lists everything a page takes in its address, each value a link that goes there. The board takes `?players=2`, `3` or `4` for how many are at the table, three when left out. A button on its bar shows the number and goes round them: 2, 3, 4, and back to 2. The list in the help is checked against what the pages take, so neither drifts from the other.
+- **The preview pages** are the board (`/preview/board`), its loading screen (`/preview/loading`), the end of a game (`/preview/game-over`) and the tiers (`/preview/tiers`: every frame tier with what earns it, the rank badge and the leaderboard rows). Each has a bar along the bottom (`app/preview/PreviewBar.tsx`): back to the main menu, the four pages to move between, and a `?` that lists everything a page takes in its address, each value a link that goes there. The board takes `?players=2`, `3` or `4` for how many are at the table, three when left out. A button on its bar shows the number and goes round them: 2, 3, 4, and back to 2. The list in the help is checked against what the pages take, so neither drifts from the other.
 - **The glide is taken back when it is set up twice.** In development every effect is run twice; the second start used to measure the tile mid-flight and leave it standing in the middle of the screen.
 - **Turn clocks.** A turn's clock starts once the animations before it are over, as it already did for a bot's thinking time. The player who moved skips the outline of their own pick, so their device is a second and a half ahead of the others'. That is inside the three seconds a device waits before timing another player out.
 - **Less motion.** For anyone who has asked their device for less motion, the outline and announcements appear without moving.
@@ -332,7 +333,7 @@ Players in a private game can send an emoji or a short message to the table. It 
 
 Every menu screen is laid out the same way, so they keep the same margins and the same top bar.
 
-- **The top bar** (`components/TopBar.tsx`) shows the player's profile button, their wins, the game's name in the middle, and a menu button on the right. The menu opens a popup with Profile settings and Log out, and Admin for an admin. It is on the home screen, the profile, Profile settings, VS Computer, Private Game and the lobby. It is not on the board, the collection, the admin pages or the previews, and a visitor who isn't signed in doesn't see it.
+- **The top bar** (`components/TopBar.tsx`) shows the player's profile button (their picture with a gem of their level's tier on its corner, their name, rating, level and progress to the next level), their wins, their coins, the game's name in the middle, and a menu button on the right. The menu opens a popup with Profile settings and Log out, and Admin for an admin. It is on the home screen, the profile, Profile settings, VS Computer, Private Game and the lobby. It is not on the board, the collection, the admin pages or the previews, and a visitor who isn't signed in doesn't see it.
 - **A page adds it** by putting `<TopBar />` beside its screen. It fetches the player itself.
 - **`StageRows`** leaves room for the bar and sets the margins: 4 steps at the sides and 3 at the bottom. The last thing in it is the footer; everything before it is the content, which sits in the middle of the room between the bar and the footer, with as much space over it as under. Screens have no header or title of their own.
 - **The sizes** come from a canvas 100 steps tall and 200 wide that scales to the screen. The bar takes 17 of the 100, a footer about 13, leaving about 64 for a screen's content.
@@ -368,8 +369,57 @@ Every release has a number, `0.MINOR.PATCH`, and an entry in `data/updates.json`
 - Leave out what players can't see: admin pages, previews, tests, scripts and notes.
 - With each release, add the entry and set `version` in `package.json` to match.
 
+**Coins, XP, rank and card levels**
+
+Four related but independent progression systems. None share a formula with another — they're computed separately even though the same finished game feeds all of them. What each is for:
+
+| System | Measures | Shows as | Can go down? |
+|---|---|---|---|
+| Coins | Currency to spend | Balance in the top bar, shop | No (spending aside) |
+| XP / account level | How much you've played | Player-card frame, frame on the picture, level badge | No |
+| Rank | How good you are vs. people | Number badge, leaderboard | Yes |
+| Card level | Dedication to one card | Frame on that card | No |
+
+The player-card frame and card-level frames are deliberately the same idea applied twice: both read as "a collector's flex that only ever grows," so both use the same tier ladder and both are driven by a count that only goes up (games played; times recruited). Rank is the opposite kind of number — it moves both ways because it's measuring current skill, not accumulated effort — so it stays off the frame and lives as a separate badge instead. Keeping them visually distinct (rank is a bare number, never a tier) is intentional: it's what stops "how much I've played" and "how good I am" from reading as the same stat.
+
+*Coins — done: ledger, cached balance and payout built (`lib/coins.ts`, `lib/record-coins.ts`), balance shown in the top bar beside games won; the shop itself is a later roadmap item (below).* Awarded once per finished game (`FINISHED` only; `ABANDONED` pays nothing), to signed-in human participants only. Amount depends on the toughest opponent actually at the table — a bot-filled seat in an otherwise-solo private game still only pays the bot rate, so filling a "multiplayer" room with bots can't be used to farm the human rate:
+
+| Opponent tier | Win | Loss |
+|---|---|---|
+| ≥1 human opponent | 50 | 20 |
+| Bot — Hard | 30 | 12 |
+| Bot — Normal | 18 | 7 |
+| Bot — Easy | 10 | 4 |
+
+Guardrails: a game must reach at least 4 turns per player to pay out (blocks an instant-forfeit loop); coins earned from bot games are capped at 150/day (bots are free and instant to spin up, so uncapped bot income is a grinding exploit; human games are naturally rate-limited by needing another person and aren't capped). The `CoinTransaction` ledger (`userId`, `delta`, `reason`, `gameId?`, `createdAt`) is the source of truth, with `UserCoins.balance` cached for fast reads — the ledger is what makes a disputed balance debuggable once the shop can spend it down. Awarded server-side from the moves route once a game finishes, in its own transaction alongside (not nested in) `recordGameStats`'s — never on the client's say-so. Past games are paid out from scratch by `pnpm coins:backfill`: everyone starts at zero and each finished game pays in the order it ended, the daily cap applied per day as it was then; the ledger's game awards are replaced, anything else in it is kept.
+
+*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`). The profile shows the level and XP in a badge, and the same frame is drawn round the player's picture wherever it appears with their stats to hand (profile, top bar, leaderboard), with the light over it that a card of that tier gets. Both frames are the player's choice: two switches in profile settings (`User.xpAvatarStyle`, `User.xpCardStyle`, off by default; `prisma/sql/2026-09-30-xp-styles.sql`).* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
+
+| Level | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Score needed | 0 | 100 | 283 | 520 | 800 | 1118 | 1470 | 1852 | 2263 | 2700 |
+
+(Curve is `100×(level−1)^1.5`, continuing the same way past 10 — always climbing, never capped.) Level maps to the player-card frame tier, replacing the hardcoded `frame-gold` in `components/profile/ProfileScreen.tsx`:
+
+| Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Account level | 1 | 2–3 | 4–5 | 6–7 | 8–9 | 10–12 | 13–15 | 16–19 | 20–24 | 25+ |
+
+*Rank — done: badge and rating built (`lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`), and the leaderboard (`/leaderboard`, from the top-bar menu: the top 100 by rating, equal ratings sharing a place); matchmaking is a later roadmap item (below).* An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as the number itself in a small badge (not a frame, per the table above) — no tier names, so it never reads as the same ladder as the collector frames. It's what the leaderboard orders by and what matchmaking will pair on.
+
+No season and no decay — rank only ever moves when a rated game finishes. Past games are rated from scratch by `pnpm rating:backfill`: every player starts at the default, and each finished multiplayer game is rated in the order it ended, so later games use the ratings earlier ones produced.
+
+*Card levels — done: frame built (`lib/card-level.ts`), shown on each recruited card in the collection (`components/profile/CollectionScreen.tsx`). Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band), from Silver sparkles that come and go, from Platinum the gem tiers get angled facets of light and light moving along the border, and from Diamond a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).* Uses `CollectedCard.times`, already tracked, no schema change. Same 10-tier ladder as the account-level frame above, keyed off recruit count instead of account score:
+
+| Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Times recruited | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
+
+Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
+
 **Still to do**
 
+- **Tier frames in a shader.** The frames are CSS for now: gradients, a sheen, sparkles, facets. A WebGL pass (three.js, or a fragment shader) could do real refraction and foil that turns with the phone or follows a finger.
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
 - **Sound effects and background music.** None yet. Sounds for taking tokens, recruiting, reserving, your turn, the timer running low, and winning or losing; music on the menus and the board. Needs a mute control that is remembered, and sound files the project has the right to use. Phones only play sound after the player's first tap.
 - **Team against team at the end of a game.** A comparison of the teams each player recruited: heroes against villains, points, bonuses by stone, Avengers badges, and the strongest card on each side. It can be worked out from the saved game, as the stats are.
@@ -378,11 +428,11 @@ Every release has a number, `0.MINOR.PATCH`, and an entry in `data/updates.json`
 - **The squad in the Game Record.** Done: opening a game in the profile's Game Record shows the team the player recruited in it, under how the table finished, strongest first, in a row that drifts sideways for ever. It is an ordinary scrolling row that is moved along a little at a time, so it can be swiped either way as well; it waits while it is touched and for a moment after. Tapping a card shows it large (`components/profile/TeamMarquee.tsx`). The gallery above is the same teams on a page of their own.
 - **A collection.** A page of every card in the game: the ones the player has recruited at least once are shown, and the rest are empty spaces with dotted outlines and a question mark. Three ways to look at it: one big grid; by level; or by group. By level and by group are laid out like a chart, with the level or group named down the side and its cards, found and not yet found, in a row beside it. What each player has found is kept in its own table, `CollectedCard`, so it outlasts the games: a card counts when the player recruited it themselves in a game played to the end. Abandoned games don't count, nor does anything the stand-in bot recruited. The table is added by `prisma/sql/2026-09-29-collected-cards.sql` and filled from past games by `pnpm collection:backfill`; `lib/collection.ts` reads the cards from a game's moves. When a game is played to the end its cards are saved then and there (`lib/save-collection.ts`, called from the moves route); a game ended by a forfeit counts, as it is finished, not abandoned. The backfill sets each count afresh from the games, so it also puts right anything that failed to save. The page is `/profile/<username>/collection`, under the profile it belongs to, and shows that player's cards to anyone signed in. It is reached from the Collection button on any profile (`components/profile/CollectionScreen.tsx`). The cards are given the whole screen: the page has no logo or footer, the way back sits in the header, each row is filled from edge to edge, and the list runs off the bottom of the screen, fading only at the top. It has four views: one grid, by level, by group and by alliance (hero, villain or either side). The groups are the teams each card is marked with in `data/cards.json`, three at most: a team with three or more cards gets a row, and the rest go under Others. So marking new cards with a new team, such as X-Men, makes its row once it has three. A card in two teams is in both rows.
 - **Friends.** Add friends by username, see their profiles, and invite them to a game. An invite sends a notification; opening it asks whether to join that game's lobby. Needs new tables for friendships and invites, which is a schema change. Notifications inside the app can use the live connection already there; ones that reach a phone with the app closed need web push, which on an iPhone only works once the app is on the home screen. To decide: whether a friendship needs accepting, and whether profiles stay open to everyone or only to friends.
-- **A shop, paid for in coins.** Categories: backgrounds, card packs, Location tiles, and background music tracks. Depends on coins (below) and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Coins must be given and spent on the server only, never on the device's say-so. To decide: how coins are earned; whether card packs and Location tiles change how they look or add new ones to the game, since new ones change the rules and everyone at a table must play with the same set; and whether coins can ever be bought, which would make the game commercial and needs the rights to the characters.
-- **Levelling up cards.** A card in a player's collection gains levels the more times they recruit it. The count is kept already, as `times` on `CollectedCard`, so it needs no database change. To decide: how many recruits each level takes, what a level shows or gives, and whether it only changes how the card looks; anything that changes play would give long-time players an edge over new ones.
+- **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins (done, above) and, for the music, on sound (above). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide.
 - End-to-end tests.
 - Bot banter.
-- Level, coins and rank.
+- **Level-up UI.** No notification or animation yet for reaching a new account level, rank tier, or card level.
+- **Ranked matchmaking (Quick Play).** A public queue that pairs players by rank for a multiplayer game, instead of needing a room code. Depends on rank existing. To decide: how wide a rating gap to accept and whether it widens the longer someone waits, whether it's 2-player only or fills a 3–4 table, and how the queue itself is run (likely the same Pusher presence pattern as the lobby).
 
 **Corners**
 
@@ -441,7 +491,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins and rank. Planned, not started. None of these exist in the game yet; the results popup and the player card are where they would show.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). All four are done: rank (badge), account level (the player-card frame), card levels (the frame on each recruited card in the Collection) and coins (a balance in the top bar). The shop that spends coins is still to come.
 
 What these need before they can be built:
 

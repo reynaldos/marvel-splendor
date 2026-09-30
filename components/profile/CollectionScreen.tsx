@@ -7,12 +7,14 @@ import { BackLink } from "@/components/BackLink";
 import { CardView } from "@/components/game/Card";
 import { ZoomedView } from "@/components/game/Zoomable";
 import { Stage } from "@/components/Stage";
+import { cardFrameTier } from "@/lib/card-level";
 import { COLLECTION_VIEWS, collectionRows, type CollectionView } from "@/lib/collection-views";
 import { ALL_CARDS } from "@/lib/engine/data";
 import type { Card } from "@/lib/engine/types";
+import { FRAME_EFFECT, FRAME_STYLE } from "@/lib/frame-tier";
 
 const VIEW_NAMES: Record<CollectionView, string> = { grid: "Grid", level: "Level", group: "Group", alliance: "Alliance" };
-const SLOT = "relative aspect-card w-full rounded-md";
+const SLOT = "relative aspect-card w-full rounded-frame";
 // As many cards across as fit, each stretched a little so the row is filled from edge to edge.
 const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing)*14),1fr))] gap-2";
 
@@ -81,10 +83,11 @@ export function CollectionScreen({ found, backTo }: CollectionScreenProps) {
                         type="button"
                         aria-label={`${card.name}, recruited ${found[card.id]} times. Show it large`}
                         onClick={(e) => setViewing({ card, from: e.currentTarget.getBoundingClientRect() })}
-                        className={cn(SLOT, "block")}
+                        className={cn(SLOT, "frame-gold block", FRAME_EFFECT[cardFrameTier(found[card.id])])}
+                        style={FRAME_STYLE[cardFrameTier(found[card.id])]}
                       >
-                        <CardView card={card} className="w-full" />
-                        <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-400 px-1 fs-2xs font-black text-cosmos-950 tabular-nums">
+                        <CardView card={card} className="size-full" />
+                        <span className="gem-badge absolute -top-1.5 -right-1.5 z-10 flex h-6 min-w-6 items-center justify-center px-1 fs-2xs font-black text-white tabular-nums">
                           ×{found[card.id]}
                         </span>
                       </button>
