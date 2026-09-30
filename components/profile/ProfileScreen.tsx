@@ -1,8 +1,9 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
-import { CoinBalance } from "@/components/profile/CoinBalance";
+import { LevelBadge } from "@/components/profile/LevelBadge";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { RankBadge } from "@/components/profile/RankBadge";
 import { StatsTabs } from "@/components/profile/StatsTabs";
@@ -13,15 +14,21 @@ import type { GameRecord } from "@/lib/game-record";
 import type { UserStatsSnapshot } from "@/lib/record-stats";
 import { accountFrameTier, accountLevel, accountScore } from "@/lib/xp";
 
+/** The card with the level frame turned off: the same blue border as the stats panel beside it. */
+const PLAIN_FRAME = {
+  "--frame-width": "3px",
+  "--frame-border": "linear-gradient(var(--color-cosmos-500), var(--color-cosmos-500))",
+} as CSSProperties;
+
 interface ProfileScreenProps {
   username: string;
   name: string | null;
   avatarUrl: string | null;
-  /** Already worded, such as "March 2026". */
-  joined: string;
   /** Null before a player's first rated game. */
   rating: number | null;
-  coins: number;
+  /** Their own choice: the level frame on their picture, and on this card. */
+  xpAvatarStyle: boolean;
+  xpCardStyle: boolean;
   stats: UserStatsSnapshot;
   career: CareerStats;
   records: CareerStats;
@@ -30,16 +37,30 @@ interface ProfileScreenProps {
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
-export function ProfileScreen({ username, name, avatarUrl, joined, rating, coins, stats, career, records, games, isOwn }: ProfileScreenProps) {
-  const level = accountLevel(accountScore(stats));
+export function ProfileScreen({
+  username,
+  name,
+  avatarUrl,
+  rating,
+  xpAvatarStyle,
+  xpCardStyle,
+  stats,
+  career,
+  records,
+  games,
+  isOwn,
+}: ProfileScreenProps) {
+  const score = accountScore(stats);
+  const level = accountLevel(score);
+  const tier = accountFrameTier(level);
 
   return (
     <Stage>
       <StageRows>
         <div className="flex items-end gap-6">
           <div
-            className="frame-gold relative flex h-58 w-48 shrink-0 flex-col items-center justify-center gap-1 rounded-3xl px-3 text-center"
-            style={FRAME_STYLE[accountFrameTier(level)]}
+            className="frame-gold relative flex h-62 w-52 shrink-0 flex-col items-center justify-center gap-0 rounded-3xl px-3 text-center pt-3"
+            style={xpCardStyle ? FRAME_STYLE[tier] : PLAIN_FRAME}
             title={`Level ${level}`}
           >
             {isOwn ? (
@@ -51,13 +72,17 @@ export function ProfileScreen({ username, name, avatarUrl, joined, rating, coins
                 <Pencil className="size-5" />
               </Link>
             ) : null}
-            <PlayerAvatar src={avatarUrl} name={username} className="mb-1 size-28 text-4xl" />
+            <PlayerAvatar
+              src={avatarUrl}
+              name={username}
+              tier={xpAvatarStyle ? tier : undefined}
+              className="size-24 text-4xl"
+            />
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
-            <p className="text-xs font-bold text-cosmos-300">Joined {joined}</p>
-            <div className="mt-1 flex flex-wrap items-center justify-center gap-1.5">
+            <div className="mt-auto mb-3 flex flex-wrap items-center justify-center gap-1.5">
               <RankBadge rating={rating} />
-              <CoinBalance balance={coins} />
+              <LevelBadge level={level} score={score} />
             </div>
           </div>
           <StatsTabs stats={stats} career={career} records={records} games={games} />

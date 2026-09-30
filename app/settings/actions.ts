@@ -39,6 +39,9 @@ export interface ProfileChanges {
   name: string;
   /** A picture chosen from the library, or null to leave the picture as it is. */
   avatarId: string | null;
+  /** The level frame on their picture, and on the card that carries their name. */
+  xpAvatarStyle: boolean;
+  xpCardStyle: boolean;
 }
 
 export async function saveProfileAction(changes: ProfileChanges): Promise<SaveState> {
@@ -53,7 +56,13 @@ export async function saveProfileAction(changes: ProfileChanges): Promise<SaveSt
   try {
     await prisma.user.update({
       where: { id: user.id },
-      data: { username: checked.username, name: named.name, avatarKey },
+      data: {
+        username: checked.username,
+        name: named.name,
+        avatarKey,
+        xpAvatarStyle: changes.xpAvatarStyle === true,
+        xpCardStyle: changes.xpCardStyle === true,
+      },
     });
   } catch (error) {
     // Someone can take the name between the check and the save; the database has the last word.

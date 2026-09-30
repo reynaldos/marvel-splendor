@@ -33,6 +33,9 @@ model User {
   email            String?
   // An uploaded picture's storage key, or "library/<id>" for one from the library.
   avatarKey        String?
+  // Whether the account-level frame is drawn on their picture, and on the card that carries their name.
+  xpAvatarStyle    Boolean           @default(false)
+  xpCardStyle      Boolean           @default(false)
   createdAt        DateTime          @default(now())
   players          GamePlayer[]
   stats            UserStats?

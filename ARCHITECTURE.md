@@ -218,7 +218,7 @@ app/
   lobby/[gameId]/page.tsx        # pre-game lobby
   profile/[username]/page.tsx    # public profile + stats
   leaderboard/page.tsx           # players ranked by rating
-  settings/page.tsx              # own profile edit, avatar upload
+  settings/page.tsx              # own profile edit, avatar upload, level-frame switches
   api/
     auth/[auth0]/route.ts        # Auth0 handlers
     games/route.ts               # POST create
@@ -333,7 +333,7 @@ Players in a private game can send an emoji or a short message to the table. It 
 
 Every menu screen is laid out the same way, so they keep the same margins and the same top bar.
 
-- **The top bar** (`components/TopBar.tsx`) shows the player's profile button, their wins, the game's name in the middle, and a menu button on the right. The menu opens a popup with Profile settings and Log out, and Admin for an admin. It is on the home screen, the profile, Profile settings, VS Computer, Private Game and the lobby. It is not on the board, the collection, the admin pages or the previews, and a visitor who isn't signed in doesn't see it.
+- **The top bar** (`components/TopBar.tsx`) shows the player's profile button (their picture with a gem of their level's tier on its corner, their name, rating, level and progress to the next level), their wins, their coins, the game's name in the middle, and a menu button on the right. The menu opens a popup with Profile settings and Log out, and Admin for an admin. It is on the home screen, the profile, Profile settings, VS Computer, Private Game and the lobby. It is not on the board, the collection, the admin pages or the previews, and a visitor who isn't signed in doesn't see it.
 - **A page adds it** by putting `<TopBar />` beside its screen. It fetches the player itself.
 - **`StageRows`** leaves room for the bar and sets the margins: 4 steps at the sides and 3 at the bottom. The last thing in it is the footer; everything before it is the content, which sits in the middle of the room between the bar and the footer, with as much space over it as under. Screens have no header or title of their own.
 - **The sizes** come from a canvas 100 steps tall and 200 wide that scales to the screen. The bar takes 17 of the 100, a footer about 13, leaving about 64 for a screen's content.
@@ -375,14 +375,14 @@ Four related but independent progression systems. None share a formula with anot
 
 | System | Measures | Shows as | Can go down? |
 |---|---|---|---|
-| Coins | Currency to spend | Balance, shop | No (spending aside) |
-| XP / account level | How much you've played | Player-card frame | No |
+| Coins | Currency to spend | Balance in the top bar, shop | No (spending aside) |
+| XP / account level | How much you've played | Player-card frame, frame on the picture, level badge | No |
 | Rank | How good you are vs. people | Number badge, leaderboard | Yes |
 | Card level | Dedication to one card | Frame on that card | No |
 
 The player-card frame and card-level frames are deliberately the same idea applied twice: both read as "a collector's flex that only ever grows," so both use the same tier ladder and both are driven by a count that only goes up (games played; times recruited). Rank is the opposite kind of number — it moves both ways because it's measuring current skill, not accumulated effort — so it stays off the frame and lives as a separate badge instead. Keeping them visually distinct (rank is a bare number, never a tier) is intentional: it's what stops "how much I've played" and "how good I am" from reading as the same stat.
 
-*Coins — done: ledger, cached balance and payout built (`lib/coins.ts`, `lib/record-coins.ts`), balance shown on the player card; the shop itself is a later roadmap item (below).* Awarded once per finished game (`FINISHED` only; `ABANDONED` pays nothing), to signed-in human participants only. Amount depends on the toughest opponent actually at the table — a bot-filled seat in an otherwise-solo private game still only pays the bot rate, so filling a "multiplayer" room with bots can't be used to farm the human rate:
+*Coins — done: ledger, cached balance and payout built (`lib/coins.ts`, `lib/record-coins.ts`), balance shown in the top bar beside games won; the shop itself is a later roadmap item (below).* Awarded once per finished game (`FINISHED` only; `ABANDONED` pays nothing), to signed-in human participants only. Amount depends on the toughest opponent actually at the table — a bot-filled seat in an otherwise-solo private game still only pays the bot rate, so filling a "multiplayer" room with bots can't be used to farm the human rate:
 
 | Opponent tier | Win | Loss |
 |---|---|---|
@@ -393,7 +393,7 @@ The player-card frame and card-level frames are deliberately the same idea appli
 
 Guardrails: a game must reach at least 4 turns per player to pay out (blocks an instant-forfeit loop); coins earned from bot games are capped at 150/day (bots are free and instant to spin up, so uncapped bot income is a grinding exploit; human games are naturally rate-limited by needing another person and aren't capped). The `CoinTransaction` ledger (`userId`, `delta`, `reason`, `gameId?`, `createdAt`) is the source of truth, with `UserCoins.balance` cached for fast reads — the ledger is what makes a disputed balance debuggable once the shop can spend it down. Awarded server-side from the moves route once a game finishes, in its own transaction alongside (not nested in) `recordGameStats`'s — never on the client's say-so. Past games are paid out from scratch by `pnpm coins:backfill`: everyone starts at zero and each finished game pays in the order it ended, the daily cap applied per day as it was then; the ledger's game awards are replaced, anything else in it is kept.
 
-*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`).* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
+*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`). The profile shows the level and XP in a badge, and the same frame is drawn round the player's picture wherever it appears with their stats to hand (profile, top bar, leaderboard), with the light over it that a card of that tier gets. Both frames are the player's choice: two switches in profile settings (`User.xpAvatarStyle`, `User.xpCardStyle`, off by default; `prisma/sql/2026-09-30-xp-styles.sql`).* Derived from `UserStats`, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5`. Level is whichever threshold the score has passed:
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -491,7 +491,7 @@ Profile:
 - Edit name. Done. A name is optional, up to 40 characters; the profile shows it with the username beneath.
 - Profile and Settings pages in the box-art theme. Done. The profile is a gold-framed player card beside the stats, which are split over three tabs: Statistics, Records, and Heroes & Villains.
 - Game Record. Done: a fourth tab lists the player's finished games, latest first, with their place, the number of players, rounds, final score and cards by level. Tapping a game shows how the whole table finished, under Victory or Defeat. It is read from the saved games (`lib/game-record.ts`), so clearing games clears it.
-- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). All four are done: rank (badge), account level (the player-card frame), card levels (the frame on each recruited card in the Collection) and coins (a balance badge on the player card). The shop that spends coins is still to come.
+- Level, coins, rank and card levels. Fully designed in "Coins, XP, rank and card levels" (above). All four are done: rank (badge), account level (the player-card frame), card levels (the frame on each recruited card in the Collection) and coins (a balance in the top bar). The shop that spends coins is still to come.
 
 What these need before they can be built:
 

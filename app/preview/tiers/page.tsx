@@ -19,7 +19,15 @@ const HEADING = "font-display text-xs font-black tracking-widest text-gold-400 u
 const NOTE = "fs-2xs font-bold text-cosmos-300 tabular-nums";
 const THANOS = ALL_CARDS.find((c) => c.name === "Thanos")!;
 const LEADERBOARD = [
-  { place: 1, username: "rival", name: "A Rival", avatarUrl: null, rating: 1240, gamesRated: 18 },
+  {
+    place: 1,
+    username: "rival",
+    name: "A Rival",
+    avatarUrl: null,
+    avatarTier: "Gold" as const,
+    rating: 1240,
+    gamesRated: 18,
+  },
   { place: 2, username: "you", name: "You", avatarUrl: null, rating: 1180, gamesRated: 9 },
 ];
 
@@ -38,7 +46,7 @@ export default function TiersPreviewPage() {
                 style={FRAME_STYLE[tier]}
               >
                 <div className="frame-gold flex h-20 w-16 flex-col items-center justify-center gap-0.5 rounded-2xl px-1">
-                  <PlayerAvatar src={null} name="Tier Preview" className="size-8 text-xs" />
+                  <PlayerAvatar src={null} name="Tier Preview" tier={tier} className="size-8 text-xs" />
                   <span className="w-full truncate fs-2xs font-black text-gold-400">Player</span>
                   <span className="fs-3xs font-bold text-cosmos-300">Level {ACCOUNT_FRAME_TIER_MIN_LEVEL[i]}</span>
                 </div>

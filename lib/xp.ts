@@ -22,3 +22,16 @@ export const ACCOUNT_FRAME_TIER_MIN_LEVEL = [1, 2, 4, 6, 8, 10, 13, 16, 20, 25];
 export function accountFrameTier(level: number): FrameTier {
   return frameTierFor(level, ACCOUNT_FRAME_TIER_MIN_LEVEL);
 }
+
+/** Where a player stands: their level, and how far through it they are, in XP. */
+export function accountProgress(stats: UserStatsSnapshot): { level: number; into: number; span: number } {
+  const score = accountScore(stats);
+  const level = accountLevel(score);
+  const from = scoreForLevel(level);
+  return { level, into: score - from, span: scoreForLevel(level + 1) - from };
+}
+
+/** The frame tier a player's stats earn them. */
+export function accountTierFor(stats: UserStatsSnapshot): FrameTier {
+  return accountFrameTier(accountProgress(stats).level);
+}

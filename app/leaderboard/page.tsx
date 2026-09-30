@@ -4,7 +4,9 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { publicAvatarUrl } from "@/lib/r2";
 import { placeByRating } from "@/lib/rating";
+import { defaultUserStatsSnapshot } from "@/lib/record-stats";
 import { pageMetadata } from "@/lib/site";
+import { accountTierFor } from "@/lib/xp";
 
 export const metadata = pageMetadata("Leaderboard", "The top-ranked Marvel Splendor players.");
 
@@ -15,7 +17,11 @@ export default async function LeaderboardPage() {
       orderBy: [{ rating: "desc" }, { gamesRated: "desc" }, { updatedAt: "asc" }],
       // ponytail: top 100 only, no paging. Add a "find me" row once the list outgrows it.
       take: 100,
-      include: { user: { select: { username: true, name: true, avatarKey: true, auth0Sub: true } } },
+      include: {
+        user: {
+          select: { username: true, name: true, avatarKey: true, auth0Sub: true, xpAvatarStyle: true, stats: true },
+        },
+      },
     }),
   ]);
 
@@ -24,6 +30,7 @@ export default async function LeaderboardPage() {
       username: user.username,
       name: user.name,
       avatarUrl: publicAvatarUrl(user.avatarKey),
+      avatarTier: user.xpAvatarStyle ? accountTierFor(user.stats ?? defaultUserStatsSnapshot) : undefined,
       rating,
       gamesRated,
     })),

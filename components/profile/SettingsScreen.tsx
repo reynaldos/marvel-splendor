@@ -9,37 +9,94 @@ import { AssetImage } from "@/components/game/assets";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { AVATAR_LIBRARY } from "@/lib/avatars";
+import type { FrameTier } from "@/lib/frame-tier";
 import { checkUsername, NAME_MAX, USERNAME_MAX } from "@/lib/username";
 import type { ProfileChanges, SaveState } from "@/app/settings/actions";
 
 const HEADING = "font-display text-base font-bold tracking-wide text-gold-400 uppercase";
 const PILL_BUTTON =
   "h-11 rounded-full px-6 text-base font-black uppercase disabled:bg-cosmos-700 disabled:text-cosmos-300";
+const GOLD_BUTTON = cn(PILL_BUTTON, "bg-gold-400 text-cosmos-950 hover:bg-gold-200");
+const BLUE_BUTTON = cn(PILL_BUTTON, "bg-cosmos-500 hover:bg-cosmos-300 hover:text-cosmos-950");
+const BIG_BUTTON =
+  "h-11 w-60 rounded-full bg-gold-400 indent-[0.025em] font-display text-base font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200 disabled:bg-cosmos-700 disabled:text-cosmos-300";
 const FIELD =
-  "h-11 rounded-full bg-cosmos-950 px-5 text-lg font-bold ring-2 ring-cosmos-500 outline-none ring-inset placeholder:text-cosmos-500 focus:ring-gold-400";
+  "h-11 w-full rounded-full bg-cosmos-950 px-5 text-lg font-bold ring-2 ring-cosmos-500 outline-none ring-inset placeholder:text-cosmos-500 focus:ring-gold-400";
 /** How long typing must pause before the username is looked up. */
 const CHECK_DELAY_MS = 400;
 
 /** A picture picked but not saved yet: one from the library, or a file to upload. */
 type Picked = { src: string; id: string } | { src: string; file: File };
 
+/** An on/off switch drawn in the theme's colours. */
+function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: boolean) => void; label: string }) {
+  return (
+    <label className="flex h-11 items-center justify-between gap-3 rounded-full bg-cosmos-950 pr-2 pl-5 text-base font-bold ring-2 ring-cosmos-500 ring-inset">
+      {label}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        onClick={() => onChange(!on)}
+        className={cn(
+          "relative h-7 w-12 shrink-0 rounded-full transition-colors",
+          on ? "bg-gold-400" : "bg-cosmos-700",
+        )}
+      >
+        <span
+          className={cn(
+            "absolute top-1 left-1 size-5 rounded-full transition-transform",
+            on ? "translate-x-5 bg-cosmos-950" : "bg-cosmos-300",
+          )}
+        />
+      </button>
+    </label>
+  );
+}
+
 interface SettingsScreenProps {
   username: string;
   name: string | null;
   avatarUrl: string | null;
+  /** The frame their level has earned, shown on the picture while the switch is on. */
+  avatarTier: FrameTier;
+  xpAvatarStyle: boolean;
+  xpCardStyle: boolean;
   onCheckUsername: (typed: string) => Promise<SaveState>;
   onSave: (changes: ProfileChanges) => Promise<SaveState>;
 }
 
-/** Where a player changes their picture, name and username. Nothing is kept until Save. */
-export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUsername, onSave }: SettingsScreenProps) {
+/**
+ * Where a player changes their picture, name, username and level frames. Nothing is kept until
+ * Save. The picture is changed on its own view, reached from Edit, which comes back here.
+ */
+export function SettingsScreen({
+  username,
+  name: savedName,
+  avatarUrl,
+  avatarTier,
+  xpAvatarStyle,
+  xpCardStyle,
+  onCheckUsername,
+  onSave,
+}: SettingsScreenProps) {
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(username);
   const [fullName, setFullName] = useState(savedName ?? "");
   const [picked, setPicked] = useState<Picked | null>(null);
+  const [xpAvatar, setXpAvatar] = useState(xpAvatarStyle);
+  const [xpCard, setXpCard] = useState(xpCardStyle);
+  const [editingPicture, setEditingPicture] = useState(false);
   // What the server said about the username last looked up.
   const [looked, setLooked] = useState<{ name: string; result: SaveState } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -49,7 +106,12 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
 
   const typed = name.trim().toLowerCase();
   const nameChanged = typed !== username;
-  const unsaved = nameChanged || picked !== null || fullName.trim() !== (savedName ?? "");
+  const unsaved =
+    nameChanged ||
+    picked !== null ||
+    fullName.trim() !== (savedName ?? "") ||
+    xpAvatar !== xpAvatarStyle ||
+    xpCard !== xpCardStyle;
   const shape = checkUsername(name);
   const shown = picked?.src ?? avatarUrl;
 
@@ -80,6 +142,13 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
     setPicked(next);
   }
 
+  function set<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      setResult(null);
+      setter(value);
+    };
+  }
+
   async function save() {
     setSaving(true);
     setResult(null);
@@ -88,13 +157,13 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
         username: typed,
         name: fullName,
         avatarId: picked && "id" in picked ? picked.id : null,
+        xpAvatarStyle: xpAvatar,
+        xpCardStyle: xpCard,
       });
-      if (saved.ok && picked && "file" in picked) {
-        await uploadAvatar(picked.file);
-        router.refresh();
-      }
-      if (saved.ok) setPicked(null);
-      setResult(saved);
+      if (saved.ok && picked && "file" in picked) await uploadAvatar(picked.file);
+      // Saved: on to the profile, under whatever the username is now.
+      if (saved.ok) router.push(`/profile/${typed}`);
+      else setResult(saved);
     } catch (error) {
       setResult({ ok: false, message: error instanceof Error ? error.message : "Something went wrong." });
     } finally {
@@ -108,12 +177,18 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
     setLeaving(true);
   };
 
+  // One skeleton for both views, so the picture, its button and the footer's button stay where they are.
   return (
     <Stage>
       <StageRows>
-        <div className="flex items-center justify-around gap-6">
+        <div className="flex items-center justify-center gap-10">
           <div className="flex w-40 flex-col items-center gap-3">
-            <PlayerAvatar src={shown} name={typed || username} className="size-28 text-4xl" />
+            <PlayerAvatar
+              src={shown}
+              name={typed || username}
+              tier={xpAvatar ? avatarTier : undefined}
+              className="size-28 text-4xl"
+            />
             <input
               ref={fileInput}
               type="file"
@@ -131,76 +206,85 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
             <button
               type="button"
               disabled={saving}
-              onClick={() => fileInput.current?.click()}
-              className={cn(PILL_BUTTON, "bg-cosmos-500 hover:bg-cosmos-300 hover:text-cosmos-950")}
+              onClick={() => (editingPicture ? fileInput.current?.click() : setEditingPicture(true))}
+              className={BLUE_BUTTON}
             >
-              Upload
+              {editingPicture ? "Upload" : "Edit"}
             </button>
           </div>
 
-          <div className="flex w-72 flex-col gap-3">
-            <h2 className={HEADING}>Or choose a picture</h2>
-            <div className="grid grid-cols-6 gap-2">
-              {AVATAR_LIBRARY.map((picture) => (
-                <button
-                  key={picture.id}
-                  type="button"
-                  aria-label={picture.label}
-                  aria-pressed={shown === picture.src}
-                  disabled={saving}
-                  onClick={() => pick({ src: picture.src, id: picture.id })}
-                  className={cn(
-                    "relative aspect-square overflow-hidden rounded-full ring-2 ring-cosmos-500 hover:ring-gold-200",
-                    shown === picture.src && "ring-4 ring-gold-400",
-                  )}
-                >
-                  <AssetImage src={picture.src} alt="" className={picture.fit} />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex w-60 flex-col gap-2">
-            <label htmlFor="username" className={HEADING}>
-              Username
-            </label>
-            <input
-              id="username"
-              value={name}
-              onChange={(event) => {
-                setResult(null);
-                setName(event.target.value);
-              }}
-              maxLength={USERNAME_MAX}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              aria-describedby="username-note"
-              aria-invalid={nameNote ? !nameNote.ok : undefined}
-              className={FIELD}
-            />
-            <p
-              id="username-note"
-              aria-live="polite"
-              className={cn("h-4 px-5 text-xs font-bold", nameNote?.ok ? "text-gold-200" : "text-red-300")}
-            >
-              {nameNote?.message}
-            </p>
-            <label htmlFor="name" className={HEADING}>
-              Name
-            </label>
-            <input
-              id="name"
-              value={fullName}
-              onChange={(event) => {
-                setResult(null);
-                setFullName(event.target.value);
-              }}
-              maxLength={NAME_MAX}
-              autoComplete="name"
-              placeholder="Optional"
-              className={FIELD}
-            />
+          <div className="flex w-130 flex-col gap-3">
+            {editingPicture ? (
+              <>
+                <h2 className={HEADING}>Or choose a picture</h2>
+                <div className="grid grid-cols-9 gap-2">
+                  {AVATAR_LIBRARY.map((picture) => (
+                    <button
+                      key={picture.id}
+                      type="button"
+                      aria-label={picture.label}
+                      aria-pressed={shown === picture.src}
+                      disabled={saving}
+                      onClick={() => pick({ src: picture.src, id: picture.id })}
+                      className={cn(
+                        "relative aspect-square overflow-hidden rounded-full ring-2 ring-cosmos-500 hover:ring-gold-200",
+                        shown === picture.src && "ring-4 ring-gold-400",
+                      )}
+                    >
+                      <AssetImage src={picture.src} alt="" className={picture.fit} />
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex gap-4">
+                  <div className="flex flex-1 flex-col gap-2">
+                    <label htmlFor="username" className={HEADING}>
+                      Username
+                    </label>
+                    <input
+                      id="username"
+                      value={name}
+                      onChange={(event) => set(setName)(event.target.value)}
+                      maxLength={USERNAME_MAX}
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      aria-describedby="username-note"
+                      aria-invalid={nameNote ? !nameNote.ok : undefined}
+                      className={FIELD}
+                    />
+                    <p
+                      id="username-note"
+                      aria-live="polite"
+                      className={cn("h-4 px-5 text-xs font-bold", nameNote?.ok ? "text-gold-200" : "text-red-300")}
+                    >
+                      {nameNote?.message}
+                    </p>
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2">
+                    <label htmlFor="name" className={HEADING}>
+                      Name
+                    </label>
+                    <input
+                      id="name"
+                      value={fullName}
+                      onChange={(event) => set(setFullName)(event.target.value)}
+                      maxLength={NAME_MAX}
+                      autoComplete="name"
+                      placeholder="Optional"
+                      className={FIELD}
+                    />
+                  </div>
+                </div>
+                <h2 className={HEADING}>Level frame</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="On my picture" />
+                  <Toggle on={xpCard} onChange={set(setXpCard)} label="On my name card" />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -212,14 +296,15 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
           >
             {result?.message}
           </p>
-          <button
-            type="button"
-            disabled={saving || !unsaved || !nameIsFree}
-            onClick={save}
-            className="h-13 w-64 rounded-full bg-gold-400 font-display text-lg font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200 disabled:bg-cosmos-700 disabled:text-cosmos-300"
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </button>
+          {editingPicture ? (
+            <button type="button" onClick={() => setEditingPicture(false)} className={BIG_BUTTON}>
+              Back to settings
+            </button>
+          ) : (
+            <button type="button" disabled={saving || !unsaved || !nameIsFree} onClick={save} className={BIG_BUTTON}>
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          )}
         </footer>
       </StageRows>
 
@@ -230,11 +315,7 @@ export function SettingsScreen({ username, name: savedName, avatarUrl, onCheckUs
             <DialogDescription>Your changes have not been saved and will be lost.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={() => setLeaving(false)}
-              className={cn(PILL_BUTTON, "bg-gold-400 text-cosmos-950 hover:bg-gold-200")}
-            >
+            <button type="button" onClick={() => setLeaving(false)} className={GOLD_BUTTON}>
               Keep editing
             </button>
             <button
