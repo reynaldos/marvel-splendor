@@ -9,7 +9,7 @@ import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { MAX_SEATS, withCheat } from "@/lib/lobby";
+import { closeIfHostGone, hostAwayUntil, MAX_SEATS, withCheat } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
 import { pageMetadata } from "@/lib/site";
@@ -62,6 +62,17 @@ export default async function LobbyPage({
   const mySeat = game.players.find((p) => p.userId === user.id);
   // Not seated yet: the join page seats you, or explains why it can't.
   if (!mySeat) redirect(`/join/${game.joinCode}`);
+  // A room whose host stayed away too long closes on everyone in it; the state still says they left.
+  const awayUntil = hostAwayUntil(game);
+  if (awayUntil !== null && (await closeIfHostGone(game))) {
+    return (
+      <NoticeScreen title="Room closed" message="The host left and didn't come back in time. Ask them for a new code, or start a game of your own.">
+        <Link href="/" className={NOTICE_BUTTON}>
+          Back to home
+        </Link>
+      </NoticeScreen>
+    );
+  }
   if (game.status !== "LOBBY") redirect(withCheat(`/play/${game.id}`, cheat));
 
   const settings = { ...DEFAULT_SETTINGS, ...(game.settings as unknown as Partial<GameSettings>) };
@@ -69,9 +80,10 @@ export default async function LobbyPage({
   return (
     <>
       <TopBar />
-      <LobbyLive gameId={game.id} />
+      <LobbyLive gameId={game.id} isHost={mySeat.seat === 0} hostAwayUntil={awayUntil} />
       <LobbyScreen
         joinCode={game.joinCode}
+        hostAwayUntil={awayUntil}
         seats={Array.from({ length: MAX_SEATS }, (_, i) => {
           const player = tableOrder(game.players)[i];
           if (!player) return null;
