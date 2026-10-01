@@ -3,8 +3,10 @@
 import { useState, type ReactNode } from "react";
 import { cn } from "cn";
 
+import { NewDot } from "@/components/UpdateLog";
+
 /** Tabs in a row along the top, with the chosen one's view under them, as on the profile's stats. */
-export function AdminTabs({ tabs }: { tabs: Array<{ name: string; view: ReactNode }> }) {
+export function AdminTabs({ tabs }: { tabs: Array<{ name: string; view: ReactNode; dot?: boolean }> }) {
   const [open, setOpen] = useState(0);
 
   return (
@@ -18,11 +20,12 @@ export function AdminTabs({ tabs }: { tabs: Array<{ name: string; view: ReactNod
             aria-selected={i === open}
             onClick={() => setOpen(i)}
             className={cn(
-              "h-9 min-w-0 truncate rounded-t-xl px-4 text-sm font-black",
+              "relative h-9 min-w-0 truncate rounded-t-xl px-4 text-sm font-black",
               i === open ? "bg-cosmos-500 text-white" : "bg-cosmos-800 text-cosmos-300 hover:text-white",
             )}
           >
             {tab.name}
+            {tab.dot ? <NewDot label="New feedback" className="absolute top-0.5 right-0.5" /> : null}
           </button>
         ))}
       </div>

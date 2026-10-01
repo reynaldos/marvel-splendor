@@ -1,8 +1,9 @@
-// Sets what every finished game gave each player, for games that ended before
-// rewards were saved. Everything is replayed from scratch in the order the games
-// ended — stats, rank, coins and collections — the same way the live game and
-// the rank and coins backfills do it, so each game's before-and-after is what
-// it would have been at the time. Only the rewards column is written.
+// Sets what every finished game gave each player: for games that ended before
+// rewards were saved, and to recount everyone's XP when its formula changes.
+// Everything is replayed from scratch in the order the games ended — stats,
+// rank, coins, collections and XP — the same way the live game and the rank and
+// coins backfills do it, so each game's before-and-after is what it would have
+// been at the time. Only the rewards column is written.
 //
 //   pnpm rewards:backfill            show what would be saved (changes nothing)
 //   pnpm rewards:backfill --verbose  also show every game in order, with each player's rewards
@@ -19,9 +20,9 @@ import type { GameSettings, GameState, Move } from "@/lib/engine/types";
 import { rankPlayers } from "@/lib/game-record";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { defaultRatingSnapshot, nextRatings, type RatingSnapshot } from "@/lib/rating";
-import { buildGameRewards, type RewardSources } from "@/lib/record-rewards";
+import { accountXpByUser } from "@/lib/load-xp";
+import { buildGameRewards, gameXpByUser, type RewardSources } from "@/lib/record-rewards";
 import { defaultUserStatsSnapshot, nextUserStats, type UserStatsSnapshot } from "@/lib/record-stats";
-import { cardLevelXp } from "@/lib/xp";
 
 async function main() {
   const games = await prisma.game.findMany({
@@ -45,6 +46,7 @@ async function main() {
   const botCoinsByDay = new Map<string, number>();
   const coins = new Map<string, number>();
   const collections = new Map<string, Map<string, number>>();
+  const xp = new Map<string, number>();
   const writes: Array<{ gameId: string; seat: number; rewards: NonNullable<ReturnType<typeof buildGameRewards>> }> = [];
 
   for (const game of games) {
@@ -52,7 +54,7 @@ async function main() {
     const humans = game.players.filter((p) => !p.isBot && p.userId);
     if (humans.length === 0) continue;
     const moves = game.moves.map((m) => ({ seat: m.seat, move: m.payload as unknown as Move }));
-    const from: RewardSources = { stats: [], rating: [], coins: new Map(), cardXpBefore: new Map(), cards: [] };
+    const from: RewardSources = { stats: [], rating: [], coins: new Map(), xpBefore: new Map(), gameXp: gameXpByUser(state, game.players), cards: [] };
 
     // Stats, as recordGameStats does it.
     for (const p of humans) {
@@ -99,7 +101,7 @@ async function main() {
     const recruited = cardsRecruited(moves);
     for (const p of humans) {
       const mine = collections.get(p.userId!) ?? new Map<string, number>();
-      from.cardXpBefore.set(p.userId!, cardLevelXp([...mine.values()]));
+      from.xpBefore.set(p.userId!, xp.get(p.userId!) ?? 0);
       for (const [cardId, times] of recruited.get(p.seat) ?? []) {
         const before = mine.get(cardId) ?? 0;
         mine.set(cardId, before + times);
@@ -111,6 +113,7 @@ async function main() {
     if (verbose) console.log(`\n${game.updatedAt.toISOString().slice(0, 16).replace("T", " ")}  ${game.mode}`);
     for (const p of humans) {
       const rewards = buildGameRewards(p.userId!, from)!;
+      xp.set(p.userId!, rewards.xp.after);
       writes.push({ gameId: game.id, seat: p.seat, rewards });
       if (!verbose) continue;
       const rating = rewards.rating ? `rank ${rewards.rating.before} → ${rewards.rating.after}` : "unrated";
@@ -130,6 +133,11 @@ async function main() {
   for (const { userId, _sum } of liveCoins) {
     if ((coins.get(userId) ?? 0) !== (_sum.delta ?? 0)) console.log(`  coins differ for ${userId}: replay ${coins.get(userId) ?? 0}, database ${_sum.delta}`);
   }
+  // XP is expected to differ when its formula changed: this is what saving will set it to.
+  const liveXp = await accountXpByUser([...xp.keys()]);
+  const names = new Map(games.flatMap((g) => g.players.filter((p) => p.userId).map((p) => [p.userId!, p.user!.username] as const)));
+  console.log("\nXP, as saved → as replayed:");
+  for (const [userId, total] of xp) console.log(`  ${names.get(userId)!.padEnd(16)} ${String(liveXp.get(userId) ?? 0).padStart(6)} → ${String(total).padStart(6)}`);
 
   if (!process.argv.includes("--yes")) {
     console.log("\nNothing was changed. Run again with --yes to save the above.");

@@ -1,18 +1,45 @@
 import { cardFrameTier } from "@/lib/card-level";
 import { prisma } from "@/lib/db";
-import type { GameRewards } from "@/lib/game-record";
+import { botDifficultyForSeat, type GameState } from "@/lib/engine/types";
+import { rankPlayers, type GameRewards } from "@/lib/game-record";
 import { Prisma } from "@/lib/generated/prisma/client";
 import type { UserStatsSnapshot } from "@/lib/record-stats";
 import type { CardCountChange } from "@/lib/save-collection";
-import { accountScore, cardLevelXp } from "@/lib/xp";
+import { cardLevelXp, gameXp } from "@/lib/xp";
 
 export interface RewardSources {
   stats: Array<{ userId: string; prev: UserStatsSnapshot; next: UserStatsSnapshot }>;
   rating: Array<{ userId: string; before: number; after: number }>;
   coins: Map<string, number>;
-  /** Each player's XP from card levels before this game's cards were added. */
-  cardXpBefore: Map<string, number>;
+  /** Each player's account XP before this game. */
+  xpBefore: Map<string, number>;
+  /** What this game gave each player, from `gameXpByUser`. */
+  gameXp: Map<string, number>;
   cards: CardCountChange[];
+}
+
+/** XP the game gave each signed-in human, from how their seat finished. A guest or stand-in bot counts as a human opponent. */
+export function gameXpByUser(state: GameState, players: Array<{ seat: number; userId: string | null; isBot: boolean }>): Map<string, number> {
+  const ranked = rankPlayers(state, []);
+  const xp = new Map<string, number>();
+  for (const p of players) {
+    if (p.isBot || !p.userId) continue;
+    const seat = state.players[p.seat];
+    xp.set(
+      p.userId,
+      gameXp({
+        place: ranked.find((r) => r.seat === p.seat)!.place,
+        opponents: players.filter((o) => o.seat !== p.seat).map((o) => (o.isBot ? botDifficultyForSeat(state.settings, o.seat) : "human")),
+        pointsOverTarget: Math.max(0, seat.points - state.settings.targetPoints),
+        cards: seat.cards.length,
+        badges: seat.tags,
+        heldAvengersTile: state.avengersHolder === p.seat,
+        locations: seat.locations.length,
+        timeStone: seat.tokens.time > 0,
+      }),
+    );
+  }
+  return xp;
 }
 
 /** One player's rewards, put together from what each recorder said it changed. Null when their stats weren't recorded. */
@@ -21,16 +48,16 @@ export function buildGameRewards(userId: string, from: RewardSources): GameRewar
   if (!stats) return null;
 
   const cards = from.cards.filter((c) => c.userId === userId);
-  const xpBefore = from.cardXpBefore.get(userId) ?? 0;
-  const xpAfter = xpBefore + cardLevelXp(cards.map((c) => c.after)) - cardLevelXp(cards.map((c) => c.before));
+  const xpBefore = from.xpBefore.get(userId) ?? 0;
+  const xpAfter = xpBefore + (from.gameXp.get(userId) ?? 0) + cardLevelXp(cards.map((c) => ({ cardId: c.cardId, times: c.after }))) - cardLevelXp(cards.map((c) => ({ cardId: c.cardId, times: c.before })));
   const rating = from.rating.find((r) => r.userId === userId);
 
   return {
     ...(rating ? { rating: { before: rating.before, after: rating.after } } : {}),
     coins: from.coins.get(userId) ?? 0,
-    xp: { before: accountScore(stats.prev, xpBefore), after: accountScore(stats.next, xpAfter) },
+    xp: { before: xpBefore, after: xpAfter },
     cardLevelUps: cards
-      .map((c) => ({ cardId: c.cardId, from: cardFrameTier(c.before), to: cardFrameTier(c.after) }))
+      .map((c) => ({ cardId: c.cardId, from: cardFrameTier(c.cardId, c.before), to: cardFrameTier(c.cardId, c.after) }))
       .filter((c) => c.from !== c.to),
   };
 }

@@ -54,12 +54,12 @@ export default function TiersPreviewPage() {
                 <div className={cn("frame-gold relative aspect-card w-14 rounded-frame", FRAME_EFFECT[tier])}>
                   <CardView card={THANOS} className="size-full" />
                   <span className="gem-badge absolute -top-1.5 -right-1.5 z-10 flex h-6 min-w-6 items-center justify-center px-1 fs-2xs font-black text-white tabular-nums">
-                    ×{CARD_LEVEL_TIER_MIN_TIMES[i]}
+                    ×{CARD_LEVEL_TIER_MIN_TIMES[THANOS.level][i]}
                   </span>
                 </div>
                 <span className="text-xs font-black">{tier}</span>
                 <span className={NOTE}>
-                  Lv {ACCOUNT_FRAME_TIER_MIN_LEVEL[i]} · ×{CARD_LEVEL_TIER_MIN_TIMES[i]}
+                  Lv {ACCOUNT_FRAME_TIER_MIN_LEVEL[i]} · ×{CARD_LEVEL_TIER_MIN_TIMES[THANOS.level][i]}
                 </span>
                 <span className={NOTE}>{scoreForLevel(ACCOUNT_FRAME_TIER_MIN_LEVEL[i])} XP</span>
               </li>

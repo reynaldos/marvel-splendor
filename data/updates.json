@@ -1,6 +1,28 @@
 [
   {
-    "version": "0.14.0",
+    "version": "2.5.0",
+    "date": "2026-10-01",
+    "title": "Daily bonus, and XP that counts everything",
+    "summary": "Collect coins every day for an eight-day streak, and earn XP for how you played, not just whether you won.",
+    "pulls": [],
+    "new": [
+      "Daily bonus: tap your coins to collect, every day, climbing from 10 coins on Day 1 to 100 on Day 8; miss a day and it starts over",
+      "A dot on your coins while today's bonus is waiting",
+      "XP for every part of a game: your place, who you played against, points past the target, cards, Avengers badges and tile, Locations and the Time Stone",
+      "A tougher table pays more: a human opponent is worth more than a hard bot, and a hard bot more than an easy one"
+    ],
+    "improved": [
+      "Card levels pay more the further a card climbs, and a hard-to-get Level 3 card climbs sooner than a Level 1",
+      "Levels take more XP to reach, so each one means more",
+      "Past games have been recounted under the new XP, so your level may have moved",
+      "The music is quieter and the sounds a little louder"
+    ],
+    "fixed": [
+      "A phone changing address mid-visit no longer shows as two visits"
+    ]
+  },
+  {
+    "version": "2.4.0",
     "date": "2026-10-01",
     "title": "Sound, feedback, and a new menu",
     "summary": "Music and sounds while you play, a way to tell us what you want, and a menu lay out update.",
@@ -17,7 +39,7 @@
     "fixed": []
   },
   {
-    "version": "0.13.0",
+    "version": "2.3.0",
     "date": "2026-09-30",
     "title": "A fuller game log, and no more mid-game sign-outs",
     "summary": "Every tile won is in the log, with scores and rounds, and your sign-in no longer runs out during a game.",
@@ -33,7 +55,7 @@
     ]
   },
   {
-    "version": "0.12.0",
+    "version": "2.2.0",
     "date": "2026-09-30",
     "title": "Lobbies that look after themselves",
     "summary": "Rooms close if their host leaves, game records stay private, and new players get a hero.",
@@ -54,7 +76,7 @@
     ]
   },
   {
-    "version": "0.11.0",
+    "version": "2.1.0",
     "date": "2026-09-30",
     "title": "Rewards at the end of a game",
     "summary": "See what every game gives you: coins, XP, rank and the cards that ranked up.",
@@ -72,7 +94,7 @@
     "fixed": []
   },
   {
-    "version": "0.10.0",
+    "version": "2.0.0",
     "date": "2026-09-30",
     "title": "Rank, levels and coins",
     "summary": "Climb the leaderboard, level up your frames, and earn coins for every game.",
@@ -95,7 +117,7 @@
     ]
   },
   {
-    "version": "0.9.0",
+    "version": "1.5.0",
     "date": "2026-09-29",
     "title": "What's new",
     "summary": "See what has changed in the game,",
@@ -107,7 +129,7 @@
     "fixed": []
   },
   {
-    "version": "0.8.0",
+    "version": "1.4.0",
     "date": "2026-09-29",
     "title": "Collections and smarter bots",
     "summary": "Collect every card you recruit, and face a tougher hard bot.",
@@ -132,7 +154,7 @@
     ]
   },
   {
-    "version": "0.7.0",
+    "version": "1.3.0",
     "date": "2026-09-29",
     "title": "Table chat",
     "summary": "Send emojis and quick messages to the table while you play.",
@@ -151,7 +173,7 @@
     ]
   },
   {
-    "version": "0.6.0",
+    "version": "1.2.0",
     "date": "2026-09-29",
     "title": "Board animations",
     "summary": "The board comes to life, and winning feels like winning.",
@@ -173,7 +195,7 @@
     ]
   },
   {
-    "version": "0.5.1",
+    "version": "1.1.1",
     "date": "2026-09-28",
     "title": "Small fixes",
     "summary": "A small fix behind the scenes.",
@@ -187,7 +209,7 @@
     ]
   },
   {
-    "version": "0.5.0",
+    "version": "1.1.0",
     "date": "2026-09-28",
     "title": "Profile pictures",
     "summary": "Pick a character as your picture, and see everyone's at the table.",
@@ -202,7 +224,7 @@
     "fixed": []
   },
   {
-    "version": "0.4.0",
+    "version": "1.0.0",
     "date": "2026-09-28",
     "title": "Profiles and the home screen app",
     "summary": "Your own profile, and the game on your home screen like an app.",

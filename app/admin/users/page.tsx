@@ -91,7 +91,7 @@ export default async function AdminUsersPage() {
     );
   }
   const { totals, tables, recent, users, sent } = metrics;
-  const unread = feedback.filter((row) => row.status === "NEW").length;
+  const unread = feedback.some((row) => row.status === "NEW");
 
   return (
     <main className="dark min-h-dvh bg-cosmos px-6 py-8 text-white">
@@ -204,7 +204,8 @@ export default async function AdminUsersPage() {
               ),
             },
             {
-              name: unread ? `Feedback (${unread} new)` : "Feedback",
+              name: "Feedback",
+              dot: unread,
               view: <FeedbackTable rows={feedback} />,
             },
           ]}

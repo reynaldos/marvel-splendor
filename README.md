@@ -17,6 +17,7 @@ It is built for a phone held on its side, and can be added to the home screen to
 - **Timers:** an optional turn timer and game clock.
 - **Away players:** a bot takes over for anyone who misses 3 turns in a row, until they come back.
 - **Profiles:** a picture, name and username, with stats and a record of every finished game.
+- **Progression:** XP and level frames, coins with a daily bonus, a rank and leaderboard, and a collection with card levels.
 - **Installed app:** home screen icon, launch picture, and full-screen play on iPhone.
 
 ## Built with
@@ -85,6 +86,8 @@ You need Node 22 and pnpm.
 | `pnpm rating:backfill` | Shows what each player's rank would be, rating every multiplayer game played to the end in order. Add `--verbose` to see each game and every player's swing, `--yes` to save it |
 | `pnpm coins:backfill` | Shows what each player's coins would be, paying out every game played to the end in order. Add `--verbose` to see each payout, `--yes` to save it |
 | `pnpm rewards:backfill` | Shows what each finished game gave each player, replaying rank, coins and XP in order. Add `--verbose` to see every game, `--yes` to save it |
+| `pnpm daily:backfill` | Shows the daily bonus each player would be given for every day since they joined, through yesterday. Add `--yes` to save it |
+| `pnpm xp:lab` | Builds `docs/xp-lab.html`, a page to try XP weights and level curves against every finished game |
 | `pnpm games:clear` | Shows what clearing every game would delete. Add `--yes` to delete; this cannot be undone |
 | `pnpm games:reset` | A fresh start: the same, and every player's stats set back to zero. Players, names and pictures are kept. Add `--yes` to do it |
 
@@ -121,6 +124,27 @@ The app is hosted on Vercel.
 2. Apply the schema to the production database with `pnpm db:update`.
 3. Paste `auth0/login.html` into the Auth0 Universal Login template, and add the live address to the allowed callback and logout URLs.
 
+## Releasing
+
+Every release has a number, `MAJOR.MINOR.PATCH`, and an entry in `data/updates.json`, latest first. The menu's What's new button shows them (`components/UpdateLog.tsx`), one box to a release, closed until tapped. A gold dot sits on the menu button and on What's new when there are releases the player hasn't seen; opening the log clears it, and shows those releases open, in gold, marked New. The last release seen is remembered on the device, not the account, so a new phone shows the dot once.
+
+| What the release holds | What changes | Example |
+|---|---|---|
+| Something new for players | MINOR goes up, PATCH back to 0 | 0.8.0 to 0.9.0 |
+| Only fixes or small changes | PATCH goes up | 0.9.0 to 0.9.1 |
+| The first release of the next version of the [roadmap](docs/ROADMAP.md) | MAJOR goes up, the rest back to 0 | 2.5.0 to 3.0.0 |
+
+- One release is one branch's work, however many pull requests it took to merge; `pulls` lists them.
+- Each entry has a date, a short title, one sentence that sums it up, and no more than about seven changes under `new`, `improved` and `fixed`, in words a player would use.
+- Leave out what players can't see: admin pages, previews, tests, scripts and notes.
+- With each release, add the entry and set `version` in `package.json` to match.
+
 ## More detail
 
-[ARCHITECTURE.md](ARCHITECTURE.md) has the full rules reference, the data model, how live play works, the known limitations of the timers and idle rules, and the roadmap.
+| Doc | What it holds |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | The rules the engine implements, the stack, how a move travels, the data model, routes, and the limits of the timers and idle rules |
+| [docs/UI.md](docs/UI.md) | How each screen looks and behaves |
+| [docs/DESIGN.md](docs/DESIGN.md) | The design system: colours, type, layout, components, motion, sound |
+| [docs/PROGRESSION.md](docs/PROGRESSION.md) | XP and levels, coins and the daily bonus, rank, card levels |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | What has shipped and what is still to build |

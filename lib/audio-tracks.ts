@@ -1,8 +1,8 @@
 /** Where the sound files live, and how loud they play. Drop the files in public/audio and the paths here find them. */
 
 /** 0 to 1. The music sits under the sounds. */
-export const BGM_VOLUME = 0.2;
-export const SFX_VOLUME = 0.9;
+export const BGM_VOLUME = 0.1;
+export const SFX_VOLUME = 1;
 
 /**
  * Background music. A player's pick is saved by `id`, so never change or
