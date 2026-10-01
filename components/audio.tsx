@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
-import { BGM_TRACKS, SFX, type SfxName } from "@/lib/audio-tracks";
+import { BGM_TRACKS, BGM_VOLUME, SFX, SFX_VOLUME, type SfxName } from "@/lib/audio-tracks";
 
 interface AudioPrefs {
   bgm: boolean;
@@ -52,6 +52,7 @@ export function playSfx(name: SfxName) {
   let sound = loaded.get(name);
   if (!sound) {
     sound = new Audio(SFX[name]);
+    sound.volume = SFX_VOLUME;
     loaded.set(name, sound);
   }
   sound.currentTime = 0;
@@ -59,9 +60,10 @@ export function playSfx(name: SfxName) {
 }
 
 /**
- * Plays the background music on a loop while it is switched on. Browsers
- * only let it start after the player has touched the page, so it waits for
- * that if need be, and it rests while the tab is hidden.
+ * Plays the background music on a loop while it is on the page and switched
+ * on; the board puts it there. Browsers only let it start after the player
+ * has touched the page, so it waits for that if need be, and it rests while
+ * the tab is hidden.
  */
 export function BgmPlayer() {
   const { bgm, track } = useAudioPrefs();
@@ -70,6 +72,7 @@ export function BgmPlayer() {
     const src = BGM_TRACKS.find((t) => t.id === track)?.src ?? BGM_TRACKS[0].src;
     const music = new Audio(src);
     music.loop = true;
+    music.volume = BGM_VOLUME;
     const start = () => music.play().catch(() => {});
     const onGesture = () => {
       start();
