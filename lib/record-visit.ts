@@ -17,6 +17,20 @@ export function clientIp(requestHeaders: Headers): string | null {
   return forwarded || requestHeaders.get("x-real-ip") || null;
 }
 
+/** Folds visits that start inside the gap after the one before into it. Takes one user's visits, earliest first. */
+export function mergeVisits<T extends { id: string; startedAt: Date; lastSeenAt: Date }>(visits: T[]) {
+  const kept: T[] = [];
+  const dropped: T[] = [];
+  for (const visit of visits) {
+    const last = kept.at(-1);
+    if (last && visit.startedAt.getTime() - last.lastSeenAt.getTime() < VISIT_GAP_MS) {
+      last.lastSeenAt = new Date(Math.max(last.lastSeenAt.getTime(), visit.lastSeenAt.getTime()));
+      dropped.push(visit);
+    } else kept.push({ ...visit });
+  }
+  return { kept, dropped };
+}
+
 /** The visit keeps the address it began from. Exported for its test. */
 export async function saveVisit(userId: string, ip: string | null, userAgent: string | null, db = prisma) {
   const now = new Date();
