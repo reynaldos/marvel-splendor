@@ -34,7 +34,8 @@ interface ProfileScreenProps {
   cardXp: number;
   career: CareerStats;
   records: CareerStats;
-  games: GameRecord[];
+  /** Null when the viewer may not see them: only the player and admins can. */
+  games: GameRecord[] | null;
   isOwn: boolean;
 }
 

@@ -105,7 +105,8 @@ interface StatsTabsProps {
   career: CareerStats;
   /** The same stats, from games against other people only. */
   records: CareerStats;
-  games: GameRecord[];
+  /** Null hides the Game Record tab. */
+  games: GameRecord[] | null;
 }
 
 const PANEL = "h-50 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
@@ -119,7 +120,7 @@ export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <div role="tablist" className="flex gap-1 px-3">
-        {[...all.map((tab) => tab.name), "Game Record"].map((name, i) => (
+        {[...all.map((tab) => tab.name), ...(games ? ["Game Record"] : [])].map((name, i) => (
           <button
             key={name}
             type="button"
@@ -163,14 +164,14 @@ export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
             </div>
           ))}
         </dl>
-      ) : (
+      ) : games ? (
         // The list scrolls by touch or trackpad, with no scrollbar drawn; rows fade out at the frame.
         <div role="tabpanel" className={cn(PANEL, "overflow-hidden p-1")}>
           <div className="scroll-fade flex h-full flex-col overflow-y-auto overscroll-contain px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <GameRecords games={games} />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

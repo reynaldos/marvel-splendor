@@ -2,6 +2,7 @@ import { TopBar } from "@/components/TopBar";
 import { notFound } from "next/navigation";
 
 import { ProfileScreen } from "@/components/profile/ProfileScreen";
+import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { cardLevelXpByUser } from "@/lib/load-card-xp";
@@ -22,6 +23,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   if (!user) notFound();
 
   const [session, history, cardXp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), cardLevelXpByUser([user.id])]);
+  const isOwn = session?.user.sub === user.auth0Sub;
 
   return (
     <>
@@ -37,8 +39,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         cardXp={cardXp.get(user.id) ?? 0}
         career={history.career}
         records={history.records}
-        games={history.games}
-        isOwn={session?.user.sub === user.auth0Sub}
+        // A player's games are theirs to see, and admins'; nobody else is sent them.
+        games={isOwn || (session && isAdmin(session.user)) ? history.games : null}
+        isOwn={isOwn}
       />
     </>
   );
