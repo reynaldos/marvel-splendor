@@ -1,5 +1,42 @@
 [
   {
+    "version": "0.13.0",
+    "date": "2026-09-30",
+    "title": "A fuller game log, and no more mid-game sign-outs",
+    "summary": "Every tile won is in the logged, with scores and rounds, and your sign-in no longer runs out during a game.",
+    "pulls": [],
+    "new": [],
+    "improved": [
+      "The log records each Location claimed, the Avengers Assemble tile taken or stolen, and the Time Stone picked up",
+      "The move log opens in a larger window and ha a bar between rounds"
+    ],
+    "fixed": [
+      "Players are no longer signed out partway through a game and skipped until a bot takes their seat",
+      "If your sign-in does run out, you are signed back in and returned to the board straight away"
+    ]
+  },
+  {
+    "version": "0.12.0",
+    "date": "2026-09-30",
+    "title": "Lobbies that look after themselves",
+    "summary": "Rooms close if their host leaves, game records stay private, and new players get a hero.",
+    "pulls": [],
+    "new": [
+      "A lobby closes if its host leaves and isn't back within 30 seconds, with their seat dimmed and a countdown meanwhile",
+      "Private Game takes you straight back to the lobby you are waiting in",
+      "A Cancel lobby button for the host",
+      "Replay the results screen of any game in your game record, with the rewards it gave",
+      "New players start with a random hero picture"
+    ],
+    "improved": [
+      "The leaderboard shows each player's username, with their level and XP under it",
+      "Your game record is only shown to you"
+    ],
+    "fixed": [
+      "Closing What's new no longer leaves the menu untappable on phones"
+    ]
+  },
+  {
     "version": "0.11.0",
     "date": "2026-09-30",
     "title": "Rewards at the end of a game",
