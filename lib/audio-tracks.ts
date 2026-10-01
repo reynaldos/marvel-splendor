@@ -10,27 +10,26 @@ export const SFX_VOLUME = 0.8;
  */
 export const BGM_TRACKS = [{ id: "theme", label: "Theme", src: "/audio/bgm/theme.mp3" }] as const;
 
-/** The game's sounds, the same for everyone. */
+/** The game's sounds, the same for everyone. AAC, made from the originals with macOS's afconvert. */
 export const SFX = {
   /** Picking a stone or a deck on the board, before the turn is played. */
-  tap: "/audio/sfx/tap.mp3",
-  /** Opening a card, your reserves, or a team to look at. */
-  flip: "/audio/sfx/flip.mp3",
-  yourTurn: "/audio/sfx/your-turn.mp3",
-  /** Five seconds left on your turn. */
-  clockLow: "/audio/sfx/clock-low.mp3",
-  /** Stones and cards landing in a hand. */
-  takeTokens: "/audio/sfx/take-tokens.mp3",
-  recruit: "/audio/sfx/recruit.mp3",
-  reserve: "/audio/sfx/reserve.mp3",
-  location: "/audio/sfx/location.mp3",
-  timeStone: "/audio/sfx/time-stone.mp3",
-  avengers: "/audio/sfx/avengers.mp3",
-  chat: "/audio/sfx/chat.mp3",
-  victory: "/audio/sfx/victory.mp3",
-  defeat: "/audio/sfx/defeat.mp3",
+  tap: "/audio/sfx/tap.m4a",
+  /** Viewing a card large, or opening a Location, the Avengers tile, your reserves or a team to look at. */
+  flip: "/audio/sfx/flip.m4a",
+  yourTurn: "/audio/sfx/your-turn.m4a",
+  /** One tick; it repeats quickly through the last seconds of your turn. */
+  clockLow: "/audio/sfx/clock-low.m4a",
+  /** Stones or a card landing in a hand, yours or anyone's, once the turn is played. */
+  recruit: "/audio/sfx/recruit.m4a",
+  reserve: "/audio/sfx/reserve.m4a",
+  location: "/audio/sfx/location.m4a",
+  timeStone: "/audio/sfx/time-stone.m4a",
+  avengers: "/audio/sfx/avengers.m4a",
+  chat: "/audio/sfx/chat.m4a",
+  victory: "/audio/sfx/victory.m4a",
+  defeat: "/audio/sfx/defeat.m4a",
   /** The game ends with no winner: abandoned, or out of time. */
-  gameOver: "/audio/sfx/game-over.mp3",
+  gameOver: "/audio/sfx/game-over.m4a",
 } as const;
 
 export type SfxName = keyof typeof SFX;

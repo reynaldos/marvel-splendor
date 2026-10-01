@@ -13,7 +13,7 @@ import { ChatButton } from "@/components/game/ChatButton";
 import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
-import { playSfx } from "@/components/audio";
+import { playSfx, scheduleClockTicks } from "@/components/audio";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
@@ -179,8 +179,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         await delay(TRACE_MS);
         setTraced(null);
       }
-      if (step.move.type === "TAKE_TOKENS") playSfx("takeTokens");
-      else if (step.move.type === "RECRUIT") playSfx("recruit");
+      if (step.move.type === "TAKE_TOKENS" || step.move.type === "RECRUIT") playSfx("recruit");
       else if (step.move.type === "RESERVE") playSfx("reserve");
       // Where each tile sits is read now, while it is still on the board.
       const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
@@ -381,11 +380,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
-  // A warning with five seconds left on your own turn.
+  // The clock ticks through the last seconds of your own turn.
   useEffect(() => {
     if (!timed || !isMine || turnEndsAt === null) return;
-    const timer = setTimeout(() => playSfx("clockLow"), Math.max(0, turnEndsAt - Date.now() - 5000));
-    return () => clearTimeout(timer);
+    return scheduleClockTicks(turnEndsAt);
   }, [timed, isMine, turnEndsAt]);
 
   const stageTokenColor = useCallback(

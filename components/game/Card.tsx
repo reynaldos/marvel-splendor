@@ -107,10 +107,7 @@ export function Card({
       <button
         type="button"
         aria-expanded={expanded}
-        onClick={() => {
-          if (!expanded) playSfx("flip");
-          setExpanded((v) => !v);
-        }}
+        onClick={() => setExpanded((v) => !v)}
         className={cn(
           "@container relative block size-full overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10 transition-transform disabled:cursor-default",
           affordable && "ring-2 ring-primary",
@@ -148,7 +145,15 @@ export function Card({
               {reserveAction.label}
             </Button>
           ) : null}
-          <Button type="button" size="lg" variant="secondary" onClick={() => setViewing(root.current?.getBoundingClientRect() ?? null)}>
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            onClick={() => {
+              playSfx("flip");
+              setViewing(root.current?.getBoundingClientRect() ?? null);
+            }}
+          >
             View
           </Button>
         </div>

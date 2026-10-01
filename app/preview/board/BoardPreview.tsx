@@ -4,12 +4,14 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { UsersRound } from "lucide-react";
 
+import { playSfx, scheduleClockTicks } from "@/components/audio";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
 import { GameMenu } from "@/components/game/GameMenu";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
+import { SFX, type SfxName } from "@/lib/audio-tracks";
 import { EMOJIS, MESSAGES, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import type { BoardEvent } from "@/lib/board-events";
@@ -91,11 +93,14 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
   const [announced, setAnnounced] = useState<{ event: BoardEvent; origin: TileOrigin | null; key: number } | null>(null);
 
   const trace = (move: Move) => {
+    if (move.type === "TAKE_TOKENS" || move.type === "RECRUIT") playSfx("recruit");
+    else if (move.type === "RESERVE") playSfx("reserve");
     // Taken off and put back, so choosing the same one again plays it again.
     setTraced(null);
     setTimeout(() => setTraced({ seat: 1, move }), 50);
   };
   const announce = (event: BoardEvent) => {
+    playSfx(event.kind);
     const key = Date.now();
     setAnnounced({ event, origin: tileOrigin(event), key });
     if (at === undefined) setTimeout(() => setAnnounced((shown) => (shown?.key === key ? null : shown)), announceMs(event));
@@ -163,6 +168,20 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
             {label}
           </button>
         ))}
+        </div>
+        {/* Every sound on its own, to hear it. */}
+        <div className="flex justify-center gap-1">
+          {(Object.keys(SFX) as SfxName[]).map((name) => (
+            <button
+              key={name}
+              type="button"
+              // The clock's button plays its whole run of ticks, as a turn's last seconds do.
+              onClick={() => (name === "clockLow" ? scheduleClockTicks(Date.now() + 3000) : playSfx(name))}
+              className="rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-bold text-cosmos-300 ring-1 ring-cosmos-500 ring-inset hover:text-white"
+            >
+              {name}
+            </button>
+          ))}
         </div>
         <div className="flex justify-center gap-1">
           <PreviewBar />

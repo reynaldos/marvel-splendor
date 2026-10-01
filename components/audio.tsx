@@ -59,6 +59,20 @@ export function playSfx(name: SfxName) {
   sound.play().catch(() => {});
 }
 
+/** The clock ticks twice a second through the last three seconds of a turn. */
+const TICK_FOR_MS = 3000;
+const TICK_EVERY_MS = 500;
+
+/** Ticks the clock up to `endsAt`, starting when its last seconds come. Call what it returns to stop early. */
+export function scheduleClockTicks(endsAt: number): () => void {
+  const timers: ReturnType<typeof setTimeout>[] = [];
+  for (let at = endsAt - TICK_FOR_MS; at < endsAt; at += TICK_EVERY_MS) {
+    const wait = at - Date.now();
+    if (wait >= 0) timers.push(setTimeout(() => playSfx("clockLow"), wait));
+  }
+  return () => timers.forEach(clearTimeout);
+}
+
 /**
  * Plays the background music on a loop while it is on the page and switched
  * on; the board puts it there. Browsers only let it start after the player
