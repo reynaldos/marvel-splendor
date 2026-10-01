@@ -17,14 +17,16 @@ export function clientIp(requestHeaders: Headers): string | null {
   return forwarded || requestHeaders.get("x-real-ip") || null;
 }
 
-async function saveVisit(userId: string, ip: string | null, userAgent: string | null) {
+/** The visit keeps the address it began from. Exported for its test. */
+export async function saveVisit(userId: string, ip: string | null, userAgent: string | null, db = prisma) {
   const now = new Date();
+  // Matched by user only: phones change IP mid-sitting.
   // ponytail: two first requests at once can open two visits; add a lock if the counts need to be exact
-  const { count } = await prisma.userVisit.updateMany({
-    where: { userId, ip, lastSeenAt: { gte: new Date(now.getTime() - VISIT_GAP_MS) } },
+  const { count } = await db.userVisit.updateMany({
+    where: { userId, lastSeenAt: { gte: new Date(now.getTime() - VISIT_GAP_MS) } },
     data: { lastSeenAt: now },
   });
-  if (count === 0) await prisma.userVisit.create({ data: { userId, ip, userAgent } });
+  if (count === 0) await db.userVisit.create({ data: { userId, ip, userAgent } });
 }
 
 /** Notes that the user is active, at most once a minute. Never fails the request it is called from. */
