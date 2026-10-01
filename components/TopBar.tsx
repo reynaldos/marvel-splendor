@@ -4,10 +4,9 @@ import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { cardLevelXpByUser } from "@/lib/load-card-xp";
+import { accountXpByUser } from "@/lib/load-xp";
 import { publicAvatarUrl } from "@/lib/r2";
-import { defaultUserStatsSnapshot } from "@/lib/record-stats";
-import { accountProgress, accountTierFor } from "@/lib/xp";
+import { accountTierFor, progressForScore } from "@/lib/xp";
 
 /**
  * The bar along the top of every menu screen: who is signed in, their wins and coins,
@@ -19,23 +18,22 @@ export async function TopBar() {
   if (!session) return null;
 
   const user = await getOrCreateUser(session.user);
-  const [stats, coins, rating, cardXp] = await Promise.all([
+  const [stats, coins, rating, accountXp] = await Promise.all([
     prisma.userStats.findUnique({ where: { userId: user.id } }),
     prisma.userCoins.findUnique({ where: { userId: user.id }, select: { balance: true } }),
     prisma.userRating.findUnique({ where: { userId: user.id }, select: { rating: true } }),
-    cardLevelXpByUser([user.id]),
+    accountXpByUser([user.id]),
   ]);
 
-  const snapshot = stats ?? defaultUserStatsSnapshot;
-  const xp = cardXp.get(user.id) ?? 0;
+  const xp = accountXp.get(user.id) ?? 0;
 
   return (
     <TopBarView
       username={user.username}
       avatarUrl={publicAvatarUrl(user.avatarKey)}
-      tier={accountTierFor(snapshot, xp)}
+      tier={accountTierFor(xp)}
       framed={user.xpAvatarStyle}
-      progress={accountProgress(snapshot, xp)}
+      progress={progressForScore(xp)}
       rating={rating?.rating ?? null}
       wins={stats?.wins ?? 0}
       coins={coins?.balance ?? 0}

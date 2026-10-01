@@ -12,7 +12,7 @@ import type { CareerStats } from "@/lib/career-stats";
 import { FRAME_STYLE } from "@/lib/frame-tier";
 import type { GameRecord } from "@/lib/game-record";
 import type { UserStatsSnapshot } from "@/lib/record-stats";
-import { accountFrameTier, accountLevel, accountScore } from "@/lib/xp";
+import { accountFrameTier, accountLevel } from "@/lib/xp";
 
 /** The card with the level frame turned off: the same blue border as the stats panel beside it. */
 const PLAIN_FRAME = {
@@ -30,8 +30,8 @@ interface ProfileScreenProps {
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
   stats: UserStatsSnapshot;
-  /** XP from card levels, on top of what the stats give. */
-  cardXp: number;
+  /** Account XP, which the level and frame come from. */
+  xp: number;
   career: CareerStats;
   records: CareerStats;
   /** Null when the viewer may not see them: only the player and admins can. */
@@ -48,14 +48,13 @@ export function ProfileScreen({
   xpAvatarStyle,
   xpCardStyle,
   stats,
-  cardXp,
+  xp,
   career,
   records,
   games,
   isOwn,
 }: ProfileScreenProps) {
-  const score = accountScore(stats, cardXp);
-  const level = accountLevel(score);
+  const level = accountLevel(xp);
   const tier = accountFrameTier(level);
 
   return (
@@ -86,7 +85,7 @@ export function ProfileScreen({
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}
             <div className="mt-auto mb-3 flex flex-wrap items-center justify-center gap-1.5">
               <RankBadge rating={rating} />
-              <LevelBadge level={level} score={score} />
+              <LevelBadge level={level} score={xp} />
             </div>
           </div>
           <StatsTabs stats={stats} career={career} records={records} games={games} />

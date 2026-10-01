@@ -12,12 +12,12 @@ import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { cardLevelXpByUser } from "@/lib/load-card-xp";
+import { accountXpByUser } from "@/lib/load-xp";
 import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameRating } from "@/lib/record-rating";
-import { recordGameRewards } from "@/lib/record-rewards";
+import { gameXpByUser, recordGameRewards } from "@/lib/record-rewards";
 import { recordGameStats, type PlayerGameOutcome } from "@/lib/record-stats";
 import { saveCollectedCards } from "@/lib/save-collection";
 
@@ -154,13 +154,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const stats = await recordGameStats({ mode: game.mode, players: outcomes });
     const rating = await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
     const coins = await recordFinishedGameCoins(id, finalState.settings, game.players, outcomes);
-    const cardXpBefore = await cardLevelXpByUser(outcomes.map((o) => o.userId));
+    const xpBefore = await accountXpByUser(outcomes.map((o) => o.userId));
+    const gameXp = gameXpByUser(finalState, game.players);
     // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
     const cards = await saveCollectedCards(id, game.players).catch((error) => {
       console.error("collection not saved", id, error);
       return [];
     });
-    await recordGameRewards(id, game.players, { stats, rating, coins, cardXpBefore, cards });
+    await recordGameRewards(id, game.players, { stats, rating, coins, xpBefore, gameXp, cards });
     // The other players fetched the final move before the rewards were there.
     if (game.mode === "MULTIPLAYER") await notifyGame(id);
   }

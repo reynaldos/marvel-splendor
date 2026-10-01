@@ -5,7 +5,7 @@ import { ProfileScreen } from "@/components/profile/ProfileScreen";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
-import { cardLevelXpByUser } from "@/lib/load-card-xp";
+import { accountXpByUser } from "@/lib/load-xp";
 import { loadGameHistory } from "@/lib/load-game-history";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
 import { publicAvatarUrl } from "@/lib/r2";
@@ -22,7 +22,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const user = await prisma.user.findUnique({ where: { username }, include: { stats: true, rating: true } });
   if (!user) notFound();
 
-  const [session, history, cardXp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), cardLevelXpByUser([user.id])]);
+  const [session, history, xp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), accountXpByUser([user.id])]);
   const isOwn = session?.user.sub === user.auth0Sub;
 
   return (
@@ -36,7 +36,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         xpAvatarStyle={user.xpAvatarStyle}
         xpCardStyle={user.xpCardStyle}
         stats={user.stats ?? defaultUserStatsSnapshot}
-        cardXp={cardXp.get(user.id) ?? 0}
+        xp={xp.get(user.id) ?? 0}
         career={history.career}
         records={history.records}
         // A player's games are theirs to see, and admins'; nobody else is sent them.

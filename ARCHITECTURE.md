@@ -393,13 +393,13 @@ The player-card frame and card-level frames are deliberately the same idea appli
 
 Guardrails: a game must reach at least 4 turns per player to pay out (blocks an instant-forfeit loop); coins earned from bot games are capped at 150/day (bots are free and instant to spin up, so uncapped bot income is a grinding exploit; human games are naturally rate-limited by needing another person and aren't capped). The `CoinTransaction` ledger (`userId`, `delta`, `reason`, `gameId?`, `createdAt`) is the source of truth, with `UserCoins.balance` cached for fast reads — the ledger is what makes a disputed balance debuggable once the shop can spend it down. Awarded server-side from the moves route once a game finishes, in its own transaction alongside (not nested in) `recordGameStats`'s — never on the client's say-so. Past games are paid out from scratch by `pnpm coins:backfill`: everyone starts at zero and each finished game pays in the order it ended, the daily cap applied per day as it was then; the ledger's game awards are replaced, anything else in it is kept.
 
-*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`). The profile shows the level and XP in a badge, and the same frame is drawn round the player's picture wherever it appears with their stats to hand (profile, top bar, leaderboard), with the light over it that a card of that tier gets. Both frames are the player's choice: two switches in profile settings (`User.xpAvatarStyle`, `User.xpCardStyle`, off by default; `prisma/sql/2026-09-30-xp-styles.sql`).* Derived from `UserStats` and the collection, no schema change: `score = gamesPlayed×10 + wins×20 + avengersTilesWon×5 + locationsClaimed×5 + cardLevels×5`, where `cardLevels` is every level a collected card has climbed past Recruited (a Bronze card is 1, a Mastered card 9; `cardLevelXp` in `lib/xp.ts`, read by `lib/load-card-xp.ts`). Kept small so collecting never outweighs playing. Level is whichever threshold the score has passed:
+*XP / account level — done: score, level and the player-card frame built (`lib/xp.ts`, `lib/frame-tier.ts`, wired into `components/profile/ProfileScreen.tsx`). The profile shows the level and XP in a badge, and the same frame is drawn round the player's picture wherever it appears with their stats to hand (profile, top bar, leaderboard), with the light over it that a card of that tier gets. Both frames are the player's choice: two switches in profile settings (`User.xpAvatarStyle`, `User.xpCardStyle`, off by default; `prisma/sql/2026-09-30-xp-styles.sql`).* No schema change: each finished game's XP is worked out from how the seat finished (`gameXp` in `lib/xp.ts`, `gameXpByUser` in `lib/record-rewards.ts`) and saved in that seat's `GamePlayer.rewards`; a player's score is the sum of what their games gave them (`lib/load-xp.ts`). Per game: 5 for playing; 20/10/5/2 for 1st/2nd/3rd/4th place at a full table of four (every shared winner is 1st), 5 less for each empty seat and never under 3, and when every opponent is a bot scaled by their average difficulty (hard ×0.8, normal ×0.6, easy ×0.4, so 1st against three hard bots is 16; `placeXp`); per opponent at the table 4 for a human (a guest or a stand-in bot counts as one), 3 for a hard bot, 2 normal, 1 easy; 3 per Infinity Point past the game's target (16 unless changed); 1 per card recruited; 1 per Avengers badge, plus 5 for holding the Avengers tile; 3 per Location; 2 for holding the Time Stone; plus, for each level a card in the collection climbs past Recruited, 5 for the first and one more for each after (Recruited to Bronze 5, Bronze to Silver 6, so a Mastered card has given 81; `cardLevelXp`). A solid win against one normal bot comes to about 40. Level is whichever threshold the score has passed:
 
 | Level | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Score needed | 0 | 100 | 283 | 520 | 800 | 1118 | 1470 | 1852 | 2263 | 2700 |
+| Score needed | 0 | 150 | 487 | 971 | 1583 | 2314 | 3155 | 4100 | 5145 | 6285 |
 
-(Curve is `100×(level−1)^1.5`, continuing the same way past 10 — always climbing, never capped.) Level maps to the player-card frame tier, replacing the hardcoded `frame-gold` in `components/profile/ProfileScreen.tsx`:
+(Curve is `150×(level−1)^1.7`, continuing the same way past 10 — always climbing, never capped.) Level maps to the player-card frame tier, replacing the hardcoded `frame-gold` in `components/profile/ProfileScreen.tsx`:
 
 | Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -413,7 +413,11 @@ No season and no decay — rank only ever moves when a rated game finishes. Past
 
 | Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Times recruited | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
+| Level 1 card, times recruited | 1 | 8 | 15 | 30 | 45 | 68 | 98 | 135 | 180 | 240 |
+| Level 2 card | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
+| Level 3 card | 1 | 3 | 5 | 10 | 15 | 23 | 33 | 45 | 60 | 80 |
+
+A level 1 card is recruited about four times as often as a level 3 card, so its ladder is 1.5× the level 2 one and a level 3 card's is half.
 
 Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
 

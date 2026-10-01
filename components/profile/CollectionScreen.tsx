@@ -83,8 +83,8 @@ export function CollectionScreen({ found, backTo }: CollectionScreenProps) {
                         type="button"
                         aria-label={`${card.name}, recruited ${found[card.id]} times. Show it large`}
                         onClick={(e) => setViewing({ card, from: e.currentTarget.getBoundingClientRect() })}
-                        className={cn(SLOT, "frame-gold block", FRAME_EFFECT[cardFrameTier(found[card.id])])}
-                        style={FRAME_STYLE[cardFrameTier(found[card.id])]}
+                        className={cn(SLOT, "frame-gold block", FRAME_EFFECT[cardFrameTier(card.id, found[card.id])])}
+                        style={FRAME_STYLE[cardFrameTier(card.id, found[card.id])]}
                       >
                         <CardView card={card} className="size-full" />
                         <span className="gem-badge absolute -top-1.5 -right-1.5 z-10 flex h-6 min-w-6 items-center justify-center px-1 fs-2xs font-black text-white tabular-nums">
