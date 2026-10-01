@@ -70,7 +70,7 @@ export function gameXp(g: GameXpInput): number {
   );
 }
 
-/** Score needed for `level`: 150×(level−1)^1.7, matching the table in ARCHITECTURE.md. */
+/** Score needed for `level`: 150×(level−1)^1.7. */
 export function scoreForLevel(level: number): number {
   return Math.round(150 * (level - 1) ** 1.7);
 }

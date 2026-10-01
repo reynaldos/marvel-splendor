@@ -1,6 +1,15 @@
-# XP and coins
+# Progression: XP, coins, rank and card levels
 
-How a finished game pays out. Rank (the ELO-style rating) is separate and lives in `lib/rating.ts`; it is not covered here.
+Four related but independent progression systems. None share a formula with another — they're computed separately even though the same finished game feeds all of them. What each is for:
+
+| System | Measures | Shows as | Can go down? |
+|---|---|---|---|
+| Coins | Currency to spend | Balance in the top bar, shop | No (spending aside) |
+| XP / account level | How much you've played | Player-card frame, frame on the picture, level badge | No |
+| Rank | How good you are vs. people | Number badge, leaderboard | Yes |
+| Card level | Dedication to one card | Frame on that card | No |
+
+The player-card frame and card-level frames are deliberately the same idea applied twice: both read as "a collector's flex that only ever grows," so both use the same tier ladder and both are driven by a count that only goes up (games played; times recruited). Rank is the opposite kind of number — it moves both ways because it's measuring current skill, not accumulated effort — so it stays off the frame and lives as a separate badge instead. Keeping them visually distinct (rank is a bare number, never a tier) is intentional: it's what stops "how much I've played" and "how good I am" from reading as the same stat.
 
 Everything below is awarded on the server when a game reaches FINISHED, from the moves route (`app/api/games/[id]/moves/route.ts`). Bots and guests earn nothing. Abandoned games pay nothing.
 
@@ -67,7 +76,11 @@ A Mastered card has paid 81 in total. The ladder depends on the card's level, be
 | Level 2 card | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
 | Level 3 card | 1 | 3 | 5 | 10 | 15 | 23 | 33 | 45 | 60 | 80 |
 
-Card frames are cosmetic only. They never change a card's cost, points or bonus.
+### The frames
+
+Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band), from Silver sparkles that come and go, from Platinum the gem tiers get angled facets of light and light moving along the border, and from Diamond a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).
+
+Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
 
 ### Worked example
 
@@ -159,6 +172,14 @@ A full rotation pays 290. Each claim is a ledger row with reason `daily:<day>`, 
 `CoinTransaction` is the ledger and the source of truth: one row per award with `userId`, `delta`, `reason` (`game:<tier>:<win|loss>`), `gameId` and `createdAt`. `UserCoins.balance` is a cached total for fast reads. The daily cap is checked against the ledger's rows for today whose reason is not a human game.
 
 `pnpm coins:backfill` pays every finished game again from zero, in order, with the daily cap applied per day as it was then. It replaces the ledger's game awards and keeps anything else in it.
+
+## Rank
+
+Code: `lib/rating.ts`, `lib/record-rating.ts`, `components/profile/RankBadge.tsx`; the leaderboard is `/leaderboard`.
+
+The leaderboard, from the top-bar menu, is the top 100 by rating, equal ratings sharing a place; matchmaking is on the [roadmap](ROADMAP.md). An ELO-style rating, multiplayer only, and only when a game has 2+ human players — a game with only one human and the rest bot-filled seats doesn't move it, since there's no real opponent to be rated against. Starts at 1000. K-factor 40 for a player's first 15 rated games (provisional), 20 after. A 2–4 player free-for-all is scored as a virtual round-robin off final placement: each player is compared pairwise against every opponent (actual score 1 for finishing above them, 0 below, 0.5 for a shared-victory tie; expected score via the standard `1/(1+10^((opponentRating−rating)/400))`), and the rating delta is `K × average(actual−expected across opponents)`. Floor of 100, no ceiling. Shown as the number itself in a small badge (not a frame, per the table above) — no tier names, so it never reads as the same ladder as the collector frames. It's what the leaderboard orders by and what matchmaking will pair on.
+
+No season and no decay — rank only ever moves when a rated game finishes. Past games are rated from scratch by `pnpm rating:backfill`: every player starts at the default, and each finished multiplayer game is rated in the order it ended, so later games use the ratings earlier ones produced.
 
 ## What the results screen shows
 

@@ -13,7 +13,7 @@ import { Prisma } from "@/lib/generated/prisma/client";
 import { recordGameStats } from "@/lib/record-stats";
 
 /**
- * POST /api/games — creates a vs-bot game (ARCHITECTURE.md §8 Phase 1 scope;
+ * POST /api/games — creates a vs-bot game (ARCHITECTURE.md §5;
  * multiplayer LOBBY-status creation is Phase 2). The human is always seat 0;
  * every other seat is a bot. vs-bot games skip the LOBBY status entirely and
  * start ACTIVE immediately (§5: "vs-Bot games skip Pusher entirely").
