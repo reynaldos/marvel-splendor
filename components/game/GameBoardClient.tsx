@@ -27,6 +27,7 @@ import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type St
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
+import type { MoveSummary } from "@/lib/game-replay";
 
 interface GamePlayerInfo {
   seat: number;
@@ -53,8 +54,8 @@ interface GameGetResponse {
   version: number;
   players: GamePlayerInfo[];
   view: RedactedGameState;
-  /** The whole move log, in order. */
-  moves: Array<{ ordinal: number; seat: number; move: Move }>;
+  /** The whole move log, in order, each with what it meant for the record. */
+  moves: Array<{ ordinal: number; seat: number; move: Move } & Partial<MoveSummary>>;
   /** The moves since `?since=`, to play back; empty when there's nothing to show. */
   steps: GameStep[];
   turnEndsInMs: number | null;
@@ -88,8 +89,9 @@ function toDeadline(msLeft: number | null): number | null {
   return msLeft === null ? null : Date.now() + msLeft;
 }
 
-function toLogEntry(step: { seat: number; move: Move }): MoveLogEntry {
-  return { id: crypto.randomUUID(), seat: step.seat, move: step.move, timestamp: Date.now() };
+function toLogEntry(step: { seat: number; move: Move } & Partial<MoveSummary>): MoveLogEntry {
+  const { seat, move, round, points, events } = step;
+  return { id: crypto.randomUUID(), seat, move, round, points, events, timestamp: Date.now() };
 }
 
 /** How long what another player picked is outlined before it leaves the board: the time the outline takes to be drawn and taken up. */
@@ -183,7 +185,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       // Where each tile sits is read now, while it is still on the board.
       const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
       setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
-      setMoveLog((log) => [...log, toLogEntry(step)]);
+      const points = step.view.players.find((p) => p.seat === step.seat)?.points;
+      setMoveLog((log) => [...log, toLogEntry({ ...step, round: shown.round, points, events: events.map((e) => e.event) })]);
       shown = step.view;
       for (const [i, announced] of events.entries()) {
         playSfx(announced.event.kind);

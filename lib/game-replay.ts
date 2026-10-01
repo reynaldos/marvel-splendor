@@ -6,6 +6,7 @@
  */
 import { isDeepStrictEqual } from "node:util";
 
+import { boardEvents, type BoardEvent } from "@/lib/board-events";
 import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
 import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
@@ -50,6 +51,33 @@ export function replaySteps(args: {
     return same ? steps : null;
   } catch {
     return null;
+  }
+}
+
+/** What a logged move meant: the round it was in, the mover's points after it, and anything it won. */
+export interface MoveSummary {
+  round: number;
+  points: number;
+  events: BoardEvent[];
+}
+
+/** One summary per move, by replaying the log; empty when the replay can't be trusted. */
+export function moveSummaries(args: {
+  seed: string;
+  settings: GameSettings;
+  playerCount: number;
+  moves: Array<{ seat: number; move: Move }>;
+}): MoveSummary[] {
+  const { seed, settings, playerCount, moves } = args;
+  try {
+    let state = createGame(playerCount, seed, settings);
+    return moves.map(({ seat, move }) => {
+      const before = state;
+      state = applyMove(state, seat, move);
+      return { round: before.round, points: state.players[seat].points, events: boardEvents(before, state) };
+    });
+  } catch {
+    return [];
   }
 }
 

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
-import { gameEndsInMs, replaySteps, turnEndsInMs } from "@/lib/game-replay";
+import { gameEndsInMs, moveSummaries, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import type { GameRewards } from "@/lib/game-record";
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -61,6 +61,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     move: m.payload as unknown as Move,
   }));
 
+  const summaries = moveSummaries({
+    seed: game.seed,
+    settings: game.settings as unknown as GameSettings,
+    playerCount: game.players.length,
+    moves,
+  });
+
   const since = Number(new URL(request.url).searchParams.get("since") ?? NaN);
   const steps =
     Number.isInteger(since) && since >= 0 && since < moves.length
@@ -90,7 +97,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       rewards: p.rewards as unknown as GameRewards | null,
     })),
     view: redactState(state, seatRow.seat),
-    moves,
+    moves: moves.map((m, i) => ({ ...m, ...summaries[i] })),
     steps: steps ?? [],
     turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
     gameEndsInMs: game.status === "ACTIVE" ? gameEndsInMs(state.settings, game.createdAt) : null,
