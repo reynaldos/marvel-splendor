@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
 import { Rule } from "@/components/lobby/Rule";
+import { SoundToggles } from "@/components/SoundToggles";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import type { GameSettings } from "@/lib/engine/types";
 
@@ -85,7 +86,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
       </DropdownMenu>
 
       <Dialog open={open !== null} onOpenChange={(next) => !next && setOpen(null)}>
-        <DialogContent className="theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto">
+        <DialogContent className={`theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto ${open === "moves" ? "sm:max-w-lg" : ""}`}>
           {open === "moves" ? (
             <>
               <DialogHeader>
@@ -129,6 +130,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
                   />
                 ) : null}
               </div>
+              <SoundToggles />
             </>
           ) : null}
 

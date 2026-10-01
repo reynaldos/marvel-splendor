@@ -32,10 +32,10 @@ export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProp
   const newestFirst = [...entries].reverse();
   return (
     <div className={className}>
-      <ScrollArea className="h-48 rounded-xl bg-cosmos-950/60 p-3 ring-2 ring-cosmos-500 ring-inset">
+      <ScrollArea className="h-[65dvh] rounded-xl bg-cosmos-950/60 p-3 ring-2 ring-cosmos-500 ring-inset">
         <ol className="flex flex-col gap-1.5">
           {entries.length === 0 ? (
-            <li className="text-sm text-cosmos-300">No moves yet.</li>
+            <li className="text-base text-cosmos-300">No moves yet.</li>
           ) : (
             newestFirst.map((entry, i) => {
               // The bar sits above the newest move of each round, so it reads as that round's heading.
@@ -49,10 +49,10 @@ export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProp
                       <span className="h-px flex-1 bg-cosmos-500" />
                     </li>
                   )}
-                  <li className="text-sm">
+                  <li className="text-base">
                     {describeMove(entry, players, viewerSeat)}
                     {describeEvents(entry, players, viewerSeat).map((line) => (
-                      <span key={line} className="block text-xs text-gold-400">
+                      <span key={line} className="block text-sm text-gold-400">
                         {line}
                       </span>
                     ))}
