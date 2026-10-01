@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { cn } from "cn";
 
+import { playSfx } from "@/components/audio";
 import { CHAT_BUBBLE_MS } from "@/lib/chat";
 
 interface Sent {
@@ -18,6 +19,7 @@ export function useChatBubbles() {
   const [bubbles, setBubbles] = useState<Bubbles>({});
 
   const show = useCallback((seat: number, { kind, body }: Sent) => {
+    playSfx("chat");
     const key = Date.now();
     setBubbles((shown) => ({ ...shown, [seat]: { kind, body, key } }));
     // A newer one from the same player has taken its place, and leaves in its own time.

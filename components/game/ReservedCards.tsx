@@ -4,6 +4,7 @@ import { useState } from "react";
 import { cn } from "cn";
 import { Check } from "lucide-react";
 
+import { playSfx } from "@/components/audio";
 import { LargeImages } from "@/components/game/assets";
 import { CardView } from "@/components/game/Card";
 import { estimateAffordability } from "@/components/game/affordability";
@@ -48,7 +49,10 @@ export function ReservedCards({
       <button
         type="button"
         aria-label={`Your reserved cards (${cards.length})`}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          playSfx("flip");
+          setOpen(true);
+        }}
         className="relative mr-1 w-22 shrink-0 self-stretch [clip-path:inset(-50%_-50%_0_-50%)]"
       >
         {cards.map((card, i) => (

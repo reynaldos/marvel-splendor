@@ -2,18 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Coins, LogOut, Medal, Menu, ScrollText, Settings, Shield, Trophy } from "lucide-react";
+import { Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trash2, Trophy } from "lucide-react";
 
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { SoundToggles } from "@/components/SoundToggles";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { markUpdatesSeen, NewDot, unseenCount, UpdateLog, useSeenUpdate } from "@/components/UpdateLog";
 import { useNotchSide } from "@/components/use-notch-side";
 import { FRAME_STYLE, type FrameTier } from "@/lib/frame-tier";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
+const TITLE = "font-display text-base font-black tracking-widest text-gold-400 uppercase";
+/** A round picture button with its name under it, in the row along the top of the menu. */
 const CHOICE =
-  "flex h-12 items-center gap-3 rounded-full bg-cosmos-700 px-5 text-base font-bold ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400";
+  "group flex w-20 flex-col items-center gap-1.5 text-xs font-bold tracking-wide uppercase outline-none [&>span]:focus-visible:ring-gold-400";
+const CHOICE_ICON =
+  "relative flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset group-hover:bg-cosmos-500";
+const WIDE = "flex h-12 flex-1 items-center justify-center gap-2 rounded-full text-base font-bold outline-none focus-visible:ring-2 focus-visible:ring-gold-400";
 
 interface TopBarViewProps {
   username: string;
@@ -28,6 +34,7 @@ interface TopBarViewProps {
   wins: number;
   coins: number;
   isAdmin: boolean;
+  onDeleteAccount: () => Promise<void>;
 }
 
 /** The top bar as drawn. It lies over the top of the screen's canvas, and scales with it. */
@@ -41,10 +48,11 @@ export function TopBarView({
   wins,
   coins,
   isAdmin,
+  onDeleteAccount,
 }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
-  // The menu and the log share one dialog: two overlapping ones left stale pointer locks on touch.
-  const [view, setView] = useState<"menu" | "updates">("menu");
+  // The menu, the log and the delete check share one dialog: two overlapping ones left stale pointer locks on touch.
+  const [view, setView] = useState<"menu" | "updates" | "delete">("menu");
   const seen = useSeenUpdate();
   // What had been seen when the log was opened, so the new ones stay marked while it is read.
   const [since, setSince] = useState(seen);
@@ -114,51 +122,99 @@ export function TopBarView({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           className={`theme-cosmos dark border-2 border-gold-400 ${
-            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : "gap-3 sm:max-w-xs"
+            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : "gap-4 sm:max-w-md"
           }`}
         >
           {view === "updates" ? (
             <UpdateLog since={since} />
+          ) : view === "delete" ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className={TITLE}>Delete your account?</DialogTitle>
+                <DialogDescription className="text-sm text-white/70">
+                  Your profile, stats, rank, coins and collection go for good. Games you played stay, with no name on
+                  your seat.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setView("menu")}
+                  className={`${WIDE} bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500`}
+                >
+                  Keep it
+                </button>
+                <form action={onDeleteAccount} className="flex flex-1">
+                  <button type="submit" className={`${WIDE} bg-marvel text-white hover:bg-red-500`}>
+                    Delete for good
+                  </button>
+                </form>
+              </div>
+            </>
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
-                  Menu
-                </DialogTitle>
-                <DialogDescription className="sr-only">The leaderboard, settings, and signing out.</DialogDescription>
+                <DialogTitle className={TITLE}>Menu</DialogTitle>
+                <DialogDescription className="sr-only">
+                  The leaderboard, what&apos;s new, feedback, sound, and signing out.
+                </DialogDescription>
               </DialogHeader>
-              <Link href="/leaderboard" onClick={close} className={CHOICE}>
-                <Medal className="size-5 text-gold-200" />
-                Ranked Leaderboard
-              </Link>
-              <Link href="/settings" onClick={close} className={CHOICE}>
-                <Settings className="size-5 text-gold-200" />
-                Profile settings
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setSince(seen);
-                  markUpdatesSeen();
-                  setView("updates");
-                }}
-                className={CHOICE}
-              >
-                <ScrollText className="size-5 text-gold-200" />
-                What&apos;s new
-                {hasNew ? <NewDot className="ml-auto" /> : null}
-              </button>
-              {isAdmin ? (
-                <Link href="/admin/users" onClick={close} className={CHOICE}>
-                  <Shield className="size-5 text-gold-200" />
-                  Admin
+              <nav className="flex justify-center gap-2">
+                <Link href="/leaderboard" onClick={close} className={CHOICE}>
+                  <span className={CHOICE_ICON}>
+                    <Medal className="size-7" />
+                  </span>
+                  Leaderboard
                 </Link>
-              ) : null}
-              {/* A plain link: signing out is a trip to the server, not a page of the app. */}
-              <a href="/auth/logout" className={CHOICE}>
-                <LogOut className="size-5 text-gold-200" />
-                Log out
-              </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSince(seen);
+                    markUpdatesSeen();
+                    setView("updates");
+                  }}
+                  className={CHOICE}
+                >
+                  <span className={CHOICE_ICON}>
+                    <ScrollText className="size-7" />
+                    {hasNew ? <NewDot className="absolute top-0 right-0" /> : null}
+                  </span>
+                  What&apos;s new
+                </button>
+                {/* ponytail: does nothing yet; the feedback form is next. */}
+                <button type="button" className={CHOICE}>
+                  <span className={CHOICE_ICON}>
+                    <MessageSquareText className="size-7" />
+                  </span>
+                  Feedback
+                </button>
+                {isAdmin ? (
+                  <Link href="/admin/users" onClick={close} className={CHOICE}>
+                    <span className={CHOICE_ICON}>
+                      <Shield className="size-7" />
+                    </span>
+                    Admin
+                  </Link>
+                ) : null}
+              </nav>
+              <hr className="border-cosmos-500" />
+              <SoundToggles />
+              <hr className="border-cosmos-500" />
+              <div className="flex gap-3">
+                {/* A plain link: signing out is a trip to the server, not a page of the app. */}
+                <a href="/auth/logout" className={`${WIDE} bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500`}>
+                  <LogOut className="size-5 text-gold-200" />
+                  Sign out
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setView("delete")}
+                  className={`${WIDE} bg-marvel text-white hover:bg-red-500`}
+                >
+                  <Trash2 className="size-5" />
+                  Delete
+                </button>
+              </div>
             </>
           )}
         </DialogContent>

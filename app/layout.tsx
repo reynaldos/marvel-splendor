@@ -5,6 +5,7 @@ import "./globals.css";
 import { LAUNCH_IMAGES } from "@/lib/launch-images";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl, THEME_COLOR } from "@/lib/site";
 import { AppWindow } from "@/components/AppWindow";
+import { BgmPlayer } from "@/components/audio";
 import { LaunchArt, RotateNotice } from "@/components/LaunchArt";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>
             <AppWindow />
+            <BgmPlayer />
             {/* The installed app opens on the launch picture; this holds it a little longer, then fades. */}
             <LaunchArt className="launch-splash pointer-events-none fixed inset-0 z-[110] hidden [@media(display-mode:standalone)]:flex" />
             {children}

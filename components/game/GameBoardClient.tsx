@@ -285,12 +285,14 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     gameData.view.status === "active" &&
     gameData.view.currentSeat === gameData.view.viewerSeat;
   const finishedNow = gameData?.view.status === "finished" && !gameOverDismissed && !announcement;
+  const winner = gameData?.view.winnerSeat ?? null;
+  const viewerSeat = gameData?.view.viewerSeat;
   useEffect(() => {
     if (myTurnNow) playSfx("yourTurn");
   }, [myTurnNow]);
   useEffect(() => {
-    if (finishedNow) playSfx("gameOver");
-  }, [finishedNow]);
+    if (finishedNow) playSfx(winner === null ? "gameOver" : winner === viewerSeat ? "victory" : "defeat");
+  }, [finishedNow, winner, viewerSeat]);
 
   /** Resolves to whether the move went through. */
   const submitMove = useCallback(
@@ -379,6 +381,12 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
+  // A warning with five seconds left on your own turn.
+  useEffect(() => {
+    if (!timed || !isMine || turnEndsAt === null) return;
+    const timer = setTimeout(() => playSfx("clockLow"), Math.max(0, turnEndsAt - Date.now() - 5000));
+    return () => clearTimeout(timer);
+  }, [timed, isMine, turnEndsAt]);
 
   const stageTokenColor = useCallback(
     (color: Stone) => {
@@ -386,6 +394,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         if (!gameData) return prev;
         const existing = prev?.kind === "tokens" ? prev.colors : [];
         if (!canAddTokenColor(existing, color, gameData.view.supply)) return prev;
+        playSfx("tap");
         return { kind: "tokens", colors: [...existing, color] };
       });
     },
@@ -414,6 +423,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   // Tapping the staged deck again un-stages it.
   const stageReserveDeck = useCallback((level: CardLevel) => {
+    playSfx("tap");
     setStaged((prev) =>
       prev?.kind === "reserve" && prev.from === "deck" && prev.level === level
         ? null

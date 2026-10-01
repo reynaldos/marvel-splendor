@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { cn } from "cn";
 
+import { playSfx } from "@/components/audio";
 import { Button } from "@/components/ui/button";
 import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { ZoomedView } from "@/components/game/Zoomable";
@@ -106,7 +107,10 @@ export function Card({
       <button
         type="button"
         aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          if (!expanded) playSfx("flip");
+          setExpanded((v) => !v);
+        }}
         className={cn(
           "@container relative block size-full overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10 transition-transform disabled:cursor-default",
           affordable && "ring-2 ring-primary",

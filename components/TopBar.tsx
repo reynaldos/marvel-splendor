@@ -1,4 +1,5 @@
 import { TopBarView } from "@/components/TopBarView";
+import { deleteAccountAction } from "@/app/settings/actions";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
@@ -39,6 +40,7 @@ export async function TopBar() {
       wins={stats?.wins ?? 0}
       coins={coins?.balance ?? 0}
       isAdmin={isAdmin(session.user)}
+      onDeleteAccount={deleteAccountAction}
     />
   );
 }
