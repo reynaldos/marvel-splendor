@@ -53,8 +53,8 @@ export function unseenCount(seen: string | null) {
   return at === -1 ? 1 : at;
 }
 
-export function NewDot({ className = "" }: { className?: string }) {
-  return <span aria-label="New updates" className={`size-3 rounded-full bg-gold-400 ring-2 ring-cosmos-950 ${className}`} />;
+export function NewDot({ label = "New updates", className = "" }: { label?: string; className?: string }) {
+  return <span aria-label={label} className={`size-3 rounded-full bg-gold-400 ring-2 ring-cosmos-950 ${className}`} />;
 }
 
 // Read as UTC, so the day doesn't shift with the reader's time zone.

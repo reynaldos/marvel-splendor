@@ -35,6 +35,8 @@ interface TopBarViewProps {
   wins: number;
   coins: number;
   isAdmin: boolean;
+  /** Feedback no admin has looked at yet; lights the menu and its Admin choice. Always false for players. */
+  newFeedback: boolean;
   onDeleteAccount: () => Promise<void>;
 }
 
@@ -49,6 +51,7 @@ export function TopBarView({
   wins,
   coins,
   isAdmin,
+  newFeedback,
   onDeleteAccount,
 }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
@@ -116,7 +119,7 @@ export function TopBarView({
           className="relative flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
         >
           <Menu className="size-6" />
-          {hasNew ? <NewDot className="absolute top-0 right-0" /> : null}
+          {hasNew || newFeedback ? <NewDot className="absolute top-0 right-0" /> : null}
         </button>
       </header>
 
@@ -194,6 +197,7 @@ export function TopBarView({
                   <Link href="/admin/users" onClick={close} className={CHOICE}>
                     <span className={CHOICE_ICON}>
                       <Shield className="size-7" />
+                      {newFeedback ? <NewDot label="New feedback" className="absolute top-0 right-0" /> : null}
                     </span>
                     Admin
                   </Link>

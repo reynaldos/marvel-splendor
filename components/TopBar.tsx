@@ -18,11 +18,14 @@ export async function TopBar() {
   if (!session) return null;
 
   const user = await getOrCreateUser(session.user);
-  const [stats, coins, rating, accountXp] = await Promise.all([
+  const admin = isAdmin(session.user);
+  const [stats, coins, rating, accountXp, newFeedback] = await Promise.all([
     prisma.userStats.findUnique({ where: { userId: user.id } }),
     prisma.userCoins.findUnique({ where: { userId: user.id }, select: { balance: true } }),
     prisma.userRating.findUnique({ where: { userId: user.id }, select: { rating: true } }),
     accountXpByUser([user.id]),
+    // Only admins see the feedback badge, so only they pay for the count.
+    admin ? prisma.feedback.count({ where: { status: "NEW" } }) : 0,
   ]);
 
   const xp = accountXp.get(user.id) ?? 0;
@@ -37,7 +40,8 @@ export async function TopBar() {
       rating={rating?.rating ?? null}
       wins={stats?.wins ?? 0}
       coins={coins?.balance ?? 0}
-      isAdmin={isAdmin(session.user)}
+      isAdmin={admin}
+      newFeedback={newFeedback > 0}
       onDeleteAccount={deleteAccountAction}
     />
   );
