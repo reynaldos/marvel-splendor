@@ -13,6 +13,7 @@ import { ChatButton } from "@/components/game/ChatButton";
 import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
+import { playSfx } from "@/components/audio";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
@@ -98,6 +99,12 @@ const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
 
+// A session that ended mid-game: sign in again and come straight back, before any turns are missed.
+function signInAgain(gameId: string) {
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Auth0 route, not a page
+  window.location.href = `/auth/login?returnTo=${encodeURIComponent(`/play/${gameId}`)}`;
+}
+
 const NOTICE =
   "flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md";
 
@@ -170,12 +177,16 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         await delay(TRACE_MS);
         setTraced(null);
       }
+      if (step.move.type === "TAKE_TOKENS") playSfx("takeTokens");
+      else if (step.move.type === "RECRUIT") playSfx("recruit");
+      else if (step.move.type === "RESERVE") playSfx("reserve");
       // Where each tile sits is read now, while it is still on the board.
       const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
       setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
       setMoveLog((log) => [...log, toLogEntry(step)]);
       shown = step.view;
       for (const [i, announced] of events.entries()) {
+        playSfx(announced.event.kind);
         setAnnouncement({ ...announced, key: `${step.view.moveCount}-${i}` });
         await delay(announceMs(announced.event));
       }
@@ -202,6 +213,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const res = await fetch(`/api/games/${gameId}${shown ? `?since=${shown.view.moveCount}` : ""}`);
         const body = await res.json().catch(() => null);
         if (!res.ok) {
+          if (res.status === 401) return signInAgain(gameId);
           if (!quiet) setFatalError(body?.error ?? `Could not load this game (${res.status}).`);
           return;
         }
@@ -263,6 +275,20 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // can only ever become non-null as the direct result of a move that just
   // went through that same success path.
 
+  // Sounds for the moments the board doesn't play back: your turn coming round, and the end.
+  const myTurnNow =
+    gameData !== null &&
+    !gameData.abandoned &&
+    gameData.view.status === "active" &&
+    gameData.view.currentSeat === gameData.view.viewerSeat;
+  const finishedNow = gameData?.view.status === "finished" && !gameOverDismissed && !announcement;
+  useEffect(() => {
+    if (myTurnNow) playSfx("yourTurn");
+  }, [myTurnNow]);
+  useEffect(() => {
+    if (finishedNow) playSfx("gameOver");
+  }, [finishedNow]);
+
   /** Resolves to whether the move went through. */
   const submitMove = useCallback(
     async (move: Move, quietly = false): Promise<boolean> => {
@@ -282,6 +308,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const body = await res.json().catch(() => null);
 
         if (!res.ok) {
+          if (res.status === 401) {
+            signInAgain(gameId);
+            return false;
+          }
           if (!quiet) toast.error(body?.error ?? `That move was rejected (${res.status}).`);
           // Someone else changed the game first; catch up once this flow ends.
           if (res.status === 409) missedSignal.current = true;
