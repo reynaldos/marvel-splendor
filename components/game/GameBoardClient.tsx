@@ -13,6 +13,7 @@ import { ChatButton } from "@/components/game/ChatButton";
 import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
+import { playSfx, scheduleClockTicks } from "@/components/audio";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
@@ -26,6 +27,7 @@ import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type St
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
 import { TURN_BANNER_MS } from "@/lib/turn-banner";
 import type { RedactedGameState } from "@/lib/game-view";
+import type { MoveSummary } from "@/lib/game-replay";
 
 interface GamePlayerInfo {
   seat: number;
@@ -52,8 +54,8 @@ interface GameGetResponse {
   version: number;
   players: GamePlayerInfo[];
   view: RedactedGameState;
-  /** The whole move log, in order. */
-  moves: Array<{ ordinal: number; seat: number; move: Move }>;
+  /** The whole move log, in order, each with what it meant for the record. */
+  moves: Array<{ ordinal: number; seat: number; move: Move } & Partial<MoveSummary>>;
   /** The moves since `?since=`, to play back; empty when there's nothing to show. */
   steps: GameStep[];
   turnEndsInMs: number | null;
@@ -87,8 +89,9 @@ function toDeadline(msLeft: number | null): number | null {
   return msLeft === null ? null : Date.now() + msLeft;
 }
 
-function toLogEntry(step: { seat: number; move: Move }): MoveLogEntry {
-  return { id: crypto.randomUUID(), seat: step.seat, move: step.move, timestamp: Date.now() };
+function toLogEntry(step: { seat: number; move: Move } & Partial<MoveSummary>): MoveLogEntry {
+  const { seat, move, round, points, events } = step;
+  return { id: crypto.randomUUID(), seat, move, round, points, events, timestamp: Date.now() };
 }
 
 /** How long what another player picked is outlined before it leaves the board: the time the outline takes to be drawn and taken up. */
@@ -97,6 +100,12 @@ const TRACE_MS = 1500;
 const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
+
+// A session that ended mid-game: sign in again and come straight back, before any turns are missed.
+function signInAgain(gameId: string) {
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Auth0 route, not a page
+  window.location.href = `/auth/login?returnTo=${encodeURIComponent(`/play/${gameId}`)}`;
+}
 
 const NOTICE =
   "flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md";
@@ -170,12 +179,16 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         await delay(TRACE_MS);
         setTraced(null);
       }
+      if (step.move.type === "TAKE_TOKENS" || step.move.type === "RECRUIT") playSfx("recruit");
+      else if (step.move.type === "RESERVE") playSfx("reserve");
       // Where each tile sits is read now, while it is still on the board.
       const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
       setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
-      setMoveLog((log) => [...log, toLogEntry(step)]);
+      const points = step.view.players.find((p) => p.seat === step.seat)?.points;
+      setMoveLog((log) => [...log, toLogEntry({ ...step, round: shown.round, points, events: events.map((e) => e.event) })]);
       shown = step.view;
       for (const [i, announced] of events.entries()) {
+        playSfx(announced.event.kind);
         setAnnouncement({ ...announced, key: `${step.view.moveCount}-${i}` });
         await delay(announceMs(announced.event));
       }
@@ -202,6 +215,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const res = await fetch(`/api/games/${gameId}${shown ? `?since=${shown.view.moveCount}` : ""}`);
         const body = await res.json().catch(() => null);
         if (!res.ok) {
+          if (res.status === 401) return signInAgain(gameId);
           if (!quiet) setFatalError(body?.error ?? `Could not load this game (${res.status}).`);
           return;
         }
@@ -263,6 +277,22 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   // can only ever become non-null as the direct result of a move that just
   // went through that same success path.
 
+  // Sounds for the moments the board doesn't play back: your turn coming round, and the end.
+  const myTurnNow =
+    gameData !== null &&
+    !gameData.abandoned &&
+    gameData.view.status === "active" &&
+    gameData.view.currentSeat === gameData.view.viewerSeat;
+  const finishedNow = gameData?.view.status === "finished" && !gameOverDismissed && !announcement;
+  const winner = gameData?.view.winnerSeat ?? null;
+  const viewerSeat = gameData?.view.viewerSeat;
+  useEffect(() => {
+    if (myTurnNow) playSfx("yourTurn");
+  }, [myTurnNow]);
+  useEffect(() => {
+    if (finishedNow) playSfx(winner === null ? "gameOver" : winner === viewerSeat ? "victory" : "defeat");
+  }, [finishedNow, winner, viewerSeat]);
+
   /** Resolves to whether the move went through. */
   const submitMove = useCallback(
     async (move: Move, quietly = false): Promise<boolean> => {
@@ -282,6 +312,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const body = await res.json().catch(() => null);
 
         if (!res.ok) {
+          if (res.status === 401) {
+            signInAgain(gameId);
+            return false;
+          }
           if (!quiet) toast.error(body?.error ?? `That move was rejected (${res.status}).`);
           // Someone else changed the game first; catch up once this flow ends.
           if (res.status === 409) missedSignal.current = true;
@@ -346,6 +380,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
   }, [timed, isMine, turnEndsAt, submitMove]);
+  // The clock ticks through the last seconds of your own turn.
+  useEffect(() => {
+    if (!timed || !isMine || turnEndsAt === null) return;
+    return scheduleClockTicks(turnEndsAt);
+  }, [timed, isMine, turnEndsAt]);
 
   const stageTokenColor = useCallback(
     (color: Stone) => {
@@ -353,6 +392,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         if (!gameData) return prev;
         const existing = prev?.kind === "tokens" ? prev.colors : [];
         if (!canAddTokenColor(existing, color, gameData.view.supply)) return prev;
+        playSfx("tap");
         return { kind: "tokens", colors: [...existing, color] };
       });
     },
@@ -381,6 +421,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
 
   // Tapping the staged deck again un-stages it.
   const stageReserveDeck = useCallback((level: CardLevel) => {
+    playSfx("tap");
     setStaged((prev) =>
       prev?.kind === "reserve" && prev.from === "deck" && prev.level === level
         ? null

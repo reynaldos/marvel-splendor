@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { BgmPlayer } from "@/components/audio";
 import { GameBoardClient } from "@/components/game/GameBoardClient";
 import { auth0 } from "@/lib/auth0";
 import { pageMetadata } from "@/lib/site";
@@ -22,5 +23,11 @@ export default async function PlayPage({
     redirect(`/auth/login?returnTo=/play/${gameId}`);
   }
 
-  return <GameBoardClient gameId={gameId} />;
+  // The music plays at the table only; leaving the board stops it.
+  return (
+    <>
+      <BgmPlayer />
+      <GameBoardClient gameId={gameId} />
+    </>
+  );
 }

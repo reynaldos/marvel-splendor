@@ -5,4 +5,7 @@ import { Auth0Client } from "@auth0/nextjs-auth0/server";
 // (see .env.example). The SDK mounts its own routes (/auth/login,
 // /auth/logout, /auth/callback, /auth/profile, ...) via `proxy.ts` — there is
 // no catch-all route handler to write for this SDK major version.
-export const auth0 = new Auth0Client();
+// Sessions roll on every request and last 30 days, so a hard expiry can't log a player out mid-game.
+export const auth0 = new Auth0Client({
+  session: { absoluteDuration: 60 * 60 * 24 * 30, inactivityDuration: 60 * 60 * 24 * 7 },
+});

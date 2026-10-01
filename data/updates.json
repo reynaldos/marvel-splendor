@@ -1,5 +1,38 @@
 [
   {
+    "version": "0.14.0",
+    "date": "2026-10-01",
+    "title": "Sound, feedback, and a new menu",
+    "summary": "Music and sounds while you play, a way to tell us what you want, and a menu lay out update.",
+    "pulls": [],
+    "new": [
+      "Music at the table, and sounds for the moments of a game, WIP.",
+      "Music and Sounds switches in the menu and in the game's settings; more sounds are on the way",
+      "Feedback from the menu: a feature request, a bug report, or a character you'd like to see",
+      "Sign out and delete your account from the menu"
+    ],
+    "improved": [
+      "The menu layout edit, with round buttons for the leaderboard, what's new and feedback"
+    ],
+    "fixed": []
+  },
+  {
+    "version": "0.13.0",
+    "date": "2026-09-30",
+    "title": "A fuller game log, and no more mid-game sign-outs",
+    "summary": "Every tile won is in the log, with scores and rounds, and your sign-in no longer runs out during a game.",
+    "pulls": [],
+    "new": [],
+    "improved": [
+      "The log records each Location claimed, the Avengers Assemble tile taken or stolen, and the Time Stone picked up",
+      "The move log opens in a larger window and has a bar between rounds"
+    ],
+    "fixed": [
+      "Players are no longer signed out partway through a game and skipped until a bot takes their seat",
+      "If your sign-in does run out, you are signed back in and returned to the board straight away"
+    ]
+  },
+  {
     "version": "0.12.0",
     "date": "2026-09-30",
     "title": "Lobbies that look after themselves",

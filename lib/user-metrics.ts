@@ -1,6 +1,8 @@
 import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
-import type { GameState } from "@/lib/engine/types";
+import type { GameSettings, GameState } from "@/lib/engine/types";
+import { rankPlayers } from "@/lib/game-record";
+import type { GameSummary } from "@/lib/game-summary";
 import { botName } from "@/lib/lobby-rules";
 
 /** Visits are written at most once a minute, so anyone seen this recently is still here. */
@@ -9,6 +11,8 @@ const ONLINE_MS = 5 * 60 * 1000;
 const LIVE_GAME_MS = 10 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TABLES_SHOWN = 50;
+// ponytail: the latest 200 finished games, paged in the browser. Page on the server if the list outgrows it.
+const RECENT_SHOWN = 200;
 
 const SIGN_IN: Record<string, string> = {
   auth0: "Email",
@@ -50,10 +54,6 @@ export function deviceName(userAgent: string | null): string {
 }
 
 /** "45m", "3h 12m". */
-export function formatDuration(ms: number): string {
-  const minutes = Math.round(ms / 60_000);
-  return minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-}
 
 export interface Visit {
   ip: string | null;
@@ -75,11 +75,28 @@ export function summarizeVisits(visits: Visit[]) {
   };
 }
 
-/** Most sent first. What is on the list but never sent is there with 0; what was sent and since taken off the list is kept. */
+/** Most sent first, for what is on the list now: never sent shows 0, and anything taken off the list is left out. */
 export function rankSends(list: readonly string[], sent: Array<{ body: string; count: number }>) {
-  const counts = new Map([...list.map((body) => [body, 0] as const), ...sent.map((s) => [s.body, s.count] as const)]);
-  return [...counts].map(([body, count]) => ({ body, count })).sort((a, b) => b.count - a.count);
+  return list
+    .map((body) => ({ body, count: sent.find((s) => s.body === body)?.count ?? 0 }))
+    .sort((a, b) => b.count - a.count);
 }
+
+const GAME_SELECT = {
+  id: true,
+  joinCode: true,
+  status: true,
+  mode: true,
+  createdAt: true,
+  updatedAt: true,
+  state: true,
+  settings: true,
+  _count: { select: { moves: true } },
+  players: {
+    orderBy: { seat: "asc" as const },
+    select: { seat: true, isBot: true, guestName: true, user: { select: { username: true } } },
+  },
+};
 
 /**
  * Everything the admin page shows: who is here now, the open tables, and every user.
@@ -88,7 +105,7 @@ export function rankSends(list: readonly string[], sent: Array<{ body: string; c
  * add the visits up in the database once there are thousands.
  */
 export async function loadUserMetrics(now = Date.now()) {
-  const [users, moveTimes, gameCounts, openGames, sends] = await Promise.all([
+  const [users, moveTimes, gameCounts, openGames, recentGames, sends] = await Promise.all([
     prisma.user.findMany({
       select: {
         id: true,
@@ -111,19 +128,13 @@ export async function loadUserMetrics(now = Date.now()) {
       where: { status: { in: ["ACTIVE", "LOBBY"] } },
       orderBy: { updatedAt: "desc" },
       take: TABLES_SHOWN,
-      select: {
-        id: true,
-        joinCode: true,
-        status: true,
-        mode: true,
-        createdAt: true,
-        updatedAt: true,
-        state: true,
-        players: {
-          orderBy: { seat: "asc" },
-          select: { seat: true, isBot: true, guestName: true, user: { select: { username: true } } },
-        },
-      },
+      select: GAME_SELECT,
+    }),
+    prisma.game.findMany({
+      where: { status: { in: ["FINISHED", "ABANDONED"] } },
+      orderBy: { updatedAt: "desc" },
+      take: RECENT_SHOWN,
+      select: GAME_SELECT,
     }),
     prisma.chatMessage.groupBy({ by: ["kind", "body"], _count: { _all: true } }),
   ]);
@@ -159,12 +170,32 @@ export async function loadUserMetrics(now = Date.now()) {
     // Latest seen first; those never seen since tracking began go last.
     .sort((a, b) => (b.lastSeenAt?.getTime() ?? 0) - (a.lastSeenAt?.getTime() ?? 0));
 
-  const tables = openGames.map(({ state, players, ...game }) => ({
-    ...game,
-    live: game.status === "ACTIVE" && now - game.updatedAt.getTime() < LIVE_GAME_MS,
-    round: (state as unknown as Partial<GameState> | null)?.round ?? 0,
-    players: players.map((p) => (p.isBot ? botName(players, p.seat) : (p.user?.username ?? p.guestName ?? "Player"))),
-  }));
+  const summarize = (game: (typeof openGames)[number]): GameSummary => {
+    const state = game.state as unknown as Partial<GameState> | null;
+    const settings = game.settings as unknown as Partial<GameSettings> | null;
+    const seated = game.players.map((p) => ({
+      seat: p.seat,
+      name: p.isBot ? botName(game.players, p.seat) : (p.user?.username ?? p.guestName ?? "Player"),
+      avatarUrl: null,
+    }));
+    return {
+      id: game.id,
+      status: game.status,
+      mode: game.mode,
+      joinCode: game.joinCode,
+      createdAt: game.createdAt.getTime(),
+      updatedAt: game.updatedAt.getTime(),
+      playedMs: playedMs.get(game.id) ?? 0,
+      live: game.status === "ACTIVE" && now - game.updatedAt.getTime() < LIVE_GAME_MS,
+      round: state?.round ?? 0,
+      moves: game._count.moves,
+      players: seated.map((p) => p.name),
+      rules: { targetPoints: settings?.targetPoints ?? 0, turnTimeSeconds: settings?.turnTimeSeconds ?? null },
+      standings: state?.players ? rankPlayers(state as GameState, seated) : null,
+    };
+  };
+  const tables = openGames.map(summarize);
+  const recent = recentGames.map(summarize);
 
   return {
     totals: {
@@ -179,6 +210,7 @@ export async function loadUserMetrics(now = Date.now()) {
       abandoned: gamesWith("ABANDONED"),
     },
     tables,
+    recent,
     users: rows,
     sent: {
       emojis: rankSends(EMOJIS, sentOf("REACTION")),

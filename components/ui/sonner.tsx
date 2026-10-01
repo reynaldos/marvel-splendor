@@ -11,7 +11,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group"
+      // Drawn like the game's dialogs: night sky behind, gold edge, bold white text.
+      className="toaster group theme-cosmos dark"
       icons={{
         success: (
           <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4" />
@@ -31,15 +32,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          "--normal-bg": "var(--color-cosmos-900)",
+          "--normal-text": "#fff",
+          "--normal-border": "var(--color-gold-400)",
+          "--border-radius": "1rem",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "cn-toast border-2! font-bold shadow-lg [&_[data-icon]]:text-gold-400",
+          description: "text-cosmos-300!",
         },
       }}
       {...props}

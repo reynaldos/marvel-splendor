@@ -24,6 +24,21 @@ async function signedInUser() {
   return getOrCreateUser(session.user);
 }
 
+/** Removes the player for good. Their finished games stay, with no name on their seat. */
+export async function deleteAccountAction() {
+  const user = await signedInUser();
+  // The rows that don't cascade go first; the seat rows stay, unnamed.
+  await prisma.$transaction([
+    prisma.gamePlayer.updateMany({ where: { userId: user.id }, data: { userId: null } }),
+    prisma.userStats.deleteMany({ where: { userId: user.id } }),
+    prisma.userRating.deleteMany({ where: { userId: user.id } }),
+    prisma.userCoins.deleteMany({ where: { userId: user.id } }),
+    prisma.user.delete({ where: { id: user.id } }),
+  ]);
+  if (user.avatarKey && !libraryAvatarSrc(user.avatarKey)) void deleteAvatarObject(user.avatarKey);
+  redirect("/auth/logout");
+}
+
 /** Whether the signed-in player could take this username. */
 export async function checkUsernameAction(typed: string): Promise<SaveState> {
   const user = await signedInUser();

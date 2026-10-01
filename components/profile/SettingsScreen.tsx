@@ -9,6 +9,7 @@ import { AssetImage } from "@/components/game/assets";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
+import { Toggle } from "@/components/Toggle";
 import {
   Dialog,
   DialogContent,
@@ -36,32 +37,6 @@ const CHECK_DELAY_MS = 400;
 
 /** A picture picked but not saved yet: one from the library, or a file to upload. */
 type Picked = { src: string; id: string } | { src: string; file: File };
-
-/** An on/off switch drawn in the theme's colours. */
-function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: boolean) => void; label: string }) {
-  return (
-    <label className="flex h-11 items-center justify-between gap-3 rounded-full bg-cosmos-950 pr-2 pl-5 text-base font-bold ring-2 ring-cosmos-500 ring-inset">
-      {label}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={on}
-        onClick={() => onChange(!on)}
-        className={cn(
-          "relative h-7 w-12 shrink-0 rounded-full transition-colors",
-          on ? "bg-gold-400" : "bg-cosmos-700",
-        )}
-      >
-        <span
-          className={cn(
-            "absolute top-1 left-1 size-5 rounded-full transition-transform",
-            on ? "translate-x-5 bg-cosmos-950" : "bg-cosmos-300",
-          )}
-        />
-      </button>
-    </label>
-  );
-}
 
 interface SettingsScreenProps {
   username: string;

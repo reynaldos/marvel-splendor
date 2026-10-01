@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { cn } from "cn";
 
+import { playSfx } from "@/components/audio";
 import { Button } from "@/components/ui/button";
 import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { ZoomedView } from "@/components/game/Zoomable";
@@ -144,7 +145,15 @@ export function Card({
               {reserveAction.label}
             </Button>
           ) : null}
-          <Button type="button" size="lg" variant="secondary" onClick={() => setViewing(root.current?.getBoundingClientRect() ?? null)}>
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            onClick={() => {
+              playSfx("flip");
+              setViewing(root.current?.getBoundingClientRect() ?? null);
+            }}
+          >
             View
           </Button>
         </div>

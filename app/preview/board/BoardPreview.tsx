@@ -4,10 +4,14 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { UsersRound } from "lucide-react";
 
+import { playSfx, scheduleClockTicks } from "@/components/audio";
 import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
+import { GameMenu } from "@/components/game/GameMenu";
+import type { MoveLogEntry } from "@/components/game/MoveLog";
+import { SFX, type SfxName } from "@/lib/audio-tracks";
 import { EMOJIS, MESSAGES, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import type { BoardEvent } from "@/lib/board-events";
@@ -49,7 +53,18 @@ export function previewTable(count: number) {
     Avengers: { kind: "avengers", seat: 1, from: count > 2 ? count - 1 : 0 },
     TimeStone: { kind: "timeStone", seat: 1 },
   };
-  return { view, players: SEATED.slice(0, count), moves, events };
+  // The moves above as a log, a few rounds of it, with the tiles won along the way.
+  const won = Object.values(events);
+  const log: MoveLogEntry[] = Object.values(moves).map((move, i) => ({
+    id: `m${i}`,
+    seat: i % count,
+    move,
+    round: Math.floor(i / count),
+    points: i,
+    events: won[i - 2] ? [won[i - 2]] : [],
+    timestamp: i,
+  }));
+  return { view, players: SEATED.slice(0, count), moves, events, log };
 }
 // Shown on every card at once, the longest message among them.
 const SENDS: Record<string, ChatSend> = {
@@ -69,7 +84,7 @@ interface BoardPreviewProps {
 
 /** The board's animations, without playing a game: choose one and it plays. */
 export function BoardPreview({ show, at, count }: BoardPreviewProps) {
-  const { view, players, moves: MOVES, events: EVENTS } = useMemo(() => previewTable(count), [count]);
+  const { view, players, moves: MOVES, events: EVENTS, log } = useMemo(() => previewTable(count), [count]);
   const [traced, setTraced] = useState<TracedMove | null>(null);
   const [bubbles, showBubble] = useChatBubbles();
   // `?show=MyTurn` gives the first seat the turn, with a clock, to look at its card lit up.
@@ -78,11 +93,14 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
   const [announced, setAnnounced] = useState<{ event: BoardEvent; origin: TileOrigin | null; key: number } | null>(null);
 
   const trace = (move: Move) => {
+    if (move.type === "TAKE_TOKENS" || move.type === "RECRUIT") playSfx("recruit");
+    else if (move.type === "RESERVE") playSfx("reserve");
     // Taken off and put back, so choosing the same one again plays it again.
     setTraced(null);
     setTimeout(() => setTraced({ seat: 1, move }), 50);
   };
   const announce = (event: BoardEvent) => {
+    playSfx(event.kind);
     const key = Date.now();
     setAnnounced({ event, origin: tileOrigin(event), key });
     if (at === undefined) setTimeout(() => setAnnounced((shown) => (shown?.key === key ? null : shown)), announceMs(event));
@@ -151,6 +169,20 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
           </button>
         ))}
         </div>
+        {/* Every sound on its own, to hear it. */}
+        <div className="flex justify-center gap-1">
+          {(Object.keys(SFX) as SfxName[]).map((name) => (
+            <button
+              key={name}
+              type="button"
+              // The clock's button plays its whole run of ticks, as a turn's last seconds do.
+              onClick={() => (name === "clockLow" ? scheduleClockTicks(Date.now() + 3000) : playSfx(name))}
+              className="rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-bold text-cosmos-300 ring-1 ring-cosmos-500 ring-inset hover:text-white"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
         <div className="flex justify-center gap-1">
           <PreviewBar />
           {/* Goes round the table sizes: 2, 3, 4, and back to 2. */}
@@ -173,7 +205,17 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
           disabled
           submitting={false}
           bubbles={bubbles}
-          menu={null}
+          menu={
+            <GameMenu
+              moveLog={log}
+              players={players}
+              viewerSeat={0}
+              settings={view.settings}
+              finished={false}
+              busy={false}
+              onForfeit={noop}
+            />
+          }
           chat={<ChatButton waiting={false} onSend={(chat) => showBubble(0, chat)} defaultOpen={show === "Chat"} />}
           onStageTokenColor={noop}
           onUnstageTokenColor={noop}

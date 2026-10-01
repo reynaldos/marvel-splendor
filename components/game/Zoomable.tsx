@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "cn";
 
+import { playSfx } from "@/components/audio";
 import { LargeImages } from "@/components/game/assets";
 import { glideFrom, lessMotion } from "@/components/game/glide";
 
@@ -38,11 +39,13 @@ export function Zoomable({ label, title, zoomed, interactive, className, style, 
         aria-label={label}
         onClick={(e) => {
           e.stopPropagation();
+          playSfx("flip");
           setFrom(e.currentTarget.getBoundingClientRect());
         }}
         onKeyDown={(e) => {
           if (e.key !== "Enter" && e.key !== " ") return;
           e.stopPropagation();
+          playSfx("flip");
           setFrom(e.currentTarget.getBoundingClientRect());
         }}
         className={cn("cursor-pointer", className)}

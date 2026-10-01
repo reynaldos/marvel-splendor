@@ -1,3 +1,4 @@
+import { BgmPlayer } from "@/components/audio";
 import { pageMetadata } from "@/lib/site";
 
 import { BoardPreview } from "./BoardPreview";
@@ -13,12 +14,15 @@ export default async function BoardPreviewPage({
   const { show, at, players } = await searchParams;
   const count = Number(players);
   return (
-    <BoardPreview
-      // Remade for each table size, so nothing is left over from the last.
-      key={players}
-      show={show}
-      at={at === undefined ? undefined : Number(at)}
-      count={[2, 3, 4].includes(count) ? count : 3}
-    />
+    <>
+      <BgmPlayer />
+      <BoardPreview
+        // Remade for each table size, so nothing is left over from the last.
+        key={players}
+        show={show}
+        at={at === undefined ? undefined : Number(at)}
+        count={[2, 3, 4].includes(count) ? count : 3}
+      />
+    </>
   );
 }
