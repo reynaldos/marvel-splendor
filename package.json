@@ -16,6 +16,7 @@
     "rating:backfill": "npx tsx scripts/backfill-rating.ts",
     "coins:backfill": "npx tsx scripts/backfill-coins.ts",
     "rewards:backfill": "npx tsx scripts/backfill-rewards.ts",
+    "xp:lab": "npx tsx scripts/export-xp-lab.ts",
     "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {
