@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trash2, Trophy } from "lucide-react";
 
+import { FeedbackForm } from "@/components/FeedbackForm";
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { SoundToggles } from "@/components/SoundToggles";
@@ -52,7 +53,7 @@ export function TopBarView({
 }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
   // The menu, the log and the delete check share one dialog: two overlapping ones left stale pointer locks on touch.
-  const [view, setView] = useState<"menu" | "updates" | "delete">("menu");
+  const [view, setView] = useState<"menu" | "updates" | "delete" | "feedback">("menu");
   const seen = useSeenUpdate();
   // What had been seen when the log was opened, so the new ones stay marked while it is read.
   const [since, setSince] = useState(seen);
@@ -127,6 +128,8 @@ export function TopBarView({
         >
           {view === "updates" ? (
             <UpdateLog since={since} />
+          ) : view === "feedback" ? (
+            <FeedbackForm onSent={close} />
           ) : view === "delete" ? (
             <>
               <DialogHeader>
@@ -181,8 +184,7 @@ export function TopBarView({
                   </span>
                   What&apos;s new
                 </button>
-                {/* ponytail: does nothing yet; the feedback form is next. */}
-                <button type="button" className={CHOICE}>
+                <button type="button" onClick={() => setView("feedback")} className={CHOICE}>
                   <span className={CHOICE_ICON}>
                     <MessageSquareText className="size-7" />
                   </span>

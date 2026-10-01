@@ -6,8 +6,10 @@ import { ArrowLeft, Eye } from "lucide-react";
 
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
+import { FeedbackTable } from "@/components/admin/FeedbackTable";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
+import { loadFeedback } from "@/lib/load-feedback";
 import { timeAgo } from "@/lib/game-record";
 import { pageMetadata } from "@/lib/site";
 import { formatDuration, loadUserMetrics } from "@/lib/user-metrics";
@@ -72,9 +74,9 @@ export default async function AdminUsersPage() {
   if (!isAdmin(session.user)) notFound();
 
   // A load that fails, as when the database is slow to wake, leaves the page up to try again.
-  const metrics = await loadUserMetrics().catch((error) => {
+  const [metrics, feedback] = await Promise.all([loadUserMetrics(), loadFeedback()]).catch((error) => {
     console.error("admin metrics", error);
-    return null;
+    return [null, []] as const;
   });
   if (!metrics) {
     return (
@@ -88,6 +90,7 @@ export default async function AdminUsersPage() {
     );
   }
   const { totals, tables, users, sent } = metrics;
+  const unread = feedback.filter((row) => row.status === "NEW").length;
 
   return (
     <main className="dark min-h-dvh bg-cosmos px-6 py-8 text-white">
@@ -222,6 +225,10 @@ export default async function AdminUsersPage() {
                   </Table>
                 </div>
               ),
+            },
+            {
+              name: unread ? `Feedback (${unread} new)` : "Feedback",
+              view: <FeedbackTable rows={feedback} />,
             },
           ]}
         />

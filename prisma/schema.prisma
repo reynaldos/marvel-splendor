@@ -24,6 +24,19 @@ enum ChatKind {
   REACTION
 }
 
+enum FeedbackKind {
+  FEATURE
+  BUG
+  CHARACTER
+}
+
+enum FeedbackStatus {
+  NEW
+  ROADMAP
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id               String            @id @default(cuid())
   auth0Sub         String            @unique
@@ -44,6 +57,7 @@ model User {
   rating           UserRating?
   coins            UserCoins?
   coinTransactions CoinTransaction[]
+  feedback         Feedback[]
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -170,4 +184,20 @@ model ChatMessage {
   createdAt DateTime @default(now())
 
   @@index([gameId, createdAt])
+}
+
+// What a player asked for or ran into, from the menu's Feedback form, and where it stands with the admins.
+model Feedback {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      FeedbackKind
+  body      String
+  status    FeedbackStatus @default(NEW)
+  // What the admins made of it, for themselves.
+  note      String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([status, updatedAt])
 }
