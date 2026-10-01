@@ -7,17 +7,18 @@ import { ArrowLeft, Eye } from "lucide-react";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { FeedbackTable } from "@/components/admin/FeedbackTable";
+import { GamesTable } from "@/components/admin/GamesTable";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { loadFeedback } from "@/lib/load-feedback";
 import { timeAgo } from "@/lib/game-record";
 import { pageMetadata } from "@/lib/site";
-import { formatDuration, loadUserMetrics } from "@/lib/user-metrics";
+import { formatDuration } from "@/lib/game-summary";
+import { loadUserMetrics } from "@/lib/user-metrics";
 
 export const metadata = pageMetadata("Admin dashboard", "Who is playing, and how much.", true);
 
 const REFRESH_SECONDS = 60;
-const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
 
 const ago = (date: Date | null) => (date ? timeAgo(date.getTime()) : "Never");
 const day = (date: Date) =>
@@ -89,7 +90,7 @@ export default async function AdminUsersPage() {
       </main>
     );
   }
-  const { totals, tables, users, sent } = metrics;
+  const { totals, tables, recent, users, sent } = metrics;
   const unread = feedback.filter((row) => row.status === "NEW").length;
 
   return (
@@ -128,32 +129,8 @@ export default async function AdminUsersPage() {
         {/* The chosen tab is kept when the numbers are fetched again. */}
         <AdminTabs
           tabs={[
-            {
-              name: "Open tables",
-              view:
-                tables.length === 0 ? (
-                  <p className="text-sm font-bold text-cosmos-300">No games or lobbies are open.</p>
-                ) : (
-                  <Table head={["Status", "Kind", "Players", "Round", "Room code", "Opened", "Last move"]}>
-                    {tables.map((table) => (
-                      <tr key={table.id}>
-                        <td>
-                          <Dot
-                            on={table.live}
-                            label={table.status === "LOBBY" ? "Lobby" : table.live ? "In play" : "Left open"}
-                          />
-                        </td>
-                        <td>{MODE[table.mode]}</td>
-                        <td>{table.players.join(", ")}</td>
-                        <td>{table.status === "LOBBY" ? "" : table.round}</td>
-                        <td className="font-mono">{table.mode === "MULTIPLAYER" ? table.joinCode : ""}</td>
-                        <td>{ago(table.createdAt)}</td>
-                        <td>{ago(table.updatedAt)}</td>
-                      </tr>
-                    ))}
-                  </Table>
-                ),
-            },
+            { name: "Active games", view: <GamesTable games={tables} /> },
+            { name: "Recent games", view: <GamesTable games={recent} recent /> },
             {
               name: "Every user",
               view: (
@@ -204,7 +181,7 @@ export default async function AdminUsersPage() {
               ),
             },
             {
-              name: "Most sent",
+              name: "Message stats",
               view: (
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Table head={["Emoji", "Times sent"]}>
