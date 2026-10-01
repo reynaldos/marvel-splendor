@@ -32,7 +32,7 @@ export async function recordGameCoins(
 
       if (tier !== "human") {
         const earnedToday = await tx.coinTransaction.aggregate({
-          where: { userId: outcome.userId, reason: { not: { startsWith: "game:human:" } }, createdAt: { gte: startOfToday() } },
+          where: { userId: outcome.userId, reason: { startsWith: "game:", not: { startsWith: "game:human:" } }, createdAt: { gte: startOfToday() } },
           _sum: { delta: true },
         });
         amount = Math.max(0, Math.min(amount, BOT_COINS_DAILY_CAP - (earnedToday._sum.delta ?? 0)));

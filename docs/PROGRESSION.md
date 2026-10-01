@@ -140,6 +140,18 @@ Shared winners all count as winning.
 - **Minimum turns.** A player must have taken at least 4 turns in the game to be paid. A turn is a token take, a reserve, a recruit or a timed-out skip. This blocks an instant-forfeit farm loop.
 - **Daily cap on bot games.** Coins from games with no human opponent are capped at 150 per UTC day per player. Human games are not capped, since they need another person.
 
+### Daily bonus
+
+Code: `lib/daily-bonus.ts` for the rules and `lib/record-daily-bonus.ts` for the ledger; the dialog is `components/DailyBonus.tsx`, opened from the coin pill in the top bar, which shows a dot while a claim is waiting.
+
+One claim per UTC day. Claiming on consecutive days climbs the streak; missing a day drops it back to Day 1, and the day after Day 8 starts over at Day 1. Once collected, the next tile counts down to midnight UTC.
+
+| Day | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| Coins | 10 | 15 | 20 | 25 | 30 | 40 | 50 | 100 |
+
+A full rotation pays 290. Each claim is a ledger row with reason `daily:<day>`, so the streak is read from the ledger: the latest `daily:` row says when the last claim was and which day it reached. The claim is checked and written inside one transaction, so a double tap pays once. The bot-game daily cap counts only `game:` rows, so the bonus never eats into it, and the coins backfill leaves these rows alone.
+
 ### Where coins live
 
 `CoinTransaction` is the ledger and the source of truth: one row per award with `userId`, `delta`, `reason` (`game:<tier>:<win|loss>`), `gameId` and `createdAt`. `UserCoins.balance` is a cached total for fast reads. The daily cap is checked against the ledger's rows for today whose reason is not a human game.

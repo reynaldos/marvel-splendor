@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trash2, Trophy } from "lucide-react";
 
+import { DailyBonus } from "@/components/DailyBonus";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
@@ -11,6 +12,7 @@ import { SoundToggles } from "@/components/SoundToggles";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { markUpdatesSeen, NewDot, unseenCount, UpdateLog, useSeenUpdate } from "@/components/UpdateLog";
 import { useNotchSide } from "@/components/use-notch-side";
+import type { DailyBonusState } from "@/lib/daily-bonus";
 import { FRAME_STYLE, type FrameTier } from "@/lib/frame-tier";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
@@ -37,6 +39,8 @@ interface TopBarViewProps {
   isAdmin: boolean;
   /** Feedback no admin has looked at yet; lights the menu and its Admin choice. Always false for players. */
   newFeedback: boolean;
+  dailyBonus: DailyBonusState;
+  onClaimDailyBonus: () => Promise<number>;
   onDeleteAccount: () => Promise<void>;
 }
 
@@ -52,11 +56,13 @@ export function TopBarView({
   coins,
   isAdmin,
   newFeedback,
+  dailyBonus,
+  onClaimDailyBonus,
   onDeleteAccount,
 }: TopBarViewProps) {
   const [open, setOpen] = useState(false);
   // The menu, the log and the delete check share one dialog: two overlapping ones left stale pointer locks on touch.
-  const [view, setView] = useState<"menu" | "updates" | "delete" | "feedback">("menu");
+  const [view, setView] = useState<"menu" | "updates" | "delete" | "feedback" | "daily">("menu");
   const seen = useSeenUpdate();
   // What had been seen when the log was opened, so the new ones stay marked while it is read.
   const [since, setSince] = useState(seen);
@@ -101,10 +107,19 @@ export function TopBarView({
           <Trophy className="size-6 text-gold-400" />
           <span className="text-lg font-black tabular-nums">{wins}</span>
         </span>
-        <span className={PILL} title="Coins">
+        <button
+          type="button"
+          title="Coins · daily bonus"
+          onClick={() => {
+            setView("daily");
+            setOpen(true);
+          }}
+          className={`${PILL} relative hover:bg-cosmos-500`}
+        >
           <Coins className="size-6 text-gold-400" />
           <span className="text-lg font-black tabular-nums">{coins.toLocaleString()}</span>
-        </span>
+          {dailyBonus.claimable ? <NewDot label="Daily bonus ready" className="absolute top-0 right-0" /> : null}
+        </button>
         {/* In the middle of the screen, whatever is either side of it. */}
         <Link href="/" aria-label="Home" className="ml-auto">
           <Logo className="text-3xl" />
@@ -126,13 +141,15 @@ export function TopBarView({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           className={`theme-cosmos dark border-2 border-gold-400 ${
-            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : "gap-4 sm:max-w-md"
+            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : view === "daily" ? "gap-4 sm:max-w-lg" : "gap-4 sm:max-w-md"
           }`}
         >
           {view === "updates" ? (
             <UpdateLog since={since} />
           ) : view === "feedback" ? (
             <FeedbackForm onSent={close} />
+          ) : view === "daily" ? (
+            <DailyBonus state={dailyBonus} onClaim={onClaimDailyBonus} />
           ) : view === "delete" ? (
             <>
               <DialogHeader>
