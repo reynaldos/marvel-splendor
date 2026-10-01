@@ -18,6 +18,7 @@
     "rewards:backfill": "npx tsx scripts/backfill-rewards.ts",
     "visits:backfill": "npx tsx scripts/backfill-visits.ts",
     "xp:lab": "npx tsx scripts/export-xp-lab.ts",
+    "daily:backfill": "npx tsx scripts/backfill-daily-bonus.ts",
     "launch:images": "node scripts/launch-images.mjs"
   },
   "dependencies": {
