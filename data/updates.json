@@ -1,5 +1,21 @@
 [
   {
+    "version": "2.6.0",
+    "date": "2026-10-02",
+    "title": "Random seats, and a closer look at your cards",
+    "summary": "Seats are dealt at random when a room starts, and a card in your collection opens large with its ranking, count and teams.",
+    "pulls": [],
+    "new": [
+    ],
+    "improved": [
+      "Seats are dealt at random when a room's game starts, so the host no longer always goes first",
+      "A card tapped in the collection opens large just as it sits in the grid, with its ranking, its count, name and teams beside it, and a button to hide the ranking and see the plain art"
+    ],
+    "fixed": [
+      "Your reserve or recruit sounds the moment you pick it, not after the server answers"
+    ]
+  },
+  {
     "version": "2.5.1",
     "date": "2026-10-01",
     "title": "Giving back tokens as time runs out",
