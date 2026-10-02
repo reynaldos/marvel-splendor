@@ -11,6 +11,7 @@ import { runServerTurnLoop } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS, nextFreeSeat, withCheat } from "@/lib/lobby";
+import { ownedPacks } from "@/lib/record-purchase";
 import { dealSeats } from "@/lib/lobby-rules";
 import { notifyGame } from "@/lib/pusher";
 
@@ -107,6 +108,8 @@ export async function startGameAction(gameId: string, cheat: boolean) {
   const settings: GameSettings = {
     ...lobby,
     botDifficulty: "normal",
+    // Every pack anyone at the table owns is dealt in, for everyone.
+    packs: await ownedPacks(game.players.flatMap((p) => (p.userId ? [p.userId] : []))),
     // Each bot's level follows it to its final seat.
     botDifficultyBySeat: Object.fromEntries(
       seated.flatMap((p) => {

@@ -58,6 +58,7 @@ model User {
   coins            UserCoins?
   coinTransactions CoinTransaction[]
   feedback         Feedback[]
+  purchases        Purchase[]
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -200,4 +201,19 @@ model Feedback {
   updatedAt DateTime       @updatedAt
 
   @@index([status, updatedAt])
+}
+
+// Something bought in the shop, paid for in coins: kind is the shelf ("pack" for now), itemId the
+// catalogue id in data/. One of each per player; the ledger row for the spend has reason "shop:<kind>:<itemId>".
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  itemId    String
+  price     Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, kind, itemId])
+  @@index([createdAt])
 }
