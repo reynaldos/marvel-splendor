@@ -44,7 +44,7 @@ export function createGame(
   const market = {} as Record<CardLevel, (string | null)[]>;
   for (const level of [1, 2, 3] as const) {
     const deck = shuffle(
-      cardsOfLevel(level).map((c) => c.id),
+      cardsOfLevel(level, settings.packs).map((c) => c.id),
       rng,
     );
     market[level] = deck.slice(0, MARKET_SLOTS);

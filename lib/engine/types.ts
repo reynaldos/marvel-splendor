@@ -61,6 +61,19 @@ export interface GameSettings {
   startedAt?: number;
   /** Overrides botDifficulty for the bot in that seat. */
   botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
+  /** The card packs dealt in besides the base cards: every pack someone at the table owns. Absent on older games. */
+  packs?: string[];
+}
+
+/** A set of cards sold in the shop, dealt only into games where someone owns it. */
+export interface Pack {
+  id: string;
+  title: string;
+  description: string;
+  cover: string;
+  cost: number;
+  cards: string[];
+  releasedAt: string;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {

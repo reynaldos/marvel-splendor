@@ -1409,6 +1409,81 @@
 
       },
       "tags": 0
+    },
+    {
+      "id": "c1-41",
+      "name": "Human Torch",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "image": "/cards/human-torch.png",
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "space": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-42",
+      "name": "Invisible Woman",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "image": "/cards/invisible-woman.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "power": 4
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-31",
+      "name": "Mister Fantastic",
+      "side": "hero",
+      "groups": ["Fantastic Four", "Illuminati"],
+      "image": "/cards/mister-fantastic.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "mind": 5,
+        "space": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-32",
+      "name": "The Thing",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "image": "/cards/the-thing.png",
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "reality": 3,
+        "space": 3,
+        "soul": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c3-22",
+      "name": "Doctor Doom",
+      "side": "villain",
+      "groups": ["Cabal"],
+      "image": "/cards/doctor-doom.png",
+      "level": 3,
+      "bonus": "mind",
+      "points": 5,
+      "cost": {
+        "power": 6,
+        "mind": 3,
+        "soul": 3
+      },
+      "tags": 0
     }
   ]
 }
