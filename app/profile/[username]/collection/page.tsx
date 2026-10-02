@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { CollectionScreen } from "@/components/profile/CollectionScreen";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { ownedPacks } from "@/lib/record-purchase";
 import { pageMetadata } from "@/lib/site";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
@@ -20,14 +21,15 @@ export default async function CollectionPage({ params }: { params: Promise<{ use
   const user = await prisma.user.findUnique({ where: { username }, select: { id: true } });
   if (!user) notFound();
 
-  const found = await prisma.collectedCard.findMany({
-    where: { userId: user.id },
-    select: { cardId: true, times: true },
-  });
+  const [found, packs] = await Promise.all([
+    prisma.collectedCard.findMany({ where: { userId: user.id }, select: { cardId: true, times: true } }),
+    ownedPacks([user.id]),
+  ]);
 
   return (
     <CollectionScreen
       found={Object.fromEntries(found.map((c) => [c.cardId, c.times]))}
+      packs={packs}
       backTo={`/profile/${username}`}
     />
   );
