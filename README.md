@@ -109,7 +109,7 @@ You need Node 22 and pnpm.
 
 ## Changing the game's data
 
-- **Cards:** `data/cards.json`. Each card needs an `id`, `name`, `side` (`hero`, `villain` or `both`), `groups` (its teams, three at most, or `[]`), `level`, `bonus`, `points`, `cost` and `tags`. `image` is optional. Saved games refer to cards by `id`, so never reuse or renumber one.
+- **Cards:** `data/cards.json`. Each card needs an `id`, `name`, `side` (`hero`, `villain` or `both`), `groups` (its teams, four at most, or `[]`), `level`, `bonus`, `points`, `cost` and `tags`. `image` is optional. Saved games refer to cards by `id`, so never reuse or renumber one.
 - **Locations:** `data/locations.json`.
 - **Board art:** `data/assets.json`. Set a value to a path under `public/`, or leave it `null` to keep the drawn placeholder.
 - **Launch screens:** `data/launch-screens.json`. After adding one, run `pnpm launch:images`.

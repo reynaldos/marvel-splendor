@@ -1,0 +1,344 @@
+{
+  "_meta": {
+    "what": "Cards that are not in the game yet, in the owner's sheet order. They are dealt into no deck and show in no collection.",
+    "fields": "As data/cards.json, with the same stone colors (yellow->mind, blue->space, orange->soul, red->reality, purple->power), plus \"status\": where the card's art stands, from the owner's sheet; absent means not started.",
+    "ids": "A card that was once in the game keeps its id and image here, so saved games that hold it still play back. A card that never shipped has neither until it enters cards.json, where it takes the next number in its level."
+  },
+  "cards": [
+    {
+      "name": "Silver Surfer",
+      "side": "hero",
+      "groups": ["Defenders"],
+      "level": 3,
+      "bonus": "space",
+      "points": 4,
+      "cost": {
+        "space": 7,
+        "mind": 2
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Magneto",
+      "side": "both",
+      "groups": ["X-Men", "Brotherhood of Mutants"],
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "space": 6,
+        "reality": 3,
+        "soul": 3
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Galactus",
+      "side": "villain",
+      "groups": [],
+      "level": 3,
+      "bonus": "reality",
+      "points": 5,
+      "cost": {
+        "space": 7,
+        "power": 3,
+        "mind": 3
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Doctor Doom",
+      "side": "villain",
+      "groups": ["Cabal"],
+      "level": 3,
+      "bonus": "mind",
+      "points": 5,
+      "cost": {
+        "power": 6,
+        "mind": 3,
+        "soul": 3
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Phoenix",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "mind": 6,
+        "reality": 3,
+        "space": 3
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Storm",
+      "side": "hero",
+      "groups": ["X-Men", "Avengers"],
+      "level": 2,
+      "bonus": "space",
+      "points": 3,
+      "cost": {
+        "mind": 5,
+        "space": 2,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "name": "Mister Fantastic",
+      "side": "hero",
+      "groups": ["Fantastic Four", "Illuminati"],
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "mind": 5,
+        "space": 3
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Namor",
+      "side": "both",
+      "groups": ["Defenders", "Illuminati", "Cabal"],
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "soul": 4,
+        "reality": 3,
+        "mind": 2
+      },
+      "tags": 1
+    },
+    {
+      "name": "The Thing",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "level": 2,
+      "bonus": "power",
+      "points": 2,
+      "cost": {
+        "reality": 3,
+        "space": 3,
+        "soul": 2
+      },
+      "tags": 1,
+      "status": "started"
+    },
+    {
+      "name": "Wolverine",
+      "side": "hero",
+      "groups": ["X-Men", "Weapon X", "Avengers", "New Avengers"],
+      "level": 2,
+      "bonus": "reality",
+      "points": 3,
+      "cost": {
+        "soul": 5,
+        "reality": 2,
+        "mind": 1
+      },
+      "tags": 1,
+      "status": "started"
+    },
+    {
+      "name": "Professor X",
+      "side": "hero",
+      "groups": ["X-Men", "Illuminati"],
+      "level": 2,
+      "bonus": "mind",
+      "points": 3,
+      "cost": {
+        "power": 6
+      },
+      "tags": 0
+    },
+    {
+      "name": "Ultron",
+      "side": "villain",
+      "groups": [],
+      "level": 2,
+      "bonus": "mind",
+      "points": 3,
+      "cost": {
+        "space": 6
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Nightcrawler",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "power": 2,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "name": "Cyclops",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "space": 3,
+        "mind": 1,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "name": "Blade",
+      "side": "hero",
+      "groups": ["Midnight Sons"],
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "reality": 3,
+        "mind": 1,
+        "soul": 1
+      },
+      "tags": 1,
+      "status": "started"
+    },
+    {
+      "name": "Mantis",
+      "side": "hero",
+      "groups": ["Guardians of the Galaxy"],
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 2,
+        "power": 1
+      },
+      "tags": 1
+    },
+    {
+      "name": "Shang-Chi",
+      "side": "hero",
+      "groups": [],
+      "level": 1,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "reality": 3,
+        "space": 2,
+        "soul": 1
+      },
+      "tags": 1
+    },
+    {
+      "name": "Rogue",
+      "side": "hero",
+      "groups": ["X-Men", "Brotherhood of Mutants", "Avengers"],
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "soul": 2,
+        "reality": 2,
+        "space": 1
+      },
+      "tags": 1
+    },
+    {
+      "name": "Gambit",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "name": "Deadpool",
+      "side": "both",
+      "groups": ["Weapon X"],
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "power": 4
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "id": "c1-41",
+      "name": "Human Torch",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "level": 1,
+      "bonus": "reality",
+      "points": 1,
+      "cost": {
+        "space": 4
+      },
+      "tags": 0,
+      "image": "/cards/human-torch.png"
+    },
+    {
+      "name": "Mystique",
+      "side": "villain",
+      "groups": ["Brotherhood of Mutants"],
+      "level": 1,
+      "bonus": "reality",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "power": 2,
+        "mind": 1
+      },
+      "tags": 0
+    },
+    {
+      "name": "Invisible Woman",
+      "side": "hero",
+      "groups": ["Fantastic Four"],
+      "level": 1,
+      "bonus": "mind",
+      "points": 1,
+      "cost": {
+        "power": 4
+      },
+      "tags": 0,
+      "status": "started"
+    },
+    {
+      "name": "Beast",
+      "side": "hero",
+      "groups": ["X-Men", "Avengers"],
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "mind": 1
+      },
+      "tags": 1
+    }
+  ]
+}

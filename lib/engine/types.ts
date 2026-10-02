@@ -23,7 +23,7 @@ export interface Card {
   name: string;
   /** Counted by the stats; no part in the rules. "both" counts once as each. */
   side: "hero" | "villain" | "both";
-  /** The teams it belongs to, three at most. For the collection page; no part in the rules. */
+  /** The teams it belongs to, four at most. For the collection page; no part in the rules. */
   groups: string[];
   /** Full-card art path/URL; when absent the UI draws a placeholder card. */
   image?: string;

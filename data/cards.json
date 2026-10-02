@@ -4,7 +4,7 @@
     "ids": "c<level>-<nn>, numbered in the CSV's order within each level. Saved games refer to cards by id, so never reuse or renumber an id.",
     "timeStone": "Every level 3 card bears the Time Stone icon; the UI and engine derive it from the level.",
     "side": "Each card is a \"hero\", a \"villain\", or \"both\" for one that could go either way. It plays no part in the rules; it is what the hero and villain stats count, and a \"both\" card counts once as each.",
-    "groups": "The teams a card belongs to, three at most; none is allowed. The collection page makes a row for every team that three or more cards belong to, and puts the rest under Others, so a new team appears by itself once it has three cards."
+    "groups": "The teams a card belongs to, four at most; none is allowed. The collection page makes a row for every team that three or more cards belong to, and puts the rest under Others, so a new team appears by itself once it has three cards."
   },
   "cards": [
     {
@@ -75,7 +75,7 @@
       "id": "c1-05",
       "name": "Crystal",
       "side": "hero",
-      "groups": ["Avengers", "Inhumans", "Fantastic Four"],
+      "groups": ["Inhumans", "Fantastic Four"],
       "image": "/cards/crystal.png",
       "level": 1,
       "bonus": "reality",
@@ -475,7 +475,7 @@
       "id": "c1-31",
       "name": "Spider-Woman",
       "side": "hero",
-      "groups": ["Avengers", "Spider-Verse", "S.H.I.E.L.D."],
+      "groups": ["Avengers", "Spider-Verse", "S.H.I.E.L.D.", "New Avengers"],
       "image": "/cards/spider-woman.png",
       "level": 1,
       "bonus": "mind",
@@ -784,7 +784,7 @@
       "id": "c2-11",
       "name": "Jessica Jones",
       "side": "hero",
-      "groups": ["Defenders"],
+      "groups": ["Defenders", "New Avengers"],
       "image": "/cards/jessica-jones.png",
       "level": 2,
       "bonus": "power",
@@ -1102,7 +1102,7 @@
       "id": "c3-02",
       "name": "Black Bolt",
       "side": "hero",
-      "groups": ["Inhumans"],
+      "groups": ["Inhumans", "Illuminati"],
       "image": "/cards/black-bolt.png",
       "level": 3,
       "bonus": "soul",
@@ -1196,7 +1196,7 @@
       "id": "c3-08",
       "name": "Doctor Strange",
       "side": "hero",
-      "groups": ["Avengers", "Defenders", "Mystic Arts"],
+      "groups": ["Avengers", "Defenders", "Mystic Arts", "Illuminati"],
       "image": "/cards/doctor-strange.png",
       "level": 3,
       "bonus": "reality",
@@ -1239,7 +1239,7 @@
       "id": "c3-11",
       "name": "Green Goblin",
       "side": "villain",
-      "groups": ["Thunderbolts", "Sinister Six"],
+      "groups": ["Thunderbolts", "Sinister Six", "Cabal"],
       "image": "/cards/green-goblin.png",
       "level": 3,
       "bonus": "mind",
@@ -1271,7 +1271,7 @@
       "id": "c3-13",
       "name": "Iron Fist",
       "side": "hero",
-      "groups": ["Defenders", "Heroes for Hire"],
+      "groups": ["Defenders", "Heroes for Hire", "New Avengers"],
       "image": "/cards/iron-fist.png",
       "level": 3,
       "bonus": "space",
@@ -1285,7 +1285,7 @@
       "id": "c3-14",
       "name": "Iron Man",
       "side": "hero",
-      "groups": ["Avengers"],
+      "groups": ["Avengers", "Illuminati"],
       "image": "/cards/iron-man.png",
       "level": 3,
       "bonus": "mind",
@@ -1302,7 +1302,7 @@
       "id": "c3-15",
       "name": "Loki",
       "side": "villain",
-      "groups": ["Asgard"],
+      "groups": ["Asgard", "Cabal"],
       "image": "/cards/loki.png",
       "level": 3,
       "bonus": "reality",
@@ -1317,7 +1317,7 @@
       "id": "c3-16",
       "name": "Luke Cage",
       "side": "hero",
-      "groups": ["Avengers", "Defenders", "Heroes for Hire"],
+      "groups": ["New Avengers", "Defenders", "Heroes for Hire"],
       "image": "/cards/luke-cage.png",
       "level": 3,
       "bonus": "power",
@@ -1348,7 +1348,7 @@
       "id": "c3-18",
       "name": "Spider-Man",
       "side": "hero",
-      "groups": ["Avengers", "Spider-Verse"],
+      "groups": ["New Avengers", "Spider-Verse"],
       "image": "/cards/spider-man.png",
       "level": 3,
       "bonus": "soul",
@@ -1407,20 +1407,6 @@
         "reality": 3,
         "power": 5
 
-      },
-      "tags": 0
-    },
-    {
-      "id": "c1-41",
-      "name": "Human Torch",
-      "side": "hero",
-      "groups": ["Fantastic Four"],
-      "image": "/cards/human-torch.png",
-      "level": 1,
-      "bonus": "reality",
-      "points": 1,
-      "cost": {
-        "space": 4
       },
       "tags": 0
     }
