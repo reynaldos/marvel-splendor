@@ -5,11 +5,12 @@ import { Check, Coins, Image as Picture, Layers, MapPin, Music, Palette } from "
 import { cn } from "cn";
 import { toast } from "sonner";
 
-import { playSfx } from "@/components/audio";
 import { BackLink } from "@/components/BackLink";
 import { AssetImage, hasAsset } from "@/components/game/AssetImage";
+import { PackOpening } from "@/components/shop/PackOpening";
 import { Stage } from "@/components/Stage";
 import { PACK_BY_ID } from "@/lib/engine/data";
+import type { Pack } from "@/lib/engine/types";
 import type { PurchaseResult } from "@/lib/record-purchase";
 import { SHOP_ITEMS, SHOP_KINDS, type ShopItem, type ShopKind } from "@/lib/shop";
 
@@ -64,6 +65,7 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
   const [coins, setCoins] = useState(startingCoins);
   const [owned, setOwned] = useState(startingOwned);
   const [buying, setBuying] = useState(false);
+  const [opening, setOpening] = useState<Pack | null>(null);
 
   const items = SHOP_ITEMS.filter((item) => item.kind === shelf);
   const chosen = items.find((item) => item.id === chosenId) ?? null;
@@ -74,9 +76,9 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
     const result = await onPurchase(item.kind, item.id);
     setBuying(false);
     if ("error" in result) return toast.error(result.error);
-    playSfx("recruit");
     setOwned((list) => [...list, `${item.kind}:${item.id}`]);
     setCoins((c) => c - item.cost);
+    if (item.kind === "pack") setOpening(PACK_BY_ID.get(item.id) ?? null);
   };
 
   return (
@@ -170,6 +172,8 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
           )}
         </section>
       </div>
+
+      {opening ? <PackOpening pack={opening} onClose={() => setOpening(null)} /> : null}
     </Stage>
   );
 }

@@ -578,6 +578,22 @@ body {
   }
   .result-rays { animation: result-rays 20s linear infinite; }
 
+  /* A card in an opened pack, face down and restless until tapped. */
+  @keyframes pack-wiggle {
+    0%, 100% { rotate: -1.5deg; translate: 0 0; }
+    25% { rotate: 1.5deg; translate: 0 -2px; }
+    50% { rotate: -1deg; translate: 1px 0; }
+    75% { rotate: 1.5deg; translate: -1px -1px; }
+  }
+  .pack-wiggle { animation: pack-wiggle 0.9s ease-in-out infinite; }
+  /* Its face flaring as it comes round. */
+  @keyframes pack-flash {
+    0%, 40% { filter: brightness(1); }
+    55% { filter: brightness(2.6) drop-shadow(0 0 1rem rgb(246 201 69 / 0.9)); }
+    100% { filter: brightness(1); }
+  }
+  .pack-flash { animation: pack-flash 1s ease-out both; }
+
   @keyframes result-rain {
     0% { opacity: 0; translate: 0 0; rotate: 0deg; }
     10%, 85% { opacity: 1; }
