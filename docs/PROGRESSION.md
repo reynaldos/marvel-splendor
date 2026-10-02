@@ -165,7 +165,7 @@ One claim per UTC day. Claiming on consecutive days climbs the streak; missing a
 
 A full rotation pays 290. Each claim is a ledger row with reason `daily:<day>`, so the streak is read from the ledger: the latest `daily:` row says when the last claim was and which day it reached. The claim is checked and written inside one transaction, so a double tap pays once. The bot-game daily cap counts only `game:` rows, so the bonus never eats into it, and the coins backfill leaves these rows alone.
 
-`pnpm daily:backfill` gives every player the bonus for each day since they joined, as an unbroken streak, through yesterday. Today is left for them to collect. Daily rows before today are replaced; balances are reset to the ledger's totals.
+`pnpm daily:backfill` gives every player the bonus for each day they showed up, from the day they joined through yesterday, as the streak the game would have kept: consecutive days climb, a day away starts over. Every daily row is replaced, today's included, so everyone collects today afresh; balances are reset to the ledger's totals.
 
 ### Where coins live
 

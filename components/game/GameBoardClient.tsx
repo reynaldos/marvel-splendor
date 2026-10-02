@@ -138,6 +138,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const [returnClosedAt, setReturnClosedAt] = useState<number | null>(null);
   // Choosing what to give back for a pick that isn't played yet; closing it keeps the pick.
   const [choosingReturn, setChoosingReturn] = useState(false);
+  // All the tokens to give back have been tapped, but not yet sent.
+  const returnPicked = useRef<Partial<Record<TokenColor, number>> | null>(null);
+  const onReturnPicked = useCallback((tokens: Partial<Record<TokenColor, number>> | null) => {
+    returnPicked.current = tokens;
+  }, []);
   const notchSide = useNotchSide();
 
   const [chatWaiting, setChatWaiting] = useState(false);
@@ -347,16 +352,32 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     [gameId, playSteps, commit],
   );
 
-  // When a turn's time runs out, end it: straight away if it's the viewer's
-  // own, after a short wait if it's someone else's who may have walked away.
-  // The viewer's own turn plays whatever they had picked; with nothing picked,
-  // or a pick the server won't take, it is skipped. A pick that leaves tokens
-  // to give back isn't played, as there is no time left to choose them. The
-  // server re-checks the time itself, so this can't skip a turn early.
   const stagedRef = useRef(staged);
   useEffect(() => {
     stagedRef.current = staged;
   });
+
+  // Nothing is sent until the tokens to give back are chosen, so backing out costs nothing.
+  const playThenReturn = useCallback(
+    async (tokens: Partial<Record<TokenColor, number>>): Promise<boolean> => {
+      const picked = stagedRef.current;
+      const shown = gameRef.current;
+      if (!picked || !shown) return false;
+      setChoosingReturn(false);
+      // The pick leaves tokens owed; this keeps that popup shut while the rest is sent.
+      setReturnClosedAt(shown.view.moveCount + 1);
+      return (await submitMove(stagedActionToMove(picked))) && submitMove({ type: "RETURN_TOKENS", tokens });
+    },
+    [submitMove],
+  );
+
+  // When a turn's time runs out, end it: straight away if it's the viewer's
+  // own, after a short wait if it's someone else's who may have walked away.
+  // The viewer's own turn plays whatever they had picked; with nothing picked,
+  // or a pick the server won't take, it is skipped. A pick that leaves tokens
+  // to give back is played only if those were all tapped, as there is no time
+  // left to choose them. The server re-checks the time itself, so this can't
+  // skip a turn early.
   const live = gameData?.view;
   const turnEndsAt = gameData?.turnEndsAt ?? null;
   const timed = live?.status === "active" && turnEndsAt !== null && !submitting && !botPlaying;
@@ -366,12 +387,16 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
     const timer = setTimeout(async () => {
       const picked = isMine ? stagedRef.current : null;
+      const giveBack = isMine ? returnPicked.current : null;
       const mine = gameRef.current?.view.players.find((p) => p.seat === gameRef.current?.view.viewerSeat);
       const supply = gameRef.current?.view.supply;
       const goesOver = picked && mine && supply && totalTokens(tokensAfter(picked, mine.tokens, supply)) > HAND_LIMIT;
       if (picked && !goesOver && (await submitMove(stagedActionToMove(picked), true))) return;
-      // Having picked something, the player was there: the turn is lost, but not counted as missed.
       const owed = isMine && gameRef.current?.view.pending?.type === "RETURN_TOKENS";
+      // The tokens to give back were all tapped, just not sent: they go now, and the turn is kept.
+      if (giveBack && owed && (await submitMove({ type: "RETURN_TOKENS", tokens: giveBack }, true))) return;
+      if (giveBack && goesOver && (await playThenReturn(giveBack))) return;
+      // Having picked something, the player was there: the turn is lost, but not counted as missed.
       const skipped = await submitMove(picked ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" });
       if (skipped && (goesOver || owed)) {
         setChoosingReturn(false);
@@ -379,7 +404,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       }
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
-  }, [timed, isMine, turnEndsAt, submitMove]);
+  }, [timed, isMine, turnEndsAt, submitMove, playThenReturn]);
   // The clock ticks through the last seconds of your own turn.
   useEffect(() => {
     if (!timed || !isMine || turnEndsAt === null) return;
@@ -504,14 +529,6 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const afterPick = viewer ? tokensAfter(staged, viewer.tokens, view.supply) : null;
   const overBy = afterPick ? totalTokens(afterPick) - HAND_LIMIT : 0;
   const pickGoesOver = !disabled && staged !== null && overBy > 0;
-  // Nothing is sent until the tokens to give back are chosen, so backing out costs nothing.
-  const playThenReturn = async (tokens: Partial<Record<TokenColor, number>>) => {
-    if (!staged) return;
-    setChoosingReturn(false);
-    // The pick leaves tokens owed; this keeps that popup shut while the rest is sent.
-    setReturnClosedAt(view.moveCount + 1);
-    if (await submitMove(stagedActionToMove(staged))) await submitMove({ type: "RETURN_TOKENS", tokens });
-  };
 
   return (
     <>
@@ -636,6 +653,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
             owesTokens ? setReturnClosedAt(open ? null : view.moveCount) : setChoosingReturn(open)
           }
           onSubmitReturnTokens={owesTokens ? submitReturnTokens : playThenReturn}
+          onReturnPicked={onReturnPicked}
           onSubmitChooseLocation={submitChooseLocation}
         />
       ) : null}

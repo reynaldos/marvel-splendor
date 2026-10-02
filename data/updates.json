@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.5.1",
+    "date": "2026-10-01",
+    "title": "Giving back tokens as time runs out",
+    "summary": "Tapping the tokens to give back is enough: if the clock hits zero before you press the button, your pick still goes through.",
+    "pulls": [],
+    "new": [],
+    "improved": [],
+    "fixed": [
+      "With too many tokens, finishing your pick of what to give back as time runs out now keeps your turn, instead of skipping it with a \"time ran out\" message"
+    ]
+  },
+  {
     "version": "2.5.0",
     "date": "2026-10-01",
     "title": "Daily bonus, and XP that counts everything",
