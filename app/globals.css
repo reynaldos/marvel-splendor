@@ -229,10 +229,12 @@ body {
 /* A frame round a card as drawn on the board: the card's own corners, plus the border. */
 @utility rounded-frame {
   border-radius: calc(var(--radius-md) + var(--spacing) * 0.8);
+  --face-radius: var(--radius-md);
 }
 /* Round a card drawn large (`rounded-[10%/7.1%]`): the card's corners plus the frame's width, so the two run concentric. */
 @utility rounded-frame-lg {
   border-radius: calc(10% + var(--spacing) * 0.8) / calc(7.1% + var(--spacing) * 0.8);
+  --face-radius: 10% / 7.1%;
 }
 
 /* Over the face, past Recruited: a vignette in the tier's colour (`--frame-glow`) and still light (`--frame-sheen`). */
@@ -243,7 +245,7 @@ body {
     position: absolute;
     inset: 0;
     z-index: 1;
-    border-radius: inherit;
+    border-radius: var(--face-radius, inherit);
     pointer-events: none;
     opacity: var(--face-opacity, 1);
     box-shadow: inset 0 0 calc(var(--spacing) * 4) calc(var(--spacing) * 0.25) var(--frame-glow, transparent);
@@ -259,7 +261,7 @@ body {
     position: absolute;
     inset: 0;
     z-index: 1;
-    border-radius: inherit;
+    border-radius: var(--face-radius, inherit);
     pointer-events: none;
     background: var(--frame-spark);
     animation: frame-twinkle 2.4s ease-in-out infinite alternate;
@@ -280,7 +282,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: inherit;
+    border-radius: var(--face-radius, inherit);
     pointer-events: none;
     mix-blend-mode: screen;
     opacity: var(--face-opacity, 1);
