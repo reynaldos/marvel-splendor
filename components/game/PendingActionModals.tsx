@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +25,8 @@ interface PendingActionModalsProps {
   returnOpen: boolean;
   onReturnOpenChange: (open: boolean) => void;
   onSubmitReturnTokens: (tokens: Partial<Record<TokenColor, number>>) => void;
+  /** The full set of tokens tapped to give back, or null while the pick is short; so a timeout can send it. */
+  onReturnPicked?: (tokens: Partial<Record<TokenColor, number>> | null) => void;
   onSubmitChooseLocation: (locationId: string) => void;
 }
 
@@ -44,6 +46,7 @@ export function PendingActionModals({
   returnOpen,
   onReturnOpenChange,
   onSubmitReturnTokens,
+  onReturnPicked,
   onSubmitChooseLocation,
 }: PendingActionModalsProps) {
   // The popups cover the player's card, so they carry the turn's timer themselves.
@@ -58,6 +61,7 @@ export function PendingActionModals({
         open={returnOpen}
         onOpenChange={onReturnOpenChange}
         onSubmit={onSubmitReturnTokens}
+        onPicked={onReturnPicked}
       />
       <ChooseLocationDialog
         pending={pending?.type === "CHOOSE_LOCATION" ? pending : null}
@@ -77,6 +81,7 @@ function ReturnTokensDialog({
   open,
   onOpenChange,
   onSubmit,
+  onPicked,
 }: {
   pending: { type: "RETURN_TOKENS"; mustReturn: number } | null;
   viewerTokens: TokenCounts;
@@ -85,6 +90,7 @@ function ReturnTokensDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (tokens: Partial<Record<TokenColor, number>>) => void;
+  onPicked?: (tokens: Partial<Record<TokenColor, number>> | null) => void;
 }) {
   return (
     <Dialog open={Boolean(pending) && open} onOpenChange={onOpenChange}>
@@ -98,6 +104,7 @@ function ReturnTokensDialog({
             submitting={submitting}
             timer={timer}
             onSubmit={onSubmit}
+            onPicked={onPicked}
           />
         ) : null}
       </DialogContent>
@@ -131,16 +138,23 @@ export function ReturnTokens({
   submitting,
   timer,
   onSubmit,
+  onPicked,
 }: {
   mustReturn: number;
   tokens: TokenCounts;
   submitting?: boolean;
   timer?: ReactNode;
   onSubmit: (tokens: Partial<Record<TokenColor, number>>) => void;
+  onPicked?: (tokens: Partial<Record<TokenColor, number>> | null) => void;
 }) {
   const [returning, setReturning] = useState<Partial<Record<TokenColor, number>>>({});
   const picked = Object.values(returning).reduce((sum, n) => sum + (n ?? 0), 0);
   const left = mustReturn - picked;
+  // Closing the popup, however it closes, takes the pick with it.
+  useEffect(() => {
+    onPicked?.(left === 0 ? returning : null);
+    return () => onPicked?.(null);
+  }, [left, returning, onPicked]);
   const move = (color: TokenColor, by: number) =>
     setReturning((prev) => ({ ...prev, [color]: (prev[color] ?? 0) + by }));
 
