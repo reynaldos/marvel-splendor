@@ -7,7 +7,7 @@ What is still to build, and how the project got here. Releases are numbered in `
 The version we are in. It takes whatever is added until the first of the version 3 items starts.
 
 - **Sound effects and background music.** Started: music on the board and its preview, four sounds, and Music and Sounds switches that are remembered on the device. Still to do: sounds for the rest of a game's moments (your turn, the timer running low, winning or losing), music on the menus, and more tracks for the shop.
-- **A shop, paid for in coins.** Categories: board backgrounds, background music tracks, card pack skins, Location tile packs, and maybe layout themes. Depends on coins (done, [PROGRESSION.md](PROGRESSION.md)) and, for the music, on sound ([PROGRESSION.md](PROGRESSION.md)). Needs tables for what is on sale, what each player owns and what they have chosen to use, which is a schema change. Pricing still to decide.
+- **A shop, paid for in coins.** Started: the shop screen, buying through the ledger with a `Purchase` table of what each player owns, and the first shelf, card packs, with the Fantastic Four pack and its opening ([UI.md](UI.md), [PROGRESSION.md](PROGRESSION.md)). Still to do: the other shelves, board backgrounds, background music tracks, Location tile packs and maybe layout themes, each of which needs its items listed in `lib/shop.ts` and a way to choose what is in use, which is a schema change; and more packs as the backlog's art lands.
 
 ## Version 3
 
