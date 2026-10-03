@@ -65,11 +65,11 @@ export function nextRatings(
   });
 }
 
-/** Places for rows already sorted by rating, highest first. Equal ratings share a place: 1, 2, 2, 4. */
-export function placeByRating<T extends { rating: number }>(rows: T[]): Array<T & { place: number }> {
+/** Places for rows already sorted by score, highest first. Equal scores share a place: 1, 2, 2, 4. */
+export function placeBy<T>(rows: T[], score: (row: T) => number): Array<T & { place: number }> {
   let place = 0;
   return rows.map((row, i) => {
-    if (i === 0 || rows[i - 1].rating !== row.rating) place = i + 1;
+    if (i === 0 || score(rows[i - 1]) !== score(row)) place = i + 1;
     return { ...row, place };
   });
 }
