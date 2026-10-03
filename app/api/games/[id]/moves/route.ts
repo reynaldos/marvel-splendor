@@ -11,6 +11,7 @@ import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engi
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { redactState } from "@/lib/game-view";
+import { playbackMs } from "@/lib/playback";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { accountXpByUser } from "@/lib/load-xp";
 import { rankPlayers } from "@/lib/game-record";
@@ -133,10 +134,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       finalState,
     );
 
+  // The board as it stood after each move — the submitted one, then every
+  // auto-applied one — so the client can show them one at a time.
+  let replay = stored;
+  let playback = 0;
+  const steps = allApplied.map(({ seat: s, move: m }) => {
+    const next = applyMove(replay, s, m);
+    playback += playbackMs(replay, s, m, next, isBotSeat(s));
+    replay = next;
+    return { seat: s, move: m, view: redactState(next, viewerSeat) };
+  });
+
   const now = new Date();
   // A move that leaves a choice to make hasn't ended the turn, so its clock keeps running.
   const sameTurn = finalState.status === "active" && finalState.pending !== null;
-  const movedAt = sameTurn ? game.updatedAt : now;
+  // The clock starts once every device has shown the moves, not the instant they were saved.
+  const movedAt = new Date((sameTurn ? game.updatedAt : now).getTime() + playback);
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";
   const persisted = await persistMoves(id, game.version, finalState, allApplied, movedAt, status);
   if (!persisted) {
@@ -165,14 +178,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // The other players fetched the final move before the rewards were there.
     if (game.mode === "MULTIPLAYER") await notifyGame(id);
   }
-
-  // The board as it stood after each move — the submitted one, then every
-  // auto-applied one — so the client can show them one at a time.
-  let replay = stored;
-  const steps = allApplied.map(({ seat: s, move: m }) => {
-    replay = applyMove(replay, s, m);
-    return { seat: s, move: m, view: redactState(replay, viewerSeat) };
-  });
 
   return NextResponse.json({
     // `view` already carries status/winnerSeat/sharedWinners.

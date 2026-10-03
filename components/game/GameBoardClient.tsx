@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
+import { Announcement, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { BoardSkeleton } from "@/components/game/BoardSkeleton";
 import { useChatBubbles } from "@/components/game/ChatBubble";
@@ -25,7 +25,7 @@ import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
 import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
-import { TURN_BANNER_MS } from "@/lib/turn-banner";
+import { announceMs, BOT_THINK_MS, TRACE_MS, TURN_BANNER_MS } from "@/lib/playback";
 import type { RedactedGameState } from "@/lib/game-view";
 import type { MoveSummary } from "@/lib/game-replay";
 
@@ -96,10 +96,6 @@ function toLogEntry(step: { seat: number; move: Move } & Partial<MoveSummary>): 
   return { id: crypto.randomUUID(), seat, move, round, points, events, timestamp: Date.now() };
 }
 
-/** How long what another player picked is outlined before it leaves the board: the time the outline takes to be drawn and taken up. */
-const TRACE_MS = 1500;
-/** How long each bot appears to think before its move lands. */
-const BOT_THINK_MS = 3500;
 /** How long after the deadline before timing out another player; their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 3000;
 
@@ -237,6 +233,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         const data = body as GameGetResponse;
         // A reply that was in flight while we moved can be older than what we show.
         if (shown && shown.view.moveCount > data.view.moveCount) return;
+        // Counted from now, before the moves play back: the server's clock already waits for that.
+        const turnEndsAt = toDeadline(data.turnEndsInMs);
+        const gameEndsAt = toDeadline(data.gameEndsInMs);
 
         if (shown) {
           setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
@@ -253,8 +252,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           mode: data.mode,
           players: data.players,
           view: data.view,
-          turnEndsAt: toDeadline(data.turnEndsInMs),
-          gameEndsAt: toDeadline(data.gameEndsInMs),
+          turnEndsAt,
+          gameEndsAt,
           abandoned: data.status === "ABANDONED",
         });
         setFatalError(null);
@@ -346,6 +345,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         }
 
         const { view, status, steps, turnEndsInMs, gameEndsInMs } = body as MovesPostResponse;
+        const turnEndsAt = toDeadline(turnEndsInMs);
+        const gameEndsAt = toDeadline(gameEndsInMs);
         setStaged(null);
         // The request is done; what follows is the moves playing back.
         setSubmitting(false);
@@ -353,8 +354,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         commit({
           ...shown,
           view,
-          turnEndsAt: toDeadline(turnEndsInMs),
-          gameEndsAt: toDeadline(gameEndsInMs),
+          turnEndsAt,
+          gameEndsAt,
           abandoned: status === "ABANDONED",
         });
         return true;

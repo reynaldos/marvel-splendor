@@ -11,7 +11,7 @@ import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
 import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
 import { redactState, type RedactedGameState } from "@/lib/game-view";
-import { TURN_BANNER_MS } from "@/lib/turn-banner";
+import { TURN_BANNER_MS } from "@/lib/playback";
 
 export interface GameStep {
   seat: number;
