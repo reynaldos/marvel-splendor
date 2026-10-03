@@ -49,8 +49,8 @@ export interface GameRewards {
   coins: number;
   /** Account score, which the level and frame come from. */
   xp: { before: number; after: number };
-  /** Cards whose level went up in this game. */
-  cardLevelUps: Array<{ cardId: string; from: FrameTier; to: FrameTier }>;
+  /** Cards whose level went up in this game; `from` is null for one recruited for the first time. */
+  cardLevelUps: Array<{ cardId: string; from: FrameTier | null; to: FrameTier }>;
 }
 
 export interface Seated {

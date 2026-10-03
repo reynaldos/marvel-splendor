@@ -60,15 +60,15 @@ One human at the table means no bot scaling.
 
 ### Card levels
 
-Code: `CARD_LEVEL_XP` and `cardLevelXp` in `lib/xp.ts`; the ladders in `lib/card-level.ts`.
+Code: `CARD_FOUND_XP`, `CARD_LEVEL_XP` and `cardLevelXp` in `lib/xp.ts`; the ladders in `lib/card-level.ts`.
 
-Each card a player has recruited in finished games has a level from how many times they have recruited it. Every level a card climbs pays XP: 5 for the first, one more for each after.
+Each card a player has recruited in finished games has a level from how many times they have recruited it. The first recruit pays 2 XP, and every level the card climbs after that pays 5.
 
-| Climb | Recruited → Bronze | Bronze → Silver | Silver → Gold | Gold → Platinum | Platinum → Emerald | Emerald → Ruby | Ruby → Diamond | Diamond → Prismatic | Prismatic → Mastered |
-|---|---|---|---|---|---|---|---|---|---|
-| XP | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+| Climb | First recruit | Recruited → Bronze | Bronze → Silver | Silver → Gold | Gold → Platinum | Platinum → Emerald | Emerald → Ruby | Ruby → Diamond | Diamond → Prismatic | Prismatic → Mastered |
+|---|---|---|---|---|---|---|---|---|---|---|
+| XP | 2 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
 
-A Mastered card has paid 81 in total. The ladder depends on the card's level, because level 1 cards are recruited about four times as often as level 3 cards:
+A Mastered card has paid 47 in total. The ladder depends on the card's level, because level 1 cards are recruited about four times as often as level 3 cards:
 
 | Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -187,4 +187,4 @@ No season and no decay — rank only ever moves when a rated game finishes. Past
 
 ## What the results screen shows
 
-After the standings land, the viewer's coins count up, the XP bar fills from before to after and flashes a new level when it crosses one, the rating moves in a rated game, and a button opens the cards that went up a tier (`components/game/RewardsPanel.tsx`). All of it is read from the seat's saved rewards, so it shows the same way when the game is opened again later.
+After the standings land, the viewer's coins count up, the XP bar fills from before to after and flashes a new level when it crosses one, the rating moves in a rated game, and a button opens the cards that went up a tier or were recruited for the first time (`components/game/RewardsPanel.tsx`). All of it is read from the seat's saved rewards, so it shows the same way when the game is opened again later.

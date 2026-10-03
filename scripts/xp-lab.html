@@ -172,7 +172,8 @@
         <div class="field"><label for="w-time">Holding Time Stone</label><span class="with"><input id="w-time" type="number" data-k="timeStone"><button type="button" class="rec" data-for="w-time" title="Back to what the code has"></button></span></div>
       </div></div>
       <div class="group"><h3>Collection</h3><div class="fields">
-        <div class="field"><label for="w-cardlevel">First card level (+1 each level after)</label><span class="with"><input id="w-cardlevel" type="number" data-k="cardLevel"><button type="button" class="rec" data-for="w-cardlevel" title="Back to what the code has"></button></span></div>
+        <div class="field"><label for="w-cardfound">First recruit of a card</label><span class="with"><input id="w-cardfound" type="number" data-k="cardFound"><button type="button" class="rec" data-for="w-cardfound" title="Back to what the code has"></button></span></div>
+        <div class="field"><label for="w-cardlevel">Per card level after</label><span class="with"><input id="w-cardlevel" type="number" data-k="cardLevel"><button type="button" class="rec" data-for="w-cardlevel" title="Back to what the code has"></button></span></div>
       </div></div>
       </div>
       <div id="pane-levels" role="tabpanel" aria-labelledby="tab-levels" hidden>
@@ -218,9 +219,9 @@
   const frameClass = (tier) => "frame-gold " + FRAMES[tier].effect;
   const initials = (name) => name.trim().split(/\s+/).length > 1 ? name.trim().split(/\s+/).map((w) => w[0]).filter((_, i, a) => i === 0 || i === a.length - 1).join("").toUpperCase() : name.slice(0, 2).toUpperCase();
   // The formula before this update: 10 a game, 20 a win, 5 an Avengers tile, 5 a Location, 5 a card level.
-  const OLD = { played: 10, place1: 20, place2: 0, place3: 0, place4: 0, placePerEmptySeat: 0, placeMin: 0, botHard: 1, botNormal: 1, botEasy: 1, human: 0, hard: 0, normal: 0, easy: 0, point: 0, card: 0, badge: 0, avengersTile: 5, location: 5, timeStone: 0, cardLevel: 5, base: 100, exp: 1.5, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
+  const OLD = { played: 10, place1: 20, place2: 0, place3: 0, place4: 0, placePerEmptySeat: 0, placeMin: 0, botHard: 1, botNormal: 1, botEasy: 1, human: 0, hard: 0, normal: 0, easy: 0, point: 0, card: 0, badge: 0, avengersTile: 5, location: 5, timeStone: 0, cardFound: 0, cardLevel: 5, base: 100, exp: 1.5, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
   // What lib/xp.ts has now; the page opens on these.
-  const CURRENT = { played: 5, place1: 20, place2: 10, place3: 5, place4: 2, placePerEmptySeat: 5, placeMin: 3, botHard: 0.8, botNormal: 0.6, botEasy: 0.4, human: 4, hard: 3, normal: 2, easy: 1, point: 3, card: 1, badge: 1, avengersTile: 5, location: 3, timeStone: 2, cardLevel: 5, base: 150, exp: 1.7, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
+  const CURRENT = { played: 5, place1: 20, place2: 10, place3: 5, place4: 2, placePerEmptySeat: 5, placeMin: 3, botHard: 0.8, botNormal: 0.6, botEasy: 0.4, human: 4, hard: 3, normal: 2, easy: 1, point: 3, card: 1, badge: 1, avengersTile: 5, location: 3, timeStone: 2, cardFound: 2, cardLevel: 5, base: 150, exp: 1.7, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
   const TIERS = ["Recruited","Bronze","Silver","Gold","Platinum","Emerald","Ruby","Diamond","Prismatic","Mastered"];
   // Set from the inputs on every render.
   let curve = { base: 100, exp: 1.5 }, TIER_MIN_LEVEL = [1, 2, 4, 6, 8, 10, 13, 16, 20, 25];
@@ -239,9 +240,9 @@
     const factor = botsOnly ? opponents.reduce((s, o) => s + table[o], 0) / opponents.length : 1;
     return Math.max(w.placeMin, Math.round(base * factor));
   }
-  // A card's k levels past Recruited are worth base, base+1, ... base+k-1.
-  const levelsXp = (k, base) => k * base + (k * (k - 1)) / 2;
-  const cardLevelXp = (g, w) => g.cardLevels.reduce((s, [b, a]) => s + levelsXp(a, w.cardLevel) - levelsXp(b, w.cardLevel), 0);
+  // A card found once pays the first-recruit value; each level after pays the level value.
+  const levelsXp = (k, w) => (k ? w.cardFound + (k - 1) * w.cardLevel : 0);
+  const cardLevelXp = (g, w) => g.cardLevels.reduce((s, [b, a]) => s + levelsXp(a, w) - levelsXp(b, w), 0);
   function gameXp(g, w) {
     return w.played + placeXp(g.place, g.opponents, w)
       + g.opponents.reduce((s, o) => s + (w[o] ?? 0), 0)
@@ -313,7 +314,8 @@
   location: ${w.location},
   timeStone: ${w.timeStone},
 };
-export const CARD_LEVEL_XP = ${w.cardLevel}; // +1 for each level after the first
+export const CARD_FOUND_XP = ${w.cardFound};
+export const CARD_LEVEL_XP = ${w.cardLevel};
 
 export function scoreForLevel(level: number): number {
   return Math.round(${curve.base} * (level - 1) ** ${curve.exp});
