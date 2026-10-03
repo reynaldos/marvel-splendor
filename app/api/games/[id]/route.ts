@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { auth0 } from "@/lib/auth0";
+import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { createGame } from "@/lib/engine/setup";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
@@ -89,6 +90,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       : null;
   const start = steps && since === 0 ? redactState(createGame(game.players.length, game.seed, settings), seatRow.seat) : null;
 
+  const botAvatars = botAvatarKeys(game.seed, game.players);
   return NextResponse.json({
     id: game.id,
     status: game.status,
@@ -100,7 +102,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       isBot: p.isBot,
       userId: p.userId,
       name: p.isBot ? botName(game.players, p.seat) : p.user?.username ?? p.guestName ?? "Player",
-      avatarUrl: publicAvatarUrl(p.user?.avatarKey),
+      avatarUrl: publicAvatarUrl(p.isBot ? botAvatars.get(p.seat) : p.user?.avatarKey),
       rewards: p.rewards as unknown as GameRewards | null,
     })),
     view: redactState(state, seatRow.seat),

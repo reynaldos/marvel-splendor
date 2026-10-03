@@ -6,6 +6,7 @@ import { LobbyLive } from "@/components/lobby/LobbyLive";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
 import { auth0 } from "@/lib/auth0";
+import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -76,6 +77,7 @@ export default async function LobbyPage({
   if (game.status !== "LOBBY") redirect(withCheat(`/play/${game.id}`, cheat));
 
   const settings = { ...DEFAULT_SETTINGS, ...(game.settings as unknown as Partial<GameSettings>) };
+  const botAvatars = botAvatarKeys(game.seed, game.players);
 
   return (
     <>
@@ -90,7 +92,7 @@ export default async function LobbyPage({
           return {
             seat: player.seat,
             name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
-            avatarUrl: publicAvatarUrl(player.user?.avatarKey),
+            avatarUrl: publicAvatarUrl(player.isBot ? botAvatars.get(player.seat) : player.user?.avatarKey),
             isBot: player.isBot,
             isHost: player.seat === 0,
             isYou: player.userId === user.id,

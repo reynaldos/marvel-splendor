@@ -1,3 +1,4 @@
+import { botAvatarKeys } from "@/lib/avatars";
 import { careerStats, type CareerStats } from "@/lib/career-stats";
 import { prisma } from "@/lib/db";
 import type { GameState } from "@/lib/engine/types";
@@ -26,6 +27,7 @@ export async function loadGameHistory(userId: string): Promise<{
         select: {
           id: true,
           mode: true,
+          seed: true,
           updatedAt: true,
           state: true,
           players: {
@@ -45,6 +47,7 @@ export async function loadGameHistory(userId: string): Promise<{
   const played = seats.flatMap(({ seat, game }) => {
     const state = game.state as unknown as GameState;
     if (!state.players?.[seat]) return [];
+    const botAvatars = botAvatarKeys(game.seed, game.players);
     const record = gameRecord(
       {
         id: game.id,
@@ -57,7 +60,7 @@ export async function loadGameHistory(userId: string): Promise<{
       game.players.map((p) => ({
         seat: p.seat,
         name: p.isBot ? botName(game.players, p.seat) : (p.user?.username ?? p.guestName ?? "Player"),
-        avatarUrl: publicAvatarUrl(p.user?.avatarKey),
+        avatarUrl: publicAvatarUrl(p.isBot ? botAvatars.get(p.seat) : p.user?.avatarKey),
       })),
     );
     const againstPeople = game.players.some((p) => !p.isBot && p.seat !== seat);

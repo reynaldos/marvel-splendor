@@ -1,3 +1,5 @@
+import { createRng, shuffle } from "@/lib/engine/rng";
+
 interface LibraryAvatar {
   id: string;
   label: string;
@@ -49,4 +51,17 @@ export function randomLibraryAvatarKey(): string {
 export function libraryAvatarSrc(key: string | null | undefined): string | null {
   if (!key?.startsWith(PREFIX)) return null;
   return AVATAR_LIBRARY.find((a) => PREFIX + a.id === key)?.src ?? null;
+}
+
+/** A library picture per bot seat, dealt from the game seed so every device agrees; no repeats, none a person at the table uses. */
+export function botAvatarKeys(
+  seed: string,
+  players: Array<{ seat: number; isBot: boolean; user?: { avatarKey: string | null } | null }>,
+): Map<number, string> {
+  const taken = new Set(players.map((p) => p.user?.avatarKey));
+  const free = shuffle(AVATAR_LIBRARY, createRng(`${seed}:avatars`))
+    .map((a) => PREFIX + a.id)
+    .filter((key) => !taken.has(key));
+  const bots = players.filter((p) => p.isBot).sort((a, b) => a.seat - b.seat);
+  return new Map(bots.map((p, i) => [p.seat, free[i % free.length]]));
 }
