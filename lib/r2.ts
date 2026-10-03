@@ -39,7 +39,8 @@ function getBucket(): string {
   return requireEnv("R2_BUCKET");
 }
 
-export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
+/** The full-size original a player sends; the crop shown everywhere is far smaller. */
+export const AVATAR_MAX_BYTES = 10 * 1024 * 1024;
 
 export const AVATAR_ALLOWED_CONTENT_TYPES: Record<string, string> = {
   "image/png": "png",
@@ -49,40 +50,39 @@ export const AVATAR_ALLOWED_CONTENT_TYPES: Record<string, string> = {
 
 const PRESIGN_EXPIRES_SECONDS = 5 * 60;
 
-/**
- * Generates a presigned R2 PUT URL scoped to `userId`, plus the object key
- * the client will upload to. The presign request pins `ContentType` and
- * `ContentLength`, so the signature is only valid for an upload matching
- * those exact headers — this is how we enforce the size/type limit without
- * a separate S3 POST-policy flow.
- */
-export async function createAvatarUploadUrl(
-  userId: string,
-  contentType: string,
-  contentLength: number
-): Promise<{ key: string; uploadUrl: string }> {
-  const extension = AVATAR_ALLOWED_CONTENT_TYPES[contentType];
-  if (!extension) {
-    throw new Error(`Unsupported avatar content type: ${contentType}`);
-  }
+/** The full-size picture a crop was cut from, kept beside it under the same id. */
+export function originalAvatarKey(cropKey: string): string {
+  return cropKey.replace(/\.[a-z]+$/, ".original");
+}
+
+/** A presigned PUT pinned to one content type and length, so the signature only fits an upload matching them. */
+async function presignAvatarPut(key: string, contentType: string, contentLength: number): Promise<string> {
   if (contentLength <= 0 || contentLength > AVATAR_MAX_BYTES) {
     throw new Error(`Avatar file size must be between 1 and ${AVATAR_MAX_BYTES} bytes`);
   }
+  const command = new PutObjectCommand({ Bucket: getBucket(), Key: key, ContentType: contentType, ContentLength: contentLength });
+  return getSignedUrl(getR2Client(), command, { expiresIn: PRESIGN_EXPIRES_SECONDS });
+}
 
+/**
+ * Keys and upload URLs for a player's new picture: the square crop that is shown everywhere,
+ * and the full-size original it was cut from, so the crop can be redone later.
+ */
+export async function createAvatarUploadUrls(
+  userId: string,
+  crop: { contentType: string; contentLength: number },
+  original: { contentType: string; contentLength: number },
+): Promise<{ key: string; uploadUrl: string; originalUploadUrl: string }> {
+  const extension = AVATAR_ALLOWED_CONTENT_TYPES[crop.contentType];
+  if (!extension || !AVATAR_ALLOWED_CONTENT_TYPES[original.contentType]) {
+    throw new Error(`Unsupported avatar content type: ${crop.contentType}, ${original.contentType}`);
+  }
   const key = `avatars/${userId}/${randomUUID()}.${extension}`;
-
-  const command = new PutObjectCommand({
-    Bucket: getBucket(),
-    Key: key,
-    ContentType: contentType,
-    ContentLength: contentLength,
-  });
-
-  const uploadUrl = await getSignedUrl(getR2Client(), command, {
-    expiresIn: PRESIGN_EXPIRES_SECONDS,
-  });
-
-  return { key, uploadUrl };
+  const [uploadUrl, originalUploadUrl] = await Promise.all([
+    presignAvatarPut(key, crop.contentType, crop.contentLength),
+    presignAvatarPut(originalAvatarKey(key), original.contentType, original.contentLength),
+  ]);
+  return { key, uploadUrl, originalUploadUrl };
 }
 
 /** Confirms an object was actually uploaded (exists) before trusting the key. */

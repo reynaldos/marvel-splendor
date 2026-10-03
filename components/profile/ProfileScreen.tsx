@@ -37,6 +37,8 @@ interface ProfileScreenProps {
   /** Null when the viewer may not see them: only the player and admins can. */
   games: GameRecord[] | null;
   isOwn: boolean;
+  /** An admin may edit any profile; the link then names whose. */
+  canEdit: boolean;
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
@@ -53,6 +55,7 @@ export function ProfileScreen({
   records,
   games,
   isOwn,
+  canEdit,
 }: ProfileScreenProps) {
   const level = accountLevel(xp);
   const tier = accountFrameTier(level);
@@ -66,9 +69,9 @@ export function ProfileScreen({
             style={xpCardStyle ? FRAME_STYLE[tier] : PLAIN_FRAME}
             title={`Level ${level}`}
           >
-            {isOwn ? (
+            {canEdit ? (
               <Link
-                href="/settings"
+                href={isOwn ? "/settings" : `/settings?user=${username}`}
                 aria-label="Edit profile"
                 className="absolute top-2 right-2 flex size-9 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
               >

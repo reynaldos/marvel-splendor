@@ -24,6 +24,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
   const [session, history, xp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), accountXpByUser([user.id])]);
   const isOwn = session?.user.sub === user.auth0Sub;
+  const admin = Boolean(session && isAdmin(session.user));
 
   return (
     <>
@@ -40,8 +41,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         career={history.career}
         records={history.records}
         // A player's games are theirs to see, and admins'; nobody else is sent them.
-        games={isOwn || (session && isAdmin(session.user)) ? history.games : null}
+        games={isOwn || admin ? history.games : null}
         isOwn={isOwn}
+        canEdit={isOwn || admin}
       />
     </>
   );
