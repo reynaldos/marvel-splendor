@@ -5,7 +5,7 @@ import Link from "next/link";
 import { UsersRound } from "lucide-react";
 
 import { playSfx, scheduleClockTicks } from "@/components/audio";
-import { Announcement, announceMs, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
+import { Announcement, tileOrigin, type TileOrigin } from "@/components/game/Announcement";
 import { Board } from "@/components/game/Board";
 import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
@@ -18,6 +18,7 @@ import type { BoardEvent } from "@/lib/board-events";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, type Move } from "@/lib/engine/types";
 import { redactState } from "@/lib/game-view";
+import { announceMs } from "@/lib/playback";
 
 import { PreviewBar, TABLE_SIZES } from "../PreviewBar";
 

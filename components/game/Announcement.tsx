@@ -9,13 +9,10 @@ import { glideFrom } from "@/components/game/glide";
 import { LocationTile } from "@/components/game/LocationTile";
 import type { BoardEvent } from "@/lib/board-events";
 import { getLocation } from "@/lib/engine/data";
+import { announceMs } from "@/lib/playback";
 
 /** How long a tile takes to travel from the board to the middle of the screen. */
 const GLIDE_MS = 900;
-/** How long an announcement holds the screen. The Eye takes its time to open. */
-export function announceMs(event: BoardEvent): number {
-  return event.kind === "timeStone" ? 5000 : 3000;
-}
 
 /** A tile as it sat on the board: where, and a copy of it to carry to the middle of the screen. */
 export interface TileOrigin {
