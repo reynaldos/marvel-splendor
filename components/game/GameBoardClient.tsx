@@ -58,6 +58,8 @@ interface GameGetResponse {
   moves: Array<{ ordinal: number; seat: number; move: Move } & Partial<MoveSummary>>;
   /** The moves since `?since=`, to play back; empty when there's nothing to show. */
   steps: GameStep[];
+  /** The board before `steps` when they are the game's opening, so a first load can play it. */
+  start: RedactedGameState | null;
   turnEndsInMs: number | null;
   gameEndsInMs: number | null;
 }
@@ -239,6 +241,11 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         if (shown) {
           setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
           await playSteps(data.steps, data.players, shown.view);
+        } else if (data.start && data.steps.length > 0) {
+          // The bots went first: show the deal, then watch them open.
+          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false });
+          setMoveLog([]);
+          await playSteps(data.steps, data.players, data.start);
         }
         setMoveLog(data.moves.map(toLogEntry));
         commit({

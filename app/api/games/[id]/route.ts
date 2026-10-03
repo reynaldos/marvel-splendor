@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { auth0 } from "@/lib/auth0";
+import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
+import { createGame } from "@/lib/engine/setup";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
 import { gameEndsInMs, moveSummaries, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import type { GameRewards } from "@/lib/game-record";
@@ -18,6 +20,8 @@ import { publicAvatarUrl } from "@/lib/r2";
  *
  * `?since=N` (the move count the device last showed) also returns `steps`:
  * the board after each move it missed, so it can play them back in order.
+ * A first load of a game the bots opened gets those moves as steps too, with
+ * `start`, the board before them, so the player sees the bots go first.
  */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -68,12 +72,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     moves,
   });
 
-  const since = Number(new URL(request.url).searchParams.get("since") ?? NaN);
+  const sinceParam = new URL(request.url).searchParams.get("since");
+  const botsOpened = moves.length > 0 && moves.every((m) => game.players.find((p) => p.seat === m.seat)?.isBot);
+  const since = sinceParam === null ? (botsOpened ? 0 : NaN) : Number(sinceParam);
+  const settings = game.settings as unknown as GameSettings;
   const steps =
     Number.isInteger(since) && since >= 0 && since < moves.length
       ? replaySteps({
           seed: game.seed,
-          settings: game.settings as unknown as GameSettings,
+          settings,
           playerCount: game.players.length,
           moves,
           since,
@@ -81,7 +88,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           finalState: state,
         })
       : null;
+  const start = steps && since === 0 ? redactState(createGame(game.players.length, game.seed, settings), seatRow.seat) : null;
 
+  const botAvatars = botAvatarKeys(game.seed, game.players);
   return NextResponse.json({
     id: game.id,
     status: game.status,
@@ -93,12 +102,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       isBot: p.isBot,
       userId: p.userId,
       name: p.isBot ? botName(game.players, p.seat) : p.user?.username ?? p.guestName ?? "Player",
-      avatarUrl: publicAvatarUrl(p.user?.avatarKey),
+      avatarUrl: publicAvatarUrl(p.isBot ? botAvatars.get(p.seat) : p.user?.avatarKey),
       rewards: p.rewards as unknown as GameRewards | null,
     })),
     view: redactState(state, seatRow.seat),
     moves: moves.map((m, i) => ({ ...m, ...summaries[i] })),
     steps: steps ?? [],
+    start,
     turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
     gameEndsInMs: game.status === "ACTIVE" ? gameEndsInMs(state.settings, game.createdAt) : null,
   });

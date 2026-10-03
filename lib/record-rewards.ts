@@ -57,7 +57,7 @@ export function buildGameRewards(userId: string, from: RewardSources): GameRewar
     coins: from.coins.get(userId) ?? 0,
     xp: { before: xpBefore, after: xpAfter },
     cardLevelUps: cards
-      .map((c) => ({ cardId: c.cardId, from: cardFrameTier(c.cardId, c.before), to: cardFrameTier(c.cardId, c.after) }))
+      .map((c) => ({ cardId: c.cardId, from: c.before === 0 ? null : cardFrameTier(c.cardId, c.before), to: cardFrameTier(c.cardId, c.after) }))
       .filter((c) => c.from !== c.to),
   };
 }

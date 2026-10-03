@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "cn";
 
 import { LargeImages } from "@/components/game/assets";
@@ -18,11 +18,11 @@ const AFTER_MS = 1700;
 
 const BUTTON = "h-10 rounded-full px-6 font-display text-sm font-black tracking-wide uppercase shadow-lg";
 
-/** A tier's name in its own colour: gold reads gold, ruby reads ruby. Recruited has no colour of its own. */
-export function TierName({ tier, className }: { tier: FrameTier; className?: string }) {
+/** A tier's name in its own colour: gold reads gold, ruby reads ruby. Recruited has no colour of its own; null is a card never held before. */
+export function TierName({ tier, className }: { tier: FrameTier | null; className?: string }) {
   return (
-    <span className={cn("font-black", className)} style={{ ...FRAME_STYLE[tier], color: "var(--frame-glow, var(--color-cosmos-300))" }}>
-      {tier}
+    <span className={cn("font-black", className)} style={{ ...(tier ? FRAME_STYLE[tier] : {}), color: "var(--frame-glow, var(--color-cosmos-300))" }}>
+      {tier ?? "New recruit"}
     </span>
   );
 }
@@ -30,18 +30,21 @@ export function TierName({ tier, className }: { tier: FrameTier; className?: str
 /** The corners a card drawn large gets, everywhere in the game. */
 const CORNERS = "rounded-[10%/7.1%]";
 
-/** A card in a tier's frame, with the light that tier gets. */
-function FramedCard({ cardId, tier, className }: { cardId: string; tier: FrameTier; className?: string }) {
+/** A card in a tier's frame, with the light that tier gets; no frame at all before its first recruit. */
+function FramedCard({ cardId, tier, className }: { cardId: string; tier: FrameTier | null; className?: string }) {
   const card = CARD_BY_ID.get(cardId);
   return card ? (
-    <span className={cn("frame-gold aspect-card block w-full rounded-frame-lg", FRAME_EFFECT[tier], className)} style={FRAME_STYLE[tier]}>
+    <span
+      className={cn("frame-gold aspect-card block w-full rounded-frame-lg", tier && FRAME_EFFECT[tier], className)}
+      style={tier ? FRAME_STYLE[tier] : ({ "--frame-border": "transparent" } as CSSProperties)}
+    >
       <CardView card={card} className={cn("size-full", CORNERS)} />
     </span>
   ) : null;
 }
 
 /**
- * The cards that went up a tier, on the night sky over the whole screen: each
+ * The cards that went up a tier or were recruited for the first time, on the night sky over the whole screen: each
  * one rises in as it was, then its new frame flares over it, one after
  * another; then all of them together as they are now. Skip goes straight to that.
  */
@@ -61,7 +64,8 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
   const up = ups[index];
   const flipped = stage % 2 === 1;
   const [viewing, setViewing] = useState<{ card: Card; from: DOMRect } | null>(null);
-  const title = ups.length === 1 ? "1 card ranked up" : `${ups.length} cards ranked up`;
+  const n = ups.length;
+  const title = ups.every((u) => u.from) ? `${n} ${n === 1 ? "card" : "cards"} ranked up` : ups.some((u) => u.from) ? `${n} new cards and rank-ups` : `${n} new ${n === 1 ? "recruit" : "recruits"}`;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>

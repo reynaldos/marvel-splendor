@@ -14,9 +14,9 @@ function cardTierMinTimes(cardId: string): number[] {
   return CARD_LEVEL_TIER_MIN_TIMES[CARD_BY_ID.get(cardId)?.level ?? 2];
 }
 
-/** Levels a card has climbed past Recruited from `CollectedCard.times`: 0 for Recruited, 9 for Mastered. */
+/** Levels a card has climbed from `CollectedCard.times`, the first recruit included: 0 unseen, 1 Recruited, 10 Mastered. */
 export function cardLevelsClimbed(cardId: string, timesRecruited: number): number {
-  return Math.max(0, cardTierMinTimes(cardId).filter((min) => timesRecruited >= min).length - 1);
+  return cardTierMinTimes(cardId).filter((min) => timesRecruited >= min).length;
 }
 
 /** The frame a card earns from `CollectedCard.times` — same ladder as the account-level frame, keyed off recruit count instead. */

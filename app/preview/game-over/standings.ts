@@ -14,7 +14,8 @@ const TABLE = [
 
 /** How many cards the preview can show going up a level: the first `cards` of these. */
 export const CARD_LEVEL_UPS: GameRewards["cardLevelUps"] = [
-  { cardId: "c1-11", from: "Recruited", to: "Bronze" },
+  { cardId: "c1-11", from: null, to: "Recruited" },
+  { cardId: "c2-07", from: "Recruited", to: "Bronze" },
   { cardId: "c2-03", from: "Bronze", to: "Silver" },
   { cardId: "c3-01", from: "Silver", to: "Gold" },
   { cardId: "c1-01", from: "Gold", to: "Platinum" },

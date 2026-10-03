@@ -50,9 +50,8 @@ export async function POST(request: Request) {
   const initialState = createGame(playerCount, seed, settings);
 
   // Seat 0 is always the human; every other seat is a bot. If the randomly
-  // chosen starting seat is a bot, run the bot loop now so the human's very
-  // first fetch already shows a board they can act on, rather than an empty
-  // poll waiting for a bot turn that already could have happened.
+  // chosen starting seat is a bot, run the bot loop now; the board plays
+  // those opening moves back on its first load, so the player sees them.
   const isBotSeat = (seat: number) => seat !== 0;
   const { state: finalState, applied } = runServerTurnLoop(initialState, isBotSeat);
 

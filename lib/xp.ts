@@ -3,14 +3,15 @@ import type { OpponentTier } from "@/lib/coins";
 import type { BotDifficulty } from "@/lib/engine/types";
 import { frameTierFor, type FrameTier } from "@/lib/frame-tier";
 
-/** XP for a card's first level past Recruited; each level after is worth one more, so Recruited to Bronze is 5 and Bronze to Silver 6. */
+/** XP for recruiting a card the first time, and for each level it climbs after that. */
+export const CARD_FOUND_XP = 2;
 export const CARD_LEVEL_XP = 5;
 
-/** XP from card levels, given how many times each collected card has been recruited. A Mastered card has given 81. */
+/** XP from card levels, given how many times each collected card has been recruited. A Mastered card has given 47. */
 export function cardLevelXp(cards: Array<{ cardId: string; times: number }>): number {
   return cards.reduce((xp, c) => {
     const levels = cardLevelsClimbed(c.cardId, c.times);
-    return xp + levels * CARD_LEVEL_XP + (levels * (levels - 1)) / 2;
+    return levels ? xp + CARD_FOUND_XP + (levels - 1) * CARD_LEVEL_XP : xp;
   }, 0);
 }
 

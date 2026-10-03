@@ -37,7 +37,7 @@ function useCountUp(ms: number, delayMs: number): number {
 /**
  * What the game gave the viewer, counted up on the results screen: coins, then
  * the XP bar filling from where they were to where they are, wrapping and
- * flashing the new level when it crosses one, then a button for the cards that went up a tier.
+ * flashing the new level when it crosses one, then a button for the cards that went up a tier or were new recruits.
  */
 export function RewardsPanel({ rewards, delay, onShowCards }: { rewards: GameRewards; delay: number; onShowCards: () => void }) {
   const t = useCountUp(COUNT_MS, delay * 1000);
@@ -98,7 +98,7 @@ export function RewardsPanel({ rewards, delay, onShowCards }: { rewards: GameRew
               style={{ animationDelay: "0.2s" }}
             >
               <Layers className="size-4" />
-              View cards ranked up
+              {cardLevelUps.every((c) => c.from) ? "View cards ranked up" : "View new cards and rank-ups"}
               <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-cosmos-950 px-1.5 text-xs text-gold-400 tabular-nums">
                 {cardLevelUps.length}
               </span>
