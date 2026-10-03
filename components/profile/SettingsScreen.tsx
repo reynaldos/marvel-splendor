@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "cn";
+import { Crop } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
+import { CropPicture } from "@/components/profile/CropPicture";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
-import { AVATAR_TYPES, checkAvatarFile, uploadAvatar } from "@/components/profile/upload-avatar";
+import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
 import { Toggle } from "@/components/Toggle";
 import {
@@ -35,8 +37,8 @@ const FIELD =
 /** How long typing must pause before the username is looked up. */
 const CHECK_DELAY_MS = 400;
 
-/** A picture picked but not saved yet: one from the library, or a file to upload. */
-type Picked = { src: string; id: string } | { src: string; file: File };
+/** A picture picked but not saved yet: one from the library, or a crop to upload with the full-size picture it was cut from. */
+type Picked = { src: string; id: string } | { src: string; file: File; original: File };
 
 interface SettingsScreenProps {
   username: string;
@@ -46,8 +48,10 @@ interface SettingsScreenProps {
   avatarTier: FrameTier;
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
-  onCheckUsername: (typed: string) => Promise<SaveState>;
-  onSave: (changes: ProfileChanges) => Promise<SaveState>;
+  /** Set when an admin is editing another player's profile: their username. */
+  forUser: string | null;
+  onCheckUsername: (typed: string, forUser: string | null) => Promise<SaveState>;
+  onSave: (changes: ProfileChanges, forUser: string | null) => Promise<SaveState>;
 }
 
 /**
@@ -61,6 +65,7 @@ export function SettingsScreen({
   avatarTier,
   xpAvatarStyle,
   xpCardStyle,
+  forUser,
   onCheckUsername,
   onSave,
 }: SettingsScreenProps) {
@@ -72,6 +77,8 @@ export function SettingsScreen({
   const [xpAvatar, setXpAvatar] = useState(xpAvatarStyle);
   const [xpCard, setXpCard] = useState(xpCardStyle);
   const [editingPicture, setEditingPicture] = useState(false);
+  // A picture open in the circle to be placed: a file just chosen, or the saved original fetched from here.
+  const [cropping, setCropping] = useState<{ src: string; file: File | null } | null>(null);
   // What the server said about the username last looked up.
   const [looked, setLooked] = useState<{ name: string; result: SaveState } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -89,19 +96,27 @@ export function SettingsScreen({
     xpCard !== xpCardStyle;
   const shape = checkUsername(name);
   const shown = picked?.src ?? avatarUrl;
+  // What the crop button reopens: the pending upload's original, or the saved original served from here. Library pictures aren't cut.
+  const adjustable: { src: string; file: File | null } | null = picked
+    ? "original" in picked
+      ? { src: URL.createObjectURL(picked.original), file: picked.original }
+      : null
+    : avatarUrl && !avatarUrl.startsWith("/")
+      ? { src: `/api/avatar/current${forUser ? `?user=${forUser}` : ""}`, file: null }
+      : null;
 
   useEffect(() => {
     if (!nameChanged || "error" in checkUsername(typed)) return;
     let current = true;
     const timer = setTimeout(async () => {
-      const found = await onCheckUsername(typed).catch(() => null);
+      const found = await onCheckUsername(typed, forUser).catch(() => null);
       if (current && found) setLooked({ name: typed, result: found });
     }, CHECK_DELAY_MS);
     return () => {
       current = false;
       clearTimeout(timer);
     };
-  }, [typed, nameChanged, onCheckUsername]);
+  }, [typed, nameChanged, onCheckUsername, forUser]);
 
   const nameNote: SaveState | null = !nameChanged
     ? null
@@ -128,14 +143,17 @@ export function SettingsScreen({
     setSaving(true);
     setResult(null);
     try {
-      const saved = await onSave({
-        username: typed,
-        name: fullName,
-        avatarId: picked && "id" in picked ? picked.id : null,
-        xpAvatarStyle: xpAvatar,
-        xpCardStyle: xpCard,
-      });
-      if (saved.ok && picked && "file" in picked) await uploadAvatar(picked.file);
+      const saved = await onSave(
+        {
+          username: typed,
+          name: fullName,
+          avatarId: picked && "id" in picked ? picked.id : null,
+          xpAvatarStyle: xpAvatar,
+          xpCardStyle: xpCard,
+        },
+        forUser,
+      );
+      if (saved.ok && picked && "file" in picked) await uploadAvatar(picked.file, picked.original, forUser);
       // Saved: on to the profile, under whatever the username is now.
       if (saved.ok) router.push(`/profile/${typed}`);
       else setResult(saved);
@@ -158,12 +176,29 @@ export function SettingsScreen({
       <StageRows>
         <div className="flex items-center justify-center gap-10">
           <div className="flex w-40 flex-col items-center gap-3">
-            <PlayerAvatar
-              src={shown}
-              name={typed || username}
-              tier={xpAvatar ? avatarTier : undefined}
-              className="size-28 text-4xl"
-            />
+            <span className="relative">
+              <PlayerAvatar
+                src={shown}
+                name={typed || username}
+                tier={xpAvatar ? avatarTier : undefined}
+                className="size-28 text-4xl"
+              />
+              {adjustable ? (
+                <button
+                  type="button"
+                  aria-label="Adjust picture"
+                  disabled={saving || cropping !== null}
+                  onClick={() => {
+                    setEditingPicture(true);
+                    setCropping(adjustable);
+                  }}
+                  // Centred on the corner of the picture's box, which a circle leaves empty, so it never covers the face.
+                  className="absolute top-0 right-0 flex size-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500 disabled:opacity-60"
+                >
+                  <Crop className="size-4" />
+                </button>
+              ) : null}
+            </span>
             <input
               ref={fileInput}
               type="file"
@@ -173,14 +208,14 @@ export function SettingsScreen({
                 const file = event.target.files?.[0];
                 event.target.value = "";
                 if (!file) return;
-                const problem = checkAvatarFile(file);
+                const problem = checkAvatarType(file);
                 if (problem) setResult({ ok: false, message: problem });
-                else pick({ src: URL.createObjectURL(file), file });
+                else setCropping({ src: URL.createObjectURL(file), file });
               }}
             />
             <button
               type="button"
-              disabled={saving}
+              disabled={saving || cropping !== null}
               onClick={() => (editingPicture ? fileInput.current?.click() : setEditingPicture(true))}
               className={BLUE_BUTTON}
             >
@@ -189,7 +224,28 @@ export function SettingsScreen({
           </div>
 
           <div className="flex w-130 flex-col gap-3">
-            {editingPicture ? (
+            {cropping ? (
+              <>
+                <h2 className={HEADING}>Place your picture</h2>
+                <CropPicture
+                  src={cropping.src}
+                  onDone={async (file) => {
+                    const from = cropping;
+                    setCropping(null);
+                    if (!file) return;
+                    // A saved picture's original comes back from the server, to go up again with the new crop.
+                    let original = from.file;
+                    if (!original) {
+                      const blob = await fetch(from.src).then((res) => res.blob());
+                      original = new File([blob], "original", { type: blob.type });
+                    }
+                    const problem = checkAvatarFile(file) ?? checkAvatarFile(original);
+                    if (problem) setResult({ ok: false, message: problem });
+                    else pick({ src: URL.createObjectURL(file), file, original });
+                  }}
+                />
+              </>
+            ) : editingPicture ? (
               <>
                 <h2 className={HEADING}>Or choose a picture</h2>
                 <div className="grid grid-cols-9 gap-2">
@@ -272,7 +328,14 @@ export function SettingsScreen({
             {result?.message}
           </p>
           {editingPicture ? (
-            <button type="button" onClick={() => setEditingPicture(false)} className={BIG_BUTTON}>
+            <button
+              type="button"
+              onClick={() => {
+                setCropping(null);
+                setEditingPicture(false);
+              }}
+              className={BIG_BUTTON}
+            >
               Back to settings
             </button>
           ) : (

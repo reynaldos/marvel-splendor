@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "cn";
+import { toast } from "sonner";
 import { Star } from "lucide-react";
 
 import { AvengersIcon } from "@/components/game/assets";
@@ -30,6 +31,8 @@ interface PlayerPlaqueProps {
   bubble?: ShownBubble;
   /** Drawn on the name's tab (the viewer's chat button). */
   tabExtra?: ReactNode;
+  /** Took the first turn, so the game ends on the player before them. */
+  startedGame?: boolean;
   /** Stands on the card's top edge, between the tab and the points (opponents' reserved cards). */
   beside?: ReactNode;
   /** Hide the Avengers tag count (the viewer's is shown in the HandTray). */
@@ -65,6 +68,7 @@ export function PlayerPlaque({
   turnSeconds,
   bubble,
   tabExtra,
+  startedGame,
   beside,
   hideTags,
   children,
@@ -122,11 +126,21 @@ export function PlayerPlaque({
         Larger than its tab on purpose: it stands out over the tab's top, side and foot alike. It is
         drawn over the tab, not in it, so the tab's glow being cut off doesn't cut the picture.
       */}
-      <PlayerAvatar
-        src={avatarUrl}
-        name={name}
-        className="absolute bottom-[calc(100%-var(--spacing)*0.75)] -left-1 size-(--pfp) text-xs ring-1"
-      />
+      <span className="absolute bottom-[calc(100%-var(--spacing)*0.75)] -left-1 size-(--pfp)">
+        <PlayerAvatar src={avatarUrl} name={name} className="size-full text-xs ring-1" />
+        {startedGame ? (
+          // The first player's token, on the picture's corner; a tap says whose it is.
+          <button
+            type="button"
+            aria-label={`${name} started the game`}
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.info(`${name} started the game.`);
+            }}
+            className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-gold-400 ring-2 ring-gold-600 hover:bg-gold-200"
+          />
+        ) : null}
+      </span>
 
       {beside ? <div className="absolute bottom-full left-30 mb-0.5 ml-0.5">{beside}</div> : null}
 

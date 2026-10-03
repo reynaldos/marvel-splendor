@@ -1,9 +1,9 @@
 import { TopBar } from "@/components/TopBar";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { SettingsScreen } from "@/components/profile/SettingsScreen";
 import { auth0 } from "@/lib/auth0";
-import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { editTarget } from "@/lib/edit-target";
 import { accountXpByUser } from "@/lib/load-xp";
 import { publicAvatarUrl } from "@/lib/r2";
 import { pageMetadata } from "@/lib/site";
@@ -13,11 +13,14 @@ import { checkUsernameAction, saveProfileAction } from "./actions";
 
 export const metadata = pageMetadata("Profile settings", "Your picture, name and username.", true);
 
-export default async function SettingsPage() {
+/** Own settings, or with `?user=<username>` another player's for an admin. */
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ user?: string }> }) {
   const session = await auth0.getSession();
   if (!session) redirect("/auth/login?returnTo=/settings");
 
-  const user = await getOrCreateUser(session.user);
+  const { user: forUser } = await searchParams;
+  const user = await editTarget(session.user, forUser);
+  if (!user) notFound();
   const xp = await accountXpByUser([user.id]);
 
   return (
@@ -30,6 +33,7 @@ export default async function SettingsPage() {
         avatarTier={accountTierFor(xp.get(user.id) ?? 0)}
         xpAvatarStyle={user.xpAvatarStyle}
         xpCardStyle={user.xpCardStyle}
+        forUser={forUser ?? null}
         onCheckUsername={checkUsernameAction}
         onSave={saveProfileAction}
       />

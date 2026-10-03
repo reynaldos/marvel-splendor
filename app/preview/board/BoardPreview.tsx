@@ -34,9 +34,10 @@ export function nextTableSize(count: number): number {
   return TABLE_SIZES[(TABLE_SIZES.indexOf(count) + 1) % TABLE_SIZES.length];
 }
 
-/** A made-up table, seen from the first seat, with the second seat doing everything. */
-export function previewTable(count: number) {
+/** A made-up table, seen from the first seat, with the second seat doing everything and `first` having gone first. */
+export function previewTable(count: number, first = 1) {
   const state = createGame(count, "preview", DEFAULT_SETTINGS);
+  state.startingSeat = first;
   state.players[1].reserved = [{ cardId: state.decks[2][0], hidden: false }];
   const view = redactState(state, 0);
   const moves: Record<string, Move> = {
@@ -80,11 +81,13 @@ interface BoardPreviewProps {
   at?: number;
   /** How many at the table: 2, 3 or 4. */
   count: number;
+  /** The seat that went first, wearing the token. */
+  first: number;
 }
 
 /** The board's animations, without playing a game: choose one and it plays. */
-export function BoardPreview({ show, at, count }: BoardPreviewProps) {
-  const { view, players, moves: MOVES, events: EVENTS, log } = useMemo(() => previewTable(count), [count]);
+export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
+  const { view, players, moves: MOVES, events: EVENTS, log } = useMemo(() => previewTable(count, first), [count, first]);
   const [traced, setTraced] = useState<TracedMove | null>(null);
   const [bubbles, showBubble] = useChatBubbles();
   // `?show=MyTurn` gives the first seat the turn, with a clock, to look at its card lit up.
@@ -193,6 +196,15 @@ export function BoardPreview({ show, at, count }: BoardPreviewProps) {
           >
             <UsersRound className="size-[1.2em]" />
             {count} players
+          </Link>
+          {/* Hands the first player's token to the next seat round the table. */}
+          <Link
+            href={`/preview/board?players=${count}&first=${(first + 1) % count}`}
+            aria-label={`${players[first].name} went first. Change to ${players[(first + 1) % count].name}`}
+            className="flex items-center gap-1 rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-black text-white ring-1 ring-white/60 ring-inset hover:bg-cosmos-700"
+          >
+            <span className="size-[1em] rounded-full bg-gold-400 ring-1 ring-gold-600" />
+            {players[first].name} first
           </Link>
         </div>
       </div>

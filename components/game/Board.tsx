@@ -118,6 +118,7 @@ export function Board({
                 player={p}
                 name={nameForSeat(p.seat)}
                 avatarUrl={avatarForSeat(p.seat)}
+                startedGame={view.startingSeat === p.seat}
                 isCurrentTurn={turnSeat === p.seat}
                 turnEndsAt={turnEndsAt}
                 turnSeconds={view.settings.turnTimeSeconds}
@@ -199,6 +200,7 @@ export function Board({
           player={viewer}
           name={nameForSeat(viewerSeat)}
           avatarUrl={avatarForSeat(viewerSeat)}
+          startedGame={view.startingSeat === viewerSeat}
           isCurrentTurn={turnSeat === viewerSeat}
           turnEndsAt={turnEndsAt}
           turnSeconds={view.settings.turnTimeSeconds}
