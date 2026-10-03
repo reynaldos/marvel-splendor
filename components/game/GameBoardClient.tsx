@@ -110,6 +110,13 @@ function signInAgain(gameId: string) {
 const NOTICE =
   "flex flex-col items-center gap-3 rounded-2xl border-2 border-gold-400 bg-popover p-6 text-center text-popover-foreground shadow-md";
 
+/** The sound of a move landing: stones or a card into a hand. */
+function moveSfx(move: Move) {
+  if (move.type === "TAKE_TOKENS" || move.type === "RECRUIT") return "recruit" as const;
+  if (move.type === "RESERVE") return "reserve" as const;
+  return null;
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -169,7 +176,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
    * the board, and a Location, the Avengers tile or the Time Stone changing
    * hands is announced to everyone once the move has landed.
    */
-  const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[], from: RedactedGameState) => {
+  const playSteps = useCallback(async (steps: GameStep[], players: GamePlayerInfo[], from: RedactedGameState, heard = false) => {
     let shown = from;
     for (const step of steps) {
       const away = step.view.players.find((p) => p.seat === step.seat)?.away;
@@ -184,8 +191,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         await delay(TRACE_MS);
         setTraced(null);
       }
-      if (step.move.type === "TAKE_TOKENS" || step.move.type === "RECRUIT") playSfx("recruit");
-      else if (step.move.type === "RESERVE") playSfx("reserve");
+      // The viewer's own tap was already heard; everyone else's move sounds as it lands.
+      const sfx = moveSfx(step.move);
+      if (sfx && !(heard && step.seat === from.viewerSeat)) playSfx(sfx);
       // Where each tile sits is read now, while it is still on the board.
       const events = boardEvents(shown, step.view).map((event) => ({ event, origin: tileOrigin(event) }));
       setGameData((prev) => (prev ? { ...prev, view: step.view, turnEndsAt: null } : prev));
@@ -308,6 +316,9 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       const quiet = quietly || move.type === "TIMEOUT_SKIP";
       busy.current = true;
       setSubmitting(true);
+      // Heard at the tap, not once the server answers.
+      const sfx = moveSfx(move);
+      if (sfx) playSfx(sfx);
       try {
         const res = await fetch(`/api/games/${gameId}/moves`, {
           method: "POST",
@@ -331,7 +342,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         setStaged(null);
         // The request is done; what follows is the moves playing back.
         setSubmitting(false);
-        await playSteps(steps, shown.players, shown.view);
+        await playSteps(steps, shown.players, shown.view, true);
         commit({
           ...shown,
           view,

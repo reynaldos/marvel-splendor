@@ -133,7 +133,7 @@ pnpm rewards:backfill --yes  # save it
 
 ## Coins
 
-Code: `lib/coins.ts` and `lib/record-coins.ts`. Coins are a currency for the shop to come. They never affect XP, rank or gameplay.
+Code: `lib/coins.ts` and `lib/record-coins.ts`. Coins are spent in the shop ([UI.md](UI.md)); the spending is in `lib/record-purchase.ts`. They never affect XP, rank or gameplay.
 
 ### Payout
 
@@ -169,7 +169,11 @@ A full rotation pays 290. Each claim is a ledger row with reason `daily:<day>`, 
 
 ### Where coins live
 
-`CoinTransaction` is the ledger and the source of truth: one row per award with `userId`, `delta`, `reason` (`game:<tier>:<win|loss>`), `gameId` and `createdAt`. `UserCoins.balance` is a cached total for fast reads. The daily cap is checked against the ledger's rows for today whose reason is not a human game.
+`CoinTransaction` is the ledger and the source of truth: one row per award or spend with `userId`, `delta`, `reason` (`game:<tier>:<win|loss>`, `daily:<day>`, or `shop:<kind>:<item>` with a negative delta), `gameId` and `createdAt`. `UserCoins.balance` is a cached total for fast reads. The daily cap is checked against the ledger's rows for today whose reason is not a human game.
+
+### Spending
+
+A purchase is one transaction: the `Purchase` row first, one per player and item, so a second copy is refused; then the coins come off `UserCoins`, only if the balance covers the price; then the ledger row that says why. The price always comes from the catalogue in `lib/shop.ts`, never from the client. `Purchase` holds the kind of thing bought (`pack` for now), its id, the price paid and when; the table is added by `prisma/sql/2026-10-02-purchases.sql`. A card pack's cards are dealt only into games where someone at the table owns it, which `settings.packs` records on the game ([ARCHITECTURE.md](../ARCHITECTURE.md)).
 
 `pnpm coins:backfill` pays every finished game again from zero, in order, with the daily cap applied per day as it was then. It replaces the ledger's game awards and keeps anything else in it.
 

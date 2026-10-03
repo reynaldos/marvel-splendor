@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "@/lib/engine/setup";
 import { applyMove } from "@/lib/engine/apply";
 import { validateMove } from "@/lib/engine/validate";
-import { ALL_CARDS, ALL_LOCATIONS } from "@/lib/engine/data";
+import { ALL_LOCATIONS, cardPool } from "@/lib/engine/data";
 import { MARKET_SLOTS, TOKEN_COLORS, totalTokens } from "@/lib/engine/types";
 
 describe("createGame", () => {
@@ -35,10 +35,10 @@ describe("createGame", () => {
       expect(p.tags).toBe(0);
     }
 
-    // Decks + market together contain every card of that level exactly once.
+    // Decks + market together contain every base card of that level exactly once.
     for (const level of [1, 2, 3] as const) {
       expect(state.market[level]).toHaveLength(MARKET_SLOTS);
-      const totalOfLevel = ALL_CARDS.filter((c) => c.level === level).length;
+      const totalOfLevel = cardPool().filter((c) => c.level === level).length;
       const marketIds = state.market[level].filter((id): id is string => id !== null);
       expect(new Set(marketIds).size).toBe(marketIds.length); // no duplicates
       expect(marketIds).toHaveLength(MARKET_SLOTS);

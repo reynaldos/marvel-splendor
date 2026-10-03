@@ -6,3 +6,4 @@ import { vi } from "vitest";
 // with vi.unmock(...).
 vi.mock("@/data/cards.json", async () => import("./fixtures/cards.json"));
 vi.mock("@/data/locations.json", async () => import("./fixtures/locations.json"));
+vi.mock("@/data/packs.json", async () => import("./fixtures/packs.json"));

@@ -10,6 +10,7 @@ import { generateJoinCode, generateSeed, isUniqueViolation, runServerTurnLoop } 
 import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { ownedPacks } from "@/lib/record-purchase";
 import { recordGameStats } from "@/lib/record-stats";
 
 /**
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
     gameTimeMinutes: gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes,
     startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
+    packs: await ownedPacks([user.id]),
   };
 
   const seed = generateSeed();

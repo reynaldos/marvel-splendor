@@ -56,7 +56,7 @@ Players: 2–4. Turn order clockwise from a random starter.
 The official 90-card cost table is not published as data. We ship a `cards.json` dataset mirroring base Splendor's well-known cost distribution per level, with points and Avengers tags assigned to match the Marvel edition's counts. Marked clearly in the repo so it can be corrected card-by-card against a physical copy later. Game asset images are supplied by the project owner. Card `name`s are placeholders too (real Marvel characters, not matched to the physical deck). A card with an `image` renders that image as the whole card; without one the UI draws a placeholder card face.
 
 ### Extensibility guarantee
-The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated.
+The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated. A game is dealt from the base cards plus the card packs in `settings.packs` (`cardPool` in `lib/engine/data.ts`): every pack anyone at the table owns, resolved when the game is created and frozen with its settings, so a replay re-deals the same pool however ownership changes later.
 
 ---
 
@@ -144,6 +144,7 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 | `UserCoins` | The cached coin balance; `CoinTransaction` is the source of truth |
 | `CoinTransaction` | The coin ledger: one row per award, with a `reason` (`game:<tier>:<win|loss>`, `daily:<day>`) and the game when there is one |
 | `CollectedCard` | How many times a player has recruited each card, in games played to the end |
+| `Purchase` | What a player has bought in the shop: the kind of thing, its id, the price paid and when; one of each per player |
 | `UserVisit` | One row per stretch of activity, with IP address, browser and times, for the admin page |
 | `Feedback` | Feature requests and bug reports from the menu, with a status the admins move along |
 | `Game` | A table: status, mode, seed, frozen settings, the current state snapshot, a `version` for optimistic concurrency, and the winning seat |

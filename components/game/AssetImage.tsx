@@ -7,6 +7,11 @@ import { cn } from "cn";
 import versions from "@/data/image-versions.json";
 
 /** A picture's address with its fingerprint, so a changed picture is fetched afresh. */
+/** Whether the picture is in the repo: the versions list is made from the files that are. */
+export function hasAsset(src: string): boolean {
+  return src in versions;
+}
+
 export function versioned(src: string): string {
   const version = (versions as Record<string, string>)[src];
   return version ? `${src}?v=${version}` : src;

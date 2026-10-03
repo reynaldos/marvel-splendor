@@ -11,7 +11,8 @@ import { runServerTurnLoop } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { MAX_SEATS, nextFreeSeat, withCheat } from "@/lib/lobby";
-import { tableOrder } from "@/lib/lobby-rules";
+import { ownedPacks } from "@/lib/record-purchase";
+import { dealSeats } from "@/lib/lobby-rules";
 import { notifyGame } from "@/lib/pusher";
 
 const HOST_SEAT = 0;
@@ -100,13 +101,15 @@ export async function startGameAction(gameId: string, cheat: boolean) {
   const { game, isHost } = await requireLobbySeat(gameId);
   if (!isHost || game.players.length < 2 || game.players.length > MAX_SEATS) return;
 
-  // The engine needs seats 0..n-1: people first, as the lobby showed them.
-  const seated = tableOrder(game.players).map((p, seat) => ({ id: p.id, from: p.seat, seat, isBot: p.isBot }));
+  // The engine needs seats 0..n-1, dealt at random rather than in join order.
+  const seated = dealSeats(game.players, game.seed).map((p, seat) => ({ id: p.id, from: p.seat, seat, isBot: p.isBot }));
 
   const lobby = settingsOf(game);
   const settings: GameSettings = {
     ...lobby,
     botDifficulty: "normal",
+    // Every pack anyone at the table owns is dealt in, for everyone.
+    packs: await ownedPacks(game.players.flatMap((p) => (p.userId ? [p.userId] : []))),
     // Each bot's level follows it to its final seat.
     botDifficultyBySeat: Object.fromEntries(
       seated.flatMap((p) => {

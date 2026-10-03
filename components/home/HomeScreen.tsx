@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
+
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
@@ -39,9 +42,20 @@ export function HomeScreen() {
           <ModeTile href="/private" label="Private Game" tone="from-violet-400 to-purple-800" art={<AvengersArt />} />
         </div>
 
-        <p className="text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
-          Assemble the Avengers · Claim the Gauntlet
-        </p>
+        <footer className="flex items-center gap-4">
+          <Link
+            href="/shop"
+            aria-label="Shop"
+            className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
+          >
+            <ShoppingBag className="size-6" />
+          </Link>
+          <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
+            Assemble the Avengers · Claim the Gauntlet
+          </p>
+          {/* Keeps the line centred, with the Shop button on the left. */}
+          <span aria-hidden className="w-12" />
+        </footer>
       </StageRows>
     </Stage>
   );

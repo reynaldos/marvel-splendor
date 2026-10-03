@@ -10,7 +10,7 @@ NEVER COMMIT, PUSH OR PUBLISH ANY CODE YOURSELF
 
 always make tsx test scripts to test changes after every phase or fix, never stage the test scripts. once moving onto the new issue, delete old test script unless explicitly told.
 
-dont ever write to the db explicitely told to do so dont every uddate the schema or run anymigrations. 
+dont ever write to the db unless explicitly told to do so. you may propose schema changes (edit prisma/schema.prisma and add a prisma/sql file), but never apply them or run any migrations until i approve. 
 
 if we're ever working of a refrence doc, be sure to update the progress everytime we complete a task.
 

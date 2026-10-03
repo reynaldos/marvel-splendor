@@ -1,5 +1,6 @@
 import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
+import { shopItem } from "@/lib/shop";
 import type { GameSettings, GameState } from "@/lib/engine/types";
 import { rankPlayers } from "@/lib/game-record";
 import type { GameSummary } from "@/lib/game-summary";
@@ -115,6 +116,8 @@ export async function loadUserMetrics(now = Date.now()) {
         auth0Sub: true,
         createdAt: true,
         stats: { select: { wins: true } },
+        coins: { select: { balance: true } },
+        purchases: { orderBy: { createdAt: "desc" }, select: { kind: true, itemId: true, price: true, createdAt: true } },
         visits: {
           orderBy: { lastSeenAt: "desc" },
           select: { ip: true, userAgent: true, startedAt: true, lastSeenAt: true },
@@ -165,6 +168,8 @@ export async function loadUserMetrics(now = Date.now()) {
         abandoned: games("ABANDONED"),
         inPlay: games("ACTIVE"),
         wins: user.stats?.wins ?? 0,
+        coins: user.coins?.balance ?? 0,
+        purchases: user.purchases.map((p) => ({ ...p, title: shopItem(p.kind, p.itemId)?.title ?? p.itemId })),
       };
     })
     // Latest seen first; those never seen since tracking began go last.
@@ -212,6 +217,10 @@ export async function loadUserMetrics(now = Date.now()) {
     tables,
     recent,
     users: rows,
+    // Every purchase ever made, newest first, with who made it.
+    purchases: rows
+      .flatMap((r) => r.purchases.map((p) => ({ ...p, username: r.username, name: r.name })))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
     sent: {
       emojis: rankSends(EMOJIS, sentOf("REACTION")),
       messages: rankSends(MESSAGES, sentOf("TEXT")),

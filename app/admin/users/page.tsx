@@ -90,7 +90,7 @@ export default async function AdminUsersPage() {
       </main>
     );
   }
-  const { totals, tables, recent, users, sent } = metrics;
+  const { totals, tables, recent, users, sent, purchases } = metrics;
   const unread = feedback.some((row) => row.status === "NEW");
 
   return (
@@ -146,6 +146,8 @@ export default async function AdminUsersPage() {
                     "Time playing",
                     "Games",
                     "Wins",
+                    "Coins",
+                    "Purchases",
                     "Device",
                     "IP address",
                   ]}
@@ -170,6 +172,10 @@ export default async function AdminUsersPage() {
                         {user.finished + user.inPlay + user.abandoned}
                       </td>
                       <td>{user.wins}</td>
+                      <td>{user.coins.toLocaleString()}</td>
+                      <td title={user.purchases.map((p) => `${p.title}, ${p.price} coins, ${day(p.createdAt)}`).join("\n")}>
+                        {user.purchases.length}
+                      </td>
                       <td>{user.device}</td>
                       <td className="font-mono" title={user.ips.join("\n")}>
                         {user.ips[0]}
@@ -199,6 +205,42 @@ export default async function AdminUsersPage() {
                         <td>{message.count}</td>
                       </tr>
                     ))}
+                  </Table>
+                </div>
+              ),
+            },
+            {
+              name: "Shop",
+              view: (
+                <div className="flex flex-col gap-3">
+                  <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <Tile label="Purchases" value={purchases.length} />
+                    <Tile label="Coins spent" value={purchases.reduce((sum, p) => sum + p.price, 0)} />
+                    <Tile label="Buyers" value={new Set(purchases.map((p) => p.username)).size} />
+                    <Tile label="Coins held" value={users.reduce((sum, u) => sum + u.coins, 0)} note="Across every user" />
+                  </ul>
+                  <Table head={["When", "User", "Item", "Price"]}>
+                    {purchases.map((p) => (
+                      <tr key={`${p.username}-${p.kind}-${p.itemId}`}>
+                        <td>{ago(p.createdAt)}</td>
+                        <td>
+                          <Link href={`/profile/${p.username}`} className="font-bold text-gold-200 hover:underline">
+                            {p.name ?? p.username}
+                          </Link>
+                        </td>
+                        <td>
+                          {p.title} <span className="text-xs text-cosmos-300">({p.kind})</span>
+                        </td>
+                        <td>{p.price.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                    {purchases.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-cosmos-300">
+                          Nothing bought yet.
+                        </td>
+                      </tr>
+                    ) : null}
                   </Table>
                 </div>
               ),

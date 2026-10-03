@@ -23,7 +23,7 @@ export interface Card {
   name: string;
   /** Counted by the stats; no part in the rules. "both" counts once as each. */
   side: "hero" | "villain" | "both";
-  /** The teams it belongs to, three at most. For the collection page; no part in the rules. */
+  /** The teams it belongs to, four at most. For the collection page; no part in the rules. */
   groups: string[];
   /** Full-card art path/URL; when absent the UI draws a placeholder card. */
   image?: string;
@@ -61,6 +61,19 @@ export interface GameSettings {
   startedAt?: number;
   /** Overrides botDifficulty for the bot in that seat. */
   botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
+  /** The card packs dealt in besides the base cards: every pack someone at the table owns. Absent on older games. */
+  packs?: string[];
+}
+
+/** A set of cards sold in the shop, dealt only into games where someone owns it. */
+export interface Pack {
+  id: string;
+  title: string;
+  description: string;
+  cover: string;
+  cost: number;
+  cards: string[];
+  releasedAt: string;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
