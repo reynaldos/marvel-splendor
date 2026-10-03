@@ -1,3 +1,4 @@
+import { AddToHomeScreen } from "@/components/AddToHomeScreen";
 import { HomeScreen, WelcomeScreen } from "@/components/home/HomeScreen";
 import { TopBar } from "@/components/TopBar";
 import { auth0 } from "@/lib/auth0";
@@ -10,6 +11,7 @@ export default async function Home() {
     <>
       <TopBar />
       <HomeScreen />
+      <AddToHomeScreen />
     </>
   );
 }
