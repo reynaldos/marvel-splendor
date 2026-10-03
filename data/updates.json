@@ -1,5 +1,21 @@
 [
   {
+    "version": "2.9.3",
+    "date": "2026-10-03",
+    "title": "Add to your Home Screen, rejoin your room, and a fair turn clock",
+    "summary": "iPhone players are shown how to add the game to their Home Screen, a room you're seated in is one tap from home, and the turn timer starts full after a Time Stone or Location.",
+    "pulls": [],
+    "new":  [],
+    "improved": [
+      "On an iPhone in the browser, a prompt shows how to add the game to your Home Screen, with a tick to never see it again",
+      "With a room waiting, the Private Game tile on the home screen becomes Rejoin your room and goes straight to it"
+    ],
+    "fixed": [
+      "The turn timer no longer loses the seconds a Time Stone or Location announcement takes: it starts full once the announcement and the Your turn banner have gone",
+      "Mister Fantastic's card art"
+    ]
+  },
+  {
     "version": "2.9.1",
     "date": "2026-10-03",
     "title": "Place your picture, who went first, and two leaderboards",
