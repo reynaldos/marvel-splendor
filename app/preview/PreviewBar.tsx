@@ -85,6 +85,10 @@ function Help() {
             How many are at the table. Three when left out.
             <Options to={(n) => `/preview/board?players=${n}`} values={TABLE_SIZES} />
           </Entry>
+          <Entry option="?first=">
+            The seat that went first and wears the token, 0 to one less than the players. The second seat when left out.
+            <Options to={(seat) => `/preview/board?players=4&first=${seat}`} values={[0, 1, 2, 3]} />
+          </Entry>
           <Entry option="?show=">
             Plays one thing as the page opens. The buttons along the bottom play the same things.
             {Object.entries(SHOWS).map(([what, names]) => (

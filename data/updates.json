@@ -1,14 +1,15 @@
 [
   {
-    "version": "2.9.0",
+    "version": "2.9.1",
     "date": "2026-10-03",
-    "title": "Place your picture, and two leaderboards",
-    "summary": "Drag and zoom an uploaded picture into its circle, come back to adjust it any time, and see the leaderboard by rank or by XP.",
+    "title": "Place your picture, who went first, and two leaderboards",
+    "summary": "Adjust the crop of you PFP (new uploads), and see the leaderboard by rank or by XP.",
     "pulls": [],
     "new": [
       "The leaderboard has two tabs, Ranked and XP, each ordered by its own score"
     ],
     "improved": [
+      "The player who went first wears a small gold token on their picture.",
       "A crop button on your picture in Profile settings reopens the frame later, on the full picture you uploaded, so you can place it again"
     ],
     "fixed": []
