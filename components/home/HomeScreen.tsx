@@ -32,14 +32,20 @@ export function WelcomeScreen() {
   );
 }
 
-/** The main menu: the ways to play. */
-export function HomeScreen() {
+/** The main menu: the ways to play. With a room waiting (`lobbyId`), the Private Game tile goes straight back to it. */
+export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
   return (
     <Stage>
       <StageRows>
         <div className="flex h-64 gap-6">
           <ModeTile href="/solo" label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
-          <ModeTile href="/private" label="Private Game" tone="from-violet-400 to-purple-800" art={<AvengersArt />} />
+          <ModeTile
+            href={lobbyId ? `/lobby/${lobbyId}` : "/private"}
+            label={lobbyId ? "Rejoin your room" : "Private Game"}
+            tone="from-violet-400 to-purple-800"
+            art={<AvengersArt />}
+            className={lobbyId ? "glow-gold" : undefined}
+          />
         </div>
 
         <footer className="flex items-center gap-4">
