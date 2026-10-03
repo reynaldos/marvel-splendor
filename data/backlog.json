@@ -6,6 +6,23 @@
   },
   "cards": [
     {
+      "id": "c3-21",
+      "name": "Thanos",
+      "side": "villain",
+      "groups": ["Black Order"],
+      "level": 3,
+      "bonus": "power",
+      "points": 6,
+      "cost": {
+        "mind": 3,
+        "space": 5,
+        "reality": 3,
+        "power": 5
+      },
+      "tags": 0,
+      "image": "/cards/thanos.png"
+    },
+    {
       "name": "Silver Surfer",
       "side": "hero",
       "groups": ["Defenders"],

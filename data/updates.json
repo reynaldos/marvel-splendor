@@ -1,12 +1,26 @@
 [
   {
+    "version": "2.7.0",
+    "date": "2026-10-02",
+    "title": "The shop opens",
+    "summary": "Spend your coins on card packs.",
+    "pulls": [],
+    "new": [
+      "The shop, from the round button at the bottom left of the home screen: shelves down the side, what's on sale in the middle, and the chosen item with its price and a Buy button",
+      "Card packs: a pack's cards are dealt into any game where someone at the table owns it, so you can meet and recruit them even before you buy"
+    ],
+    "improved": [
+      "A card from a pack you don't own shows locked in your collection, with a way to the shop"
+    ],
+    "fixed": []
+  },
+  {
     "version": "2.6.0",
     "date": "2026-10-02",
     "title": "Random seats, and a closer look at your cards",
     "summary": "Seats are dealt at random when a room starts, and a card in your collection opens large with its ranking, count and teams.",
     "pulls": [],
-    "new": [
-    ],
+    "new": [],
     "improved": [
       "Seats are dealt at random when a room's game starts, so the host no longer always goes first",
       "A card tapped in the collection opens large just as it sits in the grid, with its ranking, its count, name and teams beside it, and a button to hide the ranking and see the plain art"

@@ -6,7 +6,7 @@ import { LeaderboardRow } from "@/components/profile/LeaderboardScreen";
 import { RankBadge } from "@/components/profile/RankBadge";
 import { Stage } from "@/components/Stage";
 import { CARD_LEVEL_TIER_MIN_TIMES } from "@/lib/card-level";
-import { ALL_CARDS } from "@/lib/engine/data";
+import { CARD_BY_ID } from "@/lib/engine/data";
 import { FRAME_EFFECT, FRAME_STYLE, FRAME_TIER_NAMES } from "@/lib/frame-tier";
 import { pageMetadata } from "@/lib/site";
 import { ACCOUNT_FRAME_TIER_MIN_LEVEL, scoreForLevel } from "@/lib/xp";
@@ -17,7 +17,7 @@ export const metadata = pageMetadata("Tiers preview", undefined, true);
 
 const HEADING = "font-display text-xs font-black tracking-widest text-gold-400 uppercase";
 const NOTE = "fs-2xs font-bold text-cosmos-300 tabular-nums";
-const THANOS = ALL_CARDS.find((c) => c.name === "Thanos")!;
+const THANOS = CARD_BY_ID.get("c3-21")!;
 const LEADERBOARD = [
   {
     place: 1,

@@ -1393,24 +1393,6 @@
       "tags": 1
     },
     {
-      "id": "c3-21",
-      "name": "Thanos",
-      "side": "villain",
-      "groups": ["Black Order"],
-      "image": "/cards/thanos.png",
-      "level": 3,
-      "bonus": "power",
-      "points": 6,
-      "cost": {
-        "mind": 3,
-        "space": 5,
-        "reality": 3,
-        "power": 5
-
-      },
-      "tags": 0
-    },
-    {
       "id": "c1-41",
       "name": "Human Torch",
       "side": "hero",

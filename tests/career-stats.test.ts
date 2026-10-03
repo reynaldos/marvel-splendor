@@ -28,7 +28,7 @@ describe("careerStats", () => {
   it("counts heroes and villains, and finds the most used of each", () => {
     const stats = careerStats([
       game({ cards: [idOf("Thor"), idOf("Loki"), idOf("Hulk")] }),
-      game({ cards: [idOf("Thor"), idOf("Loki"), idOf("Thanos")] }),
+      game({ cards: [idOf("Thor"), idOf("Loki"), idOf("Abomination")] }),
       game({ cards: [idOf("Loki")] }),
     ]);
     expect(stats.heroes).toBe(3);
