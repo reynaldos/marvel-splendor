@@ -1,5 +1,23 @@
 [
   {
+    "version": "2.8.0",
+    "date": "2026-10-02",
+    "title": "New recruits count, and bots get faces",
+    "summary": "Your first recruit of a character earns XP and shows at the end of the game, bots have pictures, and a bot that goes first is seen going first.",
+    "pulls": [],
+    "new": [
+    ],
+    "improved": [
+      "Card XP is simpler: 2 for a first recruit, 5 for every level a card climbs after that",
+      "Bots have a picture from the library, never the same as yours or each other's",
+      "Recruiting a character for the first time earns XP and appears with the cards that ranked up at the end of the game"
+
+    ],
+    "fixed": [
+      "When a bot is picked to go first, you now watch its opening moves instead of landing on a board where it is already your turn"
+    ]
+  },
+  {
     "version": "2.7.0",
     "date": "2026-10-02",
     "title": "The shop opens",
