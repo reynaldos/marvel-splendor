@@ -1462,7 +1462,7 @@
       "points": 5,
       "cost": {
         "power": 6,
-        "mind": 3,
+        "sapce": 3,
         "soul": 3
       },
       "tags": 0
