@@ -60,7 +60,7 @@ One human at the table means no bot scaling.
 
 ### Card levels
 
-Code: `CARD_FOUND_XP`, `CARD_LEVEL_XP` and `cardLevelXp` in `lib/xp.ts`; the ladders in `lib/card-level.ts`.
+Code: `CARD_FOUND_XP`, `CARD_LEVEL_XP` and `cardLevelXp` in `lib/xp.ts`; the ladders in `lib/card-level.ts`. The numbers live in `lib/progression.json`.
 
 Each card a player has recruited in finished games has a level from how many times they have recruited it. The first recruit pays 2 XP, and every level the card climbs after that pays 5.
 
@@ -68,13 +68,13 @@ Each card a player has recruited in finished games has a level from how many tim
 |---|---|---|---|---|---|---|---|---|---|---|
 | XP | 2 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
 
-A Mastered card has paid 47 in total. The ladder depends on the card's level, because level 1 cards are recruited about four times as often as level 3 cards:
+A Mastered card has paid 47 in total. The ladder depends on the card's level, because level 1 cards are recruited about four times as often as level 3 cards. A heavy player masters a favourite card in about 150 games; the level 1 ladder's top is set a little higher so those come after the first level 3 one:
 
 | Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Level 1 card, times recruited | 1 | 8 | 15 | 30 | 45 | 68 | 98 | 135 | 180 | 240 |
-| Level 2 card | 1 | 5 | 10 | 20 | 30 | 45 | 65 | 90 | 120 | 160 |
-| Level 3 card | 1 | 3 | 5 | 10 | 15 | 23 | 33 | 45 | 60 | 80 |
+| Level 1 card, times recruited | 1 | 3 | 5 | 10 | 15 | 23 | 33 | 45 | 65 | 100 |
+| Level 2 card | 1 | 2 | 4 | 7 | 10 | 15 | 22 | 30 | 40 | 54 |
+| Level 3 card | 1 | 2 | 3 | 4 | 6 | 8 | 11 | 15 | 20 | 27 |
 
 ### The frames
 
@@ -102,7 +102,7 @@ Cosmetic only at every tier, for cards and for the account-level frame alike —
 
 ### Levels
 
-Code: `scoreForLevel`, `accountLevel` and `ACCOUNT_FRAME_TIER_MIN_LEVEL` in `lib/xp.ts`.
+Code: `scoreForLevel`, `accountLevel` and `ACCOUNT_FRAME_TIER_MIN_LEVEL` in `lib/xp.ts`; the curve and tier levels in `lib/progression.json`.
 
 The XP needed for a level is `150 × (level − 1) ^ 1.7`, rounded. It keeps climbing past 10 and is never capped.
 
@@ -123,13 +123,13 @@ There is no XP column. Each finished game's XP is saved in that seat's `GamePlay
 Changing any number above changes XP for new games only. To recount every past game, run the rewards backfill. It replays every finished game in order and rewrites the rewards column, nothing else:
 
 ```
-pnpm rewards:backfill        # dry run: prints each player's saved → replayed XP
+pnpm rewards:backfill        # dry run: prints each player's saved → replayed XP and their cards per tier
 pnpm rewards:backfill --yes  # save it
 ```
 
 ### Trying new numbers
 
-`pnpm xp:lab` builds `docs/xp-lab.html` from the database: every player's finished games with their factors, in a page that recounts totals, levels and frames live as the weights, level curve and tier levels are edited. Open the file in a browser. It opens on the numbers in the code; the "Copy as code" tab gives the block to paste into `lib/xp.ts`.
+`pnpm xp:lab` builds `docs/xp-lab.html` from the database: every player's finished games with their factors, in a page that recounts totals, levels and frames live as the weights, level curve and tier levels are edited. Open the file in a browser. It opens on the numbers in `lib/progression.json`; the Levels tab also has the card ladders and both formulas, and the Code tab gives the JSON to paste back into that file.
 
 ## Coins
 

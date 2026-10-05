@@ -2,10 +2,11 @@ import { cardLevelsClimbed } from "@/lib/card-level";
 import type { OpponentTier } from "@/lib/coins";
 import type { BotDifficulty } from "@/lib/engine/types";
 import { frameTierFor, type FrameTier } from "@/lib/frame-tier";
+import progression from "@/lib/progression.json";
 
-/** XP for recruiting a card the first time, and for each level it climbs after that. */
-export const CARD_FOUND_XP = 2;
-export const CARD_LEVEL_XP = 5;
+/** XP for recruiting a card the first time, and for each level it climbs after that. Tuned in lib/progression.json. */
+export const CARD_FOUND_XP = progression.cardFoundXp;
+export const CARD_LEVEL_XP = progression.cardLevelXp;
 
 /** XP from card levels, given how many times each collected card has been recruited. A Mastered card has given 47. */
 export function cardLevelXp(cards: Array<{ cardId: string; times: number }>): number {
@@ -15,25 +16,13 @@ export function cardLevelXp(cards: Array<{ cardId: string; times: number }>): nu
   }, 0);
 }
 
-/** What each part of a finished game is worth. A solid win against one normal bot comes to about 40. */
+/** What each part of a finished game is worth, from lib/progression.json. A solid win against one normal bot comes to about 40. */
 export const GAME_XP = {
-  played: 5,
-  /** By place at a full table of four. Every shared winner is 1st. */
-  place: [20, 10, 5, 2],
-  /** Taken off every place for each empty seat, down to the floor. */
-  placePerEmptySeat: 5,
-  placeMin: 3,
+  ...progression.gameXp,
   /** Per opponent at the table, so more and tougher opponents pay more. */
-  opponent: { human: 4, hard: 3, normal: 2, easy: 1 } as Record<OpponentTier, number>,
+  opponent: progression.gameXp.opponent as Record<OpponentTier, number>,
   /** Scales the place XP when every opponent is a bot, averaged over them: 1st against three hard bots is 16. */
-  botTable: { hard: 0.8, normal: 0.6, easy: 0.4 } as Record<BotDifficulty, number>,
-  /** Per Infinity Point past the game's target, so running up the score pays. */
-  pointOverTarget: 3,
-  card: 1,
-  badge: 1,
-  avengersTile: 5,
-  location: 3,
-  timeStone: 2,
+  botTable: progression.gameXp.botTable as Record<BotDifficulty, number>,
 };
 
 /** Place XP for a table of `opponents.length + 1`, scaled down when they are all bots. */
@@ -71,9 +60,10 @@ export function gameXp(g: GameXpInput): number {
   );
 }
 
-/** Score needed for `level`: 150×(level−1)^1.7. */
+/** Score needed for `level`: base × (level − 1) ^ exponent, from lib/progression.json. */
 export function scoreForLevel(level: number): number {
-  return Math.round(150 * (level - 1) ** 1.7);
+  const { base, exponent } = progression.levelCurve;
+  return Math.round(base * (level - 1) ** exponent);
 }
 
 export function accountLevel(score: number): number {
@@ -82,7 +72,7 @@ export function accountLevel(score: number): number {
   return level;
 }
 
-export const ACCOUNT_FRAME_TIER_MIN_LEVEL = [1, 2, 4, 6, 8, 10, 13, 16, 20, 25];
+export const ACCOUNT_FRAME_TIER_MIN_LEVEL = progression.accountFrameTierMinLevel;
 
 export function accountFrameTier(level: number): FrameTier {
   return frameTierFor(level, ACCOUNT_FRAME_TIER_MIN_LEVEL);

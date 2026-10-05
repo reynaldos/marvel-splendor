@@ -1466,6 +1466,101 @@
         "soul": 3
       },
       "tags": 0
+    },
+    {
+      "id": "c2-33",
+      "name": "Silver Surfer",
+      "side": "both",
+      "groups": ["Defenders"],
+      "image": "/cards/silver-surfer.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "space": 5,
+        "mind": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-34",
+      "name": "Ultron",
+      "side": "villain",
+      "groups": [],
+      "image": "/cards/ultron.png",
+      "level": 2,
+      "bonus": "mind",
+      "points": 3,
+      "cost": {
+        "space": 6,
+        "power": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-21",
+      "name": "Thanos",
+      "side": "villain",
+      "groups": ["Black Order"],
+      "image": "/cards/thanos.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 6,
+      "cost": {
+        "mind": 3,
+        "space": 5,
+        "reality": 3,
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-23",
+      "name": "Magneto",
+      "side": "both",
+      "groups": ["X-Men", "Brotherhood of Mutants"],
+      "image": "/cards/magneto.png",
+      "level": 3,
+      "bonus": "power",
+      "points": 4,
+      "cost": {
+        "space": 6,
+        "reality": 3,
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-24",
+      "name": "Galactus",
+      "side": "villain",
+      "groups": [],
+      "image": "/cards/galactus.png",
+      "level": 3,
+      "bonus": "reality",
+      "points": 5,
+      "cost": {
+        "space": 7,
+        "power": 3,
+        "mind": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-25",
+      "name": "Kang",
+      "side": "villain",
+      "groups": [],
+      "image": "/cards/kang.png",
+      "level": 3,
+      "bonus": "reality",
+      "points": 4,
+      "cost": {
+        "mind": 6,
+        "space": 3,
+        "power": 3
+      },
+      "tags": 0
     }
   ]
 }
