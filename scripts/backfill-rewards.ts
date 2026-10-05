@@ -5,7 +5,7 @@
 // coins backfills do it, so each game's before-and-after is what it would have
 // been at the time. Only the rewards column is written.
 //
-//   pnpm rewards:backfill            show what would be saved (changes nothing)
+//   pnpm rewards:backfill            show what would be saved and everyone's cards per tier (changes nothing)
 //   pnpm rewards:backfill --verbose  also show every game in order, with each player's rewards
 //   pnpm rewards:backfill --yes      save it
 //
@@ -13,10 +13,13 @@
 // prisma/sql/2026-09-30-rewards.sql
 import "dotenv/config";
 
+import { cardFrameTier } from "@/lib/card-level";
 import { BOT_COINS_DAILY_CAP, coinsForOutcome, isTurnPrimary, opponentTierFor } from "@/lib/coins";
 import { cardsRecruited } from "@/lib/collection";
 import { prisma } from "@/lib/db";
+import { CARD_BY_ID } from "@/lib/engine/data";
 import type { GameSettings, GameState, Move } from "@/lib/engine/types";
+import { FRAME_TIER_NAMES } from "@/lib/frame-tier";
 import { rankPlayers } from "@/lib/game-record";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { defaultRatingSnapshot, nextRatings, type RatingSnapshot } from "@/lib/rating";
@@ -138,6 +141,17 @@ async function main() {
   const names = new Map(games.flatMap((g) => g.players.filter((p) => p.userId).map((p) => [p.userId!, p.user!.username] as const)));
   console.log("\nXP, as saved → as replayed:");
   for (const [userId, total] of xp) console.log(`  ${names.get(userId)!.padEnd(16)} ${String(liveXp.get(userId) ?? 0).padStart(6)} → ${String(total).padStart(6)}`);
+
+  // Card tiers come from the collection counts, so they are not saved here; this is what the collection screen shows under the current ladders.
+  console.log(`\nCards per tier (${FRAME_TIER_NAMES.map((t) => t.slice(0, 4)).join(" / ")}):`);
+  for (const [userId, cards] of collections) {
+    console.log(`  ${names.get(userId)}`);
+    for (const level of [1, 2, 3] as const) {
+      const count = Object.fromEntries(FRAME_TIER_NAMES.map((t) => [t, 0]));
+      for (const [cardId, times] of cards) if (CARD_BY_ID.get(cardId)?.level === level) count[cardFrameTier(cardId, times)]++;
+      console.log(`    level ${level}  ${FRAME_TIER_NAMES.map((t) => String(count[t]).padStart(4)).join("")}`);
+    }
+  }
 
   if (!process.argv.includes("--yes")) {
     console.log("\nNothing was changed. Run again with --yes to save the above.");

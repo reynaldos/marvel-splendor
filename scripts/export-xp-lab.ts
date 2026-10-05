@@ -6,13 +6,14 @@
 import "dotenv/config";
 import { readFileSync, writeFileSync } from "node:fs";
 
-import { cardLevelsClimbed } from "@/lib/card-level";
 import { cardsRecruited } from "@/lib/collection";
 import { prisma } from "@/lib/db";
+import { CARD_BY_ID } from "@/lib/engine/data";
 import { botDifficultyForSeat, type GameState, type Move } from "@/lib/engine/types";
 import { FRAME_EFFECT, FRAME_STYLE, FRAME_TIER_NAMES } from "@/lib/frame-tier";
 import { rankPlayers } from "@/lib/game-record";
 import { accountXpByUser } from "@/lib/load-xp";
+import progression from "@/lib/progression.json";
 
 /** Each tier's frame style with the theme's colour tokens resolved, so the page needs no app CSS. */
 function frameStyles() {
@@ -53,13 +54,12 @@ async function main() {
       if (p.isBot || !p.userId) continue;
       const seat = state.players[p.seat];
       const mine = collections.get(p.userId) ?? new Map<string, number>();
-      // Levels each card climbed in this game, by its own ladder, so the page can price them with any weight.
-      const cardLevels: Array<[number, number]> = [];
+      // Each card recruited this game as [card level, times before, times after], so the page can climb any ladder.
+      const recruits: Array<[number, number, number]> = [];
       for (const [cardId, times] of recruited.get(p.seat) ?? []) {
         const before = mine.get(cardId) ?? 0;
         mine.set(cardId, before + times);
-        const [was, now] = [cardLevelsClimbed(cardId, before), cardLevelsClimbed(cardId, before + times)];
-        if (was !== now) cardLevels.push([was, now]);
+        recruits.push([CARD_BY_ID.get(cardId)?.level ?? 2, before, before + times]);
       }
       collections.set(p.userId, mine);
       const u = users.get(p.userId) ?? { name: p.user!.username, games: [] };
@@ -75,7 +75,7 @@ async function main() {
         tile: state.avengersHolder === p.seat,
         locations: seat.locations.length,
         timeStone: seat.tokens.time > 0,
-        cardLevels,
+        recruits,
       });
       users.set(p.userId, u);
     }
@@ -87,6 +87,7 @@ async function main() {
   const page = readFileSync("scripts/xp-lab.html", "utf8")
     .replace("__FRAMES__", safe(frameStyles()))
     .replace("__DATA__", safe(data))
+    .replace("__CONFIG__", safe(progression))
     .replace("__EXPORTED__", new Date().toISOString().slice(0, 10));
   writeFileSync(
     "docs/xp-lab.html",

@@ -27,14 +27,20 @@
   .fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px 12px; }
   .field { display: grid; gap: 3px; }
   .field label { font-size: 12px; color: var(--muted); }
-  .field input { width: 100%; font: 600 16px/1 var(--display); letter-spacing: .02em; padding: 7px 9px; background: var(--ground); color: var(--gold-soft); border: 1px solid var(--line); border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .field input, .ladder input { width: 100%; font: 600 16px/1 var(--display); letter-spacing: .02em; padding: 7px 9px; background: var(--ground); color: var(--gold-soft); border: 1px solid var(--line); border-radius: 6px; font-variant-numeric: tabular-nums; }
   .with { display: flex; gap: 6px; align-items: stretch; }
   .with input { min-width: 0; flex: 1; }
   .rec { font: 600 11px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 0 7px; border-radius: 6px; border: 1px dashed var(--line); background: transparent; color: var(--dim); white-space: nowrap; }
   .rec:hover { color: var(--gold); border-color: var(--gold-deep); }
   .btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  .field input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
-  .field input.changed { border-color: var(--gold-deep); background: #141a3c; }
+  input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  input.changed { border-color: var(--gold-deep); background: #141a3c; }
+  .ladder-wrap { overflow-x: auto; }
+  .ladder { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .ladder th { font: 600 10px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); padding: 0 2px 4px; text-align: center; }
+  .ladder td { padding: 2px; }
+  .ladder td.lbl { font-size: 11px; color: var(--muted); white-space: nowrap; padding-right: 6px; text-align: left; }
+  .ladder input { width: 46px; font-size: 13px; padding: 5px 2px; text-align: center; }
   button { font: 600 13px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); cursor: pointer; }
   button:hover { border-color: var(--gold-deep); }
   button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
@@ -72,6 +78,7 @@
   .yes { color: var(--gold); } .no { color: var(--dim); }
   @media (max-width: 820px) { .games { padding-left: 16px; } }
   .levels { color: var(--muted); font-size: 12px; padding: 10px 16px; line-height: 1.7; }
+  .levels p { margin: 0 0 8px; }
   .actions { border-top: 0; }
   .tabs { display: flex; border-bottom: 1px solid var(--line-soft); }
   .tabs [role="tab"] { flex: 1; border: 0; border-radius: 0; background: transparent; color: var(--muted); padding: 10px 6px; font-size: 13px; letter-spacing: .1em; border-bottom: 2px solid transparent; margin-bottom: -1px; }
@@ -192,12 +199,13 @@
         <div class="field"><label for="w-t8">Prismatic from level</label><input id="w-t8" type="number" min="1" data-k="t8"></div>
         <div class="field"><label for="w-t9">Mastered from level</label><input id="w-t9" type="number" min="1" data-k="t9"></div>
       </div></div>
+      <div class="group"><h3>Card ladder · recruits needed per tier, by card level</h3><div class="ladder-wrap" id="ladder"></div></div>
       <div class="levels" id="levels"></div>
       </div>
       <div id="pane-code" role="tabpanel" aria-labelledby="tab-code" hidden>
       <div class="actions">
-        <button id="copy" type="button" class="primary">Copy as code</button>
-        <span class="note" id="copied">Gold inputs differ from the code.</span>
+        <button id="copy" type="button" class="primary">Copy lib/progression.json</button>
+        <span class="note" id="copied">Gold inputs differ from the JSON.</span>
       </div>
       <pre class="code" id="code"></pre>
       </div>
@@ -212,23 +220,51 @@
 
 <script id="frames" type="application/json">__FRAMES__</script>
 <script id="data" type="application/json">__DATA__</script>
+<script id="config" type="application/json">__CONFIG__</script>
 <script>
   const DATA = JSON.parse(document.getElementById("data").textContent);
+  const CONFIG = JSON.parse(document.getElementById("config").textContent);
   const FRAMES = JSON.parse(document.getElementById("frames").textContent);
   const frameStyle = (tier) => Object.entries(FRAMES[tier].vars).map(([k, v]) => `${k}:${v}`).join(";");
   const frameClass = (tier) => "frame-gold " + FRAMES[tier].effect;
   const initials = (name) => name.trim().split(/\s+/).length > 1 ? name.trim().split(/\s+/).map((w) => w[0]).filter((_, i, a) => i === 0 || i === a.length - 1).join("").toUpperCase() : name.slice(0, 2).toUpperCase();
-  // The formula before this update: 10 a game, 20 a win, 5 an Avengers tile, 5 a Location, 5 a card level.
-  const OLD = { played: 10, place1: 20, place2: 0, place3: 0, place4: 0, placePerEmptySeat: 0, placeMin: 0, botHard: 1, botNormal: 1, botEasy: 1, human: 0, hard: 0, normal: 0, easy: 0, point: 0, card: 0, badge: 0, avengersTile: 5, location: 5, timeStone: 0, cardFound: 0, cardLevel: 5, base: 100, exp: 1.5, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
-  // What lib/xp.ts has now; the page opens on these.
-  const CURRENT = { played: 5, place1: 20, place2: 10, place3: 5, place4: 2, placePerEmptySeat: 5, placeMin: 3, botHard: 0.8, botNormal: 0.6, botEasy: 0.4, human: 4, hard: 3, normal: 2, easy: 1, point: 3, card: 1, badge: 1, avengersTile: 5, location: 3, timeStone: 2, cardFound: 2, cardLevel: 5, base: 150, exp: 1.7, t1: 2, t2: 4, t3: 6, t4: 8, t5: 10, t6: 13, t7: 16, t8: 20, t9: 25 };
   const TIERS = ["Recruited","Bronze","Silver","Gold","Platinum","Emerald","Ruby","Diamond","Prismatic","Mastered"];
+  const CARD_LEVELS = [1, 2, 3];
+  // Inputs are flat keys; lib/progression.json is the nested shape. These map between the two.
+  const flatten = (c) => ({
+    played: c.gameXp.played, place1: c.gameXp.place[0], place2: c.gameXp.place[1], place3: c.gameXp.place[2], place4: c.gameXp.place[3],
+    placePerEmptySeat: c.gameXp.placePerEmptySeat, placeMin: c.gameXp.placeMin,
+    botHard: c.gameXp.botTable.hard, botNormal: c.gameXp.botTable.normal, botEasy: c.gameXp.botTable.easy,
+    human: c.gameXp.opponent.human, hard: c.gameXp.opponent.hard, normal: c.gameXp.opponent.normal, easy: c.gameXp.opponent.easy,
+    point: c.gameXp.pointOverTarget, card: c.gameXp.card, badge: c.gameXp.badge, avengersTile: c.gameXp.avengersTile, location: c.gameXp.location, timeStone: c.gameXp.timeStone,
+    cardFound: c.cardFoundXp, cardLevel: c.cardLevelXp, base: c.levelCurve.base, exp: c.levelCurve.exponent,
+    ...Object.fromEntries(c.accountFrameTierMinLevel.slice(1).map((m, i) => ["t" + (i + 1), m])),
+    ...Object.fromEntries(CARD_LEVELS.flatMap((l) => c.cardLevelTierMinTimes[l].map((m, i) => [`c${l}_${i}`, m]))),
+  });
+  const unflatten = (w) => ({
+    gameXp: {
+      played: w.played, place: [w.place1, w.place2, w.place3, w.place4], placePerEmptySeat: w.placePerEmptySeat, placeMin: w.placeMin,
+      opponent: { human: w.human, hard: w.hard, normal: w.normal, easy: w.easy },
+      botTable: { hard: w.botHard, normal: w.botNormal, easy: w.botEasy },
+      pointOverTarget: w.point, card: w.card, badge: w.badge, avengersTile: w.avengersTile, location: w.location, timeStone: w.timeStone,
+    },
+    cardFoundXp: w.cardFound, cardLevelXp: w.cardLevel,
+    levelCurve: { base: w.base, exponent: w.exp },
+    accountFrameTierMinLevel: [1, w.t1, w.t2, w.t3, w.t4, w.t5, w.t6, w.t7, w.t8, w.t9],
+    cardLevelTierMinTimes: Object.fromEntries(CARD_LEVELS.map((l) => [l, TIERS.map((_, i) => w[`c${l}_${i}`])])),
+  });
+  // What lib/progression.json has now; the page opens on these.
+  const CURRENT = flatten(CONFIG);
+  // The formula before the 2.9 rework: 10 a game, 20 a win, 5 an Avengers tile, 5 a Location, 5 a card level.
+  const OLD = { ...CURRENT, played: 10, place1: 20, place2: 0, place3: 0, place4: 0, placePerEmptySeat: 0, placeMin: 0, botHard: 1, botNormal: 1, botEasy: 1, human: 0, hard: 0, normal: 0, easy: 0, point: 0, card: 0, badge: 0, avengersTile: 5, location: 5, timeStone: 0, cardFound: 0, cardLevel: 5, base: 100, exp: 1.5 };
   // Set from the inputs on every render.
   let curve = { base: 100, exp: 1.5 }, TIER_MIN_LEVEL = [1, 2, 4, 6, 8, 10, 13, 16, 20, 25];
   const scoreForLevel = (l) => Math.round(curve.base * Math.pow(l - 1, curve.exp));
   const levelFor = (xp) => { let l = 1; while (l < 500 && xp >= scoreForLevel(l + 1)) l++; return l; };
   const tierFor = (level) => { let t = TIERS[0]; TIER_MIN_LEVEL.forEach((m, i) => { if (level >= m) t = TIERS[i]; }); return t; };
 
+  document.getElementById("ladder").innerHTML = `<table class="ladder"><tr><th></th>${TIERS.map((t) => `<th>${t.slice(0, 4)}</th>`).join("")}</tr>${CARD_LEVELS.map((l) =>
+    `<tr><td class="lbl">Level ${l} card</td>${TIERS.map((t, i) => `<td><input type="number" min="1" data-k="c${l}_${i}" aria-label="Level ${l} card, ${t}"></td>`).join("")}</tr>`).join("")}</table>`;
   const inputs = [...document.querySelectorAll("input[data-k]")];
   const weights = () => Object.fromEntries(inputs.map((i) => [i.dataset.k, Number(i.value) || 0]));
   const setWeights = (w) => inputs.forEach((i) => { i.value = w[i.dataset.k]; });
@@ -240,9 +276,10 @@
     const factor = botsOnly ? opponents.reduce((s, o) => s + table[o], 0) / opponents.length : 1;
     return Math.max(w.placeMin, Math.round(base * factor));
   }
-  // A card found once pays the first-recruit value; each level after pays the level value.
+  // A card's level is how many ladder steps its recruit count has reached; the first step pays cardFound, each after pays cardLevel.
+  const climbed = (l, times, w) => TIERS.filter((_, i) => times >= w[`c${l}_${i}`]).length;
   const levelsXp = (k, w) => (k ? w.cardFound + (k - 1) * w.cardLevel : 0);
-  const cardLevelXp = (g, w) => g.cardLevels.reduce((s, [b, a]) => s + levelsXp(a, w) - levelsXp(b, w), 0);
+  const cardLevelXp = (g, w) => g.recruits.reduce((s, [l, b, a]) => s + levelsXp(climbed(l, a, w), w) - levelsXp(climbed(l, b, w), w), 0);
   function gameXp(g, w) {
     return w.played + placeXp(g.place, g.opponents, w)
       + g.opponents.reduce((s, o) => s + (w[o] ?? 0), 0)
@@ -299,30 +336,12 @@
       </div>${table}</li>`;
     }).join("");
 
-    document.getElementById("code").textContent =
-`export const GAME_XP = {
-  played: ${w.played},
-  place: [${w.place1}, ${w.place2}, ${w.place3}, ${w.place4}],
-  placePerEmptySeat: ${w.placePerEmptySeat},
-  placeMin: ${w.placeMin},
-  opponent: { human: ${w.human}, hard: ${w.hard}, normal: ${w.normal}, easy: ${w.easy} },
-  botTable: { hard: ${w.botHard}, normal: ${w.botNormal}, easy: ${w.botEasy} },
-  pointOverTarget: ${w.point},
-  card: ${w.card},
-  badge: ${w.badge},
-  avengersTile: ${w.avengersTile},
-  location: ${w.location},
-  timeStone: ${w.timeStone},
-};
-export const CARD_FOUND_XP = ${w.cardFound};
-export const CARD_LEVEL_XP = ${w.cardLevel};
-
-export function scoreForLevel(level: number): number {
-  return Math.round(${curve.base} * (level - 1) ** ${curve.exp});
-}
-export const ACCOUNT_FRAME_TIER_MIN_LEVEL = [${TIER_MIN_LEVEL.join(", ")}];`;
-    document.getElementById("levels").innerHTML = "XP needed: " +
-      TIERS.map((t, i) => `<b>${t}</b> Lv ${TIER_MIN_LEVEL[i]} · ${scoreForLevel(TIER_MIN_LEVEL[i])}`).join(" &nbsp;|&nbsp; ");
+    document.getElementById("code").textContent = JSON.stringify(unflatten(w), null, 2);
+    document.getElementById("levels").innerHTML = `<p><b>Account level</b> needs <b>${curve.base} × (level − 1) ^ ${curve.exp}</b> XP: `
+      + TIERS.map((t, i) => `<b>${t}</b> Lv ${TIER_MIN_LEVEL[i]} · ${scoreForLevel(TIER_MIN_LEVEL[i])} XP`).join(" &nbsp;|&nbsp; ")
+      + `</p><p><b>Card level</b> = ladder steps its recruit count has reached (times ≥ step), so a level 1 card is Mastered at ${w.c1_9} recruits, level 3 at ${w.c3_9}. `
+      + `Card XP = <b>${w.cardFound} + (level − 1) × ${w.cardLevel}</b>: `
+      + TIERS.map((t, i) => `<b>${t}</b> ${levelsXp(i + 1, w)}`).join(" &nbsp;|&nbsp; ") + `</p>`;
     document.getElementById("meta").textContent = `${DATA.length} players · ${games} finished games · exported __EXPORTED__`;
   }
 
@@ -346,10 +365,10 @@ export const ACCOUNT_FRAME_TIER_MIN_LEVEL = [${TIER_MIN_LEVEL.join(", ")}];`;
   });
   document.getElementById("copy").addEventListener("click", async () => {
     const text = document.getElementById("code").textContent, note = document.getElementById("copied");
-    try { await navigator.clipboard.writeText(text); note.textContent = "Copied. Paste it back to me to apply."; }
+    try { await navigator.clipboard.writeText(text); note.textContent = "Copied. Paste it into lib/progression.json."; }
     catch { const r = document.createRange(); r.selectNodeContents(document.getElementById("code")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); note.textContent = "Select and copy the code below."; }
   });
   document.querySelectorAll(".rec").forEach((b) => { b.textContent = "now " + CURRENT[document.getElementById(b.dataset.for).dataset.k]; });
-  document.getElementById("recommend").title = "What lib/xp.ts has now";
+  document.getElementById("recommend").title = "What lib/progression.json has now";
   setWeights(CURRENT); render();
 </script>
