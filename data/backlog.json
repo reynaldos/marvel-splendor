@@ -6,67 +6,6 @@
   },
   "cards": [
     {
-      "id": "c3-21",
-      "name": "Thanos",
-      "side": "villain",
-      "groups": ["Black Order"],
-      "level": 3,
-      "bonus": "power",
-      "points": 6,
-      "cost": {
-        "mind": 3,
-        "space": 5,
-        "reality": 3,
-        "power": 5
-      },
-      "tags": 0,
-      "image": "/cards/thanos.png"
-    },
-    {
-      "name": "Silver Surfer",
-      "side": "hero",
-      "groups": ["Defenders"],
-      "level": 3,
-      "bonus": "space",
-      "points": 4,
-      "cost": {
-        "space": 7,
-        "mind": 2
-      },
-      "tags": 0,
-      "status": "started"
-    },
-    {
-      "name": "Magneto",
-      "side": "both",
-      "groups": ["X-Men", "Brotherhood of Mutants"],
-      "level": 3,
-      "bonus": "power",
-      "points": 4,
-      "cost": {
-        "space": 6,
-        "reality": 3,
-        "soul": 3
-      },
-      "tags": 0,
-      "status": "started"
-    },
-    {
-      "name": "Galactus",
-      "side": "villain",
-      "groups": [],
-      "level": 3,
-      "bonus": "reality",
-      "points": 5,
-      "cost": {
-        "space": 7,
-        "power": 3,
-        "mind": 3
-      },
-      "tags": 0,
-      "status": "started"
-    },
-    {
       "name": "Phoenix",
       "side": "hero",
       "groups": ["X-Men"],
@@ -135,19 +74,6 @@
         "power": 6
       },
       "tags": 0
-    },
-    {
-      "name": "Ultron",
-      "side": "villain",
-      "groups": [],
-      "level": 2,
-      "bonus": "mind",
-      "points": 3,
-      "cost": {
-        "space": 6
-      },
-      "tags": 0,
-      "status": "started"
     },
     {
       "name": "Nightcrawler",

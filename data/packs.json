@@ -12,6 +12,15 @@
       "cost": 1000,
       "cards": ["c1-41", "c1-42", "c2-31", "c2-32", "c3-22"],
       "releasedAt": "2026-10-02"
+    },
+    {
+      "id": "villains",
+      "title": "Villains",
+      "description": "Thanos and the worst the universe has to offer.",
+      "cover": "/assets/packs/villains.png",
+      "cost": 1400,
+      "cards": ["c2-33", "c2-34", "c3-21", "c3-23", "c3-24", "c3-25"],
+      "releasedAt": "2026-10-05"
     }
   ]
 }
