@@ -1,5 +1,19 @@
 [
   {
+    "version": "2.10.0",
+    "date": "2026-10-05",
+    "title": "The Villains pack",
+    "summary": "Thanos leads a new pack of six into the shop, and cards climb their tiers sooner.",
+    "pulls": [],
+    "new": [
+      "The Villains pack in the shop: Thanos, Galactus, Kang, Magneto, Ultron and Silver Surfer, dealt into any game where someone at the table owns it"
+    ],
+    "improved": [
+      "Cards reach each tier after fewer recruits, so a favourite shows its progress sooner"
+    ],
+    "fixed": []
+  },
+  {
     "version": "2.9.3",
     "date": "2026-10-03",
     "title": "Add to your Home Screen, rejoin your room, and a fair turn clock",
