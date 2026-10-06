@@ -35,20 +35,6 @@
       "tags": 1
     },
     {
-      "name": "Namor",
-      "side": "both",
-      "groups": ["Defenders", "Illuminati", "Cabal"],
-      "level": 2,
-      "bonus": "soul",
-      "points": 2,
-      "cost": {
-        "soul": 4,
-        "reality": 3,
-        "mind": 2
-      },
-      "tags": 1
-    },
-    {
       "name": "Wolverine",
       "side": "hero",
       "groups": ["X-Men", "Weapon X", "Avengers", "New Avengers"],
@@ -101,49 +87,6 @@
         "soul": 1
       },
       "tags": 0
-    },
-    {
-      "name": "Blade",
-      "side": "hero",
-      "groups": ["Midnight Sons"],
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "reality": 3,
-        "mind": 1,
-        "soul": 1
-      },
-      "tags": 1,
-      "status": "started"
-    },
-    {
-      "name": "Mantis",
-      "side": "hero",
-      "groups": ["Guardians of the Galaxy"],
-      "level": 1,
-      "bonus": "soul",
-      "points": 0,
-      "cost": {
-        "mind": 2,
-        "space": 2,
-        "power": 1
-      },
-      "tags": 1
-    },
-    {
-      "name": "Shang-Chi",
-      "side": "hero",
-      "groups": [],
-      "level": 1,
-      "bonus": "soul",
-      "points": 1,
-      "cost": {
-        "reality": 3,
-        "space": 2,
-        "soul": 1
-      },
-      "tags": 1
     },
     {
       "name": "Rogue",
