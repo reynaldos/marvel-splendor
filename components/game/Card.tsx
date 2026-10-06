@@ -40,7 +40,9 @@ interface CardProps {
  * ReserveTray. Tap/click lifts the card over a dimmed board and shows the
  * currently-legal Recruit/Reserve actions beside it, plus View, which opens
  * the card large in the middle of the screen; tapping anywhere else
- * dismisses. All input is tap-only — there is no drag interaction.
+ * dismisses. With no legal move (not your turn, busy, can't afford or
+ * reserve) a tap opens the large view straight away. All input is
+ * tap-only — there is no drag interaction.
  *
  * A card with an `image` renders that image full-bleed (the art carries its
  * own points/cost/name). Without one it draws a placeholder laid out like
@@ -86,6 +88,10 @@ export function Card({
     setExpanded(false);
     setViewing(null);
   };
+  const openView = () => {
+    playSfx("flip");
+    setViewing(root.current?.getBoundingClientRect() ?? null);
+  };
 
   return (
     <div
@@ -107,7 +113,8 @@ export function Card({
       <button
         type="button"
         aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
+        // With no move to offer, View would be the only button: skip the menu.
+        onClick={() => (showRecruit || showReserve ? setExpanded((v) => !v) : openView())}
         className={cn(
           "@container relative block size-full overflow-hidden rounded-md bg-zinc-900 text-left ring-1 ring-foreground/10 transition-transform disabled:cursor-default",
           affordable && "ring-2 ring-primary",
@@ -149,10 +156,7 @@ export function Card({
             type="button"
             size="lg"
             variant="secondary"
-            onClick={() => {
-              playSfx("flip");
-              setViewing(root.current?.getBoundingClientRect() ?? null);
-            }}
+            onClick={openView}
           >
             View
           </Button>
