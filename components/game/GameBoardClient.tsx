@@ -14,6 +14,7 @@ import { CHAT_COOLDOWN_MS, ChatBubbleSchema, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import { boardEvents, leavesATrace, type BoardEvent } from "@/lib/board-events";
 import { playSfx, scheduleClockTicks } from "@/components/audio";
+import { flowLock } from "@/components/game/flow-lock";
 import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
@@ -163,7 +164,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   }, []);
   // One flow at a time touches the board; a signal that arrives meanwhile is
   // remembered and acted on once the current flow finishes.
-  const busy = useRef(false);
+  const [lock] = useState(flowLock);
   const missedSignal = useRef(false);
   /** Runs at the end of every flow; refetches if a signal was missed during it. */
   const catchUp = useRef(() => {});
@@ -215,11 +216,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
    */
   const fetchGame = useCallback(
     async (quiet = false) => {
-      if (busy.current) {
+      if (!lock.take()) {
         missedSignal.current = true;
         return;
       }
-      busy.current = true;
       try {
         const shown = gameRef.current;
         if (!shown) quiet = false;
@@ -260,11 +260,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       } catch {
         if (!quiet) setFatalError("Could not reach the server.");
       } finally {
-        busy.current = false;
-        catchUp.current();
+        if (lock.release()) catchUp.current();
       }
     },
-    [gameId, playSteps, commit],
+    [gameId, lock, playSteps, commit],
   );
 
   useEffect(() => {
@@ -315,17 +314,21 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   /** Resolves to whether the move went through. */
   const submitMove = useCallback(
     async (move: Move, quietly = false): Promise<boolean> => {
-      const shown = gameRef.current;
-      if (!shown || busy.current || shown.abandoned || shown.view.status !== "active") return false;
+      // A tap during a background refresh waits for it rather than going nowhere.
+      const turn = gameRef.current?.view.status === "active" && !gameRef.current.abandoned ? lock.wait() : null;
+      if (!turn) return false;
       // A timeout is sent in the background; losing the race to another
       // device, or being a moment early, isn't something to tell the player.
       const quiet = quietly || move.type === "TIMEOUT_SKIP";
-      busy.current = true;
       setSubmitting(true);
       // Heard at the tap, not once the server answers.
       const sfx = moveSfx(move);
       if (sfx) playSfx(sfx);
+      await turn;
+      // Read after the wait: the refresh may have moved the game on.
+      const shown = gameRef.current;
       try {
+        if (!shown || shown.abandoned || shown.view.status !== "active") return false;
         const res = await fetch(`/api/games/${gameId}/moves`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -364,11 +367,10 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
         return false;
       } finally {
         setSubmitting(false);
-        busy.current = false;
-        catchUp.current();
+        if (lock.release()) catchUp.current();
       }
     },
-    [gameId, playSteps, commit],
+    [gameId, lock, playSteps, commit],
   );
 
   const stagedRef = useRef(staged);

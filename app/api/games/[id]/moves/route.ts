@@ -17,6 +17,7 @@ import { accountXpByUser } from "@/lib/load-xp";
 import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { refreshLeaderboard } from "@/lib/load-leaderboard";
 import { recordGameRating } from "@/lib/record-rating";
 import { gameXpByUser, recordGameRewards } from "@/lib/record-rewards";
 import { recordGameStats, type PlayerGameOutcome } from "@/lib/record-stats";
@@ -175,6 +176,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return [];
     });
     await recordGameRewards(id, game.players, { stats, rating, coins, xpBefore, gameXp, cards });
+    refreshLeaderboard();
     // The other players fetched the final move before the rewards were there.
     if (game.mode === "MULTIPLAYER") await notifyGame(id);
   }
