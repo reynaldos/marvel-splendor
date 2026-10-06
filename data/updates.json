@@ -1,17 +1,22 @@
 [
   {
     "version": "2.10.0",
-    "date": "2026-10-05",
-    "title": "The Villains pack",
-    "summary": "Thanos leads a new pack of six into the shop, and cards climb their tiers sooner.",
+    "date": "2026-10-06",
+    "title": "Two new packs in the shop",
+    "summary": "Thanos leads the Villains pack and a Mystery Soul pack, cards climb their tiers sooner, and the board takes every tap.",
     "pulls": [],
     "new": [
-      "The Villains pack in the shop, dealt into any game where someone at the table owns it"
+      "The Villains pack added.",
+      "The Mystery Soul pack added."
     ],
     "improved": [
-      "Cards reach each tier after fewer recruits, so a favourite shows its progress sooner"
+      "Cards reach each tier after fewer recruits, so a favourite shows its progress sooner",
+      "Tapping a card you can't recruit or reserve opens its large view straight away",
+      "The leaderboard loads at once, rebuilt as each game ends"
     ],
-    "fixed": []
+    "fixed": [
+      "A move tapped while the board was refreshing is played once the refresh is done, instead of being dropped"
+    ]
   },
   {
     "version": "2.9.3",
@@ -19,7 +24,7 @@
     "title": "Add to your Home Screen, rejoin your room, and a fair turn clock",
     "summary": "iPhone players are shown how to add the game to their Home Screen, a room you're seated in is one tap from home, and the turn timer starts full after a Time Stone or Location.",
     "pulls": [],
-    "new":  [],
+    "new": [],
     "improved": [
       "On an iPhone in the browser, a prompt shows how to add the game to your Home Screen, with a tick to never see it again",
       "With a room waiting, the Private Game tile on the home screen becomes Rejoin your room and goes straight to it"

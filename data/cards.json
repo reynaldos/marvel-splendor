@@ -1447,7 +1447,7 @@
       "cost": {
         "reality": 3,
         "space": 3,
-        "soul": 2
+        "soul": 3
       },
       "tags": 1
     },
@@ -1561,6 +1561,85 @@
         "power": 3
       },
       "tags": 0
+    },
+    {
+      "id": "c1-43",
+      "name": "Blade",
+      "side": "hero",
+      "groups": ["Midnight Sons"],
+      "image": "/cards/blade.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "reality": 3,
+        "mind": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-44",
+      "name": "Mantis",
+      "side": "hero",
+      "groups": ["Guardians of the Galaxy"],
+      "image": "/cards/mantis.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 0,
+      "cost": {
+        "mind": 2,
+        "space": 2,
+        "power": 1
+      },
+      "tags": 1
+    },
+    {
+      "id": "c1-45",
+      "name": "Shang-Chi",
+      "side": "hero",
+      "groups": [],
+      "image": "/cards/shang-chi.png",
+      "level": 1,
+      "bonus": "soul",
+      "points": 1,
+      "cost": {
+        "reality": 3,
+        "space": 2,
+        "soul": 1
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-35",
+      "name": "Namor",
+      "side": "both",
+      "groups": ["Defenders", "Illuminati", "Cabal"],
+      "image": "/cards/namor.png",
+      "level": 2,
+      "bonus": "soul",
+      "points": 2,
+      "cost": {
+        "soul": 4,
+        "reality": 2,
+        "mind": 2
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-26",
+      "name": "Red Hulk",
+      "side": "both",
+      "groups": ["Avengers"],
+      "image": "/cards/red-hulk.png",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "reality": 5,
+        "power": 4,
+        "space": 3
+      },
+      "tags": 1
     }
   ]
 }

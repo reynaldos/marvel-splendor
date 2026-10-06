@@ -18,9 +18,18 @@
       "title": "Villains",
       "description": "Thanos and the worst the universe has to offer.",
       "cover": "/assets/packs/villains.png",
-      "cost": 1400,
+      "cost": 1200,
       "cards": ["c2-33", "c2-34", "c3-21", "c3-23", "c3-24", "c3-25"],
       "releasedAt": "2026-10-05"
+    },
+    {
+      "id": "mystery-soul",
+      "title": "Mystery Soul",
+      "description": "Five who fight with the Soul Stone...",
+      "cover": "/assets/packs/mystery-soul.png",
+      "cost": 750,
+      "cards": ["c1-43", "c1-44", "c1-45", "c2-35", "c3-26"],
+      "releasedAt": "2026-10-06"
     }
   ]
 }
