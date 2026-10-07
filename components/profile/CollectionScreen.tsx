@@ -20,7 +20,7 @@ const VIEW_NAMES: Record<CollectionView, string> = { grid: "Grid", level: "Level
 const SLOT = "relative aspect-card w-full rounded-frame";
 const FRAME_HIDDEN_KEY = "collection-frame-hidden";
 // As many cards across as fit, each stretched a little so the row is filled from edge to edge.
-const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing)*14),1fr))] gap-2";
+const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing)*14),1fr))] gap-3";
 
 /**
  * A found card as the grid shows it: in the frame of its tier, with its count cut as a gem. Large, its
@@ -120,7 +120,8 @@ export function CollectionScreen({ found, packs, backTo }: CollectionScreenProps
           </h1>
         </header>
 
-        <div className="scroll-fade-top flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Runs out to the screen's edge and pads back in, so the frames' glow isn't cut off at the sides. */}
+        <div className="scroll-fade-top -mx-3 flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {collectionRows(ALL_CARDS, view).map((row) => (
             <section key={row.name ?? "all"} className="flex gap-2">
               {row.name ? (

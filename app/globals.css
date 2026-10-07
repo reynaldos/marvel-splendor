@@ -664,6 +664,35 @@ body {
   animation: drift 6s ease-in-out infinite;
 }
 
+/* The how-to-play slides: a piece moving to where it goes (--dx, --dy), or sinking away as it is spent or given back.
+   Drawn where it ends up when motion is off; the loops stay put. */
+.howto-move { translate: var(--dx, 0) var(--dy, 0); }
+.howto-sink { translate: var(--dx, 0) var(--dy, 0); opacity: 0; scale: 0.5; }
+/* A first view that makes way for a second after a few seconds. */
+.howto-out { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes howto-out {
+    0%, 85% { opacity: 1; scale: 1; }
+    100% { opacity: 0; scale: 0.8; }
+  }
+  .howto-out { animation: howto-out 3s ease-in both; }
+  @keyframes howto-move { from { translate: 0 0; } }
+  .howto-move { animation: howto-move 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.15) both; }
+  @keyframes howto-sink { from { translate: 0 0; opacity: 1; scale: 1; } }
+  .howto-sink { animation: howto-sink 0.7s ease-in both; }
+  /* Taking stones, over and over: some go and come back in the first half of the cycle, others in the second. */
+  @keyframes howto-loop-a {
+    0%, 6%, 48%, 100% { translate: 0 0; }
+    14%, 40% { translate: var(--dx, 0) var(--dy, 0); }
+  }
+  @keyframes howto-loop-b {
+    0%, 56%, 98%, 100% { translate: 0 0; }
+    64%, 90% { translate: var(--dx, 0) var(--dy, 0); }
+  }
+  .howto-loop-a { animation: howto-loop-a 7s cubic-bezier(0.2, 0.9, 0.3, 1.15) infinite; }
+  .howto-loop-b { animation: howto-loop-b 7s cubic-bezier(0.2, 0.9, 0.3, 1.15) infinite; }
+}
+
 /* A breathing gold halo, for the one button that matters. */
 @keyframes glow-gold {
   0%, 100% { box-shadow: 0 0 calc(var(--spacing) * 2) rgb(246 201 69 / 0.45); }

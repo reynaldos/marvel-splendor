@@ -179,16 +179,10 @@ export function TopBarView({
               <DialogHeader>
                 <DialogTitle className={TITLE}>Menu</DialogTitle>
                 <DialogDescription className="sr-only">
-                  The leaderboard, what&apos;s new, feedback, sound, and signing out.
+                  What&apos;s new, feedback, sound, and signing out.
                 </DialogDescription>
               </DialogHeader>
               <nav className="flex justify-center gap-2">
-                <Link href="/leaderboard" onClick={close} className={CHOICE}>
-                  <span className={CHOICE_ICON}>
-                    <Medal className="size-7" />
-                  </span>
-                  Leaderboard
-                </Link>
                 <button
                   type="button"
                   onClick={() => {

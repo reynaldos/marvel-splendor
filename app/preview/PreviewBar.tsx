@@ -23,6 +23,7 @@ const PAGES = [
   { name: "Game over", href: "/preview/game-over" },
   { name: "Tiers", href: "/preview/tiers" },
   { name: "Pack", href: "/preview/pack" },
+  { name: "How to", href: "/preview/how-to" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
@@ -126,6 +127,14 @@ function Help() {
 
         <h3 className={HEADING}>Tiers</h3>
         <p className="text-cosmos-300">Takes nothing: every frame tier, the rank badge and the leaderboard rows, side by side.</p>
+
+        <h3 className={HEADING}>How to</h3>
+        <dl className="flex flex-col gap-3">
+          <Entry option="?slide=">
+            Opens the how-to-play slideshow on that slide, counting from 1. Closed, with just its button, when left out.
+            <Options to={(n) => `/preview/how-to?slide=${n}`} values={[1, 4, 6, 12]} />
+          </Entry>
+        </dl>
       </DialogContent>
     </Dialog>
   );

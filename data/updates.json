@@ -1,5 +1,22 @@
 [
   {
+    "version": "2.11.0",
+    "date": "2026-10-06",
+    "title": "How to play",
+    "summary": "A slideshow of the rules from the home screen, the leaderboard a tap closer, and a dot on the Shop when a new pack is in.",
+    "pulls": [],
+    "new": [
+      "A How to play button on the home screen opens the rules as an animated slideshow, drawn with the game's own stones, cards and tiles",
+      "The Shop button wears a gold dot while a pack you haven't seen is on sale"
+    ],
+    "improved": [
+      "The leaderboard has its own button on the home screen, next to How to play, instead of a place in the menu"
+    ],
+    "fixed": [
+      "The glow on collection cards at the left and right edges is no longer cut off"
+    ]
+  },
+  {
     "version": "2.10.0",
     "date": "2026-10-06",
     "title": "Two new packs in the shop",

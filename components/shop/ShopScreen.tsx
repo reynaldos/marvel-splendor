@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { Check, Coins, Image as Picture, Layers, MapPin, Music, Palette } from "lucide-react";
 import { cn } from "cn";
 import { toast } from "sonner";
 
 import { BackLink } from "@/components/BackLink";
 import { AssetImage, hasAsset } from "@/components/game/AssetImage";
+import { markSeen } from "@/components/seen";
 import { PackOpening } from "@/components/shop/PackOpening";
 import { Stage } from "@/components/Stage";
 import { PACK_BY_ID } from "@/lib/engine/data";
 import type { Pack } from "@/lib/engine/types";
 import type { PurchaseResult } from "@/lib/record-purchase";
-import { SHOP_ITEMS, SHOP_KINDS, type ShopItem, type ShopKind } from "@/lib/shop";
+import { SHOP_ITEMS, SHOP_KINDS, SHOP_LATEST, SHOP_SEEN_KEY, type ShopItem, type ShopKind } from "@/lib/shop";
 
 const SHELVES: Record<ShopKind, { label: string; icon: ComponentType<{ className?: string }> }> = {
   pack: { label: "Card packs", icon: Layers },
@@ -66,6 +67,8 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
   const [owned, setOwned] = useState(startingOwned);
   const [buying, setBuying] = useState(false);
   const [opening, setOpening] = useState<Pack | null>(null);
+  // A visit takes the dot off the home screen's Shop button.
+  useEffect(() => markSeen(SHOP_SEEN_KEY, SHOP_LATEST), []);
 
   const items = SHOP_ITEMS.filter((item) => item.kind === shelf);
   const chosen = items.find((item) => item.id === chosenId) ?? null;
