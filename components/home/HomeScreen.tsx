@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Medal, ShoppingBag } from "lucide-react";
 
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { HowToPlay } from "@/components/home/HowToPlay";
@@ -57,9 +57,18 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
           >
             <ShoppingBag className="size-6" />
           </Link>
+          {/* Keeps the line centred, with two buttons on the right. */}
+          <span aria-hidden className="w-12" />
           <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
             Assemble the Avengers · Claim the Gauntlet
           </p>
+          <Link
+            href="/leaderboard"
+            aria-label="Leaderboard"
+            className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
+          >
+            <Medal className="size-6" />
+          </Link>
           <HowToPlay />
         </footer>
       </StageRows>
