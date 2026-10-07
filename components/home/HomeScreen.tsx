@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
+import { HowToPlay } from "@/components/home/HowToPlay";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
 import { Stage, StageRows } from "@/components/Stage";
@@ -59,8 +60,7 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
           <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
             Assemble the Avengers · Claim the Gauntlet
           </p>
-          {/* Keeps the line centred, with the Shop button on the left. */}
-          <span aria-hidden className="w-12" />
+          <HowToPlay />
         </footer>
       </StageRows>
     </Stage>

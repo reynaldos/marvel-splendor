@@ -87,6 +87,15 @@ Every menu screen is laid out the same way, so they keep the same margins and th
 - **`StageRows`** leaves room for the bar and sets the margins: 4 steps at the sides and 3 at the bottom. The last thing in it is the footer; everything before it is the content, which sits in the middle of the room between the bar and the footer, with as much space over it as under. Screens have no header or title of their own.
 - **The sizes** come from a canvas 100 steps tall and 200 wide that scales to the screen. The bar takes 17 of the 100, a footer about 13, leaving about 64 for a screen's content.
 
+## How to play
+
+The round `?` button at the bottom right of the home screen (`components/home/HowToPlay.tsx`) opens the rules as a slideshow over the night sky, darkened a little, filling the screen like the board. Twelve slides (`components/home/how-to-slides.tsx`) follow the Ephod game's tutorial, worded from the Marvel rulebook: the stones, where points come from, the three actions, taking stones, reserving, recruiting and bonuses, the 10-stone limit, Locations, the Avengers Assemble tile, the Time Stone and winning. Each slide is drawn from the real pieces: `TokenChip`, `CardView`, `LocationTile`, the deck backs, the Avengers tile and the Gauntlet tile, so it always matches the board. Cards and tiles carry their own points, so nothing is printed over them.
+
+- **Its pieces come in one after another** as the slide opens: popping into place (`result-pop`), dropping or sinking (`howto-move` and `howto-sink` in `app/globals.css`, which move a piece by `--dx` and `--dy` steps), with the caption rising last. The taking-stones slide loops: three different stones drop into the hand and go back, then two of one colour (`howto-loop-a` and `howto-loop-b`). On the limit slide the marked stacks each give a stone back. The slide is keyed on its number, so moving to it plays it afresh. With reduced motion every piece is drawn where it ends up and the loop stays in the bank.
+- **Each slide plays the sound of what it shows** as it opens, when it has one: a stone pick, a reserve, a recruit, a Location, the Avengers tile, the Time Stone. Moving about makes no sound of its own.
+- **Moving about:** gold arrows at the sides, the dots along the bottom, or the arrow keys. The X at the top right or Escape closes it; it opens on the first slide every time.
+- **`/preview/how-to`** shows it without signing in, and `?slide=` opens it on a given slide.
+
 ## Profile
 
 Player stats, shown on the profile page. The Records tab counts only games against at least one other person, as beating bots sets no records; a game with people and bots at the table counts. Done: they are worked out from how each of the player's finished games ended (`lib/career-stats.ts`, loaded by `lib/load-game-history.ts`), so they cover games already played and need no new columns.
