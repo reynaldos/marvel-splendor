@@ -1,8 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { markSeen, useSeen } from "@/components/seen";
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import updates from "@/data/updates.json";
 
@@ -14,37 +14,14 @@ const KINDS = [
 
 const SEEN_KEY = "updates-seen";
 const LATEST = updates[0].version;
-const watchers = new Set<() => void>();
-
-function subscribe(onChange: () => void) {
-  watchers.add(onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    watchers.delete(onChange);
-    window.removeEventListener("storage", onChange);
-  };
-}
-
-// ponytail: remembered on the device, not the account. A column on User if it must follow the player.
-function readSeen() {
-  try {
-    return localStorage.getItem(SEEN_KEY);
-  } catch {
-    // Nowhere to remember it, so don't nag.
-    return LATEST;
-  }
-}
 
 export function markUpdatesSeen() {
-  try {
-    localStorage.setItem(SEEN_KEY, LATEST);
-  } catch {}
-  watchers.forEach((tell) => tell());
+  markSeen(SEEN_KEY, LATEST);
 }
 
 /** The release this device last saw, or null if it has never opened the log. */
 export function useSeenUpdate() {
-  return useSyncExternalStore(subscribe, readSeen, () => LATEST);
+  return useSeen(SEEN_KEY, LATEST);
 }
 
 /** Releases newer than the one last seen. Someone who has seen none is shown the latest. */

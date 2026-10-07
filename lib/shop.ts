@@ -11,6 +11,8 @@ export interface ShopItem {
   description: string;
   cover: string;
   cost: number;
+  /** The day it went on sale. */
+  releasedAt: string;
 }
 
 // To sell on another shelf: list its items here from a data/ file, and give the player what they
@@ -22,7 +24,12 @@ export const SHOP_ITEMS: ShopItem[] = PACKS.map((p) => ({
   description: p.description,
   cover: p.cover,
   cost: p.cost,
+  releasedAt: p.releasedAt,
 }));
+
+/** The newest day anything went on sale; a device that has seen it has seen the whole shop. */
+export const SHOP_LATEST = SHOP_ITEMS.map((item) => item.releasedAt).sort().at(-1) ?? "";
+export const SHOP_SEEN_KEY = "shop-seen";
 
 /** What is for sale under that name, or undefined; the price comes from here, never from a client. */
 export function shopItem(kind: string, id: string): ShopItem | undefined {

@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Medal, ShoppingBag } from "lucide-react";
+import { Medal } from "lucide-react";
 
 import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
 import { HowToPlay } from "@/components/home/HowToPlay";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
+import { ShopButton } from "@/components/shop/ShopButton";
 import { Stage, StageRows } from "@/components/Stage";
 
 /** What a visitor sees before signing in. */
@@ -50,13 +51,7 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
         </div>
 
         <footer className="flex items-center gap-4">
-          <Link
-            href="/shop"
-            aria-label="Shop"
-            className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
-          >
-            <ShoppingBag className="size-6" />
-          </Link>
+          <ShopButton />
           {/* Keeps the line centred, with two buttons on the right. */}
           <span aria-hidden className="w-12" />
           <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
