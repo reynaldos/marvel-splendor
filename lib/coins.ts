@@ -3,17 +3,17 @@ import { botDifficultyForSeat, type BotDifficulty, type GameSettings } from "@/l
 export type OpponentTier = "human" | BotDifficulty;
 
 const PAYOUT: Record<OpponentTier, { win: number; loss: number }> = {
-  human: { win: 50, loss: 20 },
-  hard: { win: 30, loss: 12 },
-  normal: { win: 18, loss: 7 },
-  easy: { win: 10, loss: 4 },
+  human: { win: 75, loss: 30 },
+  hard: { win: 45, loss: 18 },
+  normal: { win: 27, loss: 11 },
+  easy: { win: 15, loss: 6 },
 };
 
 /** A game must reach this many turns for a player before it pays out — blocks an instant-forfeit farm loop. */
 const MIN_TURNS_TO_PAY = 4;
 
 /** Daily cap on coins from bot games only — bots are free and instant to spin up; human games are naturally rate-limited. */
-export const BOT_COINS_DAILY_CAP = 150;
+export const BOT_COINS_DAILY_CAP = 225;
 
 const BOT_DIFFICULTY_RANK: Record<BotDifficulty, number> = { easy: 0, normal: 1, hard: 2 };
 
