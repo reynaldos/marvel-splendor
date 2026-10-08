@@ -1640,6 +1640,145 @@
         "space": 3
       },
       "tags": 1
+    },
+    {
+      "id": "c1-46",
+      "name": "Nightcrawler",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "image": "/cards/nightcrawler.png",
+      "level": 1,
+      "bonus": "space",
+      "points": 0,
+      "cost": {
+        "power": 2,
+        "soul": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-47",
+      "name": "Rogue",
+      "side": "hero",
+      "groups": ["X-Men", "Brotherhood of Mutants"],
+      "image": "/cards/rogue.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "soul": 2,
+        "reality": 1,
+        "space": 1
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-48",
+      "name": "Gambit",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "image": "/cards/gambit.png",
+      "level": 1,
+      "bonus": "power",
+      "points": 0,
+      "cost": {
+        "reality": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c1-49",
+      "name": "Beast",
+      "side": "hero",
+      "groups": ["X-Men", "Avengers"],
+      "image": "/cards/beast.png",
+      "level": 1,
+      "bonus": "mind",
+      "points": 0,
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "mind": 1
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-36",
+      "name": "Cyclops",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "image": "/cards/cyclops.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 2,
+      "cost": {
+        "space": 3,
+        "mind": 2,
+        "soul": 3
+      },
+      "tags": 0
+    },
+    {
+      "id": "c2-37",
+      "name": "Wolverine",
+      "side": "hero",
+      "groups": ["X-Men", "Weapon X", "Avengers", "New Avengers"],
+      "image": "/cards/wolverine.png",
+      "level": 2,
+      "bonus": "reality",
+      "points": 2,
+      "cost": {
+        "soul": 5,
+        "reality": 3,
+        "mind": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-38",
+      "name": "Storm",
+      "side": "hero",
+      "groups": ["X-Men", "Avengers"],
+      "image": "/cards/storm.png",
+      "level": 2,
+      "bonus": "space",
+      "points": 3,
+      "cost": {
+        "mind": 5,
+        "space": 2,
+        "power": 2
+      },
+      "tags": 1
+    },
+    {
+      "id": "c2-39",
+      "name": "Professor X",
+      "side": "hero",
+      "groups": ["X-Men", "Illuminati"],
+      "image": "/cards/professor-x.png",
+      "level": 2,
+      "bonus": "mind",
+      "points": 2,
+      "cost": {
+        "power": 5
+      },
+      "tags": 0
+    },
+    {
+      "id": "c3-27",
+      "name": "Phoenix",
+      "side": "hero",
+      "groups": ["X-Men"],
+      "image": "/cards/phoenix.png",
+      "level": 3,
+      "bonus": "soul",
+      "points": 4,
+      "cost": {
+        "mind": 6,
+        "reality": 3,
+        "space": 3
+      },
+      "tags": 0
     }
   ]
 }
