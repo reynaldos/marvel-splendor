@@ -34,7 +34,7 @@
     {
       "id": "x-men",
       "title": "X-Men",
-      "description": "Nine mutants from Xavier's school, Phoenix among them.",
+      "description": "Professor X and eight of the most iconic X-Men.",
       "cover": "/assets/packs/x-men.png",
       "cost": 1500,
       "cards": ["c1-46", "c1-47", "c1-48", "c1-49", "c2-36", "c2-37", "c2-38", "c2-39", "c3-27"],
