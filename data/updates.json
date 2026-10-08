@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.12.0",
+    "date": "2026-10-08",
+    "title": "The X-Men pack",
+    "summary": "Professor X and eight of the most iconic X-Men arrive in the shop.",
+    "pulls": [],
+    "new": [
+      "The X-Men pack added: Professor X and eight of the most iconic X-Men, across all three levels"
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
     "version": "2.11.0",
     "date": "2026-10-06",
     "title": "How to play",

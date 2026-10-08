@@ -6,115 +6,6 @@
   },
   "cards": [
     {
-      "name": "Phoenix",
-      "side": "hero",
-      "groups": ["X-Men"],
-      "level": 3,
-      "bonus": "soul",
-      "points": 4,
-      "cost": {
-        "mind": 6,
-        "reality": 3,
-        "space": 3
-      },
-      "tags": 0,
-      "status": "started"
-    },
-    {
-      "name": "Storm",
-      "side": "hero",
-      "groups": ["X-Men", "Avengers"],
-      "level": 2,
-      "bonus": "space",
-      "points": 3,
-      "cost": {
-        "mind": 5,
-        "space": 2,
-        "power": 2
-      },
-      "tags": 1
-    },
-    {
-      "name": "Wolverine",
-      "side": "hero",
-      "groups": ["X-Men", "Weapon X", "Avengers", "New Avengers"],
-      "level": 2,
-      "bonus": "reality",
-      "points": 3,
-      "cost": {
-        "soul": 5,
-        "reality": 2,
-        "mind": 1
-      },
-      "tags": 1,
-      "status": "started"
-    },
-    {
-      "name": "Professor X",
-      "side": "hero",
-      "groups": ["X-Men", "Illuminati"],
-      "level": 2,
-      "bonus": "mind",
-      "points": 3,
-      "cost": {
-        "power": 6
-      },
-      "tags": 0
-    },
-    {
-      "name": "Nightcrawler",
-      "side": "hero",
-      "groups": ["X-Men"],
-      "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "power": 2,
-        "soul": 1
-      },
-      "tags": 0
-    },
-    {
-      "name": "Cyclops",
-      "side": "hero",
-      "groups": ["X-Men"],
-      "level": 1,
-      "bonus": "space",
-      "points": 0,
-      "cost": {
-        "space": 3,
-        "mind": 1,
-        "soul": 1
-      },
-      "tags": 0
-    },
-    {
-      "name": "Rogue",
-      "side": "hero",
-      "groups": ["X-Men", "Brotherhood of Mutants", "Avengers"],
-      "level": 1,
-      "bonus": "power",
-      "points": 0,
-      "cost": {
-        "soul": 2,
-        "reality": 2,
-        "space": 1
-      },
-      "tags": 1
-    },
-    {
-      "name": "Gambit",
-      "side": "hero",
-      "groups": ["X-Men"],
-      "level": 1,
-      "bonus": "power",
-      "points": 0,
-      "cost": {
-        "reality": 3
-      },
-      "tags": 0
-    },
-    {
       "name": "Deadpool",
       "side": "both",
       "groups": ["Weapon X"],
@@ -140,20 +31,6 @@
         "mind": 1
       },
       "tags": 0
-    },
-    {
-      "name": "Beast",
-      "side": "hero",
-      "groups": ["X-Men", "Avengers"],
-      "level": 1,
-      "bonus": "mind",
-      "points": 0,
-      "cost": {
-        "space": 2,
-        "soul": 2,
-        "mind": 1
-      },
-      "tags": 1
     }
   ]
 }
