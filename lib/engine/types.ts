@@ -37,8 +37,6 @@ export interface Card {
 
 export interface Location {
   id: string;
-  tile: number;
-  side: string;
   name: string;
   points: number;
   requires: Partial<StoneCounts>;

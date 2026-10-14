@@ -51,13 +51,7 @@ export function createGame(
     decks[level] = deck.slice(MARKET_SLOTS);
   }
 
-  // One random face from each of `playerCount` random tiles.
-  const pool = locationPool(settings.packs);
-  const tiles = shuffle([...new Set(pool.map((l) => l.tile))], rng).slice(0, playerCount);
-  const locations = tiles.map((tile) => {
-    const faces = pool.filter((l) => l.tile === tile);
-    return faces[Math.floor(rng() * faces.length)].id;
-  });
+  const locations = shuffle(locationPool(settings.packs).map((l) => l.id), rng).slice(0, playerCount);
 
   const startingSeat = Math.floor(rng() * playerCount);
 

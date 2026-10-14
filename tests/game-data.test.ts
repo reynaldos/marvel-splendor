@@ -112,14 +112,10 @@ describe("data/packs.json", () => {
 });
 
 describe("data/locations.json", () => {
-  it("has 4 double-sided base tiles, and no two faces on one side of a tile", () => {
+  it("has unique ids and names", () => {
     expect(new Set(ALL_LOCATIONS.map((l) => l.id)).size).toBe(ALL_LOCATIONS.length);
     expect(new Set(ALL_LOCATIONS.map((l) => l.name)).size).toBe(ALL_LOCATIONS.length);
-    for (const tile of [1, 2, 3, 4]) {
-      expect(ALL_LOCATIONS.filter((l) => l.tile === tile).map((l) => l.side).sort()).toEqual(["a", "b"]);
-    }
-    // Ids are unique, so this also keeps two faces off one side of a tile.
-    for (const l of ALL_LOCATIONS) expect(l.id).toBe(`loc-${String(l.tile).padStart(2, "0")}${l.side}`);
+    for (const l of ALL_LOCATIONS) expect(l.id).toMatch(/^loc-\d\d[ab]$/);
   });
 
   it.each(ALL_LOCATIONS)("$name is well formed", (location) => {

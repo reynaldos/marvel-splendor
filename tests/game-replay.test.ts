@@ -51,7 +51,7 @@ describe("replaySteps", () => {
 describe("a player who stops playing", () => {
   const SKIP: Move = { type: "TIMEOUT_SKIP" };
   const nobodyIsABot = () => false;
-  const start = () => createGame(2, "away-a", { ...settings, turnTimeSeconds: 30 });
+  const start = () => createGame(2, "away-b", { ...settings, turnTimeSeconds: 30 });
   const play = (state: GameState) => applyMove(state, state.currentSeat, chooseBotMove(state, state.currentSeat));
   const skip = (state: GameState) => applyMove(state, state.currentSeat, SKIP);
   /** Seat 0 lets `times` turns run out while seat 1 plays on; ends with seat 0 up. */
@@ -129,7 +129,7 @@ describe("a player who stops playing", () => {
     apply(0, chooseBotMove(state, 0));
     apply(0, { type: "REJOIN" });
     const steps = replaySteps({
-      seed: "away-a",
+      seed: "away-b",
       settings: state.settings,
       playerCount: 2,
       moves,

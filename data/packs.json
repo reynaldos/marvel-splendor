@@ -47,7 +47,7 @@
       "cover": "/assets/packs/location-pack-1.png",
       "cost": 800,
       "cards": [],
-      "locations": ["loc-05a", "loc-05b", "loc-06a", "loc-06b", "loc-07a"],
+      "locations": ["loc-05a", "loc-06a", "loc-07a", "loc-08a", "loc-09a"],
       "releasedAt": "2026-10-13"
     }
   ]
