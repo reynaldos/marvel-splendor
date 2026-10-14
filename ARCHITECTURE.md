@@ -27,7 +27,7 @@ Source: official Space Cowboys rulebook PDF, cross-checked with BoardGameGeek an
 | Infinity Stone tokens (basic) | 7 each | Mind (yellow), Space (blue), Soul (orange), Power (purple), Reality (red) |
 | Time Stone tokens (green) | 4 | Special — see below |
 | S.H.I.E.L.D. tokens (gray) | 5 | Wildcard, gold-equivalent; only obtainable by reserving |
-| Location tiles (nobles) | 4 | Random `playerCount` tiles used per game; 3 pts each |
+| Location tiles (nobles) | 4 base + packs | Random `playerCount` tiles used per game, from the base tiles and any Location pack at the table; 3 pts each |
 | Avengers Assemble tile | 1 | Contested; 3 pts; stealable |
 
 Setup token supply: 2p → 4 of each basic + 2 green; 3p → 5 of each basic + 3 green; 4p → 7 of each basic + 4 green. Gray always 5. Market: 4 face-up cards per level, refilled immediately.
@@ -56,7 +56,7 @@ Players: 2–4. Turn order clockwise from a random starter.
 The official 90-card cost table is not published as data. We ship a `cards.json` dataset mirroring base Splendor's well-known cost distribution per level, with points and Avengers tags assigned to match the Marvel edition's counts. Marked clearly in the repo so it can be corrected card-by-card against a physical copy later. Game asset images are supplied by the project owner. Card `name`s are placeholders too (real Marvel characters, not matched to the physical deck). A card with an `image` renders that image as the whole card; without one the UI draws a placeholder card face.
 
 ### Extensibility guarantee
-The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated. A game is dealt from the base cards plus the card packs in `settings.packs` (`cardPool` in `lib/engine/data.ts`): every pack anyone at the table owns, resolved when the game is created and frozen with its settings, so a replay re-deals the same pool however ownership changes later.
+The engine is data-driven: it makes no assumption about deck sizes. Cards, Locations, and per-player-count token supplies are all loaded from `data/` — adding, removing, or rebalancing cards is a JSON change (plus an asset image keyed by card id), never a code change. Game state and the move log reference cards by stable id, so expansions are backward-compatible with saved games and replays as long as existing ids are never reused or mutated. A game is dealt from the base cards plus the card packs in `settings.packs` (`cardPool` in `lib/engine/data.ts`), and its Location tiles from the base tiles plus the Location packs there (`locationPool`): every pack anyone at the table owns, resolved when the game is created and frozen with its settings, so a replay re-deals the same pool however ownership changes later.
 
 ---
 

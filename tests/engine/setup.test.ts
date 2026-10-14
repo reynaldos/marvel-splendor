@@ -47,12 +47,11 @@ describe("createGame", () => {
       expect(allIds.size).toBe(totalOfLevel);
     }
 
-    // One location per player, all valid, distinct tiles.
+    // One location per player, all valid, no repeats.
     expect(state.locations).toHaveLength(playerCount);
     const validIds = new Set(ALL_LOCATIONS.map((l) => l.id));
     for (const id of state.locations) expect(validIds.has(id)).toBe(true);
-    const tiles = state.locations.map((id) => ALL_LOCATIONS.find((l) => l.id === id)!.tile);
-    expect(new Set(tiles).size).toBe(tiles.length);
+    expect(new Set(state.locations).size).toBe(playerCount);
 
     expect(state.avengersHolder).toBeNull();
   });

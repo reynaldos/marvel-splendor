@@ -13,7 +13,7 @@ import { Stage } from "@/components/Stage";
 import { PACK_BY_ID } from "@/lib/engine/data";
 import type { Pack } from "@/lib/engine/types";
 import type { PurchaseResult } from "@/lib/record-purchase";
-import { SHOP_ITEMS, SHOP_KINDS, SHOP_LATEST, SHOP_SEEN_KEY, type ShopItem, type ShopKind } from "@/lib/shop";
+import { PACK_KINDS, SHOP_ITEMS, SHOP_KINDS, SHOP_LATEST, SHOP_SEEN_KEY, type ShopItem, type ShopKind } from "@/lib/shop";
 
 const SHELVES: Record<ShopKind, { label: string; icon: ComponentType<{ className?: string }> }> = {
   pack: { label: "Card packs", icon: Layers },
@@ -51,9 +51,12 @@ function Cover({ item, className }: { item: ShopItem; className?: string }) {
   );
 }
 
-/** How many cards a pack holds; which ones stays a surprise until it is opened. */
-function cardCount(item: ShopItem): number {
-  return item.kind === "pack" ? (PACK_BY_ID.get(item.id)?.cards.length ?? 0) : 0;
+/** How many cards or tiles a pack holds; which ones stays a surprise until it is opened. */
+function contents(item: ShopItem): string | null {
+  const pack = PACK_KINDS.includes(item.kind) ? PACK_BY_ID.get(item.id) : undefined;
+  if (!pack) return null;
+  const tiles = pack.locations?.length ?? 0;
+  return tiles ? `${tiles} locations` : `${pack.cards.length} cards`;
 }
 
 /**
@@ -81,7 +84,7 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
     if ("error" in result) return toast.error(result.error);
     setOwned((list) => [...list, `${item.kind}:${item.id}`]);
     setCoins((c) => c - item.cost);
-    if (item.kind === "pack") setOpening(PACK_BY_ID.get(item.id) ?? null);
+    if (PACK_KINDS.includes(item.kind)) setOpening(PACK_BY_ID.get(item.id) ?? null);
   };
 
   return (
@@ -152,7 +155,7 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
               <h1 className="font-display text-base font-black tracking-widest text-gold-400 uppercase">{chosen.title}</h1>
               <Cover item={chosen} className="w-28 rounded-2xl" />
               <p className="text-xs text-cosmos-300">{chosen.description}</p>
-              {cardCount(chosen) > 0 ? <span className={HEADING}>{cardCount(chosen)} cards</span> : null}
+              {contents(chosen) ? <span className={HEADING}>{contents(chosen)}</span> : null}
               <button
                 type="button"
                 disabled={has(chosen) || buying || coins < chosen.cost}

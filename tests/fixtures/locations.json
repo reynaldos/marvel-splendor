@@ -1,13 +1,11 @@
 {
   "_meta": {
-    "source": "Requirement patterns are 8 of base Splendor's 10 noble tiles (five '4+4 of two colors' and five '3+3+3 of three colors' patterns; the blue+green 4/4 and green+red+black 3/3/3 patterns were dropped). Each of the 4 double-sided tiles carries one 4/4 face (side a) and one 3/3/3 face (side b). Marvel location names are thematic; official Marvel Splendor per-tile requirements are unpublished.",
+    "source": "Requirement patterns are 8 of base Splendor's 10 noble tiles (five '4+4 of two colors' and five '3+3+3 of three colors' patterns; the blue+green 4/4 and green+red+black 3/3/3 patterns were dropped). The a faces are 4/4 and the b faces 3/3/3. Marvel location names are thematic; official Marvel Splendor per-tile requirements are unpublished.",
     "note": "requirements mirror base Splendor nobles pending verification against physical Marvel copy"
   },
   "locations": [
     {
       "id": "loc-01a",
-      "tile": 1,
-      "side": "a",
       "name": "Avengers Tower",
       "points": 3,
       "requires": {
@@ -17,8 +15,6 @@
     },
     {
       "id": "loc-01b",
-      "tile": 1,
-      "side": "b",
       "name": "Sanctum Sanctorum",
       "points": 3,
       "requires": {
@@ -29,8 +25,6 @@
     },
     {
       "id": "loc-02a",
-      "tile": 2,
-      "side": "a",
       "name": "Wakanda",
       "points": 3,
       "requires": {
@@ -40,8 +34,6 @@
     },
     {
       "id": "loc-02b",
-      "tile": 2,
-      "side": "b",
       "name": "Asgard",
       "points": 3,
       "requires": {
@@ -52,8 +44,6 @@
     },
     {
       "id": "loc-03a",
-      "tile": 3,
-      "side": "a",
       "name": "Xavier's School",
       "points": 3,
       "requires": {
@@ -63,8 +53,6 @@
     },
     {
       "id": "loc-03b",
-      "tile": 3,
-      "side": "b",
       "name": "The Raft",
       "points": 3,
       "requires": {
@@ -75,8 +63,6 @@
     },
     {
       "id": "loc-04a",
-      "tile": 4,
-      "side": "a",
       "name": "Knowhere",
       "points": 3,
       "requires": {
@@ -86,8 +72,6 @@
     },
     {
       "id": "loc-04b",
-      "tile": 4,
-      "side": "b",
       "name": "Atlantis",
       "points": 3,
       "requires": {

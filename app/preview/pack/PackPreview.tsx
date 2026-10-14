@@ -10,9 +10,9 @@ import { PACKS } from "@/lib/engine/data";
 import { PreviewBarRow } from "../PreviewBar";
 
 /** Every pack on sale, each with a button that opens it afresh. */
-export function PackPreview() {
+export function PackPreview({ open }: { open?: string }) {
   // Counts the openings, so each one is a new popup that plays from the start.
-  const [showing, setShowing] = useState<{ id: string; n: number } | null>(null);
+  const [showing, setShowing] = useState<{ id: string; n: number } | null>(open ? { id: open, n: 1 } : null);
   const pack = showing ? PACKS.find((p) => p.id === showing.id) : null;
 
   return (

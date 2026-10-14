@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { PACK_BY_ID } from "@/lib/engine/data";
 import { isUniqueViolation } from "@/lib/game-server";
 import type { Prisma } from "@/lib/generated/prisma/client";
-import { shopItem } from "@/lib/shop";
+import { PACK_KINDS, shopItem } from "@/lib/shop";
 
 export type PurchaseResult = { ok: true } | { error: string };
 
@@ -37,7 +37,7 @@ export async function purchase(userId: string, kind: string, itemId: string, db 
 export async function ownedPacks(userIds: string[], db: Prisma.TransactionClient | typeof prisma = prisma): Promise<string[]> {
   if (userIds.length === 0) return [];
   const rows = await db.purchase.findMany({
-    where: { userId: { in: userIds }, kind: "pack" },
+    where: { userId: { in: userIds }, kind: { in: PACK_KINDS } },
     select: { itemId: true },
     distinct: ["itemId"],
   });

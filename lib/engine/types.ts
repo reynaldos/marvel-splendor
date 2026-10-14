@@ -37,8 +37,6 @@ export interface Card {
 
 export interface Location {
   id: string;
-  tile: number;
-  side: string;
   name: string;
   points: number;
   requires: Partial<StoneCounts>;
@@ -65,7 +63,7 @@ export interface GameSettings {
   packs?: string[];
 }
 
-/** A set of cards sold in the shop, dealt only into games where someone owns it. */
+/** A set of cards or Location tiles sold in the shop, dealt only into games where someone owns it. */
 export interface Pack {
   id: string;
   title: string;
@@ -73,6 +71,7 @@ export interface Pack {
   cover: string;
   cost: number;
   cards: string[];
+  locations?: string[];
   releasedAt: string;
 }
 

@@ -1,4 +1,4 @@
-import { ALL_LOCATIONS, cardsOfLevel } from "./data";
+import { cardsOfLevel, locationPool } from "./data";
 import { createRng, shuffle } from "./rng";
 import {
   type CardLevel,
@@ -51,12 +51,7 @@ export function createGame(
     decks[level] = deck.slice(MARKET_SLOTS);
   }
 
-  // One random face from each of `playerCount` random tiles.
-  const tiles = shuffle([...new Set(ALL_LOCATIONS.map((l) => l.tile))], rng).slice(0, playerCount);
-  const locations = tiles.map((tile) => {
-    const faces = ALL_LOCATIONS.filter((l) => l.tile === tile);
-    return faces[Math.floor(rng() * faces.length)].id;
-  });
+  const locations = shuffle(locationPool(settings.packs).map((l) => l.id), rng).slice(0, playerCount);
 
   const startingSeat = Math.floor(rng() * playerCount);
 

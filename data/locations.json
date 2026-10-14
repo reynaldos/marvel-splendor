@@ -1,13 +1,11 @@
 {
   "_meta": {
     "source": "Marvel Splendor location tiles supplied by the project owner (\"Marvel Splendor Expansion Locations.csv\"), transcribed from tile scans. Stone colors: yellow->mind, blue->space, orange->soul, red->reality, purple->power.",
-    "ids": "loc-<tile><side>: the 4 physical tiles are double-sided, and a game uses one face of each tile it draws. Saved games refer to locations by id, so never reuse or renumber an id."
+    "ids": "loc-<tile><face>, after the physical double-sided tiles they were scanned from; in the game every face is a tile of its own, and any of them can be dealt together. Tiles 5 and up are sold in packs (data/packs.json). Saved games refer to locations by id, so never reuse or renumber an id."
   },
   "locations": [
     {
       "id": "loc-01a",
-      "tile": 1,
-      "side": "a",
       "name": "Triskelion",
       "image": "/assets/locations/triskelion.png",
       "points": 3,
@@ -18,8 +16,6 @@
     },
     {
       "id": "loc-01b",
-      "tile": 1,
-      "side": "b",
       "name": "Hell's Kitchen, NYC",
       "image": "/assets/locations/hells_kitchen.png",
       "points": 3,
@@ -30,8 +26,6 @@
     },
     {
       "id": "loc-02a",
-      "tile": 2,
-      "side": "a",
       "name": "Wakanda",
       "image": "/assets/locations/wakanda.png",
       "points": 3,
@@ -42,8 +36,6 @@
     },
     {
       "id": "loc-02b",
-      "tile": 2,
-      "side": "b",
       "name": "Asgard",
       "image": "/assets/locations/asgard.png",
       "points": 3,
@@ -55,8 +47,6 @@
     },
     {
       "id": "loc-03a",
-      "tile": 3,
-      "side": "a",
       "name": "Attilan",
       "image": "/assets/locations/attilan.png",
       "points": 3,
@@ -67,8 +57,6 @@
     },
     {
       "id": "loc-03b",
-      "tile": 3,
-      "side": "b",
       "name": "Avengers Tower, NYC",
       "image": "/assets/locations/avengers_tower.png",
       "points": 3,
@@ -79,8 +67,6 @@
     },
     {
       "id": "loc-04a",
-      "tile": 4,
-      "side": "a",
       "name": "Knowhere",
       "image": "/assets/locations/knowhere.png",
       "points": 3,
@@ -92,13 +78,64 @@
     },
     {
       "id": "loc-04b",
-      "tile": 4,
-      "side": "b",
       "name": "Atlantis",
       "image": "/assets/locations/atlantis.jpeg",
       "points": 3,
       "requires": {
         "space": 3,
+        "reality": 3,
+        "power": 3
+      }
+    },
+    {
+      "id": "loc-05a",
+      "name": "Helicarrier",
+      "image": "/assets/locations/helicarrier.png",
+      "points": 3,
+      "requires": {
+        "space": 4,
+        "power": 4
+      }
+    },
+    {
+      "id": "loc-06a",
+      "name": "Baxter Building",
+      "image": "/assets/locations/baxter_building.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
+        "soul": 3,
+        "reality": 3
+      }
+    },
+    {
+      "id": "loc-07a",
+      "name": "X-Mansion",
+      "image": "/assets/locations/x_mansion.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
+        "space": 3,
+        "power": 3
+      }
+    },
+    {
+      "id": "loc-08a",
+      "name": "Sanctum Sanctorum",
+      "image": "/assets/locations/sanctum_sanctorum.png",
+      "points": 3,
+      "requires": {
+        "mind": 4,
+        "power": 4
+      }
+    },
+    {
+      "id": "loc-09a",
+      "name": "Latveria",
+      "image": "/assets/locations/latveria.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
         "reality": 3,
         "power": 3
       }

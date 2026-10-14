@@ -555,7 +555,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
     <>
       <div
         data-notch={notchSide}
-        className="game-board theme-cosmos dark relative flex h-dvh w-full items-center overflow-hidden bg-cosmos"
+        className="game-board theme-cosmos dark relative flex h-dvh w-full items-end overflow-hidden bg-cosmos"
       >
         {gameData.abandoned ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">

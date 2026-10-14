@@ -22,13 +22,14 @@ export function LaunchArt({ className }: { className?: string }) {
 }
 
 /**
- * Shown over everything while a phone is held upright, as every screen is
- * laid out for landscape. It runs on past the bottom edge by the height of
- * the status bar: an installed iPhone app measures the screen that much short.
+ * Shown over everything while a phone or tablet is held upright, as every
+ * screen is laid out for landscape; a desktop window taller than wide is left
+ * alone. It runs on past the bottom edge by the height of the status bar: an
+ * installed iPhone app measures the screen that much short.
  */
 export function RotateNotice() {
   return (
-    <div className="stage dark fixed inset-x-0 top-0 bottom-[calc(env(safe-area-inset-top,0px)*-1)] z-[100] hidden overflow-hidden bg-cosmos portrait:max-md:block">
+    <div className="stage dark fixed inset-x-0 top-0 bottom-[calc(env(safe-area-inset-top,0px)*-1)] z-[100] hidden overflow-hidden bg-cosmos portrait:max-md:block portrait:pointer-coarse:block">
       <StackedArt upright>
         <div className="flex flex-col items-center gap-[calc(var(--spacing)*8)]">
           <Logo className="text-[calc(var(--spacing)*28)]" />
