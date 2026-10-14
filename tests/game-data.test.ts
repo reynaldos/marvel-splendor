@@ -6,7 +6,7 @@ vi.unmock("@/data/cards.json");
 vi.unmock("@/data/locations.json");
 vi.unmock("@/data/packs.json");
 
-import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID, cardPool, PACKS, packOf } from "@/lib/engine/data";
+import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID, cardPool, LOCATION_BY_ID, locationPool, PACKS, packOf } from "@/lib/engine/data";
 import { applyMove } from "@/lib/engine/apply";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, MARKET_SLOTS, STONES, type Move } from "@/lib/engine/types";
@@ -54,10 +54,12 @@ describe("data/cards.json", () => {
 });
 
 describe("data/packs.json", () => {
-  it("has unique ids, and every card in one pack at most", () => {
+  it("has unique ids, and every card and tile in one pack at most", () => {
     expect(new Set(PACKS.map((p) => p.id)).size).toBe(PACKS.length);
     const sold = PACKS.flatMap((p) => p.cards);
     expect(new Set(sold).size).toBe(sold.length);
+    const tiles = PACKS.flatMap((p) => p.locations ?? []);
+    expect(new Set(tiles).size).toBe(tiles.length);
   });
 
   it.each(PACKS)("$title is well formed", (pack) => {
@@ -65,8 +67,9 @@ describe("data/packs.json", () => {
     expect(pack.description.length).toBeGreaterThan(0);
     expect(pack.cover).toMatch(/^\/assets\/packs\//);
     expect(pack.cost).toBeGreaterThan(0);
-    expect(pack.cards.length).toBeGreaterThan(0);
+    expect(pack.cards.length + (pack.locations?.length ?? 0)).toBeGreaterThan(0);
     for (const id of pack.cards) expect(CARD_BY_ID.get(id)?.id).toBe(id);
+    for (const id of pack.locations ?? []) expect(LOCATION_BY_ID.get(id)?.id).toBe(id);
     expect(new Date(pack.releasedAt).getTime()).not.toBeNaN();
   });
 
@@ -81,6 +84,13 @@ describe("data/packs.json", () => {
         expect(dealt(withPack).has(id)).toBe(true);
       }
       expect(cardPool([pack.id]).length).toBe(cardPool().length + pack.cards.length);
+      expect(locationPool([pack.id]).length).toBe(locationPool().length + (pack.locations?.length ?? 0));
+      // A tile pack puts its tiles in the draw, so enough seeds see one; without it none ever do.
+      const drawn = (packs: string[]) => new Set(Array.from({ length: 40 }, (_, i) => createGame(4, `tiles-${i}`, { packs }).locations).flat());
+      for (const id of pack.locations ?? []) {
+        expect(drawn([]).has(id)).toBe(false);
+        expect(drawn([pack.id]).has(id)).toBe(true);
+      }
     }
   });
 
@@ -102,12 +112,14 @@ describe("data/packs.json", () => {
 });
 
 describe("data/locations.json", () => {
-  it("has 4 double-sided tiles with unique ids and names", () => {
+  it("has 4 double-sided base tiles, and no two faces on one side of a tile", () => {
     expect(new Set(ALL_LOCATIONS.map((l) => l.id)).size).toBe(ALL_LOCATIONS.length);
     expect(new Set(ALL_LOCATIONS.map((l) => l.name)).size).toBe(ALL_LOCATIONS.length);
     for (const tile of [1, 2, 3, 4]) {
       expect(ALL_LOCATIONS.filter((l) => l.tile === tile).map((l) => l.side).sort()).toEqual(["a", "b"]);
     }
+    // Ids are unique, so this also keeps two faces off one side of a tile.
+    for (const l of ALL_LOCATIONS) expect(l.id).toBe(`loc-${String(l.tile).padStart(2, "0")}${l.side}`);
   });
 
   it.each(ALL_LOCATIONS)("$name is well formed", (location) => {

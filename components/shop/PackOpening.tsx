@@ -7,9 +7,10 @@ import { playSfx } from "@/components/audio";
 import { ASSETS } from "@/components/game/assets";
 import { AssetImage, hasAsset, LargeImages } from "@/components/game/AssetImage";
 import { Card, CardView } from "@/components/game/Card";
+import { LocationTile } from "@/components/game/LocationTile";
 import { ZoomedView } from "@/components/game/Zoomable";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { getCard } from "@/lib/engine/data";
+import { getCard, getLocation } from "@/lib/engine/data";
 import type { Card as CardType, Pack } from "@/lib/engine/types";
 
 const BUTTON = "h-10 rounded-full px-6 font-display text-sm font-black tracking-wide uppercase shadow-lg";
@@ -31,10 +32,12 @@ function Back({ level, className }: { level: CardType["level"]; className?: stri
 /**
  * A pack just bought, opened on the night sky: the pack itself first, then its
  * cards in a row, face down and restless, each turned over with a tap, or all
- * at once with Reveal all.
+ * at once with Reveal all. A pack of Location tiles has no backs, so its tiles
+ * arrive face up.
  */
 export function PackOpening({ pack, onClose }: { pack: Pack; onClose: () => void }) {
   const cards = pack.cards.map(getCard);
+  const locations = (pack.locations ?? []).map(getLocation);
   const everyCard = () => new Set(cards.map((c) => c.id));
   // With less motion, it opens already dealt and turned over.
   const still = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -74,8 +77,14 @@ export function PackOpening({ pack, onClose }: { pack: Pack; onClose: () => void
             </>
           ) : (
             <>
-              <p className={TITLE}>{allShown ? `${cards.length} new cards` : "Tap a card to reveal it"}</p>
+              <p className={TITLE}>{!allShown ? "Tap a card to reveal it" : locations.length ? `${locations.length} new locations` : `${cards.length} new cards`}</p>
               <ul className="flex flex-wrap items-start justify-center gap-x-5 gap-y-3">
+                {locations.map((l, i) => (
+                  <li key={l.id} className="card-arrive flex flex-col items-center gap-1.5" style={{ width: "min(8rem, 26dvh)", animationDelay: `${i * 0.1}s` }}>
+                    <LocationTile location={l} className="pack-flash" />
+                    <span className="h-4 fs-2xs font-bold tracking-wide text-cosmos-300 uppercase">{l.name}</span>
+                  </li>
+                ))}
                 {cards.map((c, i) => {
                   const shown = revealed.has(c.id);
                   return (

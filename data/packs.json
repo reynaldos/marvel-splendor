@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "what": "What the shop sells as card packs. A pack's cards are in data/cards.json like any other, but are dealt into a game only when someone at the table owns the pack, and show locked in a collection until the player owns it. A card is in one pack at most; a card in no pack is in every game.",
-    "fields": "id is what a purchase and a game's settings refer to, so never change one. cover is the picture on the shelf, cost is in coins, cards lists ids, releasedAt is the day it went on sale."
+    "what": "What the shop sells as card packs. A pack's cards are in data/cards.json like any other, but are dealt into a game only when someone at the table owns the pack, and show locked in a collection until the player owns it. A card is in one pack at most; a card in no pack is in every game. A pack of locations is sold on the Locations shelf and its tiles join the draw the same way.",
+    "fields": "id is what a purchase and a game's settings refer to, so never change one. cover is the picture on the shelf, cost is in coins, cards lists card ids, locations lists tile ids, releasedAt is the day it went on sale."
   },
   "packs": [
     {
@@ -39,6 +39,16 @@
       "cost": 1500,
       "cards": ["c1-46", "c1-47", "c1-48", "c1-49", "c2-36", "c2-37", "c2-38", "c2-39", "c3-27"],
       "releasedAt": "2026-10-08"
+    },
+    {
+      "id": "location-pack-1",
+      "title": "Location Pack 1",
+      "description": "S.H.I.E.L.D Helicarrier plus four more locations to create bases.",
+      "cover": "/assets/packs/location-pack-1.png",
+      "cost": 800,
+      "cards": [],
+      "locations": ["loc-05a", "loc-05b", "loc-06a", "loc-06b", "loc-07a"],
+      "releasedAt": "2026-10-13"
     }
   ]
 }

@@ -28,6 +28,15 @@ export function cardPool(packs: readonly string[] = []): Card[] {
   });
 }
 export const ALL_LOCATIONS: Location[] = (locationsJson as { locations: Location[] }).locations;
+const PACK_OF_LOCATION: ReadonlyMap<string, string> = new Map(PACKS.flatMap((p) => (p.locations ?? []).map((id) => [id, p.id])));
+
+/** The tiles a game draws from: the base tiles plus those of the packs given. */
+export function locationPool(packs: readonly string[] = []): Location[] {
+  return ALL_LOCATIONS.filter((l) => {
+    const pack = PACK_OF_LOCATION.get(l.id);
+    return pack === undefined || packs.includes(pack);
+  });
+}
 
 // A card pulled back into the backlog keeps its id, so games that hold it still resolve.
 const BACKLOG_CARDS = (backlogJson as { cards: Partial<Card>[] }).cards.filter((c): c is Card => Boolean(c.id));

@@ -1,7 +1,7 @@
 {
   "_meta": {
     "source": "Marvel Splendor location tiles supplied by the project owner (\"Marvel Splendor Expansion Locations.csv\"), transcribed from tile scans. Stone colors: yellow->mind, blue->space, orange->soul, red->reality, purple->power.",
-    "ids": "loc-<tile><side>: the 4 physical tiles are double-sided, and a game uses one face of each tile it draws. Saved games refer to locations by id, so never reuse or renumber an id."
+    "ids": "loc-<tile><side>: the 4 base tiles are double-sided, and a game uses one face of each tile it draws. Tiles 5 and up are sold in packs (data/packs.json). Saved games refer to locations by id, so never reuse or renumber an id."
   },
   "locations": [
     {
@@ -99,6 +99,69 @@
       "points": 3,
       "requires": {
         "space": 3,
+        "reality": 3,
+        "power": 3
+      }
+    },
+    {
+      "id": "loc-05a",
+      "tile": 5,
+      "side": "a",
+      "name": "Helicarrier",
+      "image": "/assets/locations/helicarrier.png",
+      "points": 3,
+      "requires": {
+        "space": 4,
+        "power": 4
+      }
+    },
+    {
+      "id": "loc-05b",
+      "tile": 5,
+      "side": "b",
+      "name": "Baxter Building",
+      "image": "/assets/locations/baxter_building.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
+        "soul": 3,
+        "reality": 3
+      }
+    },
+    {
+      "id": "loc-06a",
+      "tile": 6,
+      "side": "a",
+      "name": "X-Mansion",
+      "image": "/assets/locations/x_mansion.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
+        "space": 3,
+        "power": 3
+      }
+    },
+    {
+      "id": "loc-06b",
+      "tile": 6,
+      "side": "b",
+      "name": "Sanctum Sanctorum",
+      "image": "/assets/locations/sanctum_sanctorum.png",
+      "points": 3,
+      "requires": {
+        "mind": 4,
+        "power": 4
+      }
+    },
+    {
+      "id": "loc-07a",
+      "tile": 7,
+      "side": "a",
+      "name": "Latveria",
+      "image": "/assets/locations/latveria.png",
+      "points": 3,
+      "requires": {
+        "mind": 3,
         "reality": 3,
         "power": 3
       }
