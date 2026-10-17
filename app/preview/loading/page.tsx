@@ -1,7 +1,7 @@
 import { BoardSkeleton } from "@/components/game/BoardSkeleton";
 import { pageMetadata } from "@/lib/site";
 
-import { PreviewBarRow } from "../PreviewBar";
+import { PreviewMenu } from "../PreviewBar";
 
 export const metadata = pageMetadata("Loading preview", undefined, true);
 
@@ -10,7 +10,7 @@ export default function LoadingPreviewPage() {
   return (
     <>
       <BoardSkeleton />
-      <PreviewBarRow />
+      <PreviewMenu />
     </>
   );
 }

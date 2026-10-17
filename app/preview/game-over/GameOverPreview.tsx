@@ -9,7 +9,7 @@ import { BackLink } from "@/components/BackLink";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { Stage, StageRows } from "@/components/Stage";
 
-import { CARD_COUNTS, PreviewBar } from "../PreviewBar";
+import { CARD_COUNTS, MENU_LIT, MENU_PILL, MENU_PLAIN, MenuSection, PreviewMenu } from "../PreviewBar";
 import { RESULTS, rewardsFor, standingsFor, type Result } from "./standings";
 
 const LABEL = { win: "Win", loss: "Loss", shared: "Shared win" };
@@ -19,7 +19,6 @@ export function GameOverPreview({ result, players, cards }: { result: Result; pl
   // Counts the showings: each one is a fresh popup, so it plays from the start. Nothing until Play is pressed.
   const [showing, setShowing] = useState<number | null>(null);
   const { standings, viewerSeat } = standingsFor(result, players);
-  const nextCards = CARD_COUNTS[(CARD_COUNTS.indexOf(cards) + 1) % CARD_COUNTS.length];
 
   return (
     <Stage>
@@ -59,18 +58,22 @@ export function GameOverPreview({ result, players, cards }: { result: Result; pl
           </button>
         </footer>
       </StageRows>
-      <div className="fixed inset-x-0 bottom-1 z-30 flex justify-center gap-1">
-        <PreviewBar />
-        {/* Goes round how many cards level up: 0, 1, 3, 6, and back to 0. */}
-        <Link
-          href={`/preview/game-over?result=${result}&players=${players}&cards=${nextCards}`}
-          aria-label={`${cards} cards level up. Change to ${nextCards}`}
-          className="flex items-center gap-1 rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-black text-white ring-1 ring-white/60 ring-inset hover:bg-cosmos-700"
-        >
-          <Layers className="size-[1.2em]" />
-          {cards} cards
-        </Link>
-      </div>
+      <PreviewMenu>
+        {/* How many of the viewer's cards level up. */}
+        <MenuSection title="Cards levelled up">
+          {CARD_COUNTS.map((n) => (
+            <Link
+              key={n}
+              href={`/preview/game-over?result=${result}&players=${players}&cards=${n}`}
+              aria-current={n === cards ? "true" : undefined}
+              className={cn(MENU_PILL, n === cards ? MENU_LIT : MENU_PLAIN)}
+            >
+              <Layers className="size-4" />
+              {n} cards
+            </Link>
+          ))}
+        </MenuSection>
+      </PreviewMenu>
       <GameOverDialog
         key={showing}
         open={showing !== null}
