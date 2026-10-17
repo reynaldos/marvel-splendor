@@ -131,7 +131,7 @@ export function TopBarView({
             setView("menu");
             setOpen(true);
           }}
-          className="relative flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+          className="relative flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
         >
           <Menu className="size-6" />
           {hasNew || newFeedback ? <NewDot className="absolute top-0 right-0" /> : null}

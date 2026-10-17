@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Share } from "lucide-react";
 
 const BUTTON =
-  "flex size-10 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
+  "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
 
 /**
  * What gets sent to a friend: a line to read, the code, and a link that joins

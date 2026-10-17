@@ -14,7 +14,7 @@ export function ShopButton() {
     <Link
       href="/shop"
       aria-label="Shop"
-      className="relative flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
+      className="relative flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
     >
       <ShoppingBag className="size-6" />
       {seen === null || seen < SHOP_LATEST ? <NewDot label="New in the shop" className="absolute top-0 right-0" /> : null}
