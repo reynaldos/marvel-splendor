@@ -7,7 +7,7 @@ import { PackOpening } from "@/components/shop/PackOpening";
 import { Stage, StageRows } from "@/components/Stage";
 import { PACKS } from "@/lib/engine/data";
 
-import { PreviewBarRow } from "../PreviewBar";
+import { PreviewMenu } from "../PreviewBar";
 
 /** Every pack on sale, each with a button that opens it afresh. */
 export function PackPreview({ open }: { open?: string }) {
@@ -31,7 +31,7 @@ export function PackPreview({ open }: { open?: string }) {
             </button>
           ))}
         </div>
-        <PreviewBarRow />
+        <PreviewMenu />
       </StageRows>
       {pack && showing ? <PackOpening key={showing.n} pack={pack} onClose={() => setShowing(null)} /> : null}
     </Stage>

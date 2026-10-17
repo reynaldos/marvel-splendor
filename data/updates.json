@@ -2,12 +2,14 @@
   {
     "version": "2.13.1",
     "date": "2026-10-17",
-    "title": "Bigger buttons",
-    "summary": "The round buttons through the app are bigger, so they are easier to tap.",
+    "title": "New sounds and bigger buttons",
+    "summary": "More sounds on the board, bigger round buttons through the app, and a longer wait between chat messages.",
     "pulls": [],
     "new": [],
     "improved": [
-      "The round buttons through the app, like the menu, shop and back arrows, are bigger, so they are easier to tap"
+      "More sound effects added during game play.",
+      "The round buttons through the app, like the menu, shop and back arrows, are bigger, so they are easier to tap",
+      "A chat message or emoji can be sent every six seconds instead of every three, so the table can't be spammed"
     ],
     "fixed": []
   },

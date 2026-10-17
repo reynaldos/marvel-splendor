@@ -2,7 +2,7 @@ import { HowToPlay } from "@/components/home/HowToPlay";
 import { Stage } from "@/components/Stage";
 import { pageMetadata } from "@/lib/site";
 
-import { PreviewBarRow } from "../PreviewBar";
+import { PreviewMenu } from "../PreviewBar";
 
 export const metadata = pageMetadata("How to play preview", undefined, true);
 
@@ -12,7 +12,7 @@ export default async function HowToPreviewPage({ searchParams }: { searchParams:
   return (
     <Stage className="justify-center">
       <HowToPlay preview={slide >= 1 ? slide - 1 : undefined} />
-      <PreviewBarRow />
+      <PreviewMenu />
     </Stage>
   );
 }

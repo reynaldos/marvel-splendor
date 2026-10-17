@@ -2,6 +2,7 @@
 
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import Link from "next/link";
+import { cn } from "cn";
 import { UsersRound } from "lucide-react";
 
 import { playSfx, scheduleClockTicks } from "@/components/audio";
@@ -20,20 +21,43 @@ import { DEFAULT_SETTINGS, type Move } from "@/lib/engine/types";
 import { redactState } from "@/lib/game-view";
 import { announceMs } from "@/lib/playback";
 
-import { PreviewBar, TABLE_SIZES } from "../PreviewBar";
+import {
+  MENU_GOLD,
+  MENU_LIT,
+  MENU_PALE,
+  MENU_PILL,
+  MENU_PLAIN,
+  MenuPlay,
+  MenuSection,
+  PreviewMenu,
+  TABLE_SIZES,
+} from "../PreviewBar";
 
 const SEATED = [
-  { seat: 0, isBot: false, userId: "a", name: "You", avatarUrl: "/assets/pfp/pfp-iron-man.jpg" },
-  { seat: 1, isBot: false, userId: "b", name: "maryanmi", avatarUrl: "/assets/pfp/pfp-scarlet-witch.jpg" },
+  {
+    seat: 0,
+    isBot: false,
+    userId: "a",
+    name: "You",
+    avatarUrl: "/assets/pfp/pfp-iron-man.jpg",
+  },
+  {
+    seat: 1,
+    isBot: false,
+    userId: "b",
+    name: "maryanmi",
+    avatarUrl: "/assets/pfp/pfp-scarlet-witch.jpg",
+  },
   { seat: 2, isBot: true, userId: null, name: "Bot 1", avatarUrl: null },
   // A name of the greatest length, to see how it is cut short.
-  { seat: 3, isBot: false, userId: "c", name: "the_devenger_of_doom", avatarUrl: "/assets/pfp/pfp-doom.jpg" },
+  {
+    seat: 3,
+    isBot: false,
+    userId: "c",
+    name: "the_devenger_of_doom",
+    avatarUrl: "/assets/pfp/pfp-doom.jpg",
+  },
 ];
-
-/** The table size after this one, going round. */
-export function nextTableSize(count: number): number {
-  return TABLE_SIZES[(TABLE_SIZES.indexOf(count) + 1) % TABLE_SIZES.length];
-}
 
 /** A made-up table, seen from the first seat, with the second seat doing everything and `first` having gone first. */
 export function previewTable(count: number, first = 1) {
@@ -45,9 +69,18 @@ export function previewTable(count: number, first = 1) {
     "3 tokens": { type: "TAKE_TOKENS", colors: ["mind", "soul", "reality"] },
     "2 tokens": { type: "TAKE_TOKENS", colors: ["space", "space"] },
     Recruit: { type: "RECRUIT", from: "market", cardId: view.market[2][1]! },
-    Reserve: { type: "RESERVE", from: "market", level: 3, cardId: view.market[3][2]! },
+    Reserve: {
+      type: "RESERVE",
+      from: "market",
+      level: 3,
+      cardId: view.market[3][2]!,
+    },
     "Reserve blind": { type: "RESERVE", from: "deck", level: 1 },
-    "Recruit reserved": { type: "RECRUIT", from: "reserve", cardId: state.decks[2][0] },
+    "Recruit reserved": {
+      type: "RECRUIT",
+      from: "reserve",
+      cardId: state.decks[2][0],
+    },
   };
   const events: Record<string, BoardEvent> = {
     Location: { kind: "location", seat: 1, locationId: view.locations[0] },
@@ -71,7 +104,10 @@ export function previewTable(count: number, first = 1) {
 // Shown on every card at once, the longest message among them.
 const SENDS: Record<string, ChatSend> = {
   Emoji: { kind: "REACTION", body: EMOJIS[0] },
-  Message: { kind: "TEXT", body: MESSAGES.reduce((longest, body) => (body.length > longest.length ? body : longest)) },
+  Message: {
+    kind: "TEXT",
+    body: MESSAGES.reduce((longest, body) => (body.length > longest.length ? body : longest)),
+  },
 };
 
 const noop = () => {};
@@ -88,13 +124,23 @@ interface BoardPreviewProps {
 
 /** The board's animations, without playing a game: choose one and it plays. */
 export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
-  const { view, players, moves: MOVES, events: EVENTS, log } = useMemo(() => previewTable(count, first), [count, first]);
+  const {
+    view,
+    players,
+    moves: MOVES,
+    events: EVENTS,
+    log,
+  } = useMemo(() => previewTable(count, first), [count, first]);
   const [traced, setTraced] = useState<TracedMove | null>(null);
   const [bubbles, showBubble] = useChatBubbles();
   // `?show=MyTurn` gives the first seat the turn, with a clock, to look at its card lit up.
   const [myTurnEndsAt] = useState(() => (show === "MyTurn" ? Date.now() + 20_000 : null));
   const send = (chat: ChatSend) => players.forEach((p) => showBubble(p.seat, chat));
-  const [announced, setAnnounced] = useState<{ event: BoardEvent; origin: TileOrigin | null; key: number } | null>(null);
+  const [announced, setAnnounced] = useState<{
+    event: BoardEvent;
+    origin: TileOrigin | null;
+    key: number;
+  } | null>(null);
 
   const trace = (move: Move) => {
     if (move.type === "TAKE_TOKENS" || move.type === "RECRUIT") playSfx("recruit");
@@ -107,7 +153,8 @@ export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
     playSfx(event.kind);
     const key = Date.now();
     setAnnounced({ event, origin: tileOrigin(event), key });
-    if (at === undefined) setTimeout(() => setAnnounced((shown) => (shown?.key === key ? null : shown)), announceMs(event));
+    if (at === undefined)
+      setTimeout(() => setAnnounced((shown) => (shown?.key === key ? null : shown)), announceMs(event));
   };
   // The address can name one to play on arrival, once the board is there to take a tile from.
   const played = useEffectEvent(() => {
@@ -139,76 +186,69 @@ export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
           nameForSeat={(seat) => players[seat].name}
         />
       ) : null}
-      {/* What can be played, over the way between the preview pages. */}
-      <div className="absolute inset-x-0 bottom-1 z-30 flex flex-col items-center gap-1">
-        <div className="flex justify-center gap-1">
-        {Object.entries(MOVES).map(([label, move]) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => trace(move)}
-            className="rounded-full bg-cosmos-700 px-2 py-0.5 fs-2xs font-bold ring-1 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
-          >
-            {label}
-          </button>
-        ))}
-        {Object.entries(SENDS).map(([label, chat]) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => send(chat)}
-            className="rounded-full bg-cosmos-300 px-2 py-0.5 fs-2xs font-black text-cosmos-950 hover:bg-white"
-          >
-            {label}
-          </button>
-        ))}
-        {Object.entries(EVENTS).map(([label, event]) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => announce(event)}
-            className="rounded-full bg-gold-400 px-2 py-0.5 fs-2xs font-black text-cosmos-950 hover:bg-gold-200"
-          >
-            {label}
-          </button>
-        ))}
-        </div>
-        {/* Every sound on its own, to hear it. */}
-        <div className="flex justify-center gap-1">
+      {/* What can be played, in the menu behind the gear. Playing closes it, so the board is seen. */}
+      <PreviewMenu>
+        <MenuSection title="Table">
+          {TABLE_SIZES.map((n) => (
+            <Link
+              key={n}
+              href={`/preview/board?players=${n}`}
+              aria-current={n === count ? "true" : undefined}
+              className={cn(MENU_PILL, n === count ? MENU_LIT : MENU_PLAIN)}
+            >
+              <UsersRound className="size-4" />
+              {n} players
+            </Link>
+          ))}
+          {/* Who wears the first player's token. */}
+          {players.map((p) => (
+            <Link
+              key={p.seat}
+              href={`/preview/board?players=${count}&first=${p.seat}`}
+              aria-current={p.seat === first ? "true" : undefined}
+              className={cn(MENU_PILL, p.seat === first ? MENU_LIT : MENU_PLAIN)}
+            >
+              <span className="size-3 rounded-full bg-gold-400 ring-1 ring-gold-600" />
+              {p.name} first
+            </Link>
+          ))}
+        </MenuSection>
+        <MenuSection title="Picks">
+          {Object.entries(MOVES).map(([label, move]) => (
+            <MenuPlay key={label} onClick={() => trace(move)} className={MENU_PLAIN}>
+              {label}
+            </MenuPlay>
+          ))}
+        </MenuSection>
+        <MenuSection title="Chat">
+          {Object.entries(SENDS).map(([label, chat]) => (
+            <MenuPlay key={label} onClick={() => send(chat)} className={MENU_PALE}>
+              {label}
+            </MenuPlay>
+          ))}
+        </MenuSection>
+        <MenuSection title="Announcements">
+          {Object.entries(EVENTS).map(([label, event]) => (
+            <MenuPlay key={label} onClick={() => announce(event)} className={MENU_GOLD}>
+              {label}
+            </MenuPlay>
+          ))}
+        </MenuSection>
+        {/* Every sound on its own, to hear it. The menu stays open: there is nothing to see. */}
+        <MenuSection title="Sounds">
           {(Object.keys(SFX) as SfxName[]).map((name) => (
             <button
               key={name}
               type="button"
               // The clock's button plays its whole run of ticks, as a turn's last seconds do.
               onClick={() => (name === "clockLow" ? scheduleClockTicks(Date.now() + 3000) : playSfx(name))}
-              className="rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-bold text-cosmos-300 ring-1 ring-cosmos-500 ring-inset hover:text-white"
+              className={cn(MENU_PILL, MENU_PLAIN)}
             >
               {name}
             </button>
           ))}
-        </div>
-        <div className="flex justify-center gap-1">
-          <PreviewBar />
-          {/* Goes round the table sizes: 2, 3, 4, and back to 2. */}
-          <Link
-            href={`/preview/board?players=${nextTableSize(count)}`}
-            aria-label={`${count} players. Change to ${nextTableSize(count)}`}
-            className="flex items-center gap-1 rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-black text-white ring-1 ring-white/60 ring-inset hover:bg-cosmos-700"
-          >
-            <UsersRound className="size-[1.2em]" />
-            {count} players
-          </Link>
-          {/* Hands the first player's token to the next seat round the table. */}
-          <Link
-            href={`/preview/board?players=${count}&first=${(first + 1) % count}`}
-            aria-label={`${players[first].name} went first. Change to ${players[(first + 1) % count].name}`}
-            className="flex items-center gap-1 rounded-full bg-cosmos-950 px-2 py-0.5 fs-2xs font-black text-white ring-1 ring-white/60 ring-inset hover:bg-cosmos-700"
-          >
-            <span className="size-[1em] rounded-full bg-gold-400 ring-1 ring-gold-600" />
-            {players[first].name} first
-          </Link>
-        </div>
-      </div>
+        </MenuSection>
+      </PreviewMenu>
       <TracedMoveProvider value={traced}>
         <Board
           view={myTurnEndsAt ? { ...view, currentSeat: 0 } : view}

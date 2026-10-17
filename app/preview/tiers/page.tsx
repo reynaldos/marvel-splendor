@@ -11,7 +11,7 @@ import { FRAME_EFFECT, FRAME_STYLE, FRAME_TIER_NAMES } from "@/lib/frame-tier";
 import { pageMetadata } from "@/lib/site";
 import { ACCOUNT_FRAME_TIER_MIN_LEVEL, scoreForLevel } from "@/lib/xp";
 
-import { PreviewBarRow } from "../PreviewBar";
+import { PreviewMenu } from "../PreviewBar";
 
 export const metadata = pageMetadata("Tiers preview", undefined, true);
 
@@ -80,7 +80,7 @@ export default function TiersPreviewPage() {
           </div>
         </section>
       </div>
-      <PreviewBarRow />
+      <PreviewMenu />
     </Stage>
   );
 }

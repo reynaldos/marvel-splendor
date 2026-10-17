@@ -3,7 +3,7 @@ import { z } from "zod";
 /** Sent on the game's channel with a `ChatBubble`. */
 export const CHAT_EVENT = "chat";
 /** The wait between one send and the next, for each player. */
-export const CHAT_COOLDOWN_MS = 3000;
+export const CHAT_COOLDOWN_MS = 6000;
 /** How long it is shown on the sender's card. */
 export const CHAT_BUBBLE_MS = 3000;
 
