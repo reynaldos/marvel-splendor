@@ -21,7 +21,8 @@ export const SFX = {
   clockLow: "/audio/sfx/clock-low.m4a",
   /** Stones or a card landing in a hand, yours or anyone's, once the turn is played. */
   recruit: "/audio/sfx/recruit.m4a",
-  reserve: "/audio/sfx/reserve.m4a",
+  /** The same sound as viewing a card. */
+  reserve: "/audio/sfx/flip.m4a",
   location: "/audio/sfx/location.m4a",
   timeStone: "/audio/sfx/time-stone.m4a",
   avengers: "/audio/sfx/avengers.m4a",
