@@ -10,7 +10,7 @@ import { SLIDES } from "@/components/home/how-to-slides";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 const ROUND =
-  "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400";
+  "flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400";
 const ARROW =
   "absolute top-1/2 z-10 -translate-y-1/2 text-gold-400 outline-none hover:text-gold-200 focus-visible:text-gold-200 disabled:invisible";
 

@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.13.1",
+    "date": "2026-10-17",
+    "title": "Bigger buttons",
+    "summary": "The round buttons through the app are bigger, so they are easier to tap.",
+    "pulls": [],
+    "new": [],
+    "improved": [
+      "The round buttons through the app, like the menu, shop and back arrows, are bigger, so they are easier to tap"
+    ],
+    "fixed": []
+  },
+  {
     "version": "2.13.0",
     "date": "2026-10-13",
     "title": "Location Pack 1 and iPads",

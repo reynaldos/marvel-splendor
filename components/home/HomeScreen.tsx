@@ -53,14 +53,14 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
         <footer className="flex items-center gap-4">
           <ShopButton />
           {/* Keeps the line centred, with two buttons on the right. */}
-          <span aria-hidden className="w-12" />
+          <span aria-hidden className="w-14" />
           <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
             Assemble the Avengers · Claim the Gauntlet
           </p>
           <Link
             href="/leaderboard"
             aria-label="Leaderboard"
-            className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
+            className="flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
           >
             <Medal className="size-6" />
           </Link>

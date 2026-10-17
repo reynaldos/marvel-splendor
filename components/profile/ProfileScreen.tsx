@@ -73,7 +73,7 @@ export function ProfileScreen({
               <Link
                 href={isOwn ? "/settings" : `/settings?user=${username}`}
                 aria-label="Edit profile"
-                className="absolute top-2 right-2 flex size-9 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+                className="absolute top-2 right-2 flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
               >
                 <Pencil className="size-5" />
               </Link>

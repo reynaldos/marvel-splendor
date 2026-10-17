@@ -151,7 +151,7 @@ export function LobbyScreen({
                   <button
                     type="submit"
                     aria-label="Remove bot"
-                    className="flex size-8 items-center justify-center rounded-full bg-marvel text-white ring-2 ring-white/40 hover:bg-red-500"
+                    className="flex size-10 items-center justify-center rounded-full bg-marvel text-white ring-2 ring-white/40 hover:bg-red-500"
                   >
                     <X className="size-5" />
                   </button>
@@ -174,7 +174,7 @@ export function LobbyScreen({
         <footer className="flex items-center justify-between gap-4">
           <form action={onLeave} className="flex">
             <button type="submit" className="flex items-center gap-2 text-base font-bold whitespace-nowrap hover:text-gold-200">
-              <span className="flex size-11 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
+              <span className="flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset">
                 <ArrowLeft className="size-6" />
               </span>
               {isHost ? "Cancel lobby" : "Leave"}
