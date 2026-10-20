@@ -10,7 +10,7 @@ export function Stage({ className, children }: { className?: string; children: R
   return (
     <main
       data-notch={useNotchSide()}
-      className={cn("stage dark flex h-dvh w-full items-center overflow-hidden bg-cosmos text-white", className)}
+      className={cn("stage dark flex w-full items-center overflow-hidden bg-cosmos text-white", className)}
     >
       {children}
     </main>

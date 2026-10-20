@@ -1,5 +1,19 @@
 [
   {
+    "version": "2.13.2",
+    "date": "2026-10-20",
+    "title": "Surer taps on the phone",
+    "summary": "Popup buttons answer the first tap and the team row swipes round smoothly.",
+    "pulls": [],
+    "new": [],
+    "improved": [
+    ],
+    "fixed": [
+      "Buttons in popups answer the first tap: a slow tap no longer starts selecting text or pops up the copy menu",
+      "The View team row keeps its momentum when swiped on an iPhone, and goes round without a jump"
+    ]
+  },
+  {
     "version": "2.13.1",
     "date": "2026-10-17",
     "title": "New sounds and bigger buttons",

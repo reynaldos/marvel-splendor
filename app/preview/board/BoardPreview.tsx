@@ -16,6 +16,7 @@ import { SFX, type SfxName } from "@/lib/audio-tracks";
 import { EMOJIS, MESSAGES, type ChatSend } from "@/lib/chat";
 import { TracedMoveProvider, type TracedMove } from "@/components/game/traced-move";
 import type { BoardEvent } from "@/lib/board-events";
+import { getCard } from "@/lib/engine/data";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, type Move } from "@/lib/engine/types";
 import { redactState } from "@/lib/game-view";
@@ -64,6 +65,9 @@ export function previewTable(count: number, first = 1) {
   const state = createGame(count, "preview", DEFAULT_SETTINGS);
   state.startingSeat = first;
   state.players[1].reserved = [{ cardId: state.decks[2][0], hidden: false }];
+  // Enough recruited cards that the View team row overflows and loops, with the bonuses they would have earned.
+  state.players[0].cards = state.decks[1].splice(0, 12);
+  for (const id of state.players[0].cards) state.players[0].bonuses[getCard(id).bonus]++;
   const view = redactState(state, 0);
   const moves: Record<string, Move> = {
     "3 tokens": { type: "TAKE_TOKENS", colors: ["mind", "soul", "reality"] },
@@ -177,7 +181,7 @@ export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
   }, []);
 
   return (
-    <div className="game-board theme-cosmos dark relative flex h-dvh w-full items-end overflow-hidden bg-cosmos">
+    <div className="game-board theme-cosmos dark relative flex w-full items-end overflow-hidden bg-cosmos">
       {announced ? (
         <Announcement
           key={announced.key}

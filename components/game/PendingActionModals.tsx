@@ -94,7 +94,7 @@ function ReturnTokensDialog({
 }) {
   return (
     <Dialog open={Boolean(pending) && open} onOpenChange={onOpenChange}>
-      <DialogContent className="theme-cosmos dark max-h-[90dvh] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-xl">
+      <DialogContent className="theme-cosmos dark max-h-[calc(var(--screen-h)*0.9)] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-xl">
         {pending ? (
           // Keyed so each new request starts with nothing picked.
           <ReturnTokens
@@ -246,7 +246,7 @@ function ChooseLocationDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
-        className="theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto"
+        className="theme-cosmos dark border-2 border-gold-400 max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}

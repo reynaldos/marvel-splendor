@@ -53,7 +53,7 @@ export function PackOpening({ pack, onClose }: { pack: Pack; onClose: () => void
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="theme-cosmos dark bg-cosmos inset-0 top-0 left-0 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-3 rounded-none border-0 p-4 ring-0 sm:max-w-none">
+      <DialogContent className="theme-cosmos dark bg-cosmos inset-0 top-0 left-0 flex h-(--screen-h) w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-3 rounded-none border-0 p-4 ring-0 sm:max-w-none">
         <DialogTitle className="sr-only">{pack.title} pack</DialogTitle>
         <DialogDescription className="sr-only">The cards in the pack, face down until tapped.</DialogDescription>
         <LargeImages>
