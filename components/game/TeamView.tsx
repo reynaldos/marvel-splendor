@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { CardView } from "@/components/game/Card";
 import { Zoomable } from "@/components/game/Zoomable";
@@ -24,18 +24,24 @@ export function byStrength(a: Card, b: Card): number {
   return b.points - a.points || b.tags - a.tags || b.level - a.level || totalCost(b) - totalCost(a);
 }
 
+/** Copies of the row laid end to end; the view rests in the middle one. */
+export const COPIES = 5;
+const MIDDLE = Math.floor(COPIES / 2);
+
 /**
- * Where to move a looping row's scroll position so it never reaches an end:
- * once the view drifts out of the middle copy it steps back by one copy's
- * width, which can't be seen because the copies are identical.
+ * Where to move a looping row's scroll position so it never reaches an end.
+ * At rest it goes back to the same place in the middle copy, which can't be
+ * seen because the copies are identical. Mid-swipe it is left alone, as a
+ * move stops the swipe dead on iOS, unless an end is within a screen's width.
  */
-export function wrapScroll(scrollLeft: number, copyWidth: number): number {
-  if (scrollLeft < copyWidth * 0.5) return scrollLeft + copyWidth;
-  if (scrollLeft >= copyWidth * 1.5) return scrollLeft - copyWidth;
-  return scrollLeft;
+export function wrapScroll(scrollLeft: number, copyWidth: number, viewWidth: number, atRest: boolean): number {
+  const middle = (scrollLeft % copyWidth) + copyWidth * MIDDLE;
+  const nearEnd = scrollLeft < viewWidth || scrollLeft > copyWidth * COPIES - viewWidth * 2;
+  return atRest || nearEnd ? middle : scrollLeft;
 }
 
-const COPIES = 3;
+/** How long the row must stay still before it counts as at rest. */
+const REST_MS = 150;
 
 /**
  * The cards in a row that is swiped sideways. When they don't all fit, the
@@ -44,15 +50,23 @@ const COPIES = 3;
  */
 function TeamRow({ cards }: { cards: Card[] }) {
   const row = useRef<HTMLDivElement>(null);
+  const rest = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [looping, setLooping] = useState(false);
 
   // Measured once the cards are laid out, before anything is painted.
   useLayoutEffect(() => {
     const el = row.current;
     if (!el) return;
-    if (looping) el.scrollLeft = el.scrollWidth / COPIES;
+    if (looping) el.scrollLeft = (el.scrollWidth / COPIES) * MIDDLE;
     else if (el.scrollWidth > el.clientWidth) setLooping(true);
   }, [looping]);
+
+  useEffect(() => () => clearTimeout(rest.current), []);
+
+  const wrap = (el: HTMLDivElement, atRest: boolean) => {
+    const next = wrapScroll(el.scrollLeft, el.scrollWidth / COPIES, el.clientWidth, atRest);
+    if (Math.abs(next - el.scrollLeft) > 1) el.scrollLeft = next;
+  };
 
   return (
     <div
@@ -60,15 +74,16 @@ function TeamRow({ cards }: { cards: Card[] }) {
       onScroll={(e) => {
         if (!looping) return;
         const el = e.currentTarget;
-        const next = wrapScroll(el.scrollLeft, el.scrollWidth / COPIES);
-        if (next !== el.scrollLeft) el.scrollLeft = next;
+        wrap(el, false);
+        clearTimeout(rest.current);
+        rest.current = setTimeout(() => wrap(el, true), REST_MS);
       }}
       className="flex max-w-dvw touch-pan-x overflow-x-auto overscroll-x-contain py-2 [scrollbar-width:none]"
     >
       {Array.from({ length: looping ? COPIES : 1 }, (_, copy) =>
         cards.map((card) => (
           // A margin, not a gap, so every copy is exactly the same width.
-          <span key={`${copy}-${card.id}`} aria-hidden={copy !== (looping ? 1 : 0)} className="mx-2 shrink-0">
+          <span key={`${copy}-${card.id}`} aria-hidden={copy !== (looping ? MIDDLE : 0)} className="mx-2 shrink-0">
             <CardView card={card} className="w-38 rounded-[10%/7.1%]" />
           </span>
         )),
