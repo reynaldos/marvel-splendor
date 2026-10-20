@@ -86,7 +86,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
       </DropdownMenu>
 
       <Dialog open={open !== null} onOpenChange={(next) => !next && setOpen(null)}>
-        <DialogContent className={`theme-cosmos dark border-2 border-gold-400 max-h-[90dvh] overflow-y-auto ${open === "moves" ? "sm:max-w-lg" : ""}`}>
+        <DialogContent className={`theme-cosmos dark border-2 border-gold-400 max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto ${open === "moves" ? "sm:max-w-lg" : ""}`}>
           {open === "moves" ? (
             <>
               <DialogHeader>

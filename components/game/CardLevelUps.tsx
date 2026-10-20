@@ -69,7 +69,7 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="theme-cosmos dark bg-cosmos inset-0 top-0 left-0 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-3 rounded-none border-0 p-4 ring-0 sm:max-w-none">
+      <DialogContent className="theme-cosmos dark bg-cosmos inset-0 top-0 left-0 flex h-(--screen-h) w-screen max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-3 rounded-none border-0 p-4 ring-0 sm:max-w-none">
         <DialogTitle className="sr-only">{title}</DialogTitle>
         <DialogDescription className="sr-only">Each card as it was, then as it is now.</DialogDescription>
         {/* Drawn far larger than a board piece, so the art loads sharp. */}

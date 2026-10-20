@@ -104,6 +104,16 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* The screen's height. An installed iPhone app has no toolbar to hide, yet measures its small viewport short of the screen; the large one is right. */
+:root {
+  --screen-h: 100dvh;
+}
+@media (display-mode: standalone) {
+  :root {
+    --screen-h: 100lvh;
+  }
+}
+
 /* Behave like an app: no rubber-band scrolling, no grey flash or zoom on tap. */
 html {
   overscroll-behavior: none;
@@ -118,14 +128,16 @@ body {
   color: var(--foreground);
 }
 
-/* A long press on the game shouldn't select text or pop up the copy menu; typing still works. */
+/* A long press on the game or a popup shouldn't select text or pop up the copy menu; typing still works. */
 .game-board,
-.stage {
+.stage,
+[data-slot="dialog-content"],
+[data-slot="dropdown-menu-content"] {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
 }
-.stage :is(input, .select-all) {
+:is(.stage, [data-slot="dialog-content"]) :is(input, textarea, .select-all) {
   -webkit-user-select: text;
   user-select: text;
 }
@@ -174,7 +186,8 @@ body {
   /* Menus stay clear of the home bar; the board's trays run off the bottom edge under it. */
   --pad-b: 0px;
   padding-bottom: var(--pad-b);
-  --spacing: min(calc((100dvh - var(--pad-b)) / 100), calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
+  height: var(--screen-h);
+  --spacing: min(calc((var(--screen-h) - var(--pad-b)) / 100), calc((100dvw - var(--pad-l) - var(--pad-r)) / 200));
   --text-xs: calc(var(--spacing) * 3);
   --text-sm: calc(var(--spacing) * 3.5);
   --text-base: calc(var(--spacing) * 4);

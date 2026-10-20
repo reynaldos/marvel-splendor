@@ -71,7 +71,7 @@ export function GameOverDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "theme-cosmos dark grid max-h-[94dvh] min-h-[86dvh] w-[92dvw] grid-cols-[2fr_3fr] gap-0 overflow-x-hidden overflow-y-auto border-2 p-0 sm:max-w-4xl",
+          "theme-cosmos dark grid max-h-[calc(var(--screen-h)*0.94)] min-h-[calc(var(--screen-h)*0.86)] w-[92dvw] grid-cols-[2fr_3fr] gap-0 overflow-x-hidden overflow-y-auto border-2 p-0 sm:max-w-4xl",
           won ? "result-glow-gold border-gold-400" : "result-glow-red border-red-600",
         )}
       >

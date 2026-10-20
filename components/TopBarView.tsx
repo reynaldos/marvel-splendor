@@ -73,7 +73,7 @@ export function TopBarView({
     <div
       data-notch={useNotchSide()}
       // Level with the top of the canvas, which sits in the middle of a screen taller than it.
-      className="stage dark pointer-events-none fixed inset-x-0 top-[calc((100dvh-var(--pad-b)-var(--spacing)*100)/2)] z-20 text-white"
+      className="stage dark pointer-events-none fixed inset-x-0 top-[calc((var(--screen-h)-var(--pad-b)-var(--spacing)*100)/2)] z-20 text-white"
     >
       <header className="pointer-events-auto relative mx-4 mt-2 flex h-12 items-center gap-3">
         <Link href={`/profile/${username}`} className={`${PILL} pl-1 hover:bg-cosmos-500`} style={FRAME_STYLE[tier]}>
@@ -141,7 +141,7 @@ export function TopBarView({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           className={`theme-cosmos dark border-2 border-gold-400 ${
-            view === "updates" ? "flex max-h-[90dvh] flex-col gap-0 sm:max-w-lg" : view === "daily" ? "gap-4 sm:max-w-lg" : "gap-4 sm:max-w-md"
+            view === "updates" ? "flex max-h-[calc(var(--screen-h)*0.9)] flex-col gap-0 sm:max-w-lg" : view === "daily" ? "gap-4 sm:max-w-lg" : "gap-4 sm:max-w-md"
           }`}
         >
           {view === "updates" ? (

@@ -20,7 +20,7 @@ export function BoardSkeleton() {
   return (
     <div
       data-notch={useNotchSide()}
-      className="game-board theme-cosmos dark relative flex h-dvh w-full items-end overflow-hidden bg-cosmos"
+      className="game-board theme-cosmos dark relative flex w-full items-end overflow-hidden bg-cosmos"
     >
       <div
         role="status"

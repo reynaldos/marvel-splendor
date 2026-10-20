@@ -177,7 +177,7 @@ export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
   }, []);
 
   return (
-    <div className="game-board theme-cosmos dark relative flex h-dvh w-full items-end overflow-hidden bg-cosmos">
+    <div className="game-board theme-cosmos dark relative flex w-full items-end overflow-hidden bg-cosmos">
       {announced ? (
         <Announcement
           key={announced.key}
