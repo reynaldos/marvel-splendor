@@ -6,7 +6,7 @@
  * End-of-turn automatics run in rulebook order after the primary action:
  *   1. Time Stone grant (first Level-3 recruit ever, per player)
  *   2. Avengers Assemble tile claim/steal
- *   3. Location auto-claim (or a CHOOSE_LOCATION pending on a tie)
+ *   3. Location auto-claim (or a CHOOSE_LOCATION pending on a tie), after any action
  *   4. Hand-limit check (a RETURN_TOKENS pending if over 10 tokens)
  * A turn only actually advances (currentSeat moves on) once no pending
  * action remains — resolving a pending action can itself cascade into the
@@ -127,7 +127,7 @@ function applyTakeTokens(state: GameState, seat: number, colors: readonly (typeo
   const players = replacePlayer(state.players, seat, { ...player, tokens });
   const taken: Partial<TokenCounts> = {};
   for (const c of colors) taken[c] = (taken[c] ?? 0) + 1;
-  return runHandLimitCheck({ ...state, players, supply }, seat, taken);
+  return runLocationThenHandLimit({ ...state, players, supply }, seat, taken);
 }
 
 function applyReserve(state: GameState, seat: number, move: Extract<Move, { type: "RESERVE" }>): GameState {
@@ -162,7 +162,7 @@ function applyReserve(state: GameState, seat: number, move: Extract<Move, { type
   const players = replacePlayer(state.players, seat, { ...player, reserved, tokens });
   // ponytail: only the token is put back on a timeout, the card stays reserved. Taking the
   // card back too would mean un-dealing the one that replaced it, which has been seen.
-  return runHandLimitCheck({ ...state, players, market, decks, supply }, seat, tookShield ? { shield: 1 } : undefined);
+  return runLocationThenHandLimit({ ...state, players, market, decks, supply }, seat, tookShield ? { shield: 1 } : undefined);
 }
 
 function applyRecruit(state: GameState, seat: number, move: Extract<Move, { type: "RECRUIT" }>): GameState {
@@ -266,11 +266,11 @@ function runAvengersCheck(state: GameState, seat: number): GameState {
   return { ...state, players, avengersHolder: seat };
 }
 
-function runLocationThenHandLimit(state: GameState, seat: number): GameState {
+function runLocationThenHandLimit(state: GameState, seat: number, taken?: Partial<TokenCounts>): GameState {
   const player = state.players[seat];
   const options = qualifyingLocations(state.locations, player.bonuses);
-  if (options.length === 0) return runHandLimitCheck(state, seat);
-  if (options.length === 1) return runHandLimitCheck(claimLocation(state, seat, options[0]), seat);
+  if (options.length === 0) return runHandLimitCheck(state, seat, taken);
+  if (options.length === 1) return runHandLimitCheck(claimLocation(state, seat, options[0]), seat, taken);
   return { ...state, pending: { type: "CHOOSE_LOCATION", options } };
 }
 
