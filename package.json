@@ -15,6 +15,7 @@
     "collection:backfill": "npx tsx scripts/backfill-collection.ts",
     "rating:backfill": "npx tsx scripts/backfill-rating.ts",
     "coins:backfill": "npx tsx scripts/backfill-coins.ts",
+    "looks:backfill": "npx tsx scripts/card-looks.ts",
     "rewards:backfill": "npx tsx scripts/backfill-rewards.ts",
     "visits:backfill": "npx tsx scripts/backfill-visits.ts",
     "xp:lab": "npx tsx scripts/export-xp-lab.ts",
