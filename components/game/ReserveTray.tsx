@@ -55,7 +55,7 @@ export function ReserveTray({ reserved, seat, ownerName, className, cardClassNam
     : -1;
   const tray = slots.map((entry, i) =>
     entry ? (
-      <span key={i} className={cn("relative flex rounded-sm", i === traced && "trace")}>
+      <span key={i} className={cn("relative flex rounded-sm", i === traced && "trace trace-card [--lift:2.5]")}>
         <ReservedCard entry={entry} className={cardClassName} />
       </span>
     ) : (

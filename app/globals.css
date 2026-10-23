@@ -417,7 +417,8 @@ body {
   content: "";
   position: absolute;
   z-index: 10;
-  inset: calc(var(--edge) * -1);
+  /* Drawn just inside the edge, so its corners follow the card's exactly. */
+  inset: 0;
   padding: var(--edge);
   border-radius: inherit;
   /* A line from its end round to its tip. */
@@ -483,6 +484,12 @@ body {
     100% { --trace: 360deg; --trace-end: 360deg; }
   }
   .trace::after { animation: trace 1.5s linear both; }
+  /* A picked card grows a little while it is outlined, then shrinks away as it leaves. */
+  @keyframes trace-card {
+    15%, 80% { scale: var(--lift, 1.15); opacity: 1; }
+    100% { scale: calc(var(--lift, 1.15) * 0.6); opacity: 0; }
+  }
+  .trace-card { z-index: 20; animation: trace-card 1.5s ease-in-out both; }
 
   @keyframes announce-line {
     from { opacity: 0; scale: 1 0.4; }

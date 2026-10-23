@@ -96,7 +96,7 @@ export function Card({
   return (
     <div
       ref={root}
-      className={cn("relative aspect-card w-16 shrink-0 rounded-md", traced && "trace", expanded && "z-50", className)}
+      className={cn("relative aspect-card w-16 shrink-0 rounded-md", traced && "trace trace-card", expanded && "z-50", className)}
       onKeyDown={(e) => {
         if (e.key === "Escape") close();
       }}

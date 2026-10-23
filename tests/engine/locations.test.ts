@@ -85,6 +85,39 @@ describe("Location auto-claim", () => {
     expect(resolved.currentSeat).toBe(1);
   });
 
+  it("grants the Location left over from a tie on the player's next turn, whatever the action", () => {
+    const state = makeState(2, {
+      locations: [XAVIERS], // the one not chosen last turn; player already qualifies
+      players: [makePlayer(0, { bonuses: { ...emptyStones(), mind: 4, space: 4, power: 4 } }), makePlayer(1)],
+    });
+    const next = applyMove(state, 0, { type: "TAKE_TOKENS", colors: ["soul", "reality", "power"] });
+    expect(next.players[0].locations).toEqual([XAVIERS]);
+    expect(next.players[0].points).toBe(getLocation(XAVIERS).points);
+    expect(next.locations).toEqual([]);
+    expect(next.pending).toBeNull();
+    expect(next.currentSeat).toBe(1);
+  });
+
+  it("keeps the taken tokens on the timeout undo when a token turn also claims a Location", () => {
+    const state = makeState(2, {
+      locations: [XAVIERS],
+      players: [
+        makePlayer(0, {
+          bonuses: { ...emptyStones(), mind: 4, space: 4, power: 4 },
+          tokens: { ...emptyTokens(), mind: 5, space: 4 }, // 9 tokens, 3 more goes over
+        }),
+        makePlayer(1),
+      ],
+    });
+    const next = applyMove(state, 0, { type: "TAKE_TOKENS", colors: ["soul", "reality", "power"] });
+    expect(next.players[0].locations).toEqual([XAVIERS]);
+    expect(next.pending).toEqual({
+      type: "RETURN_TOKENS",
+      mustReturn: 2,
+      taken: { soul: 1, reality: 1, power: 1 },
+    });
+  });
+
   it("still runs the hand-limit check after a Location choice is resolved (Location precedes hand-limit in turn order)", () => {
     // A reachable edge case: a free (bonus-covered) first Level-3 recruit
     // grants a Time Stone token while the player is already at the 10-token
