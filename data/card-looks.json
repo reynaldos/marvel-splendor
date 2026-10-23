@@ -1,0 +1,462 @@
+{
+  "c1-01": {
+    "name": "Abomination",
+    "look": "Hairless, with a grotesque bald green head and a low brow, jagged ears, and a wide snarling mouth full of sharp teeth. His skin is mottled, scaly, and heavily muscled, with a hulking, broad-chested build. He wears only dark black shorts or trunks with no shirt, cape, gloves, boots, or belt. No emblem or weapon is shown. The pose is crouched and lunging forward amid white debris and dust, with no visible energy effects."
+  },
+  "c1-02": {
+    "name": "America Chavez",
+    "look": "Young woman with short, curly black hair, no headgear or mask, and a serious bare face with dark eyes. Medium-brown skin, athletic build, leaning forward in a dynamic pose. She wears a blue sleeveless top with a pale star on the chest, red outer layers or jacket elements, and yellow-and-black accents around her shoulders and waist. No cape, gloves, or boots are visible. Bright orange-yellow energy streaks burst around her, with a purple cosmic circular effect in the background."
+  },
+  "c1-03": {
+    "name": "Baron Zemo",
+    "look": "Purple-skinned, bald, tightly masked or helmeted head with gold faceplate-like eye coverings and brow ridges, no visible hair. Lean but muscular build. Dark navy-blue bodysuit covers the torso and arms, with magenta ribbed sections at the chest and lower torso. Gold shoulder piece and small gold accents on the head. Black belt with metal buckle, gray-white forearm gauntlets and gloves, dark boots. He holds a glowing yellow-white energy orb above his raised hand, with orange energy swirling up his forearm."
+  },
+  "c1-04": {
+    "name": "Bullseye",
+    "look": "A lean, light-skinned man with short dark hair and a black eye mask stands in a cocky pose. He wears a dark teal sleeveless tunic over a black undershirt, tan shoulder cape or scarf draped around the neck, white bandage-like wrappings on the forearms, and white gloves. A circular target emblem sits on his forehead. He has a wide white belt and brown pants. No boots are visible. He holds or is framed by a curved bow with a glowing blue-white energy arrow effect."
+  },
+  "c1-05": {
+    "name": "Crystal",
+    "look": "Short auburn-brown hair swept upward in tousled spikes, no mask or headgear. Pale skin, sharp features, and glowing white eyes with a determined open-mouthed expression. Slim, athletic build. She wears a bright yellow fitted bodysuit with a black high, angular collar, black side panels, black gloves, and black boots. A flowing yellow sash or scarf trails from one shoulder. No visible belt or emblem. Orange-gold energy streaks burst around her, and a circular red crystal device glows at the upper right."
+  },
+  "c1-06": {
+    "name": "Electro",
+    "look": "A bald, sharp-featured, pale-skinned man with a gaunt, sneering face and dark, narrowed eyes. He wears a tight, black, glossy bodysuit with no visible cape, gloves, boots, or belt, the suit sculpting a lean, wiry build. White-blue electric energy crackles and streams around his head, shoulders, torso, and arms, partially obscuring the costume. A small circular red emblem with a white triangular symbol appears in the top-right corner of the card."
+  },
+  "c1-07": {
+    "name": "Elektra",
+    "look": "A slim, athletic woman with long black hair whipping upward in the wind, partly covering her forehead and flowing behind her. Her lower face is wrapped in a red mask or scarf, leaving only narrowed eyes visible. She wears a glossy black sleeveless bodysuit with red trim at the collar, wrists, and thighs, plus long red gloves and a billowing red sash or cape. She has no boots visible beyond the black suit, and wields two silver-bladed, wooden-handled sais."
+  },
+  "c1-08": {
+    "name": "Gorgon",
+    "look": "Long dark hair swept back from a stern face marked by a pale, angular forehead plate. He has no helmet, beard stubble, and a muscular, athletic build. His outfit is a yellow-and-black armored suit: bright yellow torso and shoulders, black chest and side panels, and ribbed brown-gold gauntlets and leg armor. A dark cape-like shoulder drape trails behind him. He wears black gloves and dark boots. One arm is raised in a striking pose, with no visible weapon or energy effect."
+  },
+  "c1-09": {
+    "name": "Grandmaster",
+    "look": "Pale-skinned, androgynous figure with wavy, shoulder-length pink hair and a stern, lined face framed by dark eye markings. They wear a high, golden-orange collar and a sleeveless gold chest piece with black angular panels, over a long black torso garment. Their arms are bare except for gold bracelets. A wide gold belt with a central red gem anchors brown side panels and a flowing deep red cape-skirt. No mask, gloves, or boots shown."
+  },
+  "c1-10": {
+    "name": "Hawkeye",
+    "look": "A blond, short-haired, light-skinned man with a stern face and dark wraparound visor stands in a forward-leaning archer’s pose. He wears a black, tight-fitting tactical outfit with sleeveless or short-sleeved upper armor, studded black bracers, and a dark belt with pouches. A quiver of arrows is strapped on his back. He draws a bow with a metallic, futuristic look, surrounded by a swirling orange-white energy trail and fiery motion streaks."
+  },
+  "c1-11": {
+    "name": "Kate Bishop",
+    "look": "Young woman with straight dark brown shoulder-length hair and a purple eye mask. Light skin, slim athletic build, neutral expression. She wears a sleeveless lavender-purple bodysuit with black trim, a black diagonal shoulder strap with buckles, black fingerless gloves, black thigh straps, and a dark utility-style belt with holsters and pouches. No cape. She has dark boots partly visible. A quiver of black-fletched arrows sits on her back, and she holds a curved bow with a taut white arrow."
+  },
+  "c1-12": {
+    "name": "Kingpin",
+    "look": "A bald, heavyset man in a crisp white double-breasted suit with broad shoulders, dark green vest, matching tie, and white dress shirt. He has a pale, stern face with heavy jowls and a small pocket square in his breast pocket. No mask, cape, gloves, boots, or weapon are shown. His hands are clasped low in front, mostly obscured. Behind him is a dark, angular silhouette with a circular, glowing orange emblem-like energy effect near the upper right."
+  },
+  "c1-13": {
+    "name": "Kraven",
+    "look": "No headgear or mask; thick dark hair styled into a wild swept-back mane, with a short beard and stern face. Muscular tan skin. He wears an open orange faux-fur vest or tunic with leonine face details, spotted tan leopard-print pants, and wrapped forearms. No cape. His hands are gloved or wrapped, and he has no visible boots or belt beyond the garment’s tie. He carries a wooden spear, with teal energy crackling behind him."
+  },
+  "c1-14": {
+    "name": "Lizard",
+    "look": "A huge green reptilian humanoid with a long snout, yellow slit eyes, and a wide open mouth showing sharp teeth and a long pink tongue. His scaly skin is olive green with darker markings, and he has a bulky, muscular build. He wears a torn white lab coat over a black torso garment, with shredded sleeves and ragged hems. No boots or gloves are visible. He is wading through yellow-green ooze, with a purple glowing energy sphere near his raised arm."
+  },
+  "c1-15": {
+    "name": "Lockjaw",
+    "look": "Massive brown bulldog-like head with heavy folds and a wide black muzzle, blue eyes, one fang visible, and a lolling pink tongue. A glowing white-blue symbol hovers on the forehead, with a bright white-blue energy aura and light flares around the face. No visible clothing, cape, gloves, boots, or belt. The character is shown as a close-up animal head only, with no armor or weapon, framed by a blue card border and a nameplate at the bottom."
+  },
+  "c1-16": {
+    "name": "M.O.D.O.K.",
+    "look": "Massive floating head with a bald crown beneath sparse dark hair at the sides, enclosed in an orange-yellow armored headframe and collar. His face is pink and deeply wrinkled, with a huge grimacing mouth, clenched white teeth, and narrowed eyes under a furrowed brow. Thick purple mechanical limbs and joints protrude from the lower frame. A glowing magenta energy beam or psychic aura blasts from the center of his forehead, with pink sparkles around it."
+  },
+  "c1-17": {
+    "name": "Moon Knight",
+    "look": "Masked, hooded figure in a black-and-white costume with a dark gray hood and a black face mask exposing only narrow glowing yellow eyes. The build is athletic and armored. A white crescent emblem sits on the chest. He wears a black cape with bright white lining and flowing white-edged fins or cloth panels. One arm is covered by a silver mechanical gauntlet; the other is gloved black. Silver-gray armored boots and segmented leg armor complete the look, with orange energy streaks and a moonlit glow behind him."
+  },
+  "c1-18": {
+    "name": "Ms. Marvel",
+    "look": "A teenage girl with long, windblown black hair and a black domino mask over her eyes, showing an open mouth and determined expression. She has a slim build and wears a black sleeveless tunic with pale blue side panels and a large white lightning-bolt emblem down the front, over magenta-pink leggings. She wears a red scarf or sash streaming behind her, black gloves, and no visible boots in frame. One oversized fist thrusts forward, with bright yellow-white energy bursting from her body and around her hand."
+  },
+  "c1-19": {
+    "name": "Mysterio",
+    "look": "Domed, reflective silver helmet with no visible face; the head is a smooth glassy orb. Broad, stocky body in a dark plum-and-black costume with a high, wrapped purple collar and layered maroon drapery across the chest. Two blue circular chest emblems sit near the collar. Large green gauntlets and matching green gloves cover the hands. A translucent neon-green smoke ring curls around the figure, with more green mist and vapor pooling below. No visible boots or belt."
+  },
+  "c1-20": {
+    "name": "Prowler",
+    "look": "Lean, athletic humanoid in a dark charcoal hood and full face mask with narrow glowing green eyes. The suit is deep green and black with segmented armored panels on the shoulders, chest, arms, and thighs, and a pale green chest accent. He wears dark gloves and fitted boots, with no visible cape or belt. One arm is thrust forward in a crouched, prowling pose. An orange glow and dust burst behind him, with a small glowing circular icon near the upper right."
+  },
+  "c1-21": {
+    "name": "Quake",
+    "look": "No headgear or mask; bare face with sharp features, dark eyebrows, and an intense, open-mouthed expression. Thick dark brown hair is swept upward in a wild, windblown mass. Medium-brown skin. Lean, athletic build in a tight burgundy-and-white bodysuit with black panels, pale shoulder and chest striping, and white geometric accents. Dark gloves, blue-toned lower sleeves/forearms, and white boots. No cape or visible belt. Blue-white energy blasts flare from the hands, with shattered debris around the figure."
+  },
+  "c1-22": {
+    "name": "Rhino",
+    "look": "A hulking, green-skinned, horned brute lunges forward in a furious crouch, his face twisted in a snarl with bared teeth and heavy brow ridges. He has no helmet or mask, just rough, bestial features and thick, muscular limbs. His body is mostly bare and sinewy, with torn dark blue pants or wrappings around the hips and legs. No cape, gloves, or boots are visible. Dust and debris swirl around him, with pale energy-like streaks and a purple circular emblem at the top right."
+  },
+  "c1-23": {
+    "name": "Rocket",
+    "look": "Anthropomorphic raccoon with pointed ears, dark mask-like eye markings, and a small black nose; brown-and-gray fur, average compact build. Wears a red-and-black armored suit with segmented chest and torso plating, dark shoulder pieces, and red legs. A yellow-orange circular emblem with a leaf-like symbol sits on the chest. No cape, gloves, or boots are visible. Holds a large heavy sci-fi rifle upright in one hand, with a large tail visible behind; no energy effects."
+  },
+  "c1-24": {
+    "name": "Sandman",
+    "look": "A hulking, bald, bare-chested male figure with a broad, muscular build and tan, sandy skin. His face is bare, with a heavy brow, narrowed eyes, and a wide, snarling grin. He wears no mask, cape, gloves, boots, belt, or emblem. Only tattered, earth-toned wrappings or a draped cloth skim his lower body, blending into a swirling mass of glowing yellow-white sand and dust that surrounds his arms and torso like a storm."
+  },
+  "c1-25": {
+    "name": "Scarlet Spider",
+    "look": "Masked red-and-black spider-themed acrobat with a smooth white eye-lensed faceplate and no visible hair. Muscular, athletic build. He wears a sleeveless blue hooded top with a black spider emblem, red gloves, red leggings, and gold wrist and ankle bands. A black belt with a red oval buckle wraps his waist. He is crouched mid-leap with white web lines whipping around him, one arm extended. No cape, no visible boots beyond the gold ankle bands."
+  },
+  "c1-26": {
+    "name": "Scorpion",
+    "look": "Masked warrior in a crouched, forward-lunging pose, with a sharp gold-and-green helmet covering the head and face except for a snarling mouth and exposed jaw. The body is muscular and armored in mottled olive, gold, and pale green plating with black undersuit sections at the thighs and arms. A segmented tail curves behind and around him like a weapon. No cape. Thick armored gloves and boots blend into the suit. The overall look is insectoid, with glowing green accents and a predatory stance."
+  },
+  "c1-27": {
+    "name": "Silver Sable",
+    "look": "A woman with long, windblown silver-white hair and a narrow black-and-silver headband. Her face is tan with sharp features and dark eye makeup, no mask. She wears a glossy metallic silver-and-black bodysuit with black gloves, black boots, and a fitted grey utility belt with pouches and holster-like attachments. No cape or emblem is visible. In her right hand she holds a short silver pistol. White spark-like energy streaks arc around her body and legs."
+  },
+  "c1-28": {
+    "name": "Spider-Girl",
+    "look": "Masked female superhero with long, windblown red hair and a sleek black-and-white mask that covers her eyes, leaving a smiling mouth visible. She has an athletic build and wears a tight black bodysuit with bold white spider-like shapes across the chest, shoulders, and gloves. No cape or belt is visible. She has dark gloves and matching black boots. A large circular shield or disc is held in front, and a glowing orange energy burst appears near the upper right."
+  },
+  "c1-29": {
+    "name": "Spider-Ham",
+    "look": "A stylized red-and-blue spider-themed costumed figure with a pig-like snout and rounded face mask, no visible hair, and black-tinted eye patches outlined in white. The body is compact and cartoonish, with red web-patterned head, arms, and hands, and blue torso and legs. He wears red gloves and red boots integrated into the suit, with a tiny yellow belt detail. One arm is raised in a clenched fist. White starburst energy flashes behind him."
+  },
+  "c1-30": {
+    "name": "Spider-Man 2099",
+    "look": "No headgear or mask; no visible hair. The figure has a sleek black bodysuit with a bright white, angular chest panel and red web-like armor streaks over the torso, forearms, and thighs. The face is fully covered by a dark, smooth mask with narrow red eye slits. The build is lean and athletic, with long limbs and clawed hands. No cape or belt is shown. White-soled boots and red-and-white shoulder accents complete the suit. Blue-white electrical energy crackles around the body."
+  },
+  "c1-31": {
+    "name": "Spider-Woman",
+    "look": "Unmasked woman with long, wavy black hair flying back and a fierce, open-mouthed expression. She has warm tan skin, sharp brows, and no visible headgear. Her outfit is a red-and-green suit with black sections: red shoulders, chest, and forearms; green torso and thigh panels; and black sleeves, legs, and gloves. A web-patterned wing-like cape or glider spans behind her. She wears black boots and no visible belt. She lunges forward with bright green energy erupting from her feet."
+  },
+  "c1-32": {
+    "name": "Squirrel Girl",
+    "look": "Young woman with short brown hair and a playful squirrel-eared headpiece. She has a human face, light skin, and a slim, athletic build. She wears a dark brown cropped furry jacket, orange shorts with a pale fur trim, and gray tights. A large fluffy squirrel tail curves behind and around her body. She has no visible cape, gloves, or boots. One hand is raised in a flexing pose. No weapons or energy effects are shown."
+  },
+  "c1-33": {
+    "name": "Taskmaster",
+    "look": "Masked fighter in a black hood with a dark skull-like face mask and narrow eye openings, pale skin mostly hidden. He has an average, athletic build, clad in a ragged black-brown furred hooded cloak or mantle over dark armor with bronze-gold circular shoulder pieces. His chest and forearms are wrapped in dark leather and metal. He wears dark gloves and heavy dark boots, with a wide dark belt. No emblem or cape visible. He brandishes a curved sword, with explosive white-orange impact flashes and flying debris around him."
+  },
+  "c1-34": {
+    "name": "Triton",
+    "look": "Green-scaled, reptilian humanoid with a long spined crest running from the brow over the head and down the back. The face is armored with a pale gray muzzle-like mask and narrow yellow eyes. He has a muscular build and wears a sleeveless purple tunic or chest piece with gray edging over a white lower garment. Silver-gray bracers cover the forearms, and a gray belt is partly visible. No cape or gloves. He lunges forward with a long silver trident-like weapon, surrounded by pale blue water energy at the lower edge."
+  },
+  "c1-35": {
+    "name": "Valkyrie",
+    "look": "No headgear; dark hair is pulled back into thick braids or twists. She has a stern face with dark eye makeup, brown skin, and an athletic build. Her costume is a black-and-gold armored bodice with a pale cream or white chest panel, dark fitted leggings, and dark boots. A bright blue cape or cloak billows behind her. She grips a long spear or polearm. White war-paint-like streaks mark her forehead and cheeks; no visible gloves or emblem."
+  },
+  "c1-36": {
+    "name": "Vulture",
+    "look": "Bald, pale-skinned man with a furrowed brow and snarling expression, no mask. He wears a glossy dark green, full-body flight suit with black striping and a fitted, athletic build. Large black mechanical bird wings extend from his back. His gloves and boots are dark green with silver, feather-shaped armored accents. A silver-gray harness and belt with round metallic fittings wrap his waist. He is posed in a crouched, airborne lunge, gripping a white, claw-like winged weapon. No cape or energy effects."
+  },
+  "c1-37": {
+    "name": "Wasp",
+    "look": "Female-presenting figure in a black and red insect-inspired helmet with pointed ear-like fins, narrow red eye lenses, and a small mouth opening. Short dark hair is mostly hidden. She has a slim, athletic build and pale skin visible at the lower face. The suit is glossy black with sharp red panels on the chest, shoulders, arms, and legs, plus red skirt-like side fins. Red gloves and black boots with red soles. A wing-like translucent energy effect spreads behind her, and a circular insect emblem appears on the chest."
+  },
+  "c1-38": {
+    "name": "Winter Soldier",
+    "look": "Masked man with short, spiky dark hair and a stern, scarred face. He has a black metal left arm with segmented silver fingers and a black tactical suit with dark olive panels, ribbed chest sections, and brown leather harness straps. A dark sash and utility belt with pouches wrap his waist. He wears black gloves and tall black boots with gold trim. No cape. Bright orange fire and smoke burst behind him, with a glowing circular emblem at the top."
+  },
+  "c1-39": {
+    "name": "Wong",
+    "look": "Bald, light-skinned man with a stern, calm face and closed eyes, no headgear. He wears a fitted dark green Mandarin-collar tunic with gold frog closures and matching loose trousers, with black cuffs and shoes. His build is lean and athletic. One arm is extended forward in a striking pose, the other bent near his waist. No cape, gloves, belt, or emblem. Around him, books, papers, and fragments float; a small red-clad figure with a sword appears at the bottom edge."
+  },
+  "c1-40": {
+    "name": "Yondu",
+    "look": "Blue-skinned, muscular man with a ridged scalp and a small magenta fin-like crest on top. His face is stern and square-jawed, with dark brows and heavy-lidded eyes. He wears a long black coat with a white fur collar over a teal chest, a large gold necklace, red armored trousers, and silver shin guards. A wide brown utility belt with pouches crosses his waist. He has black gloves and carries a dark blaster over one shoulder. Orange energy swirls around nearby weapons."
+  },
+  "c1-41": {
+    "name": "Human Torch",
+    "look": "Blond, clean-cut male superhero with no mask, short swept-back hair, and a confident smiling face. He has a muscular athletic build and is completely engulfed in orange-yellow flames that define his skin and body contours. He wears a tight full-body suit in fiery orange with brighter yellow flame patterns, long gloves, and matching boots. A circular chest emblem with a black “4” is centered on his torso. No cape or belt. A blazing flame trail streams from his flying body and limbs."
+  },
+  "c1-42": {
+    "name": "Invisible Woman",
+    "look": "Blonde, shoulder-length hair blows back around a fair, bare face with blue eyes and a focused expression. She wears a glossy deep-blue skintight bodysuit with black side panels and the white “4” emblem on the chest and matching circular insignia at the belt. Black gloves cover her hands; blue boots blend into the suit. No cape, mask, or armor. A translucent blue energy field forms around her raised hands, with swirling white-gray mist and power effects behind her."
+  },
+  "c1-43": {
+    "name": "Blade",
+    "look": "Dark-haired man with a short flat-top and a stern, narrowed face, lunging forward between crossed swords. He wears a black, form-fitting leather trench coat or long coat with a high collar, matching black pants, and heavy black boots. His gloves are dark, his belt is narrow and brown, and no cape or emblem is visible. He has a pale complexion and no visible headgear or mask. Two bright silver blades extend from his hands, with a white energy gleam along each blade."
+  },
+  "c1-44": {
+    "name": "Mantis",
+    "look": "Slim, green-skinned woman with a short black bob and two thin, curved antennae rising from her forehead. Her face is pale green with dark eyes and a calm, focused expression. She wears a fitted dark-green and olive bodysuit with yellow-gold accents, long flared sleeves, and a high collar, plus flowing dark-green sash-like panels around her hips. Long pale gloves cover her forearms; matching green boots extend to the calves. No cape, belt, or visible weapon; she has no energy effects."
+  },
+  "c1-45": {
+    "name": "Shang-Chi",
+    "look": "Black spiky hair and a focused bare face, with no mask or headgear. He has a lean, athletic build and light skin. He wears a sleeveless red tunic with gold trim over a pale tan inner layer, dark green trousers, and a long olive sash or strap across the torso. Gold detailing accents the collar and hem. No gloves or boots are clearly shown. He strikes a martial pose amid glowing orange-white ring-shaped energy effects and crackling sparks."
+  },
+  "c1-46": {
+    "name": "Nightcrawler",
+    "look": "Blue-skinned, lean acrobatic male with a short black shaggy haircut and a masked-looking blue face marked by sharp yellow eyes. He wears a red-and-black bodysuit with black sides and legs, red shoulders and chest, and white forearms and lower legs. Gray three-fingered gloves and matching gray boots complete the suit. A long tail trails behind. He’s surrounded by pale green smoke and a sweeping blue energy ribbon/arc; no cape or belt is shown."
+  },
+  "c1-47": {
+    "name": "Rogue",
+    "look": "Long wavy black hair with a broad white streak framing the face; no mask or headgear. Pale skin, slim athletic build, intense expression with dark eyes and bare face. She wears a tan cropped bomber jacket with rolled sleeves and a black X-like patch on the upper arm, over a black top and bright green-and-gold form-fitting bodysuit with brown bands. Brown boots, no visible gloves, no cape. A brown sash-belt crosses the hips. She holds yellow gloves or cloth in one hand. No energy effects."
+  },
+  "c1-48": {
+    "name": "Gambit",
+    "look": "A lean, athletic man with tousled reddish-brown hair and a black headband or mask across his forehead, partly hiding his hairline. He has a stern, angular face with glowing pink eyes and a clenched jaw. He wears a long brown trench coat with raised collar, teal-and-black chest armor, a pink sash or layered tunic, black gloves, black-and-pink striped leggings, and dark teal knee-high boots. A long staff is in one hand, and bright pink energy crackles around his other hand and across the scene."
+  },
+  "c1-49": {
+    "name": "Beast",
+    "look": "Blue-furred, muscular humanoid with a wild dark-blue mane and a broad, beastlike face, shown upside down. He has sharp white teeth, pale eyes, and no visible mask. His body is covered in thick blue fur with darker shading on the chest, arms, and legs. He wears a black-and-orange belt with a red central buckle and crossed strap detail. No cape, gloves, or boots are shown. Black cables or wires stretch from behind his shoulders, framing him in a dynamic pose."
+  },
+  "c2-01": {
+    "name": "Beta Ray Bill",
+    "look": "Armored, bare-headed warrior with a silver winged helmet and a narrow, skull-like gold face. His body is golden skin or armor, very muscular, with a black bodysuit and dark red cape flowing behind him. He wears a gold belt and a black-and-gold skirted waist piece, plus silver circular chest disks linked by white lines, a silver wrist band, and a dark boot visible at the bottom. A glowing yellow hammer-like weapon crackles with energy, and orange lightning fills the background."
+  },
+  "c2-02": {
+    "name": "Black Cat",
+    "look": "White-haired woman with a slim, athletic build, shown in a black domino mask. Her long, flowing white hair streams outward in wild locks. She has pale skin, a sharp face, and a fierce, open-mouthed grin. She wears a glossy, tight black catsuit with a deep V-neck and silver trim, plus a small circular zipper pull at the chest. Her black gloves and boots blend into the suit. A fluffy pale tail curls behind her. No cape or weapon; faint bluish energy swirls around her hands and tail."
+  },
+  "c2-03": {
+    "name": "Carnage",
+    "look": "A lean, monstrous humanoid with no visible mask, just a slick, angular red-and-black head and sharp white eyes. Black tendrils and jagged symbiote limbs spread from the body like living armor, with no distinct hair, gloves, boots, belt, or cape. The torso and limbs are glossy dark crimson veined with black, and the costume forms a ragged, organic suit over a muscular frame. One arm is raised, ending in a clawed, whip-like extension amid splashing black-red energy."
+  },
+  "c2-04": {
+    "name": "Crossbones",
+    "look": "A bald, white skull-faced figure with black eye sockets and a grinning jaw wears a black-and-white armored chest piece over a black bodysuit. His build is broad and muscular. He has olive-green cargo pants, a dark utility belt with pouches, and strapped holsters at the hips. Heavy black gloves cover both hands. A large bandolier of four dark cylindrical rocket-launchers crosses one shoulder. No cape, emblem, or boots are visible. A purple circular energy symbol appears in the background."
+  },
+  "c2-05": {
+    "name": "Daredevil",
+    "look": "A lean athletic male superhero in a tight red bodysuit with black accents, captured in a crouched leaping pose. He wears a full red mask with two small white eye lenses and no visible hair. The suit has dark black panels over the shoulders, chest, arms, and legs, with deep shadowed folds. He has red gloves and red boots integrated into the suit, no cape, no visible belt or emblem. One hand reaches upward toward a glowing orange circular energy icon."
+  },
+  "c2-06": {
+    "name": "Falcon",
+    "look": "Masked man with short dark hair visible beneath a gold, birdlike helmet and face mask that covers most of his face, leaving only a stern mouth and chin exposed. He has medium build and light skin. He wears a black bodysuit with pale blue chest armor, gold forearm guards, black gloves, and black boots. No cape or belt is visible. Huge orange-red feathered wings spread from his back, and he appears to be in a diving pose. No weapons or energy effects are shown."
+  },
+  "c2-07": {
+    "name": "Ghost Rider",
+    "look": "A flaming skull-headed figure with no visible skin, only a bone-white skull faceplate and glowing eye sockets. He has a black, form-fitting bodysuit with white angular chest markings and a sharp white emblem across the torso. His build is lean and athletic. He wears black gloves and boots, with no visible cape or belt. He brandishes a long silver sword angled across his body. Flames crown the skull and trail from the jaw and shoulders, with fiery energy effects around him."
+  },
+  "c2-08": {
+    "name": "Ghost-Spider",
+    "look": "Hooded figure in a black-and-white spider suit with red webbing on the hood, shoulders, and arms. The mask is smooth white with large glowing white eye lenses rimmed faintly in red. Slim, athletic build. White chest and torso panels contrast with black underarms, sides, legs, and lower body. She wears light blue shoes/boots and no visible gloves, belt, or cape. One hand is extended forward, fingers splayed, as a pale blue spiral energy effect glows near the raised wrist."
+  },
+  "c2-09": {
+    "name": "Groot",
+    "look": "No headgear or mask; a face formed of gnarled bark with a snarling mouth, deep-set glowing yellow eyes, and a crown of branching twig-like tendrils instead of hair. The tall, broad, humanoid body is entirely made of rough green-brown wood and roots, with a dark, almost black chest and tangled limb-like growths. No clothing, cape, gloves, boots, or belt. The only energy effect is the fiery orange circular icon at the top right."
+  },
+  "c2-10": {
+    "name": "Hela",
+    "look": "Masked woman in a sleek black-green bodysuit with a high collar and ornate dark green trim. She has long, sharp black hair fanning outward and a black horned mask framing a pale face with glowing green eyes and open mouth. Her build is slim and tall. The suit has a circular emblem at the throat and swirling green patterns over the torso. One gloved hand is raised; bright green magical energy and smoke-like flames surge around her."
+  },
+  "c2-11": {
+    "name": "Jessica Jones",
+    "look": "No headgear or mask. A young woman with shoulder-length, wavy black hair and a stern, open-mouthed expression, light skin, and a slim but sturdy build. She wears a dark brown leather jacket over a gray scoop-neck top, fitted black pants, and no visible gloves, boots, cape, or belt. No emblems. Her right hand is clenched as if running, left hand reaching forward. The background is a fiery yellow-orange explosion with a purple circular energy symbol in the upper right."
+  },
+  "c2-12": {
+    "name": "Karnak",
+    "look": "A bald, light-skinned man with a close-cropped mustache and strong jaw wears a tight black-and-white bodysuit with a pale cream chest and abdomen panel, black side panels, and white shoulders and sleeves. A sleek gold headpiece or mask covers the top of his head and frames his face, leaving the eyes and mouth exposed. He has no cape. His costume is fitted and minimalist, with no visible belt, gloves, or boots. Bright golden energy streaks and a glowing flare cross the image, suggesting motion or power."
+  },
+  "c2-13": {
+    "name": "Maria Hill",
+    "look": "Short dark tousled black hair, no headgear or mask, with a pale face, dark lined eyes, and red lips. She has a slim, athletic build. Her outfit is a black, glossy, form-fitting tactical bodysuit with a high collar, gray shoulder harness straps, and a circular black-and-white shield emblem on her upper arm. No cape. Black gloves and black boots are visible, with a gray utility-style belt/harness detail. No weapon is shown. No energy effects."
+  },
+  "c2-14": {
+    "name": "Maximus",
+    "look": "Unmasked man with messy black hair and a gaunt, intense face, pale skin, and a hunched, wiry build. He wears a long black coat with broad gray lapels over a black shirt or tunic; no visible cape, gloves, boots, or belt. His hands are bare, one extended forward. Behind him loom bright silver robotic arms and machinery, with a circular yellow-glowing device near the upper right and a red mechanical core at the lower right. No visible emblem on clothing."
+  },
+  "c2-15": {
+    "name": "Medusa",
+    "look": "Woman with no headgear, mask, or cape, framed by enormous flowing copper-red hair that curls around her and spills across the card. She has a pale face, sharp brows, and narrowed eyes, with a sly expression. Her slim, athletic body is clad in a glossy purple bodysuit with long sleeves, high collar, and matching boots; black gloves cover her hands. She holds a circular, ring-like metal prop in one raised hand. No belt or emblem is visible."
+  },
+  "c2-16": {
+    "name": "Miles Morales",
+    "look": "Masked headgear with large white eye lenses over a full black face covering, no visible hair or skin. Slim athletic build in a black bodysuit covered by a bright red web pattern and a red spider emblem on the chest and back. Red webbed gloves and red-accented boots. A black-and-red jacket or hooded outer layer hangs open behind him, with the hood up and orange lining visible. No belt. He swings with one hand gripping a web line, surrounded by crackling white energy/web strands."
+  },
+  "c2-17": {
+    "name": "Nebula",
+    "look": "Blue-skinned, bald, lean athletic woman with a stern, angular face and a metallic silver plate covering the top of her head, with dark markings and a gold cybernetic left eye. She wears a purple sleeveless armored bodysuit with black shoulder, chest, and waist accents, plus a fitted purple collar and panelled torso with triangular fasteners. A black glove covers one hand, while the other hand is open and reaching forward. Black segmented boots and a purple thigh guard complete the look. No cape, weapons, or energy effects are shown."
+  },
+  "c2-18": {
+    "name": "Nick Fury",
+    "look": "Bald, dark-skinned man with a stern, scarred face and a black eyepatch over one eye, grimacing. He wears a tight black tactical bodysuit with white trim, a large white star on the chest, white shoulder bands, and white star emblems on both upper arms. Brown utility belt and thigh holsters sit over the suit. Black gloves and black boots complete the outfit. He grips a silver knife in one hand, with orange explosion effects and smoke behind him."
+  },
+  "c2-19": {
+    "name": "Okoye",
+    "look": "Bald, dark-skinned woman with a stern face, arched brow marks on her forehead, and no mask or headgear. Athletic, lean build. She wears a red fitted bodysuit with black panels, a high black collar, and gold armored shoulder plates and forearm guards. A broad black-and-gold belt with a circular emblem cinches her waist. No cape or gloves. She carries a long spear angled behind her. A bright golden-white glow fills the background."
+  },
+  "c2-20": {
+    "name": "Punisher",
+    "look": "Short dark hair under a red-and-black bandanna, stern square jaw, and a hard, bare face. He has a muscular, broad-shouldered build and light skin. He wears a black armored tactical suit with a large white skull emblem on the chest, gray chest straps, black gauntlets, dark utility pouches, and knee-high black boots with pale cuffs. No cape. He carries a long black rifle slung on his shoulder and another long gun held upright; no energy effects."
+  },
+  "c2-21": {
+    "name": "Quicksilver",
+    "look": "Short, athletic man with swept-back silver hair and a stern bare face, no mask or beard. He wears a tight dark teal-and-blue bodysuit with black side panels, a white winged or star-like emblem at the chest, and a white collar detail. Pale blue translucent motion trails wrap around him. He has orange-gold gauntlet-like forearm pieces and matching spherical orbs streaking around his hands and body. No cape, belt, or boots are visible."
+  },
+  "c2-22": {
+    "name": "Red Skull",
+    "look": "Red, bald, skull-like head with deep black eye sockets, sunken cheeks, and a long narrow nose; no hair or mask. Thin, wiry build. Wears a dark military-style uniform in black-green with a high collar, gold buttons, and gold-trimmed shoulder straps. On the left chest are several ribbon bars and a small medal cluster. No cape, gloves, boots, or belt are visible. A vivid red-and-black abstract energy or shadow pattern fills the background behind him."
+  },
+  "c2-23": {
+    "name": "Ronan",
+    "look": "Tall, imposing figure in a dark, hooded black-and-white cowl that covers the head and shoulders like a cloak. The face is a smooth silver-metal mask with a stern, sculpted mouth and nose, and glowing amber eyes set in dark black eye surrounds. No visible hair or skin. The costume is mostly black with broad white panels framing the shoulders and hood. No cape, gloves, boots, belt, emblems, weapons, or energy effects are shown."
+  },
+  "c2-24": {
+    "name": "Scarlet Witch",
+    "look": "A slim, pale-skinned woman with long dark hair partly hidden under a red, pointed crown-like headpiece and a red forehead jewel. She has sharp eyebrows, dark eyes, and black lipstick. Her costume is a deep red, flowing robe with a black plunging neckline and black inner sleeves, cinched close to the body. She wears no visible gloves or boots. Gold hoop earrings show at the sides. Bright red-white magical energy ribbons coil and flare around her, with a glowing red aura behind her."
+  },
+  "c2-25": {
+    "name": "She-Hulk",
+    "look": "Green-skinned, very muscular woman with long, loose dark green hair blown back. No mask or headgear; stern face with dark brows and no visible eyewear. She wears a sleeveless white-and-gray, zip-front bodysuit with black side panels, purple gloves, and purple boots. No cape or belt. Her pose is a low crouch with one fist raised and the other braced near the ground. Yellow-white speed lines and impact bursts surround her, suggesting forceful motion."
+  },
+  "c2-26": {
+    "name": "Shuri",
+    "look": "Young woman with dark brown skin and a high braided bun, one braid trailing behind. She has a focused face with gold eyes, no mask, and dotted facial markings across her cheeks and forehead. She wears a blue sleeveless armored top with a black-and-gold triangular collar pattern, dark fitted pants, and a short dark waist cloth. Large metallic silver gauntlets cover both forearms and hands, glowing bright blue with hexagonal energy and clenched-fist projections. No cape, belt, or boots are visible."
+  },
+  "c2-27": {
+    "name": "Star-Lord",
+    "look": "A lean, athletic man in a metallic gray helmet with a dark mouth grille and glowing red circular lenses, his short brown hair visible above the mask. He wears a weathered red long coat over a white ribbed shirt, dark gray pants, and a brown cross-body harness with a small belt buckle. One arm is raised holding a twin-barreled silver futuristic space blaster; the other arm is outstretched. No cape, gloves, or boots are clearly shown. A small fiery orange emblem glows at the upper right."
+  },
+  "c2-28": {
+    "name": "The Collector",
+    "look": "A white-haired man with swept-back, spiky hair and a small white goatee has a stern, angular face and pale skin. He wears a crimson-red long coat with dark brown shoulder armor, a magenta high-collar underlayer, black chest straps and belt, black pants, and white gloves. His boots are mostly hidden. He holds a glowing orange-pink energy orb in one outstretched hand, with pink-purple light crackling around it. No cape, mask, or emblem is visible."
+  },
+  "c2-29": {
+    "name": "Venom",
+    "look": "A muscular, monstrous humanoid with a glossy black head and upper body, no visible hair, and a huge open maw full of sharp white teeth. Long, red, ribbon-like tongue coils out of the mouth. The chest and shoulders are black with a faint spider-shaped emblem across the torso. A dark red, organic-looking symbiote mass covers the back and limbs, forming flowing tendrils. No visible gloves, boots, belt, or cape; the figure is shown as a bestial black-and-red creature with no weapon."
+  },
+  "c2-30": {
+    "name": "War Machine",
+    "look": "Armored metallic humanoid in a bulky gray-and-black exosuit with a smooth helmeted faceplate, narrow glowing white eye slits, and a dark central crest. No hair is visible. The body is stocky and heavily plated, with broad shoulder armor, layered chest plates, and a circular white arc reactor glowing in the center of the chest. Black gauntlets and black armored boots complete the suit. A cannon-like weapon protrudes from one forearm. Orange fire and smoke flare behind him."
+  },
+  "c2-31": {
+    "name": "Mister Fantastic",
+    "look": "Short reddish-brown hair, no mask, stern square-jawed face, pale skin. Lean athletic build in a bright blue full-body suit with a black high collar, black oval chest emblem bearing a white “4,” and a black belt. Long black gloves cover both hands; no boots or cape visible. One arm stretches upward with elongated fingers, and the raised hand glows with a blue-white swirling energy vortex at the fingertips."
+  },
+  "c2-32": {
+    "name": "The Thing",
+    "look": "No headgear or mask. He has no hair, with a rocky, orange stone face and body made of cracked, blocky slabs. He is massively muscular and bulky. He wears dark blue shorts with a black waistband and no shirt, cape, gloves, boots, or belt. His hands are enormous stone fists, one knee torn through with exposed orange rock. No emblem is worn on his body. He is shown mid-lunge, with one arm thrust forward and no energy effects or weapons."
+  },
+  "c2-33": {
+    "name": "Silver Surfer",
+    "look": "Smooth, hairless, silver-white humanoid with a bald head and stern, featureless face shaded in gray; no mask or helmet. Very muscular, lean build with glossy metallic skin. He wears no costume, cape, gloves, boots, or belt, and there are no emblems on the body. One hand is extended in a poised, controlled gesture. He stands beside a curved spacecraft edge with a faint blue-white energy ring or portal behind him."
+  },
+  "c2-34": {
+    "name": "Ultron",
+    "look": "A tall, muscular silver android with a smooth segmented metal faceplate and red glowing eye slits, plus black mechanical detailing around the temples and jaw. Its torso is armored in polished silver with dark ribbed abdominal plating and red lightning-like accents across the chest. The arms and legs are sleek metallic silver with black joints. It wears a flowing red cape, no gloves or boots, and no belt. Hands are open in a commanding pose, with a faint red-orange glow on the chest markings."
+  },
+  "c2-35": {
+    "name": "Namor",
+    "look": "Pale, muscular male with slicked-back black hair and a stern face. He is bare-chested except for a diagonal black strap and a dark, spiked shoulder harness on one side. He wears tight dark blue-and-black leggings with a gold belt buckle, black wrist bracers, and pointed black boots. In his right hand he grips a gold trident with a long shaft. A large blue-green, finned fish-tail or aquatic cloak-like form spreads behind him, with faint water-splash effects."
+  },
+  "c2-36": {
+    "name": "Cyclops",
+    "look": "Broad-shouldered muscular man in a sleek dark navy-and-black bodysuit with glossy red highlights. He wears a tight red visor/eyepiece over his eyes, with no visible hair. His face is square-jawed and bare otherwise. A yellow belt with a circular buckle marked by a red X sits at the waist. He wears matching dark gloves and boots. No cape or emblem elsewhere. From the visor, a bright white beam with red edges shoots diagonally outward, creating a powerful energy blast."
+  },
+  "c2-37": {
+    "name": "Wolverine",
+    "look": "A muscular man in a yellow-and-black mask with pointed ear-like fins and white eye patches snarls, showing teeth. He has short dark hair at the sides, a bare lower face, and a heavily muscled, tanned torso. He wears a yellow-and-black sleeveless bodysuit with black shoulder panels, dark gloves, and dark boots, plus a gray belt with a small square buckle. Three long silver claws extend from each hand. No cape or additional props; no energy effects."
+  },
+  "c2-38": {
+    "name": "Storm",
+    "look": "Tall, athletic dark-skinned woman with a dramatic mass of white, windblown hair and narrow, intense eyes. She wears a sleek black bodysuit with gold trim at the neckline, shoulders, and hips, plus a red jewel-like emblem at the chest. Gold hoop earrings and stacked gold bangles decorate her wrists and forearms. Black thigh-high boots match the suit. No cape or mask. She is surrounded by jagged white-blue lightning and swirling storm energy."
+  },
+  "c2-39": {
+    "name": "Professor X",
+    "look": "Bald, pale-skinned man with a stern, clean-shaven face and no headgear, seated in a large gold-and-yellow hover chair. He wears a dark green suit jacket, white shirt, and black tie, with a small red circular emblem pinned to his lapel. One hand is raised in a telepathic gesture, the other touches his temple. No cape, gloves, or boots are visible. Blue-white concentric psychic rings and a faint glow surround him, with the chair emitting a cool blue light underneath."
+  },
+  "c3-01": {
+    "name": "Ant-Man",
+    "look": "Silver insect-like helmet with red eye lenses and a circular black mouthpiece, no visible hair or face. Athletic, muscular build in a form-fitting red-and-black suit. The chest and torso are bright red, with black shoulders, sides, arms, and underlayers, plus silver shoulder straps and segmented gray belt hardware. No cape, no gloves visible, no boots shown. A red-and-silver circular emblem sits at the waist. The only energy effect is the glossy metallic sheen on the mask."
+  },
+  "c3-02": {
+    "name": "Black Bolt",
+    "look": "Masked male hero with short black hair hidden under a black cowl, only the mouth, nose, and chin exposed. Medium build, tan skin, grimacing face, and a black eye mask integrated into the hood. He wears a dark green-and-black suit with a large white lightning-bolt emblem across the chest and white zigzag cuffs at the wrists. Long black gloves, black boots, and no cape. A bright blue crackling energy plume rises from his forehead, and silver-white soundwave or fin-like panels fan out behind him."
+  },
+  "c3-03": {
+    "name": "Black Panther",
+    "look": "Black, panther-like helmet with pointed ears and narrow eye slits, covering the entire head and face; no hair visible. The body is sleek and athletic, clad in a form-fitting black suit with subtle dark striping and a necklace of short silver fang-like pieces around the collar. No cape, gloves, boots, belt, or visible emblems. The suit includes sculpted muscular contours on the torso and limbs. No weapons or energy effects are shown."
+  },
+  "c3-04": {
+    "name": "Black Widow",
+    "look": "No headgear or mask; long, windswept red hair framing a stern face with narrowed eyes and an open shouting mouth. Light skin, athletic build. She wears a glossy black, tight tactical suit with a deep V neckline, long sleeves, and a dark central seam, plus black gloves and black boots. A metallic belt with round silver discs circles her waist. No cape or emblem. She strikes a low fighting pose as orange flames and pale blue energy swirl behind and around her."
+  },
+  "c3-05": {
+    "name": "Captain America",
+    "look": "Masked man in a dark blue helmet with a white “A” and small white wing fins, exposing only his lower face and chin. He has a square jaw, light skin, and a muscular, broad-shouldered build. He wears a dark blue bodysuit with a large white star on the chest, tan shoulder straps, red-and-white torso panels, a wide tan utility belt, red gloves, and tall dark boots. A large red, white, and blue circular shield is held at his side. No cape."
+  },
+  "c3-06": {
+    "name": "Captain Marvel",
+    "look": "Blonde woman with a short side-swept wave and a small top curl, no mask. Pale skin, strong jaw, blue eyes, red lipstick, and a focused upward gaze. Slim athletic build. She wears a red high-collared bodysuit with gold trim, a star emblem at the chest, black sleeves and sides, and gold shoulder and harness-like accents. No cape, gloves, boots, or belt are visible. Her arms are raised overhead, surrounded by bright fiery orange-white energy."
+  },
+  "c3-07": {
+    "name": "Doctor Octopus",
+    "look": "Middle-aged man with short black hair and a broad, smug face, wearing green-tinted rectangular goggles. His skin is light, and his build is sturdy and stocky. He wears a tight dark green bodysuit with a pale gold high collar and matching gold shoulder yoke, plus bandage-wrapped forearms and clenched fists. No cape. A wide gold belt wraps his waist. Metallic tentacle limbs with silver segments and blue square lights curl around him, with one purple mechanical limb visible at the right edge."
+  },
+  "c3-08": {
+    "name": "Doctor Strange",
+    "look": "Bareheaded, with swept-back black hair streaked with white at the temples, a furrowed brow, narrow eyes, and a pointed black goatee. He has light skin and a lean, average build. He wears a dark blue tunic or robe with long sleeves, red-orange trim, and layered black-and-gold details at the chest. A bright red cloak frames his shoulders. Gold gloves cover both hands. A wide belt is partly hidden. A glowing yellow-white orb hovers at his chest, with orange-gold magical rings and sigils swirling around him."
+  },
+  "c3-09": {
+    "name": "Drax",
+    "look": "Broad, bald, green-skinned, heavily muscled man with a stern, grimacing face and deep red tattoos or markings over his eyes, cheeks, scalp, neck, and chest. He wears a red sleeveless top or armor with a wide red strap across one shoulder and a matching red bandolier-like chest pattern. No mask, cape, gloves, boots, or visible weapon. The look is rugged and bare-armed, with a fierce, battle-ready pose against a fiery red background."
+  },
+  "c3-10": {
+    "name": "Gamora",
+    "look": "Green-skinned woman with long reddish-brown hair and a stern face, no mask or headgear. She has a slim, athletic build. Her costume is a sleeveless red-and-brown bodysuit with a silver-gray high collar and shoulder armor, plus a matching metallic chest panel. No cape, gloves, boots, or belt are shown. A thin sword crosses diagonally in front of her. Green glowing space-like background with faint sparkles surrounds her."
+  },
+  "c3-11": {
+    "name": "Green Goblin",
+    "look": "Green-skinned, gaunt goblin with a long hooked nose, pointed ears, yellow eyes, and a snarling mouth full of sharp teeth. He wears a tall purple cap, a purple tunic, matching gloves and boots, and a brown leather harness with straps and pouches over the chest and waist. His build is wiry and sinewy. He rides a black bat-shaped glider and holds a glowing orange pumpkin bomb in one hand. No cape; swirling orange fire and debris erupt behind him."
+  },
+  "c3-12": {
+    "name": "Hulk",
+    "look": "No headgear or mask; short dark hair, heavy brow, and a wide-open roaring face with clenched teeth. He has green skin, an extremely muscular, hulking build, and is shown bare-chested with deeply defined abs and shoulders. He wears torn dark gray pants only, with no cape, gloves, boots, belt, or visible emblem. His left fist is cocked near his shoulder and his right hand is spread forward, with no energy effects or weapons."
+  },
+  "c3-13": {
+    "name": "Iron Fist",
+    "look": "A bald, masked or facepainted male figure with a tense, muscular build leans forward in a fierce attack pose. He wears a tight, dark orange-and-gold bodysuit with a large jagged yellow chest emblem and matching flame-like patterns across the torso and shoulders. His eyes glow white under a sharp brow, and his mouth is open in a snarl. No cape or gloves are visible. The background and body are engulfed in bright orange-gold energy flames and streaks."
+  },
+  "c3-14": {
+    "name": "Iron Man",
+    "look": "A sleek red-and-gold armored figure in a smooth metallic helmet with narrow cyan eye slits and no visible mouth, chin, or hair. The body is athletic and fully encased in glossy red armor with gold faceplate and accents, plus a glowing pale blue circular chest reactor. One red gauntleted arm is raised forward, with bright golden light on the hand and faint blue-white energy wisps around the suit. No cape, belt, or boots are visible."
+  },
+  "c3-15": {
+    "name": "Loki",
+    "look": "A tall, lean, pale-skinned man wears a gold horned helmet with long curved antlers and a sharp, angular face. He has short dark hair mostly hidden beneath the helmet and a stern expression. His armor is metallic gold with black accents, over a dark green tunic and a flowing green cape. He wears gold gloves and gold boots, and holds a long gold staff. No visible emblem or energy effects."
+  },
+  "c3-16": {
+    "name": "Luke Cage",
+    "look": "Bald Black man with a strong, muscular build and a hard, angry scowl, showing clenched teeth and a short goatee. He has no headgear. His skin is medium-brown. He wears a torn, bright yellow short-sleeve shirt with a ragged collar and ripped seams, dark olive-green pants, and thick silver wristbands on both wrists. No cape, boots, or visible belt. He is posed punching forward, with no weapons or energy effects."
+  },
+  "c3-17": {
+    "name": "Nova",
+    "look": "A sleek armored figure in a black bodysuit with metallic gold forearms, shoulders, chest accents, and knee areas. The helmet is black with a bold red V-shaped visor and a small central silver crest, obscuring the face entirely. The build is athletic and streamlined. One hand is thrust forward in a flying pose, with no visible cape, gloves separate from the suit, or boots distinct from the armor. A circular yellow chest emblem and bright white-blue energy glow trail around the body."
+  },
+  "c3-18": {
+    "name": "Spider-Man",
+    "look": "Masked figure in a tight red-and-blue bodysuit covered in black web lines, with a full red mask and large white eye lenses. Slim, athletic build. The torso, arms, and legs are mostly red; the sides and lower body are dark blue/black. A black spider emblem spans the chest and back. He wears no cape, gloves, or boots beyond the suit. One hand is raised in a web-shooting pose, and a pale white motion trail/energy streak surrounds him."
+  },
+  "c3-19": {
+    "name": "Thor",
+    "look": "A muscular, broad-shouldered male warrior with long blond hair and a fierce, open-mouthed expression beneath a dark metallic winged helmet. His skin is pale, with no visible face paint or mask. He wears black and deep burgundy armor with rounded silver shoulder pieces, chainmail-patterned leggings, and a flowing dark cape lined in red. He has red gloves and dark boots, with a broad belt and heavy chest straps. He grips a large hammer, crackling with pink-white lightning energy."
+  },
+  "c3-20": {
+    "name": "Vision",
+    "look": "Red-faced synthezoid with a smooth metallic visage and no visible hair, wearing a deep green bodysuit under a black hooded cape that falls behind his shoulders. He has yellow gloves and yellow boots, with a yellow belt and a circular gold chest emblem set at the center of his torso. The figure is lean and athletic. One hand is extended forward, and the other is raised near his chest. No energy effects are shown."
+  },
+  "c3-21": {
+    "name": "Thanos",
+    "look": "Purple-skinned, heavily muscular bald titan with a deeply ridged chin and stern expression, wearing a gold-and-blue helmet with a central crest. He has massive gold shoulder armor, a dark blue-and-black bodysuit, and a wide gold belt. No cape or gloves are visible. His arms are bare and armored-looking in dark blue highlights. A bright green energy gem icon appears near his head, with additional glowing gem symbols around the card."
+  },
+  "c3-22": {
+    "name": "Doctor Doom",
+    "look": "Masked metal face with a silver-gray, riveted armored visage and narrow eye slits under a deep green hood. Tall, broad, and heavily armored, with a green tunic over a pleated skirted waist section, black underlayers, and a wide black belt with a gold buckle. One shoulder bears a gold clasp; one arm is bare silver metal armor while the other is hidden by a cloak. Dark green cape and hood, black gloves, black boots, and glowing green mist swirling around both hands."
+  },
+  "c3-23": {
+    "name": "Magneto",
+    "look": "Tall, muscular figure in a glossy red-and-purple bodysuit with a deep purple cowl and cape. The helmet fully covers the head, leaving the face unseen except for a black eye area and a bright star-like glint on the forehead. A high purple collar and layered shoulder armor frame the chest. Purple gloves and boots match a wide purple belt and trunks. One hand is outstretched, the other near the waist, with glowing white energy strands and sparkles swirling around the body."
+  },
+  "c3-24": {
+    "name": "Galactus",
+    "look": "A towering, broad-shouldered figure in a purple and magenta armored suit with dark blue-black chest and shoulder plating, centered by a large spherical chest emblem. He wears a high domed helmet with horn-like side extensions and a fitted faceplate that leaves the mouth and chin exposed; the face is stern and humanlike. No hair is visible. Thick armored gauntlets and boots match the suit. Behind him are swirling purple energy clouds, with no cape, belt, or weapons shown."
+  },
+  "c3-25": {
+    "name": "Kang",
+    "look": "Blue-skinned, bald man with a stern face and glowing white eyes, wearing a purple helmet-like cowl with dark panels and a high collar. He has a slim, athletic build and wears a purple bodysuit with black chest, belt, and shoulder sections, plus a textured green drape over one shoulder and across the torso. Purple gloves and segmented purple boots complete the outfit. He leans forward with one hand touching his face, the other braced back, in front of a glowing orange time-device circle and crackling white energy."
+  },
+  "c3-26": {
+    "name": "Red Hulk",
+    "look": "A towering, massively muscular red-skinned humanoid with a savage face, black swept-back hair, heavy brows, and a snarling open mouth showing teeth. He wears no shirt, cape, gloves, boots, or belt, and has no visible armor or emblems. His only clothing is dark, torn shorts around the hips. He is shown lunging forward with one fist cocked, the other arm bent. No visible energy effects or weapons appear."
+  },
+  "c3-27": {
+    "name": "Phoenix",
+    "look": "Young woman with long wavy red hair and a pale face, eyes closed and lips parted in a dramatic, upward-floating pose. She wears a dark green, form-fitting bodysuit with yellow-green shoulders and sleeves, black glossy shorts or leggings over the hips and thighs, and no visible cape, gloves, or boots. Her skin glows with bright yellow-orange fire wrapping around her torso, legs, and outstretched hands, creating a blazing energy aura."
+  }
+}
