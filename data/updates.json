@@ -1,5 +1,19 @@
 [
   {
+    "version": "2.13.3",
+    "date": "2026-10-23",
+    "title": "Location tiles after every turn",
+    "summary": "A Location tile comes after any move, not only a recruit, and a picked card grows and shrinks away.",
+    "pulls": [],
+    "new": [],
+    "improved": [
+      "A picked card grows a little while its outline is drawn, then shrinks away as it leaves the board"
+    ],
+    "fixed": [
+      "Location tiles are checked at the end of every turn, so a tile left over from a tie comes on your next turn, whatever move you make"
+    ]
+  },
+  {
     "version": "2.13.2",
     "date": "2026-10-20",
     "title": "Surer taps on the phone",
