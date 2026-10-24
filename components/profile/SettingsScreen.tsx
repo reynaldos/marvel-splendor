@@ -9,7 +9,7 @@ import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { CropPicture } from "@/components/profile/CropPicture";
 import { FoilLayer, hasGyro, setMotionFrames, useMotionFrames } from "@/components/Foil";
-import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { ownFrame, PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
 import { Toggle } from "@/components/Toggle";
@@ -45,7 +45,7 @@ interface SettingsScreenProps {
   username: string;
   name: string | null;
   avatarUrl: string | null;
-  /** The frame their level has earned, shown on the picture while the switch is on. */
+  /** The frame their level has earned, shown on the picture as the two switches say. */
   avatarTier: FrameTier;
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
@@ -185,7 +185,7 @@ export function SettingsScreen({
               <PlayerAvatar
                 src={shown}
                 name={typed || username}
-                tier={xpAvatar ? avatarTier : undefined}
+                {...ownFrame(avatarTier, xpAvatar, xpCard)}
                 className="size-28 text-4xl"
               />
               {adjustable ? (
@@ -316,8 +316,8 @@ export function SettingsScreen({
                 </div>
                 <h2 className={HEADING}>Level frame</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="On my picture" />
-                  <Toggle on={xpCard} onChange={set(setXpCard)} label="On my name card" />
+                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="Effects" />
+                  <Toggle on={xpCard} onChange={set(setXpCard)} label="Border" />
                   {tiltable ? <Toggle on={motion} onChange={setMotionFrames} label="Tilt with the phone" /> : null}
                 </div>
               </>

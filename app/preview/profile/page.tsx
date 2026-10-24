@@ -8,9 +8,17 @@ import { PreviewMenu } from "../PreviewBar";
 
 export const metadata = pageMetadata("Profile preview", undefined, true);
 
-/** Another player's profile as a visitor sees it, with no games to list. `?own=1` makes it the viewer's own, frames off. */
-export default async function ProfilePreviewPage({ searchParams }: { searchParams: Promise<{ own?: string }> }) {
-  const own = (await searchParams).own === "1";
+/**
+ * Another player's profile as a visitor sees it, with no games to list. `?own=1` makes it the viewer's own,
+ * where `?effects=1` and `?border=1` are the two frame switches (off and on when left out).
+ */
+export default async function ProfilePreviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ own?: string; effects?: string; border?: string }>;
+}) {
+  const { own: ownParam, effects = "0", border = "1" } = await searchParams;
+  const own = ownParam === "1";
   return (
     <>
       <ProfileScreen
@@ -18,8 +26,8 @@ export default async function ProfilePreviewPage({ searchParams }: { searchParam
         name="A Rival"
         avatarUrl={AVATAR_LIBRARY[0].src}
         rating={1077}
-        xpAvatarStyle={false}
-        xpCardStyle={true}
+        xpAvatarStyle={effects === "1"}
+        xpCardStyle={border === "1"}
         stats={defaultUserStatsSnapshot}
         xp={7448}
         career={careerStats([])}

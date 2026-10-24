@@ -57,7 +57,7 @@ export interface ProfileChanges {
   name: string;
   /** A picture chosen from the library, or null to leave the picture as it is. */
   avatarId: string | null;
-  /** The level frame on their picture, and on the card that carries their name. */
+  /** The level frame as they see it on their own picture: the light on the face, and the border round it and the name card. */
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
 }

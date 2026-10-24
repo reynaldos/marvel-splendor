@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 import { BackLink } from "@/components/BackLink";
 import { FoilLayer } from "@/components/Foil";
 import { LevelBadge } from "@/components/profile/LevelBadge";
-import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { ownFrame, PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { RankBadge } from "@/components/profile/RankBadge";
 import { StatsTabs } from "@/components/profile/StatsTabs";
 import { Stage, StageRows } from "@/components/Stage";
@@ -83,8 +83,8 @@ export function ProfileScreen({
             <PlayerAvatar
               src={avatarUrl}
               name={username}
-              // The switch is the player's own view of their own picture; everyone else sees the frame.
-              tier={isOwn && !xpAvatarStyle ? undefined : tier}
+              // The switches are the player's own view of their own picture; everyone else sees the full frame.
+              {...(isOwn ? ownFrame(tier, xpAvatarStyle, xpCardStyle) : { tier })}
               className="size-24 text-4xl"
             />
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>

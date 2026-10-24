@@ -102,8 +102,9 @@ Each step is one issue: build, a `tsx` or headless-Chrome check, then stop for r
       leaderboard. Uploaded pictures are served through the image resizer (`remotePatterns` in `next.config.ts`,
       from `R2_PUBLIC_BASE_URL`) so they are this site's own and can be textures; only initials get the
       border, the glow and the light laid over them. The frame is always on in the top bar, on the leaderboard (at a
-      card's full light) and on other players' profiles; the "frame on my picture" switch now only sets
-      whether players see it on their own profile and in settings. The CSS frame stays
+      card's full light) and on other players' profiles; the two switches in Settings, Effects and Border, set what players see
+      on their own profile and in settings: the full frame, the border and glow alone (`data-foil-plain`, as the
+      collection grid), the face's light in a plain ring (`data-foil-bare`), or nothing. The CSS frame stays
       under each slot as the fallback and is quietened while the shader is live (`[data-foil-live]` in
       `app/globals.css`). The tier numbers are `FRAME_FOIL` in `lib/frame-tier.ts`. The gyroscope in the app: a
       "Tilt with the phone" switch under Level frame in Settings, kept on the device; with it on, the layer takes

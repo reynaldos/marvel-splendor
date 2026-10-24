@@ -18,10 +18,16 @@ function initials(name: string): string {
  * A player's picture in a blue ring, or their initials when they have none. Size it with `size-*`.
  * With `tier`, the ring is that tier's frame, with the same light over the picture as over a card,
  * turned well down so the face stays the point; `plain` leaves the face alone and keeps only the border
- * and glow, as on the leaderboard. A `FoilLayer` on the screen draws that frame in the shader over the
- * CSS one.
+ * and glow, as on the leaderboard; `bare` is the other way round, the light on the face in a plain ring.
+ * A `FoilLayer` on the screen draws that frame in the shader over the CSS one.
  */
 const FACE_OPACITY = { "--face-opacity": 0.25 } as CSSProperties;
+
+/** What a player's two switches, the effects and the border, make of their own picture's frame. */
+export function ownFrame(tier: FrameTier, effects: boolean, border: boolean): { tier?: FrameTier; plain?: boolean; bare?: boolean } {
+  if (!effects && !border) return {};
+  return { tier, plain: !effects, bare: !border };
+}
 
 export function PlayerAvatar({
   src,
@@ -29,12 +35,14 @@ export function PlayerAvatar({
   className,
   tier,
   plain,
+  bare,
 }: {
   src: string | null;
   name: string;
   className?: string;
   tier?: FrameTier;
   plain?: boolean;
+  bare?: boolean;
 }) {
   return (
     <span
@@ -43,9 +51,11 @@ export function PlayerAvatar({
       data-foil-round={tier ? "" : undefined}
       data-foil-quiet={tier && !plain ? "" : undefined}
       data-foil-plain={tier && plain ? "" : undefined}
+      data-foil-bare={tier && bare ? "" : undefined}
       className={cn(
         "relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cosmos-700 font-bold text-gold-200",
-        tier ? cn("frame-gold", FRAME_EFFECT[tier]) : "ring-2 ring-cosmos-500",
+        tier && !bare ? "frame-gold" : "ring-2 ring-cosmos-500",
+        tier && FRAME_EFFECT[tier],
         className,
       )}
     >
