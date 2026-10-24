@@ -23,6 +23,8 @@ const PAGES = [
   { name: "Board", href: "/preview/board" },
   { name: "Game over", href: "/preview/game-over" },
   { name: "Tiers", href: "/preview/tiers" },
+  { name: "Foil", href: "/preview/foil" },
+  { name: "Profile", href: "/preview/profile" },
   { name: "Pack", href: "/preview/pack" },
   { name: "How to", href: "/preview/how-to" },
   { name: "Squad pic", href: "/preview/team" },

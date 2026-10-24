@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "cn";
 
 import { BackLink } from "@/components/BackLink";
+import { FoilLayer } from "@/components/Foil";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Stage, StageRows } from "@/components/Stage";
 import type { FrameTier } from "@/lib/frame-tier";
@@ -49,7 +50,7 @@ export function LeaderboardRow({ row, own }: { row: LeaderboardEntry; own: strin
         )}
       >
         <span className="w-8 text-center text-xl font-black tabular-nums">{row.place}</span>
-        <PlayerAvatar src={row.avatarUrl} name={row.username} tier={row.avatarTier} className="size-8 text-xs" />
+        <PlayerAvatar src={row.avatarUrl} name={row.username} tier={row.avatarTier} plain className="size-8 text-xs" />
         <span className="flex min-h-9 min-w-0 flex-1 flex-col justify-center">
           <span className="truncate text-base leading-tight font-bold">{row.username}</span>
           {onRankedBoard ? null : (
@@ -103,14 +104,15 @@ export function LeaderboardScreen({ own, ...boards }: LeaderboardScreenProps) {
           {rows.length === 0 ? (
             <p className="m-auto text-base font-bold text-cosmos-300">{open.empty}</p>
           ) : (
-            <ol
-              role="tabpanel"
-              className="scroll-fade flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {rows.map((row) => (
-                <LeaderboardRow key={row.username} row={row} own={own} />
-              ))}
-            </ol>
+            // The list scrolls inside this, with the frames' layer pinned in it so they fade with the rows at the edges.
+            <div role="tabpanel" className="scroll-fade min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <FoilLayer sticky />
+              <ol className="flex flex-col gap-1.5">
+                {rows.map((row) => (
+                  <LeaderboardRow key={row.username} row={row} own={own} />
+                ))}
+              </ol>
+            </div>
           )}
         </div>
 

@@ -54,7 +54,8 @@ export async function describeCards(cards: readonly Card[]): Promise<string[]> {
     const looks = await Promise.all(todo.map((c) => describeCard(client, c)));
     todo.forEach((c, i) => (known[c.id] = { name: c.name, look: looks[i] }));
     const sorted = Object.fromEntries(Object.keys(known).sort().map((id) => [id, known[id]]));
-    await writeFile(LOOKS_FILE, JSON.stringify(sorted, null, 2) + "\n");
+    // Hosted, the data file cannot be written: the looks still serve this draw, and `pnpm looks:backfill` saves them.
+    await writeFile(LOOKS_FILE, JSON.stringify(sorted, null, 2) + "\n").catch(() => undefined);
   }
   return cards.map((c) => known[c.id]?.look ?? "");
 }

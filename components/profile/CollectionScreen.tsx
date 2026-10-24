@@ -6,6 +6,7 @@ import { cn } from "cn";
 import { Lock } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
+import { FoilLayer } from "@/components/Foil";
 import { CardView } from "@/components/game/Card";
 import { TierName } from "@/components/game/CardLevelUps";
 import { ZoomedView } from "@/components/game/Zoomable";
@@ -19,21 +20,28 @@ import { FRAME_EFFECT, FRAME_STYLE } from "@/lib/frame-tier";
 const VIEW_NAMES: Record<CollectionView, string> = { grid: "Grid", level: "Level", group: "Group", alliance: "Alliance" };
 const SLOT = "relative aspect-card w-full rounded-frame";
 const FRAME_HIDDEN_KEY = "collection-frame-hidden";
+// Whether the grid's frames get the shader's full light. Off, they get only its border and glow: a hundred faces redrawn every frame dragged on a phone.
+const GRID_FOIL = true;
 // As many cards across as fit, each stretched a little so the row is filled from edge to edge.
 const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing)*14),1fr))] gap-3";
 
 /**
  * A found card as the grid shows it: in the frame of its tier, with its count cut as a gem. Large, its
- * corners grow with it. Locked, from a pack the player doesn't own, it is greyed under a lock.
+ * corners grow with it and the shader draws the frame over it, the CSS frame under it as the fallback; in
+ * the grid the face is left alone unless `GRID_FOIL`. Locked, from a pack the player doesn't own, it is
+ * greyed under a lock.
  */
 function FoundCard({ card, count, large, locked }: { card: Card; count: number; large?: boolean; locked?: boolean }) {
   const tier = cardFrameTier(card.id, count);
   return (
     <span
+      data-foil={locked ? undefined : tier}
+      data-foil-plain={large || GRID_FOIL ? undefined : ""}
       className={cn(large ? "relative aspect-card w-61 rounded-frame-lg" : SLOT, "frame-gold block", FRAME_EFFECT[tier])}
       style={FRAME_STYLE[tier]}
     >
       <CardView card={card} className={cn("size-full", large && "rounded-[10%/7.1%]", locked && "opacity-70 blur-[3px] grayscale")} />
+      {large && !locked ? <FoilLayer /> : null}
       {locked ? (
         <span aria-label="Locked" className="absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-cosmos-950/40">
           <Lock className="size-6 text-cosmos-300 drop-shadow-md" />
@@ -121,7 +129,8 @@ export function CollectionScreen({ found, packs, backTo }: CollectionScreenProps
         </header>
 
         {/* Runs out to the screen's edge and pads back in, so the frames' glow isn't cut off at the sides. */}
-        <div className="scroll-fade-top -mx-3 flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="scroll-fade-top -mx-3 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>section+section]:mt-7">
+          <FoilLayer sticky />
           {collectionRows(ALL_CARDS, view).map((row) => (
             <section key={row.name ?? "all"} className="flex gap-2">
               {row.name ? (

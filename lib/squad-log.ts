@@ -21,7 +21,16 @@ export interface SquadDraw {
   error?: string;
 }
 
+// Hosted, the files next to the code cannot be written: the draw still counts, the log just does not happen.
 export async function logSquadDraw(draw: SquadDraw): Promise<void> {
+  try {
+    await writeSquadDraw(draw);
+  } catch (error) {
+    console.warn("squad draw not logged", error instanceof Error ? error.message : error);
+  }
+}
+
+async function writeSquadDraw(draw: SquadDraw): Promise<void> {
   const stamp = new Date(draw.startedAt).toISOString().replace(/[:.]/g, "-");
   const picture = draw.png ? `pics/${stamp}-${draw.drawer}.png` : null;
   await mkdir(path.join(DIR, "pics"), { recursive: true });

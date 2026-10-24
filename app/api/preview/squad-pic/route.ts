@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { isAdmin } from "@/lib/admin";
+import { auth0 } from "@/lib/auth0";
 import { getCard } from "@/lib/engine/data";
 import { drawSquadPic } from "@/lib/squad-pic";
 import { drawSquadPicComfy } from "@/lib/squad-pic-comfy";
@@ -21,9 +23,13 @@ const Body = z.object({
 // ComfyUI needs no key: it is reached at COMFY_URL, or on this machine when that is unset.
 const KEY: Partial<Record<Drawer, string>> = { openai: "OPENAI_API_KEY", google: "FAL_KEY", seedream5: "FAL_KEY", seedream: "FAL_KEY", flux: "FAL_KEY" };
 
-// Demo only: draws a squad pic for the cards sent. Not served in production, as every call costs money.
+// A draw takes a minute or two; the hosted default would cut it off.
+export const maxDuration = 300;
+
+// Demo only: draws a squad pic for the cards sent. Admins only, as every call costs money.
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "Not found." }, { status: 404 });
+  const session = await auth0.getSession();
+  if (!session || !isAdmin(session.user)) return NextResponse.json({ error: "Not found." }, { status: 404 });
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Send the team's card ids and a setting." }, { status: 400 });
   const { cardIds, setting, drawer, ...opts } = parsed.data;
