@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "cn";
 import { Crop } from "lucide-react";
@@ -8,8 +8,8 @@ import { Crop } from "lucide-react";
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { CropPicture } from "@/components/profile/CropPicture";
-import { FoilLayer } from "@/components/Foil";
-import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
+import { FoilLayer, hasGyro, setMotionFrames, useMotionFrames } from "@/components/Foil";
+import { ownFrame, PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
 import { Toggle } from "@/components/Toggle";
@@ -45,10 +45,11 @@ interface SettingsScreenProps {
   username: string;
   name: string | null;
   avatarUrl: string | null;
-  /** The frame their level has earned, shown on the picture while the switch is on. */
+  /** The frame their level has earned, shown on the picture as the two switches say. */
   avatarTier: FrameTier;
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
+  hideFromLeaderboard: boolean;
   /** Set when an admin is editing another player's profile: their username. */
   forUser: string | null;
   onCheckUsername: (typed: string, forUser: string | null) => Promise<SaveState>;
@@ -66,6 +67,7 @@ export function SettingsScreen({
   avatarTier,
   xpAvatarStyle,
   xpCardStyle,
+  hideFromLeaderboard,
   forUser,
   onCheckUsername,
   onSave,
@@ -76,7 +78,11 @@ export function SettingsScreen({
   const [fullName, setFullName] = useState(savedName ?? "");
   const [picked, setPicked] = useState<Picked | null>(null);
   const [xpAvatar, setXpAvatar] = useState(xpAvatarStyle);
+  // The tilt switch is only offered where a phone can report its tilt, which is known only in the browser.
+  const motion = useMotionFrames();
+  const tiltable = useSyncExternalStore(() => () => {}, hasGyro, () => false);
   const [xpCard, setXpCard] = useState(xpCardStyle);
+  const [onBoard, setOnBoard] = useState(!hideFromLeaderboard);
   const [editingPicture, setEditingPicture] = useState(false);
   // A picture open in the circle to be placed: a file just chosen, or the saved original fetched from here.
   const [cropping, setCropping] = useState<{ src: string; file: File | null } | null>(null);
@@ -94,7 +100,8 @@ export function SettingsScreen({
     picked !== null ||
     fullName.trim() !== (savedName ?? "") ||
     xpAvatar !== xpAvatarStyle ||
-    xpCard !== xpCardStyle;
+    xpCard !== xpCardStyle ||
+    onBoard === hideFromLeaderboard;
   const shape = checkUsername(name);
   const shown = picked?.src ?? avatarUrl;
   // What the crop button reopens: the pending upload's original, or the saved original served from here. Library pictures aren't cut.
@@ -151,6 +158,7 @@ export function SettingsScreen({
           avatarId: picked && "id" in picked ? picked.id : null,
           xpAvatarStyle: xpAvatar,
           xpCardStyle: xpCard,
+          hideFromLeaderboard: !onBoard,
         },
         forUser,
       );
@@ -182,7 +190,7 @@ export function SettingsScreen({
               <PlayerAvatar
                 src={shown}
                 name={typed || username}
-                tier={xpAvatar ? avatarTier : undefined}
+                {...ownFrame(avatarTier, xpAvatar, xpCard)}
                 className="size-28 text-4xl"
               />
               {adjustable ? (
@@ -311,10 +319,11 @@ export function SettingsScreen({
                     />
                   </div>
                 </div>
-                <h2 className={HEADING}>Level frame</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="On my picture" />
-                  <Toggle on={xpCard} onChange={set(setXpCard)} label="On my name card" />
+                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="PFP effects" />
+                  <Toggle on={xpCard} onChange={set(setXpCard)} label="PFP border" />
+                  <Toggle on={onBoard} onChange={set(setOnBoard)} label="Leaderboard" />
+                  {tiltable ? <Toggle on={motion} onChange={setMotionFrames} label="Tilt with the phone" /> : null}
                 </div>
               </>
             )}

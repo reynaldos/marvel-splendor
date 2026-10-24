@@ -1,5 +1,24 @@
 [
   {
+    "version": "2.14.0",
+    "date": "2026-10-24",
+    "title": "Foil frames that turn",
+    "summary": "Card and player frames are drawn in a live foil that turns with the phone, and the tiers get a new order.",
+    "pulls": [],
+    "new": [
+      "Tier frames are drawn in a live foil: facets, metal and holographic shine lit from where your finger is, or from how you hold the phone once \"Tilt with the phone\" is on in Settings, on the collection, the leaderboard, your profile and every player avatar",
+      "A \"Leaderboard\" switch in Settings: switch it off and you are left off both boards"
+    ],
+    "improved": [
+      "The two frame switches in Settings are now Effects and Border: have the light on your picture, the tier border round it and your name card, both, or neither",
+      "The tiers now run Recruited, Bronze, Silver, Gold, Diamond, Sapphire, Emerald, Ruby, Prismatic, Mastered: Platinum is gone, Sapphire is new, and Diamond comes sooner",
+      "The leaderboard no longer scrolls sideways"
+    ],
+    "fixed": [
+      "Beast's card art"
+    ]
+  },
+  {
     "version": "2.13.3",
     "date": "2026-10-23",
     "title": "Location tiles after every turn",
@@ -20,8 +39,7 @@
     "summary": "Popup buttons answer the first tap and the team row swipes round smoothly.",
     "pulls": [],
     "new": [],
-    "improved": [
-    ],
+    "improved": [],
     "fixed": [
       "Buttons in popups answer the first tap: a slow tap no longer starts selecting text or pops up the copy menu",
       "The View team row keeps its momentum when swiped on an iPhone, and goes round without a jump"

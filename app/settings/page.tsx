@@ -33,6 +33,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         avatarTier={accountTierFor(xp.get(user.id) ?? 0)}
         xpAvatarStyle={user.xpAvatarStyle}
         xpCardStyle={user.xpCardStyle}
+        hideFromLeaderboard={user.hideFromLeaderboard}
         forUser={forUser ?? null}
         onCheckUsername={checkUsernameAction}
         onSave={saveProfileAction}

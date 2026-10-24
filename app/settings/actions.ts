@@ -57,9 +57,11 @@ export interface ProfileChanges {
   name: string;
   /** A picture chosen from the library, or null to leave the picture as it is. */
   avatarId: string | null;
-  /** The level frame on their picture, and on the card that carries their name. */
+  /** The level frame as they see it on their own picture: the light on the face, and the border round it and the name card. */
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
+  /** Whether they have asked to be left off the leaderboard. */
+  hideFromLeaderboard: boolean;
 }
 
 export async function saveProfileAction(changes: ProfileChanges, forUser?: string | null): Promise<SaveState> {
@@ -80,6 +82,7 @@ export async function saveProfileAction(changes: ProfileChanges, forUser?: strin
         avatarKey,
         xpAvatarStyle: changes.xpAvatarStyle === true,
         xpCardStyle: changes.xpCardStyle === true,
+        hideFromLeaderboard: changes.hideFromLeaderboard === true,
       },
     });
   } catch (error) {

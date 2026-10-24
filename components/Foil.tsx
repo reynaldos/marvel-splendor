@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { cn } from "cn";
 
 import { lessMotion } from "@/components/game/glide";
@@ -15,7 +15,7 @@ void main() { gl_Position = vec4(aPos, 0., 1.); }`;
 const FRAG = `#version 300 es
 precision highp float;
 uniform vec2 uOrigin, uRes, uTilt;
-uniform float uTime, uBorder, uRadius, uPad, uQuiet, uOverlay, uPlain;
+uniform float uTime, uBorder, uRadius, uPad, uQuiet, uOverlay, uPlain, uBare;
 uniform sampler2D uArt;
 uniform vec3 uGem, uGem2;
 uniform float uMetal, uCut, uBend, uGlint, uHolo, uRainbow, uSheen, uFire, uVeins, uNebula;
@@ -65,7 +65,7 @@ void main() {
   float inner = box(p, lim, uRadius);
   float alpha = 1. - smoothstep(-1., 1., outer);
   // The tier's glow round the card, as the CSS frame casts one; a grain of noise keeps it from banding.
-  float glow = max(pow(clamp(1. - outer / uPad, 0., 1.), 2.2) * 0.75 + (hash(p) - 0.5) * 0.02, 0.) * uSheen;
+  float glow = max(pow(clamp(1. - outer / uPad, 0., 1.), 2.2) * 0.75 + (hash(p) - 0.5) * 0.02, 0.) * uSheen * (1. - uBare);
   if (alpha <= 0.) { o = vec4(uGem * glow, glow); return; }
   // Border and glow only: the face is left to what is under the canvas, and costs nothing.
   if (uPlain > 0.5 && inner < -1.) { o = vec4(0.); return; }
@@ -166,7 +166,8 @@ void main() {
   // With no picture of its own, the face is only the light the effects add, laid over what is under the canvas.
   float inFace = 1. - smoothstep(-1., 1., inner);
   vec3 col = mix(border, mix(face, max(face - 0.5, 0.) * 2.2, uOverlay) * (1. - uPlain), inFace);
-  float a = mix(1., (1. - uOverlay) * (1. - uPlain), inFace);
+  // Bare, the border is left to what is under the canvas, as the glow was.
+  float a = mix(1. - uBare, (1. - uOverlay) * (1. - uPlain), inFace);
   o = vec4(mix(uGem * glow, col, alpha), mix(glow, a, alpha));
 }`;
 
@@ -180,9 +181,49 @@ const clamp = (v: number) => Math.max(-1, Math.min(1, v));
 let gyroTilt: [number, number] | null = null;
 let gyroBase: [number, number] | null = null;
 
+/** Whether this device can report its tilt at all. */
+export const hasGyro = () => typeof DeviceOrientationEvent !== "undefined";
+/** The permission ask, on iPhones only, where it must come from a tap. */
+const askPermission = () => (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+
+// The "Tilt with the phone" switch, kept on the device like the sound switches. Off means no ask and the plain drift.
+const MOTION_KEY = "motion-frames";
+const motionWatchers = new Set<() => void>();
+let motionCached: boolean | null = null;
+function readMotion(): boolean {
+  if (motionCached === null) {
+    try {
+      motionCached = localStorage.getItem(MOTION_KEY) === "1";
+    } catch {
+      motionCached = false;
+    }
+  }
+  return motionCached;
+}
+/** Switch the tilt on or off. Call from a tap when switching on: the iPhone ask happens here. */
+export function setMotionFrames(on: boolean) {
+  motionCached = on;
+  try {
+    localStorage.setItem(MOTION_KEY, on ? "1" : "0");
+  } catch {}
+  motionWatchers.forEach((tell) => tell());
+  if (on) void enableGyro();
+}
+export function useMotionFrames(): boolean {
+  return useSyncExternalStore(
+    (tell) => {
+      motionWatchers.add(tell);
+      return () => void motionWatchers.delete(tell);
+    },
+    readMotion,
+    () => false,
+  );
+}
+
 /** Lets the frames turn with the phone. Call from a tap: iPhones only allow the ask there. */
 export async function enableGyro(): Promise<boolean> {
-  const ask = (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+  if (gyroTilt) return true;
+  const ask = askPermission();
   if (ask && (await ask()) !== "granted") return false;
   window.addEventListener(
     "deviceorientation",
@@ -238,7 +279,8 @@ interface FoilLayerProps {
  * once `enableGyro` has run, or drifting on its own. A slot's CSS frame stays under it, and is all that
  * shows while its picture loads, where WebGL is missing, or past the page's share of contexts. A slot
  * with `data-foil-round` is a circle; with `data-foil-quiet` its face keeps half the picture; with
- * `data-foil-plain` it gets only the border and the glow, its face left alone. A slot whose
+ * `data-foil-plain` it gets only the border and the glow, its face left alone; with `data-foil-bare` the
+ * other way round, the face's light with no border or glow. A slot whose
  * picture can't be a texture (not loaded yet, from another host, or none) gets the border, the glow and the
  * light laid over whatever is under the canvas.
  */
@@ -296,6 +338,13 @@ export function FoilLayer({ sticky, tight, tilt: fixed }: FoilLayerProps) {
       lastPointer = performance.now();
     };
     if (!fixed) parent.addEventListener("pointermove", onMove);
+    // With the switch on, the phone's tilt is taken up at once, or on an iPhone from the next tap, which is where its ask is allowed.
+    const onTap = () => void enableGyro();
+    const askOnTap = !fixed && readMotion() && hasGyro() && !gyroTilt;
+    if (askOnTap) {
+      if (askPermission()) document.addEventListener("click", onTap, { capture: true, once: true });
+      else void enableGyro();
+    }
 
     let frame = 0;
     const draw = (now: number) => {
@@ -348,14 +397,18 @@ export function FoilLayer({ sticky, tight, tilt: fixed }: FoilLayerProps) {
         gl.uniform2f(u("uOrigin"), x, y);
         gl.uniform2f(u("uRes"), sw, sh);
         gl.uniform1f(u("uPad"), pad);
+        const bare = "foilBare" in slot.dataset;
         let border = borders.get(slot);
         if (border === undefined) borders.set(slot, (border = parseFloat(getComputedStyle(slot).borderTopWidth) || s.width * 0.03));
-        gl.uniform1f(u("uBorder"), border * dpr);
+        // Bare, there is no border to keep clear: the face runs to the edge.
+        gl.uniform1f(u("uBorder"), bare ? 0 : border * dpr);
         gl.uniform1f(u("uRadius"), (sw - pad * 2) * ("foilRound" in slot.dataset ? 0.5 : 0.1));
         // A small card keeps more of its art: the light that suits a card held large swamps one in a grid.
-        gl.uniform1f(u("uQuiet"), "foilQuiet" in slot.dataset ? 0.35 : s.width < 160 ? 0.55 : 0);
+        // Bare, with no border to hold the light, the picture keeps most of itself.
+        gl.uniform1f(u("uQuiet"), bare ? 0.7 : "foilQuiet" in slot.dataset ? 0.35 : s.width < 160 ? 0.55 : 0);
         gl.uniform1f(u("uOverlay"), tex ? 0 : 1);
         gl.uniform1f(u("uPlain"), plain ? 1 : 0);
+        gl.uniform1f(u("uBare"), bare ? 1 : 0);
         gl.uniform3fv(u("uGem"), foil.gem);
         gl.uniform3fv(u("uGem2"), foil.gem2);
         for (const k of FOIL_STRENGTHS) gl.uniform1f(u("u" + k[0].toUpperCase() + k.slice(1)), foil[k]);
@@ -374,6 +427,7 @@ export function FoilLayer({ sticky, tight, tilt: fixed }: FoilLayerProps) {
       onLost();
       el.removeEventListener("webglcontextlost", onLost);
       parent.removeEventListener("pointermove", onMove);
+      document.removeEventListener("click", onTap, { capture: true });
       liveLayers--;
     };
   }, [sticky, fixed]);
