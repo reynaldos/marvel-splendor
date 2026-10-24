@@ -27,6 +27,7 @@ const PAGES = [
   { name: "Profile", href: "/preview/profile" },
   { name: "Pack", href: "/preview/pack" },
   { name: "How to", href: "/preview/how-to" },
+  { name: "Squad pic", href: "/preview/team" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
