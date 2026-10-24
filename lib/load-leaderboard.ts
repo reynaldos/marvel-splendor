@@ -12,7 +12,7 @@ import { accountFrameTier, accountLevel } from "@/lib/xp";
 const TOP = 100;
 const TAG = "leaderboard";
 
-const USER_SELECT = { id: true, username: true, avatarKey: true, xpAvatarStyle: true } as const;
+const USER_SELECT = { id: true, username: true, avatarKey: true } as const;
 
 /** Usernames kept off both lists, from LEADERBOARD_HIDDEN: the dev's own accounts. */
 const HIDDEN = (process.env.LEADERBOARD_HIDDEN ?? "").split(",").map((name) => name.trim()).filter(Boolean);
@@ -43,7 +43,7 @@ export async function buildLeaderboard() {
       level,
       xp,
       avatarUrl: publicAvatarUrl(user.avatarKey),
-      avatarTier: user.xpAvatarStyle ? accountFrameTier(level) : undefined,
+      avatarTier: accountFrameTier(level),
     };
   };
 

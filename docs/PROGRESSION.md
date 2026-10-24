@@ -64,13 +64,13 @@ Code: `CARD_FOUND_XP`, `CARD_LEVEL_XP` and `cardLevelXp` in `lib/xp.ts`; the lad
 
 Each card a player has recruited in finished games has a level from how many times they have recruited it. The first recruit pays 2 XP, and every level the card climbs after that pays 5.
 
-| Climb | First recruit | Recruited → Bronze | Bronze → Silver | Silver → Gold | Gold → Platinum | Platinum → Emerald | Emerald → Ruby | Ruby → Diamond | Diamond → Prismatic | Prismatic → Mastered |
+| Climb | First recruit | Recruited → Bronze | Bronze → Silver | Silver → Gold | Gold → Diamond | Diamond → Sapphire | Sapphire → Emerald | Emerald → Ruby | Ruby → Prismatic | Prismatic → Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
 | XP | 2 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 | 5 |
 
 A Mastered card has paid 47 in total. The ladder depends on the card's level, because level 1 cards are recruited about four times as often as level 3 cards. A heavy player masters a favourite card in about 150 games; the level 1 ladder's top is set a little higher so those come after the first level 3 one:
 
-| Tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+| Tier | Recruited | Bronze | Silver | Gold | Diamond | Sapphire | Emerald | Ruby | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Level 1 card, times recruited | 1 | 3 | 5 | 10 | 15 | 23 | 33 | 45 | 65 | 100 |
 | Level 2 card | 1 | 2 | 4 | 7 | 10 | 15 | 22 | 30 | 40 | 54 |
@@ -78,7 +78,7 @@ A Mastered card has paid 47 in total. The ladder depends on the card's level, be
 
 ### The frames
 
-Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band), from Silver sparkles that come and go, from Platinum the gem tiers get angled facets of light and light moving along the border, and from Diamond a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).
+Styled after collector trading cards: each tier is a faceted gem border in its own colour, and the recruit count sits in a gem-cut badge of the same colour (`FRAME_STYLE` in `lib/frame-tier.ts`; `gem-badge` in `app/globals.css`). The further up, the flashier: past Recruited the face gets a vignette in the tier's colour and still light (a sheen band), from Silver sparkles that come and go, from Diamond the stone tiers get angled facets of light and light moving along the border, and from Prismatic a holographic sheen in the tier's tint crosses the face over fine prizm lines (`FRAME_EFFECT`; `frame-face`, `frame-shine` and `frame-holo` in `app/globals.css`). A card's frame keeps the card's own corners from the board, plus the border (`rounded-frame`).
 
 Cosmetic only at every tier, for cards and for the account-level frame alike — nothing here ever changes a card's cost, points, or bonus, so a new player is never at a rules disadvantage against a veteran's frame.
 
@@ -112,7 +112,7 @@ The XP needed for a level is `150 × (level − 1) ^ 1.7`, rounded. It keeps cli
 
 The level sets the player-card frame tier:
 
-| Frame tier | Recruited | Bronze | Silver | Gold | Platinum | Emerald | Ruby | Diamond | Prismatic | Mastered |
+| Frame tier | Recruited | Bronze | Silver | Gold | Diamond | Sapphire | Emerald | Ruby | Prismatic | Mastered |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Account level | 1 | 2–3 | 4–5 | 6–7 | 8–9 | 10–12 | 13–15 | 16–19 | 20–24 | 25+ |
 

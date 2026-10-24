@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
+import { FoilLayer } from "@/components/Foil";
 import { LevelBadge } from "@/components/profile/LevelBadge";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { RankBadge } from "@/components/profile/RankBadge";
@@ -69,6 +70,7 @@ export function ProfileScreen({
             style={xpCardStyle ? FRAME_STYLE[tier] : PLAIN_FRAME}
             title={`Level ${level}`}
           >
+            <FoilLayer tight />
             {canEdit ? (
               <Link
                 href={isOwn ? "/settings" : `/settings?user=${username}`}
@@ -81,7 +83,8 @@ export function ProfileScreen({
             <PlayerAvatar
               src={avatarUrl}
               name={username}
-              tier={xpAvatarStyle ? tier : undefined}
+              // The switch is the player's own view of their own picture; everyone else sees the frame.
+              tier={isOwn && !xpAvatarStyle ? undefined : tier}
               className="size-24 text-4xl"
             />
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>

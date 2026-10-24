@@ -18,9 +18,9 @@ export const CARD_LEVEL_UPS: GameRewards["cardLevelUps"] = [
   { cardId: "c2-07", from: "Recruited", to: "Bronze" },
   { cardId: "c2-03", from: "Bronze", to: "Silver" },
   { cardId: "c3-01", from: "Silver", to: "Gold" },
-  { cardId: "c1-01", from: "Gold", to: "Platinum" },
-  { cardId: "c2-10", from: "Platinum", to: "Emerald" },
-  { cardId: "c3-05", from: "Emerald", to: "Ruby" },
+  { cardId: "c1-01", from: "Gold", to: "Diamond" },
+  { cardId: "c2-10", from: "Diamond", to: "Sapphire" },
+  { cardId: "c3-05", from: "Sapphire", to: "Emerald" },
 ];
 
 /** Made-up rewards for the two people at the table: a win is worth 18 rating and 50 coins, a loss costs 18 and pays 20; a shared win moves nobody. The viewer's XP crosses level 2, and `cards` of theirs go up a level. */

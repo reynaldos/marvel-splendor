@@ -6,6 +6,7 @@ import { Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Tras
 
 import { DailyBonus } from "@/components/DailyBonus";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import { FoilLayer } from "@/components/Foil";
 import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { SoundToggles } from "@/components/SoundToggles";
@@ -27,9 +28,8 @@ const WIDE = "flex h-12 flex-1 items-center justify-center gap-2 rounded-full te
 interface TopBarViewProps {
   username: string;
   avatarUrl: string | null;
-  /** Their level's tier: a gem on the picture's corner, and the frame round it when `framed`. */
+  /** Their level's tier: the frame round the picture and a gem on its corner. */
   tier: FrameTier;
-  framed: boolean;
   /** Their level, and how far through it they are. */
   progress: { level: number; into: number; span: number };
   /** Null before their first rated game. */
@@ -49,7 +49,6 @@ export function TopBarView({
   username,
   avatarUrl,
   tier,
-  framed,
   progress,
   rating,
   wins,
@@ -76,10 +75,11 @@ export function TopBarView({
       className="stage dark pointer-events-none fixed inset-x-0 top-[calc((var(--screen-h)-var(--pad-b)-var(--spacing)*100)/2)] z-20 text-white"
     >
       <header className="pointer-events-auto relative mx-4 mt-2 flex h-12 items-center gap-3">
+        <FoilLayer tight />
         <Link href={`/profile/${username}`} className={`${PILL} pl-1 hover:bg-cosmos-500`} style={FRAME_STYLE[tier]}>
           <span className="relative">
-            <PlayerAvatar src={avatarUrl} name={username} tier={framed ? tier : undefined} />
-            <span aria-hidden className="gem-badge absolute -right-1 -bottom-0.5 size-4" />
+            <PlayerAvatar src={avatarUrl} name={username} tier={tier} />
+            <span aria-hidden className="gem-badge absolute -right-1 -bottom-0.5 z-10 size-4" />
           </span>
           <span className="flex w-40 flex-col gap-1.5">
             <span className="flex items-baseline justify-between gap-2">

@@ -39,7 +39,6 @@ export async function TopBar() {
       username={user.username}
       avatarUrl={publicAvatarUrl(user.avatarKey)}
       tier={accountTierFor(xp)}
-      framed={user.xpAvatarStyle}
       progress={progressForScore(xp)}
       rating={rating?.rating ?? null}
       wins={stats?.wins ?? 0}

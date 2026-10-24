@@ -307,6 +307,17 @@ body {
   }
 }
 
+/* While the shader draws a slot's frame over it (`components/Foil.tsx`), the CSS frame under it keeps only
+   its drop shadow, so the two don't glow and twinkle on top of each other. */
+:is([data-foil-live] [data-foil], [data-foil-live][data-foil]).frame-gold {
+  box-shadow: 0 calc(var(--spacing) * 1) calc(var(--spacing) * 3) rgb(0 0 0 / 0.5);
+  animation: none;
+}
+:is([data-foil-live] [data-foil], [data-foil-live][data-foil]):is(.frame-face, .frame-twinkle, .frame-holo)::before,
+:is([data-foil-live] [data-foil], [data-foil-live][data-foil]):is(.frame-face, .frame-twinkle, .frame-holo)::after {
+  display: none;
+}
+
 /* The count on a card, cut as a gem in the frame's own colour. */
 @utility gem-badge {
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);

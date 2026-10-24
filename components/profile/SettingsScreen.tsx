@@ -8,6 +8,7 @@ import { Crop } from "lucide-react";
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { CropPicture } from "@/components/profile/CropPicture";
+import { FoilLayer } from "@/components/Foil";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
@@ -177,6 +178,7 @@ export function SettingsScreen({
         <div className="flex items-center justify-center gap-10">
           <div className="flex w-40 flex-col items-center gap-3">
             <span className="relative">
+              <FoilLayer />
               <PlayerAvatar
                 src={shown}
                 name={typed || username}

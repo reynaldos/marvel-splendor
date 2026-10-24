@@ -1,5 +1,6 @@
 import { cn } from "cn";
 
+import { FoilLayer } from "@/components/Foil";
 import { CardView } from "@/components/game/Card";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { LeaderboardRow } from "@/components/profile/LeaderboardScreen";
@@ -9,6 +10,7 @@ import { CARD_LEVEL_TIER_MIN_TIMES } from "@/lib/card-level";
 import { CARD_BY_ID } from "@/lib/engine/data";
 import { FRAME_EFFECT, FRAME_STYLE, FRAME_TIER_NAMES } from "@/lib/frame-tier";
 import { pageMetadata } from "@/lib/site";
+import { AVATAR_LIBRARY } from "@/lib/avatars";
 import { ACCOUNT_FRAME_TIER_MIN_LEVEL, scoreForLevel } from "@/lib/xp";
 
 import { PreviewMenu } from "../PreviewBar";
@@ -24,12 +26,12 @@ const LEADERBOARD = [
     username: "rival",
     level: 8,
     xp: 1852,
-    avatarUrl: null,
+    avatarUrl: AVATAR_LIBRARY[1].src,
     avatarTier: "Gold" as const,
     rating: 1240,
     gamesRated: 18,
   },
-  { place: 2, username: "you", level: 4, xp: 520, avatarUrl: null, rating: 1180, gamesRated: 9 },
+  { place: 2, username: "you", level: 4, xp: 520, avatarUrl: AVATAR_LIBRARY[2].src, avatarTier: "Sapphire" as const, rating: 1180, gamesRated: 9 },
 ];
 
 /** Every frame tier and rank badge side by side, with what earns each, to look at without earning them. */
@@ -37,7 +39,8 @@ export default function TiersPreviewPage() {
   return (
     <Stage>
       <div className="flex h-100 w-full flex-col justify-center gap-2 px-4 pb-5">
-        <section className="flex flex-col gap-2">
+        <section className="relative flex flex-col gap-2">
+          <FoilLayer tight />
           <h2 className={HEADING}>Frames · player card by account level, card by times recruited</h2>
           <ul className="flex gap-2">
             {FRAME_TIER_NAMES.map((tier, i) => (
