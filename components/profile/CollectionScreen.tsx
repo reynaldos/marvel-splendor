@@ -21,7 +21,7 @@ const VIEW_NAMES: Record<CollectionView, string> = { grid: "Grid", level: "Level
 const SLOT = "relative aspect-card w-full rounded-frame";
 const FRAME_HIDDEN_KEY = "collection-frame-hidden";
 // Whether the grid's frames get the shader's full light. Off, they get only its border and glow: a hundred faces redrawn every frame dragged on a phone.
-const GRID_FOIL = true;
+const GRID_FOIL = false;
 // As many cards across as fit, each stretched a little so the row is filled from edge to edge.
 const CARDS = "grid flex-1 grid-cols-[repeat(auto-fill,minmax(calc(var(--spacing)*14),1fr))] gap-3";
 
