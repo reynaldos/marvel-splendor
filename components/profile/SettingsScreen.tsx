@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "cn";
 import { Crop } from "lucide-react";
@@ -8,7 +8,7 @@ import { Crop } from "lucide-react";
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { CropPicture } from "@/components/profile/CropPicture";
-import { FoilLayer } from "@/components/Foil";
+import { FoilLayer, hasGyro, setMotionFrames, useMotionFrames } from "@/components/Foil";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
@@ -76,6 +76,9 @@ export function SettingsScreen({
   const [fullName, setFullName] = useState(savedName ?? "");
   const [picked, setPicked] = useState<Picked | null>(null);
   const [xpAvatar, setXpAvatar] = useState(xpAvatarStyle);
+  // The tilt switch is only offered where a phone can report its tilt, which is known only in the browser.
+  const motion = useMotionFrames();
+  const tiltable = useSyncExternalStore(() => () => {}, hasGyro, () => false);
   const [xpCard, setXpCard] = useState(xpCardStyle);
   const [editingPicture, setEditingPicture] = useState(false);
   // A picture open in the circle to be placed: a file just chosen, or the saved original fetched from here.
@@ -315,6 +318,7 @@ export function SettingsScreen({
                 <div className="grid grid-cols-2 gap-4">
                   <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="On my picture" />
                   <Toggle on={xpCard} onChange={set(setXpCard)} label="On my name card" />
+                  {tiltable ? <Toggle on={motion} onChange={setMotionFrames} label="Tilt with the phone" /> : null}
                 </div>
               </>
             )}

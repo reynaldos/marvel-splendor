@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { cn } from "cn";
 
 import { lessMotion } from "@/components/game/glide";
@@ -180,9 +180,49 @@ const clamp = (v: number) => Math.max(-1, Math.min(1, v));
 let gyroTilt: [number, number] | null = null;
 let gyroBase: [number, number] | null = null;
 
+/** Whether this device can report its tilt at all. */
+export const hasGyro = () => typeof DeviceOrientationEvent !== "undefined";
+/** The permission ask, on iPhones only, where it must come from a tap. */
+const askPermission = () => (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+
+// The "Tilt with the phone" switch, kept on the device like the sound switches. Off means no ask and the plain drift.
+const MOTION_KEY = "motion-frames";
+const motionWatchers = new Set<() => void>();
+let motionCached: boolean | null = null;
+function readMotion(): boolean {
+  if (motionCached === null) {
+    try {
+      motionCached = localStorage.getItem(MOTION_KEY) === "1";
+    } catch {
+      motionCached = false;
+    }
+  }
+  return motionCached;
+}
+/** Switch the tilt on or off. Call from a tap when switching on: the iPhone ask happens here. */
+export function setMotionFrames(on: boolean) {
+  motionCached = on;
+  try {
+    localStorage.setItem(MOTION_KEY, on ? "1" : "0");
+  } catch {}
+  motionWatchers.forEach((tell) => tell());
+  if (on) void enableGyro();
+}
+export function useMotionFrames(): boolean {
+  return useSyncExternalStore(
+    (tell) => {
+      motionWatchers.add(tell);
+      return () => void motionWatchers.delete(tell);
+    },
+    readMotion,
+    () => false,
+  );
+}
+
 /** Lets the frames turn with the phone. Call from a tap: iPhones only allow the ask there. */
 export async function enableGyro(): Promise<boolean> {
-  const ask = (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+  if (gyroTilt) return true;
+  const ask = askPermission();
   if (ask && (await ask()) !== "granted") return false;
   window.addEventListener(
     "deviceorientation",
@@ -296,6 +336,13 @@ export function FoilLayer({ sticky, tight, tilt: fixed }: FoilLayerProps) {
       lastPointer = performance.now();
     };
     if (!fixed) parent.addEventListener("pointermove", onMove);
+    // With the switch on, the phone's tilt is taken up at once, or on an iPhone from the next tap, which is where its ask is allowed.
+    const onTap = () => void enableGyro();
+    const askOnTap = !fixed && readMotion() && hasGyro() && !gyroTilt;
+    if (askOnTap) {
+      if (askPermission()) document.addEventListener("click", onTap, { capture: true, once: true });
+      else void enableGyro();
+    }
 
     let frame = 0;
     const draw = (now: number) => {
@@ -374,6 +421,7 @@ export function FoilLayer({ sticky, tight, tilt: fixed }: FoilLayerProps) {
       onLost();
       el.removeEventListener("webglcontextlost", onLost);
       parent.removeEventListener("pointermove", onMove);
+      document.removeEventListener("click", onTap, { capture: true });
       liveLayers--;
     };
   }, [sticky, fixed]);

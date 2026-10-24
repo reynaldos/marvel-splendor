@@ -105,8 +105,10 @@ Each step is one issue: build, a `tsx` or headless-Chrome check, then stop for r
       card's full light) and on other players' profiles; the "frame on my picture" switch now only sets
       whether players see it on their own profile and in settings. The CSS frame stays
       under each slot as the fallback and is quietened while the shader is live (`[data-foil-live]` in
-      `app/globals.css`). The tier numbers are `FRAME_FOIL` in `lib/frame-tier.ts`. Not yet: the pointer
-      drives the CSS frames too, and the gyroscope in the app (only the demo's button asks for it).
+      `app/globals.css`). The tier numbers are `FRAME_FOIL` in `lib/frame-tier.ts`. The gyroscope in the app: a
+      "Tilt with the phone" switch under Level frame in Settings, kept on the device; with it on, the layer takes
+      the tilt at once on Android and from the player's next tap on an iPhone, where the ask is allowed. Not yet:
+      the pointer drives the CSS frames too.
 - [ ] **3. The gem tiers.** The metals and the stones in the same shader. Check: shots per
       tier.
 - [ ] **4. Level-up and profile.** The flare in `CardLevelUps` and the profile card. Check: the preview
