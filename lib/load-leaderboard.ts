@@ -19,20 +19,29 @@ const HIDDEN = (process.env.LEADERBOARD_HIDDEN ?? "").split(",").map((name) => n
 
 /** Both boards, best first and placed, read from the database. Exported for its test; pages read `loadLeaderboard`. */
 export async function buildLeaderboard() {
+  // Off both lists: the dev's accounts, and anyone who switched the leaderboard off in their settings.
+  const hidden = (
+    await prisma.user.findMany({
+      where: { OR: [{ hideFromLeaderboard: true }, { username: { in: HIDDEN } }] },
+      select: { id: true },
+    })
+  ).map((u) => u.id);
   const [rated, accountXp] = await Promise.all([
     prisma.userRating.findMany({
-      where: { user: { username: { notIn: HIDDEN } } },
+      where: { userId: { notIn: hidden } },
       orderBy: [{ rating: "desc" }, { gamesRated: "desc" }, { updatedAt: "asc" }],
       take: TOP,
       include: { user: { select: USER_SELECT } },
     }),
     accountXpByUser(),
   ]);
-  const topXpIds = [...accountXp].sort((a, b) => b[1] - a[1]).slice(0, TOP).map(([id]) => id);
-  const xpUsers = await prisma.user.findMany({
-    where: { id: { in: topXpIds }, username: { notIn: HIDDEN } },
-    select: USER_SELECT,
-  });
+  // Hidden players are left out before the top is cut, so the list is still full.
+  const topXpIds = [...accountXp]
+    .filter(([id]) => !hidden.includes(id))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, TOP)
+    .map(([id]) => id);
+  const xpUsers = await prisma.user.findMany({ where: { id: { in: topXpIds } }, select: USER_SELECT });
 
   const xpOf = (id: string) => accountXp.get(id) ?? 0;
   const entry = (user: (typeof xpUsers)[number]): Omit<LeaderboardEntry, "place"> => {

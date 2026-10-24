@@ -38,27 +38,29 @@ enum FeedbackStatus {
 }
 
 model User {
-  id               String            @id @default(cuid())
-  auth0Sub         String            @unique
-  username         String            @unique
-  name             String?
+  id                  String            @id @default(cuid())
+  auth0Sub            String            @unique
+  username            String            @unique
+  name                String?
   // As last seen at sign-in. Not unique: one person can sign in more than one way.
-  email            String?
+  email               String?
   // An uploaded picture's storage key, or "library/<id>" for one from the library.
-  avatarKey        String?
+  avatarKey           String?
   // Whether the account-level frame is drawn on their picture, and on the card that carries their name.
-  xpAvatarStyle    Boolean           @default(false)
-  xpCardStyle      Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  players          GamePlayer[]
-  stats            UserStats?
-  visits           UserVisit[]
-  collected        CollectedCard[]
-  rating           UserRating?
-  coins            UserCoins?
-  coinTransactions CoinTransaction[]
-  feedback         Feedback[]
-  purchases        Purchase[]
+  xpAvatarStyle       Boolean           @default(false)
+  xpCardStyle         Boolean           @default(false)
+  // Whether they have asked to be left off the leaderboard.
+  hideFromLeaderboard Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  players             GamePlayer[]
+  stats               UserStats?
+  visits              UserVisit[]
+  collected           CollectedCard[]
+  rating              UserRating?
+  coins               UserCoins?
+  coinTransactions    CoinTransaction[]
+  feedback            Feedback[]
+  purchases           Purchase[]
 }
 
 // A card a player has recruited themselves, in a game played to the end.

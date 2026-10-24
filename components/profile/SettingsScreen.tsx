@@ -49,6 +49,7 @@ interface SettingsScreenProps {
   avatarTier: FrameTier;
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
+  hideFromLeaderboard: boolean;
   /** Set when an admin is editing another player's profile: their username. */
   forUser: string | null;
   onCheckUsername: (typed: string, forUser: string | null) => Promise<SaveState>;
@@ -66,6 +67,7 @@ export function SettingsScreen({
   avatarTier,
   xpAvatarStyle,
   xpCardStyle,
+  hideFromLeaderboard,
   forUser,
   onCheckUsername,
   onSave,
@@ -80,6 +82,7 @@ export function SettingsScreen({
   const motion = useMotionFrames();
   const tiltable = useSyncExternalStore(() => () => {}, hasGyro, () => false);
   const [xpCard, setXpCard] = useState(xpCardStyle);
+  const [onBoard, setOnBoard] = useState(!hideFromLeaderboard);
   const [editingPicture, setEditingPicture] = useState(false);
   // A picture open in the circle to be placed: a file just chosen, or the saved original fetched from here.
   const [cropping, setCropping] = useState<{ src: string; file: File | null } | null>(null);
@@ -97,7 +100,8 @@ export function SettingsScreen({
     picked !== null ||
     fullName.trim() !== (savedName ?? "") ||
     xpAvatar !== xpAvatarStyle ||
-    xpCard !== xpCardStyle;
+    xpCard !== xpCardStyle ||
+    onBoard === hideFromLeaderboard;
   const shape = checkUsername(name);
   const shown = picked?.src ?? avatarUrl;
   // What the crop button reopens: the pending upload's original, or the saved original served from here. Library pictures aren't cut.
@@ -154,6 +158,7 @@ export function SettingsScreen({
           avatarId: picked && "id" in picked ? picked.id : null,
           xpAvatarStyle: xpAvatar,
           xpCardStyle: xpCard,
+          hideFromLeaderboard: !onBoard,
         },
         forUser,
       );
@@ -314,10 +319,10 @@ export function SettingsScreen({
                     />
                   </div>
                 </div>
-                <h2 className={HEADING}>Level frame</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="Effects" />
-                  <Toggle on={xpCard} onChange={set(setXpCard)} label="Border" />
+                  <Toggle on={xpAvatar} onChange={set(setXpAvatar)} label="PFP effects" />
+                  <Toggle on={xpCard} onChange={set(setXpCard)} label="PFP border" />
+                  <Toggle on={onBoard} onChange={set(setOnBoard)} label="Leaderboard" />
                   {tiltable ? <Toggle on={motion} onChange={setMotionFrames} label="Tilt with the phone" /> : null}
                 </div>
               </>

@@ -60,6 +60,8 @@ export interface ProfileChanges {
   /** The level frame as they see it on their own picture: the light on the face, and the border round it and the name card. */
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
+  /** Whether they have asked to be left off the leaderboard. */
+  hideFromLeaderboard: boolean;
 }
 
 export async function saveProfileAction(changes: ProfileChanges, forUser?: string | null): Promise<SaveState> {
@@ -80,6 +82,7 @@ export async function saveProfileAction(changes: ProfileChanges, forUser?: strin
         avatarKey,
         xpAvatarStyle: changes.xpAvatarStyle === true,
         xpCardStyle: changes.xpCardStyle === true,
+        hideFromLeaderboard: changes.hideFromLeaderboard === true,
       },
     });
   } catch (error) {
