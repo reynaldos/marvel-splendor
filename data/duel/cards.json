@@ -1,0 +1,920 @@
+{
+  "_meta": {
+    "source": "Splendor Duel (SPACE Cowboys, 2022): the 67 Jewel cards as the box has them, transcribed from the open-source recreation by Balthazar Jarry-Wilson (github splendor-duel, data/cards.data). Colours mapped to stones: blue=space, white=mind, green=soul, black=power, red=reality, Pearl=time. bonus null is a card with no bonus; \"wild\" joins a colour you own.",
+    "ids": "d<level>-<n>, in the box's order within each level. Saved games will refer to cards by id, so never reuse or renumber one."
+  },
+  "cards": [
+    {
+      "id": "d1-01",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 1,
+        "soul": 1,
+        "power": 1,
+        "reality": 1
+      }
+    },
+    {
+      "id": "d1-02",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 3
+      }
+    },
+    {
+      "id": "d1-03",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-04",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": "token",
+      "cost": {
+        "power": 2,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d1-05",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "soul": 2,
+        "reality": 3
+      }
+    },
+    {
+      "id": "d1-06",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 1,
+        "soul": 1,
+        "power": 1,
+        "reality": 1
+      }
+    },
+    {
+      "id": "d1-07",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "soul": 3
+      }
+    },
+    {
+      "id": "d1-08",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "soul": 2,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-09",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": "token",
+      "cost": {
+        "mind": 2,
+        "power": 2
+      }
+    },
+    {
+      "id": "d1-10",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "power": 3,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d1-11",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 1,
+        "mind": 1,
+        "power": 1,
+        "reality": 1
+      }
+    },
+    {
+      "id": "d1-12",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "reality": 3
+      }
+    },
+    {
+      "id": "d1-13",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "power": 2,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-14",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": "token",
+      "cost": {
+        "space": 2,
+        "mind": 2
+      }
+    },
+    {
+      "id": "d1-15",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 3,
+        "power": 2
+      }
+    },
+    {
+      "id": "d1-16",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 1,
+        "mind": 1,
+        "soul": 1,
+        "reality": 1
+      }
+    },
+    {
+      "id": "d1-17",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 3
+      }
+    },
+    {
+      "id": "d1-18",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "space": 2,
+        "mind": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-19",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": "token",
+      "cost": {
+        "soul": 2,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d1-20",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "soul": 3
+      }
+    },
+    {
+      "id": "d1-21",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 1,
+        "mind": 1,
+        "soul": 1,
+        "power": 1
+      }
+    },
+    {
+      "id": "d1-22",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "power": 3
+      }
+    },
+    {
+      "id": "d1-23",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "mind": 2,
+        "power": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-24",
+      "level": 1,
+      "points": 0,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": "token",
+      "cost": {
+        "space": 2,
+        "soul": 2
+      }
+    },
+    {
+      "id": "d1-25",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 3,
+        "mind": 2
+      }
+    },
+    {
+      "id": "d1-26",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "power": 4,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-27",
+      "level": 1,
+      "points": 0,
+      "crowns": 1,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "mind": 4,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-28",
+      "level": 1,
+      "points": 3,
+      "crowns": 0,
+      "bonus": null,
+      "bonusCount": 0,
+      "ability": null,
+      "cost": {
+        "reality": 4,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-29",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "space": 2,
+        "power": 1,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d1-30",
+      "level": 1,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "mind": 2,
+        "soul": 2,
+        "power": 1,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-01",
+      "level": 2,
+      "points": 2,
+      "crowns": 1,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "soul": 2,
+        "power": 2,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-02",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": "steal",
+      "cost": {
+        "space": 4,
+        "reality": 3
+      }
+    },
+    {
+      "id": "d2-03",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": "privilege",
+      "cost": {
+        "mind": 4,
+        "power": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-04",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "mind",
+      "bonusCount": 2,
+      "ability": null,
+      "cost": {
+        "space": 5,
+        "soul": 2
+      }
+    },
+    {
+      "id": "d2-05",
+      "level": 2,
+      "points": 2,
+      "crowns": 1,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 2,
+        "power": 2,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-06",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": "steal",
+      "cost": {
+        "soul": 4,
+        "power": 3
+      }
+    },
+    {
+      "id": "d2-07",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": "privilege",
+      "cost": {
+        "space": 4,
+        "mind": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-08",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "space",
+      "bonusCount": 2,
+      "ability": null,
+      "cost": {
+        "soul": 5,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d2-09",
+      "level": 2,
+      "points": 2,
+      "crowns": 1,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "mind": 2,
+        "power": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-10",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": "steal",
+      "cost": {
+        "mind": 3,
+        "reality": 4
+      }
+    },
+    {
+      "id": "d2-11",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": "privilege",
+      "cost": {
+        "space": 2,
+        "soul": 4,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-12",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "soul",
+      "bonusCount": 2,
+      "ability": null,
+      "cost": {
+        "power": 2,
+        "reality": 5
+      }
+    },
+    {
+      "id": "d2-13",
+      "level": 2,
+      "points": 2,
+      "crowns": 1,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "soul": 2,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-14",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": "steal",
+      "cost": {
+        "mind": 4,
+        "soul": 3
+      }
+    },
+    {
+      "id": "d2-15",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": "privilege",
+      "cost": {
+        "power": 4,
+        "reality": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-16",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "power",
+      "bonusCount": 2,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "mind": 5
+      }
+    },
+    {
+      "id": "d2-17",
+      "level": 2,
+      "points": 2,
+      "crowns": 1,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "mind": 2,
+        "soul": 2,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-18",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": "steal",
+      "cost": {
+        "space": 3,
+        "power": 4
+      }
+    },
+    {
+      "id": "d2-19",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": "privilege",
+      "cost": {
+        "soul": 2,
+        "reality": 4,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-20",
+      "level": 2,
+      "points": 1,
+      "crowns": 0,
+      "bonus": "reality",
+      "bonusCount": 2,
+      "ability": null,
+      "cost": {
+        "mind": 2,
+        "power": 5
+      }
+    },
+    {
+      "id": "d2-21",
+      "level": 2,
+      "points": 2,
+      "crowns": 0,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "soul": 6,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-22",
+      "level": 2,
+      "points": 0,
+      "crowns": 2,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "soul": 6,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-23",
+      "level": 2,
+      "points": 0,
+      "crowns": 2,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "space": 6,
+        "time": 1
+      }
+    },
+    {
+      "id": "d2-24",
+      "level": 2,
+      "points": 5,
+      "crowns": 0,
+      "bonus": null,
+      "bonusCount": 0,
+      "ability": null,
+      "cost": {
+        "space": 6,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-01",
+      "level": 3,
+      "points": 3,
+      "crowns": 2,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 3,
+        "power": 3,
+        "reality": 5,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-02",
+      "level": 3,
+      "points": 4,
+      "crowns": 2,
+      "bonus": "mind",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "mind": 6,
+        "power": 2
+      }
+    },
+    {
+      "id": "d3-03",
+      "level": 3,
+      "points": 3,
+      "crowns": 2,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 3,
+        "soul": 3,
+        "power": 5,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-04",
+      "level": 3,
+      "points": 4,
+      "crowns": 2,
+      "bonus": "space",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 6,
+        "mind": 2,
+        "soul": 2
+      }
+    },
+    {
+      "id": "d3-05",
+      "level": 3,
+      "points": 3,
+      "crowns": 2,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 3,
+        "mind": 5,
+        "reality": 3,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-06",
+      "level": 3,
+      "points": 4,
+      "crowns": 2,
+      "bonus": "soul",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 2,
+        "soul": 6,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d3-07",
+      "level": 3,
+      "points": 3,
+      "crowns": 2,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 3,
+        "soul": 5,
+        "reality": 3,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-08",
+      "level": 3,
+      "points": 4,
+      "crowns": 2,
+      "bonus": "power",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "mind": 2,
+        "power": 6,
+        "reality": 2
+      }
+    },
+    {
+      "id": "d3-09",
+      "level": 3,
+      "points": 3,
+      "crowns": 2,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "space": 5,
+        "soul": 3,
+        "power": 3,
+        "time": 1
+      }
+    },
+    {
+      "id": "d3-10",
+      "level": 3,
+      "points": 4,
+      "crowns": 2,
+      "bonus": "reality",
+      "bonusCount": 1,
+      "ability": null,
+      "cost": {
+        "soul": 2,
+        "power": 2,
+        "reality": 6
+      }
+    },
+    {
+      "id": "d3-11",
+      "level": 3,
+      "points": 3,
+      "crowns": 0,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "again",
+      "cost": {
+        "reality": 8
+      }
+    },
+    {
+      "id": "d3-12",
+      "level": 3,
+      "points": 0,
+      "crowns": 3,
+      "bonus": "wild",
+      "bonusCount": 1,
+      "ability": "wild",
+      "cost": {
+        "power": 8
+      }
+    },
+    {
+      "id": "d3-13",
+      "level": 3,
+      "points": 6,
+      "crowns": 0,
+      "bonus": null,
+      "bonusCount": 0,
+      "ability": null,
+      "cost": {
+        "mind": 8
+      }
+    }
+  ]
+}

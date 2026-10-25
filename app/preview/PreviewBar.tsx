@@ -28,6 +28,7 @@ const PAGES = [
   { name: "Pack", href: "/preview/pack" },
   { name: "How to", href: "/preview/how-to" },
   { name: "Squad pic", href: "/preview/team" },
+  { name: "Duel", href: "/preview/duel" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
@@ -173,7 +174,7 @@ export function PreviewMenu({ children }: { children?: ReactNode }) {
     <Dialog>
       <DialogTrigger
         aria-label="Preview menu"
-        className="fixed top-[12dvh] right-3 z-30 flex size-11 items-center justify-center rounded-full bg-cosmos-950/80 text-gold-400 ring-2 ring-gold-400 hover:bg-cosmos-700"
+        className="fixed right-3 bottom-[15dvh] z-30 flex size-11 items-center justify-center rounded-full bg-cosmos-950/80 text-gold-400 ring-2 ring-gold-400 hover:bg-cosmos-700"
       >
         <Settings className="size-6" />
       </DialogTrigger>
