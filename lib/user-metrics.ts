@@ -2,6 +2,7 @@ import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
 import { shopItem } from "@/lib/shop";
 import type { GameSettings, GameState } from "@/lib/engine/types";
+import { rankable, type AnyState } from "@/lib/game-rules";
 import { rankPlayers } from "@/lib/game-record";
 import type { GameSummary } from "@/lib/game-summary";
 import { botName } from "@/lib/lobby-rules";
@@ -196,7 +197,7 @@ export async function loadUserMetrics(now = Date.now()) {
       moves: game._count.moves,
       players: seated.map((p) => p.name),
       rules: { targetPoints: settings?.targetPoints ?? 0, turnTimeSeconds: settings?.turnTimeSeconds ?? null },
-      standings: state?.players ? rankPlayers(state as GameState, seated) : null,
+      standings: state?.players ? rankPlayers(rankable(state as AnyState), seated) : null,
     };
   };
   const tables = openGames.map(summarize);

@@ -9,7 +9,7 @@ import { pageMetadata } from "@/lib/site";
 
 import { createGameAction, joinGameAction } from "./actions";
 
-export const metadata = pageMetadata("Private Game", "Open a room for friends or join one with a code.", true);
+export const metadata = pageMetadata("Play Game", "Open a room: add bots, or share the code with friends. Or join a room by code.", true);
 
 export default async function PrivateGamePage() {
   const session = await auth0.getSession();

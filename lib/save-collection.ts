@@ -1,6 +1,6 @@
 import { cardsRecruited } from "@/lib/collection";
 import { prisma } from "@/lib/db";
-import type { Move } from "@/lib/engine/types";
+import type { AnyMove } from "@/lib/game-rules";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 export interface CardCountChange {
@@ -27,7 +27,7 @@ export async function saveCollectedCards(
     orderBy: { ordinal: "asc" },
     select: { seat: true, payload: true },
   });
-  const recruited = cardsRecruited(moves.map((m) => ({ seat: m.seat, move: m.payload as unknown as Move })));
+  const recruited = cardsRecruited(moves.map((m) => ({ seat: m.seat, move: m.payload as unknown as AnyMove })));
 
   const found = people.flatMap(({ seat, userId }) =>
     [...(recruited.get(seat) ?? [])].map(([cardId, times]) => ({ userId: userId!, cardId, times })),

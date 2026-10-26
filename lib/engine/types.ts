@@ -61,6 +61,8 @@ export interface GameSettings {
   botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
   /** The card packs dealt in besides the base cards: every pack someone at the table owns. Absent on older games. */
   packs?: string[];
+  /** Which game is played: Splendor Duel, or the Marvel game when absent. */
+  rules?: "marvel" | "duel";
 }
 
 /** A set of cards or Location tiles sold in the shop, dealt only into games where someone owns it. */

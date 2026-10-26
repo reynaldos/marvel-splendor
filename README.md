@@ -12,8 +12,8 @@ It is built for a phone held on its side, and can be added to the home screen to
 
 ## What it does
 
-- **Play vs Computer:** 2 to 4 players, with easy, normal or hard bots.
-- **Private games:** create a room, share a six-letter code, and play live.
+- **Play Game:** open a room for 2 to 4, fill it with easy, normal or hard bots, or share a six-letter code and play friends live.
+- **Duel:** the two-player game, in a room for two.
 - **Timers:** an optional turn timer and game clock.
 - **Away players:** a bot takes over for anyone who misses 3 turns in a row, until they come back.
 - **Profiles:** a picture, name and username, with stats and a record of every finished game.

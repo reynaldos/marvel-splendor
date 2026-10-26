@@ -3,11 +3,10 @@ import { NextResponse } from "next/server";
 import { auth0 } from "@/lib/auth0";
 import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
-import { createGame } from "@/lib/engine/setup";
-import type { GameSettings, GameState, Move } from "@/lib/engine/types";
+import type { GameSettings } from "@/lib/engine/types";
 import { gameEndsInMs, moveSummaries, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import type { GameRewards } from "@/lib/game-record";
-import { redactState } from "@/lib/game-view";
+import { createAny, redactAny, rulesOf, type AnyMove, type AnyState } from "@/lib/game-rules";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { botName } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
@@ -58,11 +57,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "This game hasn't started yet." }, { status: 409 });
   }
 
-  const state = game.state as unknown as GameState;
+  const state = game.state as unknown as AnyState;
   const moves = game.moves.map((m) => ({
     ordinal: m.ordinal,
     seat: m.seat,
-    move: m.payload as unknown as Move,
+    move: m.payload as unknown as AnyMove,
   }));
 
   const summaries = moveSummaries({
@@ -88,7 +87,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           finalState: state,
         })
       : null;
-  const start = steps && since === 0 ? redactState(createGame(game.players.length, game.seed, settings), seatRow.seat) : null;
+  const start = steps && since === 0 ? redactAny(createAny(rulesOf(settings), game.players.length, game.seed, settings), seatRow.seat) : null;
 
   const botAvatars = botAvatarKeys(game.seed, game.players);
   return NextResponse.json({
@@ -105,7 +104,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       avatarUrl: publicAvatarUrl(p.isBot ? botAvatars.get(p.seat) : p.user?.avatarKey),
       rewards: p.rewards as unknown as GameRewards | null,
     })),
-    view: redactState(state, seatRow.seat),
+    view: redactAny(state, seatRow.seat),
     moves: moves.map((m, i) => ({ ...m, ...summaries[i] })),
     steps: steps ?? [],
     start,

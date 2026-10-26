@@ -37,10 +37,21 @@ export const MoveSchema = z.union([
   z.object({ type: z.literal("CHOOSE_LOCATION"), locationId: z.string().min(1) }),
   z.object({ type: z.literal("TIMEOUT_SKIP"), present: z.literal(true).optional() }),
   z.object({ type: z.literal("FORFEIT") }),
+  // Splendor Duel's moves; the engine a game plays decides which kinds it takes.
+  z.object({ type: z.literal("SPEND_PRIVILEGE") }),
+  z.object({ type: z.literal("REFILL") }),
+  z.object({ type: z.literal("TAKE_LINE"), spaces: z.array(z.number().int().min(0).max(24)).min(1).max(3) }),
+  z.object({ type: z.literal("RESERVE"), from: z.literal("pyramid"), cardId: z.string().min(1) }),
+  z.object({ type: z.literal("BUY"), cardId: z.string().min(1) }),
+  z.object({ type: z.literal("PICK_TOKEN"), space: z.number().int().min(0).max(24) }),
+  z.object({ type: z.literal("PICK_OPPONENT_TOKEN"), color: TokenColorSchema }),
+  z.object({ type: z.literal("PICK_JOIN_COLOR"), color: z.enum(["mind", "space", "soul", "power", "reality"]) }),
+  z.object({ type: z.literal("PICK_ROYAL"), royalId: z.string().min(1) }),
 ]);
 
 /** `POST /api/games` body — see ARCHITECTURE.md §4 `GameSettings`. */
 export const CreateGameSchema = z.object({
+  rules: z.enum(["marvel", "duel"]).optional(),
   playerCount: z.union([z.literal(2), z.literal(3), z.literal(4)]),
   botDifficulty: z.enum(["easy", "normal", "hard"]).optional(),
   targetPoints: z.number().int().min(1).max(99).optional(),

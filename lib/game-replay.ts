@@ -6,18 +6,16 @@
  */
 import { isDeepStrictEqual } from "node:util";
 
-import { boardEvents, type BoardEvent } from "@/lib/board-events";
-import { applyMove } from "@/lib/engine/apply";
-import { createGame } from "@/lib/engine/setup";
-import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
-import { redactState, type RedactedGameState } from "@/lib/game-view";
+import { boardEvents, duelEvents, type BoardEvent } from "@/lib/board-events";
+import { isAway, type GameSettings } from "@/lib/engine/types";
+import { applyAny, createAny, isDuel, rankable, redactAny, rulesOf, type AnyMove, type AnyState, type AnyView } from "@/lib/game-rules";
 import { TURN_BANNER_MS } from "@/lib/playback";
 
 export interface GameStep {
   seat: number;
-  move: Move;
+  move: AnyMove;
   /** The board right after this move, as the viewer is allowed to see it. */
-  view: RedactedGameState;
+  view: AnyView;
 }
 
 /**
@@ -30,23 +28,23 @@ export function replaySteps(args: {
   settings: GameSettings;
   playerCount: number;
   /** The whole move log, in order. */
-  moves: Array<{ seat: number; move: Move }>;
+  moves: Array<{ seat: number; move: AnyMove }>;
   since: number;
   viewerSeat: number;
-  finalState: GameState;
+  finalState: AnyState;
 }): GameStep[] | null {
   const { seed, settings, playerCount, moves, since, viewerSeat, finalState } = args;
   try {
-    let state = createGame(playerCount, seed, settings);
+    let state = createAny(rulesOf(settings), playerCount, seed, settings);
     const steps: GameStep[] = [];
     moves.forEach(({ seat, move }, ordinal) => {
-      state = applyMove(state, seat, move);
-      if (ordinal >= since) steps.push({ seat, move, view: redactState(state, viewerSeat) });
+      state = applyAny(state, seat, move);
+      if (ordinal >= since) steps.push({ seat, move, view: redactAny(state, viewerSeat) });
     });
     // Compared as plain JSON, the way the stored state comes back from the database.
     const same = isDeepStrictEqual(
-      JSON.parse(JSON.stringify(redactState(state, viewerSeat))),
-      JSON.parse(JSON.stringify(redactState(finalState, viewerSeat))),
+      JSON.parse(JSON.stringify(redactAny(state, viewerSeat))),
+      JSON.parse(JSON.stringify(redactAny(finalState, viewerSeat))),
     );
     return same ? steps : null;
   } catch {
@@ -66,14 +64,18 @@ export function moveSummaries(args: {
   seed: string;
   settings: GameSettings;
   playerCount: number;
-  moves: Array<{ seat: number; move: Move }>;
+  moves: Array<{ seat: number; move: AnyMove }>;
 }): MoveSummary[] {
   const { seed, settings, playerCount, moves } = args;
   try {
-    let state = createGame(playerCount, seed, settings);
-    return moves.map(({ seat, move }) => {
+    let state = createAny(rulesOf(settings), playerCount, seed, settings);
+    return moves.map(({ seat, move }, i) => {
       const before = state;
-      state = applyMove(state, seat, move);
+      state = applyAny(state, seat, move);
+      // A Duel has no rounds or announced tiles; its turns count two to a round.
+      if (isDuel(state) || isDuel(before)) {
+        return { round: Math.floor(i / 2) + 1, points: rankable(state).players[seat].points, events: isDuel(state) && isDuel(before) ? duelEvents(before, state, { seat, move }) : [] };
+      }
       return { round: before.round, points: state.players[seat].points, events: boardEvents(before, state) };
     });
   } catch {
@@ -82,13 +84,13 @@ export function moveSummaries(args: {
 }
 
 /** Milliseconds left on the current turn, or null when turns are untimed or the game is over. */
-export function turnEndsInMs(state: GameState, turnStartedAt: Date, now = Date.now()): number | null {
+export function turnEndsInMs(state: Pick<AnyState, "status" | "settings">, turnStartedAt: Date, now = Date.now()): number | null {
   if (state.status !== "active" || state.settings.turnTimeSeconds === null) return null;
   return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
 }
 
 /** True when nobody is playing any more: every person at the table is away. Bots don't count. */
-export function isTableIdle(humanSeats: number[], state: GameState): boolean {
+export function isTableIdle(humanSeats: number[], state: Pick<AnyState, "players">): boolean {
   return humanSeats.length > 0 && humanSeats.every((seat) => isAway(state.players[seat]));
 }
 

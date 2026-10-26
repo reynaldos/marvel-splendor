@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Medal } from "lucide-react";
 
-import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
+import { CardFanArt, DuelArt, WelcomeArt } from "@/components/home/art";
 import { HowToPlay } from "@/components/home/HowToPlay";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
@@ -34,20 +34,20 @@ export function WelcomeScreen() {
   );
 }
 
-/** The main menu: the ways to play. With a room waiting (`lobbyId`), the Private Game tile goes straight back to it. */
-export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
+/** The main menu: the two games. With a room waiting (`lobbyId`), the Play Game tile goes straight back to it. */
+export function HomeScreen({ lobbyId, duelPlayed }: { lobbyId: string | null; duelPlayed: boolean }) {
   return (
     <Stage>
       <StageRows>
         <div className="flex h-64 gap-6">
-          <ModeTile href="/solo" label="VS Computer" tone="from-orange-400 to-red-700" art={<CardFanArt />} />
           <ModeTile
             href={lobbyId ? `/lobby/${lobbyId}` : "/private"}
-            label={lobbyId ? "Rejoin your room" : "Private Game"}
-            tone="from-violet-400 to-purple-800"
-            art={<AvengersArt />}
+            label={lobbyId ? "Rejoin your room" : "Play Game"}
+            tone="from-orange-400 to-red-700"
+            art={<CardFanArt />}
             className={lobbyId ? "glow-gold" : undefined}
           />
+          <ModeTile href="/duel" label="Play Duel" tone="from-sky-400 to-blue-800" art={<DuelArt />} />
         </div>
 
         <footer className="flex items-center gap-4">
@@ -64,7 +64,7 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
           >
             <Medal className="size-6" />
           </Link>
-          <HowToPlay />
+          <HowToPlay badge={!duelPlayed} />
         </footer>
       </StageRows>
     </Stage>

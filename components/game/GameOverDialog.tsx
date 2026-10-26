@@ -27,6 +27,8 @@ interface GameOverDialogProps {
   rewards: Map<number, GameRewards>;
   viewerSeat: number;
   round: number;
+  /** How the winner won, where a game has more than one way: "20 points". */
+  how?: string | null;
   /** "View board" on the board itself. */
   closeLabel?: string;
 }
@@ -60,6 +62,7 @@ export function GameOverDialog({
   rewards,
   viewerSeat,
   round,
+  how,
   closeLabel = "View board",
 }: GameOverDialogProps) {
   const winners = standings.filter((p) => p.won);
@@ -130,7 +133,7 @@ export function GameOverDialog({
               {won ? "Victory" : "Defeat"}
             </DialogTitle>
             <DialogDescription>
-              {winners.length > 1 ? "Shared victory" : won ? "You claimed the Gauntlet" : `${winners[0]?.name ?? "Nobody"} wins`}
+              {winners.length > 1 ? "Shared victory" : how ? `${won ? "You" : (winners[0]?.name ?? "Nobody")} won with ${how}` : won ? "You claimed the Gauntlet" : `${winners[0]?.name ?? "Nobody"} wins`}
               {" · "}
               {round} rounds
             </DialogDescription>

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { cn } from "cn";
 
 import { AvengersIcon } from "@/components/game/assets";
@@ -25,6 +26,10 @@ interface HandTrayProps {
   tags: number;
   /** Tokens picked this turn — counted toward the n/10 indicator. */
   stagedCount: number;
+  /** The cards are Duel cards, shown with their Duel faces. */
+  duel?: boolean;
+  /** Drawn under the Avengers count (the Duel player's Privileges). */
+  extra?: ReactNode;
   className?: string;
 }
 
@@ -38,7 +43,7 @@ const EMPTY = "bg-foreground/10";
  * its corner, its count on a badge — then the Avengers tag count. Empty
  * slots stay visible so a color never moves.
  */
-export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className }: HandTrayProps) {
+export function HandTray({ tokens, bonuses, cards, tags, stagedCount, duel, extra, className }: HandTrayProps) {
   const total = totalTokens(tokens) + stagedCount;
 
   return (
@@ -54,6 +59,7 @@ export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className 
         <TeamView
           owner="Your"
           cardIds={cards}
+          duel={duel}
           className="rounded-full bg-secondary px-2 py-0.5 fs-2xs font-bold whitespace-nowrap text-secondary-foreground uppercase"
         >
           View team
@@ -93,12 +99,12 @@ export function HandTray({ tokens, bonuses, cards, tags, stagedCount, className 
           );
         })}
       </div>
-      <span
-        className={cn("ml-1 flex items-center gap-1 text-xl font-black tabular-nums", tags === 0 && "opacity-40")}
-        title="Avengers tags"
-      >
-        <AvengersIcon className="size-7 text-base" />
-        {tags}
+      <span className="ml-1 flex flex-col items-center">
+        <span className={cn("flex items-center gap-1 text-xl font-black tabular-nums", tags === 0 && "opacity-40")} title="Avengers tags">
+          <AvengersIcon className="size-7 text-base" />
+          {tags}
+        </span>
+        {extra}
       </span>
     </div>
   );

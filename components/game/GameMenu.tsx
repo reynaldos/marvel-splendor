@@ -109,8 +109,8 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
                 />
                 <Rule
                   icon={<Star className={`${RULE_ICON} fill-gold-400 text-gold-600`} />}
-                  label="Points to win"
-                  value={`${settings.targetPoints}`}
+                  label={settings.rules === "duel" ? "To win" : "Points to win"}
+                  value={settings.rules === "duel" ? "20 pts, 10 badges, or 10 in a color" : `${settings.targetPoints}`}
                 />
                 <Rule
                   icon={<TimerIcon className={RULE_ICON} />}

@@ -1,7 +1,7 @@
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import type { ReactNode } from "react";
 import { cn } from "cn";
-import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bot, Crown, Hourglass, Star, UserRound, X } from "lucide-react";
 
 import { AwayTimer } from "@/components/lobby/AwayTimer";
 import { BotLevel } from "@/components/lobby/BotLevel";
@@ -36,6 +36,9 @@ interface LobbyScreenProps {
   isHost: boolean;
   targetPoints: number;
   turnTimeSeconds: number | null;
+  gameTimeMinutes: number | null;
+  /** A Duel room: two seats, and the game's own three wins instead of a points target. */
+  duel?: boolean;
   onAddBot: Action;
   onRemoveBot: (seat: number) => Action;
   onSetBotDifficulty: (seat: number) => Action;
@@ -111,6 +114,8 @@ export function LobbyScreen({
   isHost,
   targetPoints,
   turnTimeSeconds,
+  gameTimeMinutes,
+  duel,
   onAddBot,
   onRemoveBot,
   onSetBotDifficulty,
@@ -181,16 +186,21 @@ export function LobbyScreen({
             </button>
           </form>
 
-          <div className="flex gap-8">
+          <div className="flex gap-5">
             <Rule
-              icon={<TimerIcon className="size-10" />}
+              icon={<TimerIcon className="size-9" />}
               label="Turn time"
               value={turnTimeSeconds ? `${turnTimeSeconds} sec` : "Untimed"}
             />
             <Rule
-              icon={<Star className="size-10 fill-gold-400 text-gold-600" />}
-              label="Points to win"
-              value={String(targetPoints)}
+              icon={<Hourglass className="size-9 text-gold-400" />}
+              label="Game clock"
+              value={gameTimeMinutes ? `${gameTimeMinutes} min` : "No clock"}
+            />
+            <Rule
+              icon={<Star className="size-9 fill-gold-400 text-gold-600" />}
+              label={duel ? "Game" : "Points to win"}
+              value={duel ? "Duel" : String(targetPoints)}
             />
           </div>
 
@@ -199,13 +209,13 @@ export function LobbyScreen({
               <button
                 type="submit"
                 disabled={!canStart}
-                className="h-13 w-56 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
+                className="h-13 w-48 shrink-0 rounded-full bg-marvel font-display text-base font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
               >
                 {canStart ? "Start game" : "Need 2 players"}
               </button>
             </form>
           ) : (
-            <p className="flex h-13 w-56 items-center justify-center text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase">
+            <p className="flex h-13 w-48 shrink-0 items-center justify-center text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase">
               Waiting for the host…
             </p>
           )}

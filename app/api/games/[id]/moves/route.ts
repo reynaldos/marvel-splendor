@@ -5,12 +5,10 @@ import { auth0 } from "@/lib/auth0";
 import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { recordGameCoins } from "@/lib/record-coins";
-import { applyMove } from "@/lib/engine/apply";
-import { validateMove } from "@/lib/engine/validate";
-import { isAway, type GameSettings, type GameState, type Move } from "@/lib/engine/types";
+import { isAway, type GameSettings } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
+import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type AnyState } from "@/lib/game-rules";
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
-import { redactState } from "@/lib/game-view";
 import { playbackMs } from "@/lib/playback";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { accountXpByUser } from "@/lib/load-xp";
@@ -54,7 +52,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       { status: 400 },
     );
   }
-  const sent: Move = parsedMove.data;
+  const sent: AnyMove = parsedMove.data;
 
   const game = await prisma.game.findUnique({
     where: { id },
@@ -73,7 +71,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "This game is not active." }, { status: 400 });
   }
 
-  const stored = game.state as unknown as GameState;
+  const stored = game.state as unknown as AnyState;
   // The game clock is checked whenever anyone moves. Once it has run out, that
   // is recorded first, and the round in progress becomes the last.
   const clockLeft = gameEndsInMs(stored.settings, game.createdAt);
@@ -81,13 +79,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const clockMove: AppliedMove[] = clockRanOut
     ? [{ seat: stored.currentSeat, move: { type: "END_BY_CLOCK" }, ordinal: stored.moveCount }]
     : [];
-  const state = clockRanOut ? applyMove(stored, stored.currentSeat, { type: "END_BY_CLOCK" }) : stored;
+  const state: AnyState = clockRanOut ? applyAny(stored, stored.currentSeat, { type: "END_BY_CLOCK" }) : stored;
   const viewerSeat = seatRow.seat;
   // A timeout is the one move made on someone else's behalf: any player may
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
   const seat = sent.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
   // Only the player themselves can say they were there.
-  const move: Move = sent.type === "TIMEOUT_SKIP" && seat !== viewerSeat ? { type: "TIMEOUT_SKIP" } : sent;
+  const move: AnyMove = sent.type === "TIMEOUT_SKIP" && seat !== viewerSeat ? { type: "TIMEOUT_SKIP" } : sent;
 
   // A player removed for being away has no more say in the game, not even to forfeit it.
   if (isAway(state.players[viewerSeat])) {
@@ -110,14 +108,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // The clock ending the game outright leaves no turn to take.
   const over = state.status === "finished";
   if (!over) {
-    const validation = validateMove(state, seat, move);
+    const validation = validateAny(state, seat, move);
     if (!validation.ok) {
       return NextResponse.json({ error: validation.reason }, { status: 400 });
     }
   }
 
   const humanOrdinal = state.moveCount;
-  const afterHumanMove = over ? state : applyMove(state, seat, move);
+  const afterHumanMove = over ? state : applyAny(state, seat, move);
 
   const isBotSeat = (s: number) => game.players.find((p) => p.seat === s)?.isBot ?? false;
   const { state: finalState, applied: botApplied } = runServerTurnLoop(afterHumanMove, isBotSeat);
@@ -140,10 +138,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let replay = stored;
   let playback = 0;
   const steps = allApplied.map(({ seat: s, move: m }) => {
-    const next = applyMove(replay, s, m);
+    const next = applyAny(replay, s, m);
     playback += playbackMs(replay, s, m, next, isBotSeat(s));
     replay = next;
-    return { seat: s, move: m, view: redactState(next, viewerSeat) };
+    return { seat: s, move: m, view: redactAny(next, viewerSeat) };
   });
 
   const now = new Date();
@@ -183,7 +181,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   return NextResponse.json({
     // `view` already carries status/winnerSeat/sharedWinners.
-    view: redactState(finalState, viewerSeat),
+    view: redactAny(finalState, viewerSeat),
     status,
     steps,
     turnEndsInMs: abandoned ? null : turnEndsInMs(finalState, movedAt, now.getTime()),
@@ -194,7 +192,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 async function persistMoves(
   gameId: string,
   expectedVersion: number,
-  finalState: GameState,
+  finalState: AnyState,
   applied: AppliedMove[],
   movedAt: Date,
   status: "ACTIVE" | "FINISHED" | "ABANDONED",
@@ -236,7 +234,7 @@ class StaleVersionError extends Error {}
 
 async function buildHumanOutcomes(
   gameId: string,
-  finalState: GameState,
+  finalState: AnyState,
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
   fallbackHumanUserId: string,
 ): Promise<Array<PlayerGameOutcome & { seat: number }>> {
@@ -248,11 +246,11 @@ async function buildHumanOutcomes(
     select: { seat: true, payload: true },
   });
 
+  const record = rankable(finalState);
   return humanPlayers.map((p) => {
     const seat = p.seat;
-    const player = finalState.players[seat];
-    const isWinner =
-      finalState.winnerSeat === seat || (finalState.sharedWinners?.includes(seat) ?? false);
+    const player = record.players[seat];
+    const isWinner = record.winnerSeat === seat || (record.sharedWinners?.includes(seat) ?? false);
     const turns = primaryMoves.filter(
       (m) => m.seat === seat && isTurnPrimary((m.payload as { type?: string })?.type),
     ).length;
@@ -263,8 +261,8 @@ async function buildHumanOutcomes(
       isWinner,
       points: player.points,
       turns,
-      wonAvengersTile: finalState.avengersHolder === seat,
-      locationsClaimed: player.locations.length,
+      wonAvengersTile: !isDuel(finalState) && finalState.avengersHolder === seat,
+      locationsClaimed: isDuel(finalState) ? 0 : finalState.players[seat].locations.length,
     };
   });
 }
@@ -272,7 +270,7 @@ async function buildHumanOutcomes(
 /** Rank only moves for a multiplayer game with 2+ humans — a bot-filled seat is never a rated opponent. */
 async function recordFinishedGameRating(
   mode: "VS_BOT" | "MULTIPLAYER",
-  finalState: GameState,
+  finalState: AnyState,
   players: Array<{ seat: number; userId: string | null; isBot: boolean }>,
   fallbackHumanUserId: string,
 ) {
@@ -281,7 +279,7 @@ async function recordFinishedGameRating(
   const humanPlayers = players.filter((p) => !p.isBot && p.userId);
   if (humanPlayers.length < 2) return [];
 
-  const ranked = rankPlayers(finalState, []);
+  const ranked = rankPlayers(rankable(finalState), []);
   const placements = humanPlayers.map((p) => ({
     userId: p.userId ?? fallbackHumanUserId,
     place: ranked.find((r) => r.seat === p.seat)!.place,

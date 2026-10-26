@@ -1,6 +1,19 @@
 [
   {
-    "version": "2.14.0",
+    "version": "3.1.0",
+    "date": "2026-10-25",
+    "title": "Duel",
+    "summary": "Version 3 opens with a second game for two: take stones in lines from a board of 25, recruit cards with powers, and be first to 20 points.",
+    "pulls": [],
+    "new": [
+      "Duel, from the home screen: Splendor for two, against the computer or a friend in a room for two, with its own board, Privileges, Locations and three ways to win",
+      "How to play now asks which game first, and Duel has its own slides"
+    ],
+    "improved": [],
+    "fixed": []
+  },
+  {
+    "version": "3.0.0",
     "date": "2026-10-24",
     "title": "Foil frames that turn",
     "summary": "Card and player frames are drawn in a live foil that turns with the phone, and the tiers get a new order.",
@@ -11,8 +24,7 @@
     ],
     "improved": [
       "The two frame switches in Settings are now Effects and Border: have the light on your picture, the tier border round it and your name card, both, or neither",
-      "The tiers now run Recruited, Bronze, Silver, Gold, Diamond, Sapphire, Emerald, Ruby, Prismatic, Mastered: Platinum is gone, Sapphire is new, and Diamond comes sooner",
-      "The leaderboard no longer scrolls sideways"
+      "The tiers now run Recruited, Bronze, Silver, Gold, Diamond, Sapphire, Emerald, Ruby, Prismatic, Mastered: Platinum is gone, Sapphire is new, and Diamond comes sooner"
     ],
     "fixed": [
       "Beast's card art"

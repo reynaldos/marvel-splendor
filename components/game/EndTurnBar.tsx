@@ -12,6 +12,8 @@ interface EndTurnBarProps {
   onConfirm: () => void;
   /** Set when tokens must go back: the button opens the popup to choose them. */
   onReturn?: () => void;
+  /** Set while a power's choice popup is closed: the button opens it again. */
+  onAction?: () => void;
   className?: string;
 }
 
@@ -31,9 +33,11 @@ export function EndTurnBar({
   submitting,
   onConfirm,
   onReturn,
+  onAction,
   className,
 }: EndTurnBarProps) {
   const returning = overLimit || Boolean(onReturn);
+  const acting = !returning && Boolean(onAction);
 
   return (
     <div className={cn("flex w-28 shrink-0 flex-col justify-end gap-1 pb-2", className)}>
@@ -44,12 +48,12 @@ export function EndTurnBar({
         type="button"
         className={cn(
           BUTTON,
-          returning ? "bg-marvel text-white hover:bg-red-500" : "bg-gold-400 text-cosmos-950 hover:bg-gold-200",
+          returning ? "bg-marvel text-white hover:bg-red-500" : acting ? "bg-fuchsia-700 text-white hover:bg-fuchsia-600" : "bg-gold-400 text-cosmos-950 hover:bg-gold-200",
         )}
-        disabled={submitting || (!onReturn && (disabled || !hasStaged))}
-        onClick={onReturn ?? onConfirm}
+        disabled={submitting || (!onReturn && !onAction && (disabled || !hasStaged))}
+        onClick={onReturn ?? onAction ?? onConfirm}
       >
-        {submitting ? "Sending…" : returning ? "Return" : "End Turn"}
+        {submitting ? "Sending…" : returning ? "Return" : acting ? "Use power" : "End Turn"}
       </Button>
     </div>
   );

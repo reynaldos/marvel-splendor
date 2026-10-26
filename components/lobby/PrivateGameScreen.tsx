@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { cn } from "cn";
-import { Star } from "lucide-react";
+import { Hourglass, Star } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
 import { AssetImage } from "@/components/game/assets";
 import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
-import { nextOption, POINT_OPTIONS, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
+import { GAME_CLOCK_OPTIONS, nextOption, POINT_OPTIONS, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
 
 type Action = (formData: FormData) => Promise<void>;
 
@@ -23,10 +23,28 @@ const STONES_AROUND = [
   { stone: "time", place: "right-0 bottom-0" },
 ];
 
-/** Setting up a game with friends: choose the rules and open a room, or join someone else's. */
+/** The six stones tucked behind each side of whatever stands in the middle: the Gauntlet, or Duel's win tile. */
+export function StonesAround({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative flex justify-center">
+      {STONES_AROUND.map(({ stone, place }) => (
+        <span key={stone} className={cn("absolute size-10 overflow-hidden rounded-full shadow-lg", place)}>
+          <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
+        </span>
+      ))}
+      {children}
+    </div>
+  );
+}
+
+/** The game clocks on offer, and none. */
+const CLOCKS = [null, ...GAME_CLOCK_OPTIONS];
+
+/** Setting up a game: choose the rules and open a room, for friends by code or for bots, or join someone else's. */
 export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin: Action }) {
   const [turnTime, setTurnTime] = useState(TURN_TIME_OPTIONS[0]);
   const [points, setPoints] = useState(POINT_OPTIONS[0]);
+  const [clock, setClock] = useState<number | null>(CLOCKS[0]);
   const [code, setCode] = useState("");
 
   return (
@@ -35,36 +53,38 @@ export function PrivateGameScreen({ onCreate, onJoin }: { onCreate: Action; onJo
         <div className="flex items-end justify-around gap-6">
           <div className="flex gap-4">
             <Option
-              icon={<TimerIcon className="size-24" />}
+              className="w-32"
+              icon={<TimerIcon className="size-20" />}
               label="Turn time"
               value={`${turnTime} sec`}
               onNext={() => setTurnTime((v) => nextOption(TURN_TIME_OPTIONS, v))}
             />
             <Option
-              icon={<Star className="size-24 fill-gold-400 text-gold-600" />}
+              className="w-32"
+              icon={<Star className="size-20 fill-gold-400 text-gold-600" />}
               label="Points to win"
               value={String(points)}
               onNext={() => setPoints((v) => nextOption(POINT_OPTIONS, v))}
             />
+            <Option
+              className="w-32"
+              icon={<Hourglass className="size-20 text-gold-400" />}
+              label="Game clock"
+              value={clock ? `${clock} min` : "No clock"}
+              onNext={() => setClock((v) => nextOption(CLOCKS, v))}
+            />
           </div>
 
           <div className="flex w-80 flex-col gap-2">
-            <div className="relative flex justify-center">
-              {STONES_AROUND.map(({ stone, place }) => (
-                <span
-                  key={stone}
-                  className={cn("absolute size-10 overflow-hidden rounded-full shadow-lg", place)}
-                >
-                  <AssetImage src={`/assets/stones/${stone}-token.png`} alt="" />
-                </span>
-              ))}
+            <StonesAround>
               <span className="relative aspect-[1404/688] w-44 overflow-hidden rounded-xl shadow-lg ring-2 ring-gold-400">
                 <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" sizes="22vw" />
               </span>
-            </div>
+            </StonesAround>
             <form action={onCreate} className="flex">
               <input type="hidden" name="turnTimeSeconds" value={turnTime} />
               <input type="hidden" name="targetPoints" value={points} />
+              <input type="hidden" name="gameTimeMinutes" value={clock ?? "off"} />
               {/* Sent along for what may be typed there besides a room's code. */}
               <input type="hidden" name="code" value={code} />
               <button

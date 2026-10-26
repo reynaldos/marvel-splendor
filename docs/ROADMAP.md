@@ -1,22 +1,25 @@
 # Roadmap
 
-What is still to build, and how the project got here. Releases are numbered in `data/updates.json`; the release process is in the [README](../README.md#releasing). Each version of the game is a MAJOR number: 1.0.0 was the playable game once the box-art look was on (the original plan below), 2.0.0 brought rank, levels and coins, and the versions below are what comes next.
+What is still to build, and how the project got here. Releases are numbered in `data/updates.json`; the release process is in the [README](../README.md#releasing). Each version of the game is a MAJOR number: 1.0.0 was the playable game once the box-art look was on (the original plan below), 2.0.0 brought rank, levels and coins, 3.0.0 opened with Duel and the foil frames, and the versions below are what comes next.
 
-## Version 2, now
+## Version 2
 
-The version we are in. It takes whatever is added until the first of the version 3 items starts.
+Still open from version 2; each carries on alongside version 3.
 
 - **Sound effects and background music.** Started: music on the board and its preview, four sounds, and Music and Sounds switches that are remembered on the device. Still to do: sounds for the rest of a game's moments (your turn, the timer running low, winning or losing), music on the menus, and more tracks for the shop.
 - **A shop, paid for in coins.** Started: the shop screen, buying through the ledger with a `Purchase` table of what each player owns, and the first shelf, card packs, with the Fantastic Four pack and its opening ([UI.md](UI.md), [PROGRESSION.md](PROGRESSION.md)). Since then: the Locations shelf, with a pack of five tiles dealt in like a card pack. Still to do: the other shelves, board backgrounds, background music tracks and maybe layout themes, each of which needs its items listed in `lib/shop.ts` and a way to choose what is in use, which is a schema change; and more packs as the backlog's art lands.
 
-## Version 3
+## Version 3, now
 
+The version we are in. It opened with the two-player game and the foil frames.
+
+- **Duel, Splendor for two.** Started: the engine, the bot, the board, a third home tile and a two-seat room, and the how-to slides ([DUEL.md](DUEL.md)). It counts for rank, XP and card levels like the Marvel game. Still to do: art for the powers, the Locations and the bag.
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
 - Bot banter.
 - End-to-end tests.
 - **Friends.** Add friends by username, see their profiles, and invite them to a game. An invite sends a notification; opening it asks whether to join that game's lobby. Needs new tables for friendships and invites, which is a schema change. Notifications inside the app can use the live connection already there; ones that reach a phone with the app closed need web push, which on an iPhone only works once the app is on the home screen. To decide: whether a friendship needs accepting, and whether profiles stay open to everyone or only to friends.
 - **Duos, 2 v 2.** A four-seat game played as two teams, partners sitting opposite so turns alternate between teams. The team's points are added together for the end trigger and the standings, and both partners win or lose together. To decide: whether partners share tokens, bonuses or a reserve, or only their score; whether a team may talk beyond the set messages; how rank is scored for a team result; and whether bots can partner a player. Needs a team on each seat, which is a game setting and a change to how the engine ends a game, not a schema change.
-- **Tier frames in a shader.** Started: the research and plan are in [SHADER_FRAMES.md](SHADER_FRAMES.md). The frames are CSS for now: gradients, a sheen, sparkles, facets. A WebGL pass (one fragment shader, no three.js) does real refraction and foil that turns with the phone or follows a finger on the cards drawn large; the small frames stay CSS and follow the tilt too.
+- **Tier frames in a shader.** Shipped: one fragment shader, no three.js, draws the frames as live foil with facets, metal and holographic shine, lit from the finger or from how the phone is held, on the collection, the leaderboard, the profile and every avatar ([SHADER_FRAMES.md](SHADER_FRAMES.md)). Still to do: real refraction on the cards drawn large.
 
 ## Version 4
 

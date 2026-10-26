@@ -1,15 +1,19 @@
 import { Fragment } from "react";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { duelArt, royalTile } from "@/components/duel/duel-art";
 import { getCard, getLocation } from "@/lib/engine/data";
 import { tokenMeta } from "@/components/game/stone-colors";
 import type { BoardEvent } from "@/lib/board-events";
-import type { Move } from "@/lib/engine/types";
+import type { TokenColor } from "@/lib/engine/types";
+import type { AnyMove } from "@/lib/game-rules";
 
 export interface MoveLogEntry {
   id: string;
   seat: number;
-  move: Move;
+  move: AnyMove;
+  /** For a Duel line, the tokens it took, known only when the board was on screen. */
+  tokens?: TokenColor[];
   /** Full rounds completed when the move was made. */
   round?: number;
   /** The mover's points right after. */
@@ -89,12 +93,18 @@ export function describeEvents(
           : `${who} stole the Avengers Assemble tile from ${seatLabel(event.from, players, viewerSeat)}`;
       case "location":
         return entry.move.type === "CHOOSE_LOCATION" ? [] : `${who} claimed ${getLocation(event.locationId).name}`;
+      case "royal":
+        return entry.move.type === "PICK_ROYAL" ? [] : `${who} claimed ${royalTile(event.royalId).name}`;
+      case "privilege":
+      case "steal":
+        return [];
     }
   });
 }
 
+/** A Duel card goes by the Marvel picture it wears. */
 function cardLabel(cardId: string): string {
-  const card = getCard(cardId);
+  const card = cardId.startsWith("d") ? duelArt(cardId) : getCard(cardId);
   return `${card.name} (Lv${card.level})`;
 }
 
@@ -111,9 +121,9 @@ export function describeMove(
     case "TAKE_TOKENS":
       return `${who} took ${move.colors.map((c) => tokenMeta(c).label).join(", ")}`;
     case "RESERVE":
-      return move.from === "market"
-        ? `${who} reserved ${cardLabel(move.cardId)}`
-        : `${who} reserved a card blind from the Level ${move.level} deck`;
+      return move.from === "deck"
+        ? `${who} reserved a card blind from the Level ${move.level} deck`
+        : `${who} reserved ${cardLabel(move.cardId)}`;
     case "RECRUIT":
       return `${who} recruited ${cardLabel(move.cardId)}`;
     case "RETURN_TOKENS": {
@@ -130,6 +140,24 @@ export function describeMove(
       return `${who} forfeited the game`;
     case "END_BY_CLOCK":
       return "The game clock expired — finishing the round.";
+    case "TAKE_LINE":
+      return entry.tokens
+        ? `${who} took ${entry.tokens.map((c) => tokenMeta(c).label).join(", ")}`
+        : `${who} took ${move.spaces.length} stone${move.spaces.length === 1 ? "" : "s"}`;
+    case "BUY":
+      return `${who} recruited ${cardLabel(move.cardId)}`;
+    case "SPEND_PRIVILEGE":
+      return `${who} spent a Privilege`;
+    case "REFILL":
+      return `${who} refilled the board`;
+    case "PICK_TOKEN":
+      return `${who} took a stone`;
+    case "PICK_OPPONENT_TOKEN":
+      return `${who} took a ${tokenMeta(move.color).label} stone from their opponent`;
+    case "PICK_JOIN_COLOR":
+      return `${who}'s wild card joined ${tokenMeta(move.color).label}`;
+    case "PICK_ROYAL":
+      return `${who} claimed ${royalTile(move.royalId).name}`;
     default:
       return `${who} made a move.`;
   }

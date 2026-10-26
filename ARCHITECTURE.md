@@ -13,6 +13,7 @@ This document covers the rules the engine implements, the stack, how a move trav
 | [docs/DESIGN.md](docs/DESIGN.md) | The design system every screen is built from: colours, type, layout, components, motion, sound |
 | [docs/PROGRESSION.md](docs/PROGRESSION.md) | XP and levels, coins and the daily bonus, rank, card levels |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | What has shipped and what is still to build |
+| [docs/DUEL.md](docs/DUEL.md) | Duel, the two-player game: its rules, its board, and how it shares the server with the Marvel game |
 
 ---
 
@@ -112,6 +113,9 @@ Some turns need a follow-up decision (return tokens over 10; choose between mult
 ### The bot (`lib/bot/`)
 Deterministic heuristic policy (no LLM in the loop): greedy scoring over `legalMoves` — weighted by progress toward affordable high-value cards, color-set completion (win condition needs all 5 bonuses), Time Stone acquisition, Avengers-tag races, and token efficiency. Difficulty tiers adjust lookahead/weights. Bot turns run server-side immediately after a human move in the same request (or a follow-up invocation), so vs-computer games need no realtime infra at all. OpenAI generates an in-character quip about the move it just made (non-blocking; failures are silent).
 
+### Duel (`lib/duel/`, `lib/bot/duel-policy.ts`)
+A second game, Splendor Duel for two, with its own pure engine in the same shape (`types`, `setup`, `validate`, `legal-moves`, `apply`, `view`) and a bot whose three levels are a greedy one that slips, a one-ply one, and one that looks through the rival's best answer. `lib/game-rules.ts` is the one surface over both engines: `settings.rules` (`"marvel"` or `"duel"`) picks the game, and the server loop, the routes, replay, playback and the records call `createAny`, `validateAny`, `applyAny`, `legalAny`, `chooseBotAny` and `redactAny` instead of either engine directly. The play page picks `DuelBoardClient` or `GameBoardClient` by the same setting. The rules, the board design and the plan are in [docs/DUEL.md](docs/DUEL.md).
+
 ---
 
 ### The bots' three levels
@@ -192,8 +196,7 @@ vs-Bot games skip Pusher entirely: the move POST response contains the bot's rep
 
 ```
 app/
-  page.tsx                          # main menu: Play vs Computer / Private Game
-  solo/                             # vs-computer setup
+  page.tsx                          # main menu: Play Game / Duel
   private/                          # create or join a private room
   join/[code]/                      # join by code (sign in or guest name)
   lobby/[gameId]/                   # pre-game lobby
@@ -281,7 +284,7 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 - **Checked only when someone moves.** Nothing runs on the server between requests, so a game whose clock has run out carries on until the next move, which is then recorded as the start of the final round.
 - **The final round is played out.** The clock takes nobody's turn: whoever is up still plays, and the game ends when the round is complete, so everyone has had the same number of turns.
-- **Offered in Play vs Computer only.** Private games have no game clock setting.
+- **Offered on both setup screens**, Play Game and Duel, and shown in the room. In a Duel the game ends once both players have had the same number of turns: the most points wins, then the most Avengers badges, and level is a draw.
 
 **Turn timers**
 

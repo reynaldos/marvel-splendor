@@ -19,7 +19,7 @@ export function Option({
   return (
     <div className={cn("flex w-44 flex-col items-center gap-2", className)}>
       {icon}
-      <span className="font-display text-base font-bold tracking-wide whitespace-nowrap text-gold-400 uppercase">
+      <span className="font-display text-sm font-bold tracking-wide whitespace-nowrap text-gold-400 uppercase">
         {label}
       </span>
       <button

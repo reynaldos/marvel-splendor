@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { cn } from "cn";
 import { Check } from "lucide-react";
 
@@ -23,23 +23,40 @@ interface ReservedCardsProps {
   onStageRecruit: (cardId: string) => void;
 }
 
+/** The viewer's reserved Marvel cards, as a fan; see `ReservedFan`. */
+export function ReservedCards({ reserved, viewerTokens, viewerBonuses, selected, disabled, onStageRecruit }: ReservedCardsProps) {
+  // The viewer always sees their own cards, blind-reserved or not.
+  const cards = reserved.flatMap((r) => ("cardId" in r ? [getCard(r.cardId)] : []));
+  return (
+    <ReservedFan
+      cards={cards.map((card) => ({
+        id: card.id,
+        name: card.name,
+        affordable: estimateAffordability(card, viewerTokens, viewerBonuses).affordable,
+        face: (className) => <CardView card={card} className={className} />,
+      }))}
+      selected={selected}
+      disabled={disabled}
+      onPick={onStageRecruit}
+    />
+  );
+}
+
+interface ReservedFanProps {
+  cards: Array<{ id: string; name: string; affordable: boolean; face: (className: string) => ReactNode }>;
+  selected?: boolean;
+  disabled?: boolean;
+  onPick: (cardId: string) => void;
+}
+
 /**
  * The viewer's reserved cards: a fan peeking out of the tray. Tapping it
  * dims the board and lays the cards out large, bordered green when
  * affordable, with a check beneath, and red when not; tapping an affordable
  * one recruits it.
  */
-export function ReservedCards({
-  reserved,
-  viewerTokens,
-  viewerBonuses,
-  selected,
-  disabled,
-  onStageRecruit,
-}: ReservedCardsProps) {
+export function ReservedFan({ cards, selected, disabled, onPick }: ReservedFanProps) {
   const [open, setOpen] = useState(false);
-  // The viewer always sees their own cards, blind-reserved or not.
-  const cards = reserved.flatMap((r) => ("cardId" in r ? [getCard(r.cardId)] : []));
 
   // Keeps the fan's space, so the tray is the same width with or without cards.
   if (cards.length === 0) return <span className="mr-1 w-22 shrink-0" />;
@@ -56,19 +73,14 @@ export function ReservedCards({
         className="relative mr-1 w-22 shrink-0 self-stretch [clip-path:inset(-50%_-50%_0_-50%)]"
       >
         {cards.map((card, i) => (
-          <CardView
+          // Fan out around the middle card.
+          <span
             key={card.id}
-            card={card}
-            className={cn(
-              "absolute top-1.5 w-14 origin-bottom shadow-md",
-              selected && "ring-2 ring-primary",
-            )}
-            // Fan out around the middle card.
-            style={{
-              left: `calc(var(--spacing) * ${i * 3.5})`,
-              rotate: `${(i - (cards.length - 1) / 2) * 8}deg`,
-            }}
-          />
+            className="absolute top-1.5 block w-14 origin-bottom"
+            style={{ left: `calc(var(--spacing) * ${i * 3.5})`, rotate: `${(i - (cards.length - 1) / 2) * 8}deg` }}
+          >
+            {card.face(cn("w-full shadow-md", selected && "ring-2 ring-primary"))}
+          </span>
         ))}
       </button>
 
@@ -90,24 +102,20 @@ export function ReservedCards({
           </h2>
           <LargeImages>
           <div className="relative flex items-start gap-6">
-            {cards.map((card) => {
-              const affordable = estimateAffordability(card, viewerTokens, viewerBonuses).affordable;
+            {cards.map(({ id, name, affordable, face }) => {
               return (
                 <button
-                  key={card.id}
+                  key={id}
                   type="button"
                   disabled={disabled || !affordable}
-                  aria-label={`${card.name}, ${affordable ? "affordable" : "not affordable"}`}
+                  aria-label={`${name}, ${affordable ? "affordable" : "not affordable"}`}
                   onClick={() => {
-                    onStageRecruit(card.id);
+                    onPick(id);
                     setOpen(false);
                   }}
                   className="flex flex-col items-center gap-2"
                 >
-                  <CardView
-                    card={card}
-                    className={cn("w-38 rounded-[10%/7.1%] ring-4", affordable ? "ring-green-500" : "ring-red-500")}
-                  />
+                  {face(cn("w-38 rounded-[10%/7.1%] ring-4", affordable ? "ring-green-500" : "ring-red-500"))}
                   {/* Keeps its space when hidden, so the cards stay level. */}
                   <span
                     className={cn(

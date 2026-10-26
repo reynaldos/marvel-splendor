@@ -10,7 +10,7 @@ import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { closeIfHostGone, hostAwayUntil, MAX_SEATS, withCheat } from "@/lib/lobby";
+import { closeIfHostGone, hostAwayUntil, seatsOf, withCheat } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
 import { pageMetadata } from "@/lib/site";
@@ -86,7 +86,7 @@ export default async function LobbyPage({
       <LobbyScreen
         joinCode={game.joinCode}
         hostAwayUntil={awayUntil}
-        seats={Array.from({ length: MAX_SEATS }, (_, i) => {
+        seats={Array.from({ length: seatsOf(game.settings) }, (_, i) => {
           const player = tableOrder(game.players)[i];
           if (!player) return null;
           return {
@@ -101,7 +101,9 @@ export default async function LobbyPage({
         })}
         isHost={mySeat.seat === 0}
         targetPoints={settings.targetPoints}
+        duel={settings.rules === "duel"}
         turnTimeSeconds={settings.turnTimeSeconds}
+        gameTimeMinutes={settings.gameTimeMinutes}
         onAddBot={addBotAction.bind(null, game.id)}
         onRemoveBot={(seat) => removeBotAction.bind(null, game.id, seat)}
         onSetBotDifficulty={(seat) => setBotDifficultyAction.bind(null, game.id, seat)}

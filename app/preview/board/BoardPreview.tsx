@@ -20,7 +20,7 @@ import { getCard } from "@/lib/engine/data";
 import { createGame } from "@/lib/engine/setup";
 import { DEFAULT_SETTINGS, type Move } from "@/lib/engine/types";
 import { redactState } from "@/lib/game-view";
-import { announceMs } from "@/lib/playback";
+import { announceMs, announceSfx } from "@/lib/playback";
 
 import {
   MENU_GOLD,
@@ -154,7 +154,7 @@ export function BoardPreview({ show, at, count, first }: BoardPreviewProps) {
     setTimeout(() => setTraced({ seat: 1, move }), 50);
   };
   const announce = (event: BoardEvent) => {
-    playSfx(event.kind);
+    playSfx(announceSfx(event));
     const key = Date.now();
     setAnnounced({ event, origin: tileOrigin(event), key });
     if (at === undefined)

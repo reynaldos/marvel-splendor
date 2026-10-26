@@ -3,10 +3,15 @@
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 import { cn } from "cn";
+import { ScrollText } from "lucide-react";
 
+import { royalTile } from "@/components/duel/duel-art";
+import { RoyalCard } from "@/components/duel/DuelCard";
 import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { glideFrom } from "@/components/game/glide";
 import { LocationTile } from "@/components/game/LocationTile";
+import { tokenMeta } from "@/components/game/stone-colors";
+import { TokenChip } from "@/components/game/TokenChip";
 import type { BoardEvent } from "@/lib/board-events";
 import { getLocation } from "@/lib/engine/data";
 import { announceMs } from "@/lib/playback";
@@ -22,11 +27,14 @@ export interface TileOrigin {
 
 /** Read before the board changes, while the tile is still on it. */
 export function tileOrigin(event: BoardEvent): TileOrigin | null {
-  if (event.kind === "timeStone") return null;
-  const tile = document.querySelector<HTMLElement>(`[data-tile="${event.kind === "avengers" ? "avengers" : event.locationId}"]`);
+  if (event.kind === "timeStone" || event.kind === "privilege" || event.kind === "steal") return null;
+  const key = event.kind === "avengers" ? "avengers" : event.kind === "location" ? event.locationId : event.royalId;
+  const tile = document.querySelector<HTMLElement>(`[data-tile="${key}"]`);
   if (!tile) return null;
   const copy = tile.cloneNode(true) as HTMLElement;
   copy.removeAttribute("data-tile");
+  // Sized by where it is carried to, not by where it sat.
+  copy.style.width = "100%";
   // Who held the Avengers tile before is no longer true.
   copy.querySelector("[data-caption]")?.remove();
   copy.style.boxShadow = "0 0 0 calc(var(--spacing) * 0.5) var(--color-gold-400), 0 1.5rem 3rem rgb(0 0 0 / 0.6)";
@@ -42,7 +50,7 @@ interface AnnouncementProps {
 /**
  * Stops the game for a moment to show everyone what just happened: a Location
  * or the Avengers tile glides from its place on the board to the middle of
- * the screen, or the Eye of Agamotto opens on the Time Stone.
+ * the screen, a Duel Location grows out of the middle, or the Eye of Agamotto opens on the Time Stone.
  */
 export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) {
   const name = nameForSeat(event.seat);
@@ -69,6 +77,20 @@ export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) 
     );
     line = `${name} assembled the Avengers`;
     if (event.from !== null) detail = `Taken from ${nameForSeat(event.from)}`;
+  } else if (event.kind === "royal") {
+    piece = <RoyalCard royalId={event.royalId} className="w-full rounded-3xl shadow-2xl ring-2 ring-gold-400" />;
+    line = `${name} created a base in ${royalTile(event.royalId).name}`;
+  } else if (event.kind === "privilege") {
+    piece = (
+      <span className="mx-auto flex size-32 items-center justify-center rounded-full bg-gold-400 shadow-2xl ring-4 ring-gold-200">
+        <ScrollText className="size-16 text-cosmos-950" />
+      </span>
+    );
+    line = `${name} spent a Privilege`;
+  } else if (event.kind === "steal") {
+    piece = <TokenChip color={event.color} className="mx-auto size-32 shadow-2xl ring-4 ring-gold-400" />;
+    line = `${name} took a ${tokenMeta(event.color).label} stone`;
+    detail = `From ${nameForSeat(event.from)}`;
   } else {
     // Room under it, so its casing stands clear of the line beneath.
     piece = (

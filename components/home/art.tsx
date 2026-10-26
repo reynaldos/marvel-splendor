@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { cn } from "cn";
 
 import { AssetImage } from "@/components/game/assets";
@@ -8,11 +9,11 @@ import { AssetImage } from "@/components/game/assets";
  * The bob moves with `translate`, so it adds to a tilt but replaces a
  * `translate-*` class.
  */
-function Piece({ src, className, drift }: { src: string; className: string; drift?: number }) {
+function Piece({ src, className, drift, style }: { src: string; className: string; drift?: number; style?: CSSProperties }) {
   return (
     <span
       className={cn("absolute overflow-hidden shadow-lg", drift !== undefined && "drift", className)}
-      style={drift === undefined ? undefined : { animationDelay: `${-drift}s` }}
+      style={{ ...style, ...(drift === undefined ? undefined : { animationDelay: `${-drift}s` }) }}
     >
       <AssetImage src={src} alt="" sizes="18vw" />
     </span>
@@ -21,14 +22,14 @@ function Piece({ src, className, drift }: { src: string; className: string; drif
 
 const CARD = "aspect-card w-27 rounded-lg ring-1 ring-black/40";
 
-/** A hand of heroes. */
+/** A hand of heroes, fanned round the middle of the tile whatever its width. */
 export function CardFanArt() {
   return (
-    <>
-      <Piece src="/cards/thor.png" className={cn(CARD, "top-7 left-[7%] -rotate-12")} />
-      <Piece src="/cards/captain-america.png" className={cn(CARD, "top-7 right-[7%] rotate-12")} />
-      <Piece src="/cards/iron-man.png" className={cn(CARD, "top-3 left-1/2 w-30 -translate-x-1/2")} />
-    </>
+    <span className="absolute inset-0 flex items-start justify-center pt-3">
+      <Piece src="/cards/hulk.png" className={cn(CARD, "relative top-4 -mr-6 -rotate-12")} />
+      <Piece src="/cards/iron-man.png" className={cn(CARD, "relative z-10 w-30")} />
+      <Piece src="/cards/captain-america.png" className={cn(CARD, "relative top-4 -ml-6 rotate-12")} />
+    </span>
   );
 }
 
@@ -167,5 +168,36 @@ export function StackedArt({ upright, children }: { upright?: boolean; children:
         <div className="relative -mt-16">{children}</div>
       </div>
     </>
+  );
+}
+
+// The gems round the two cards: where each sits, as shares of the picture, how big, and in front or behind.
+const GEM_CLOUD = [
+  { stone: "space", left: 12, top: 16, size: "size-10", front: false },
+  { stone: "mind", left: 32, top: 8, size: "size-7", front: false },
+  { stone: "reality", left: 88, top: 14, size: "size-11", front: false },
+  { stone: "time", left: 70, top: 6, size: "size-7", front: false },
+  { stone: "soul", left: 8, top: 58, size: "size-8", front: true },
+  { stone: "power", left: 92, top: 52, size: "size-9", front: true },
+  { stone: "time", left: 22, top: 84, size: "size-11", front: true },
+  { stone: "space", left: 80, top: 84, size: "size-8", front: true },
+  { stone: "mind", left: 50, top: 90, size: "size-7", front: true },
+];
+
+/** Two at the table: Thor and Loki head to head, in a cloud of gems kept inside the picture. */
+export function DuelArt() {
+  return (
+    <span className="absolute inset-0 flex items-start justify-center gap-3 overflow-hidden rounded-t-3xl pt-4">
+      {GEM_CLOUD.map(({ stone, left, top, size, front }, i) => (
+        <Piece
+          key={i}
+          src={`/assets/stones/${stone}-token.png`}
+          className={cn(size, "-translate-1/2 rounded-full ring-2 ring-white/60", front ? "z-10" : "opacity-80")}
+          style={{ left: `${left}%`, top: `${top}%` }}
+        />
+      ))}
+      <Piece src="/cards/thor.png" className={cn(CARD, "relative top-3 rotate-12")} />
+      <Piece src="/cards/loki.png" className={cn(CARD, "relative top-3 -rotate-12")} />
+    </span>
   );
 }
