@@ -169,8 +169,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const xpBefore = await accountXpByUser(outcomes.map((o) => o.userId));
     const gameXp = gameXpByUser(finalState, game.players);
     // The move itself is saved by now; a collection that fails to save can be put right by the backfill.
-    // Duel's cards are not the collection's; nothing to save for them.
-    const cards = isDuel(finalState) ? [] : await saveCollectedCards(id, game.players).catch((error) => {
+    const cards = await saveCollectedCards(id, game.players).catch((error) => {
       console.error("collection not saved", id, error);
       return [];
     });
@@ -276,8 +275,6 @@ async function recordFinishedGameRating(
   fallbackHumanUserId: string,
 ) {
   if (mode !== "MULTIPLAYER") return [];
-  // Duel gets its own rating table and leaderboard tab (docs/DUEL.md, step 5b); until then it is unrated.
-  if (isDuel(finalState)) return [];
 
   const humanPlayers = players.filter((p) => !p.isBot && p.userId);
   if (humanPlayers.length < 2) return [];

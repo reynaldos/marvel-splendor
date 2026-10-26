@@ -235,7 +235,7 @@ games. The same ELO math, the same hide switch.
 - [x] **3. Server.** `lib/game-rules.ts` is the one surface over both engines (`rules` in the settings picks the
       game); the server loop, the move schema, the move and game routes, the create route, the lobby start, replay,
       playback and the records all go through it. `lib/duel/view.ts` is the redacted Duel view. Duel games are
-      unrated until 5b. The game clock ends a Duel once both have had the same number of turns, on points, then badges. `tests/duel/server.test.ts` plays a game through the loop and
+      rated, give XP and level up the Marvel cards their pictures stand for (5b). The game clock ends a Duel once both have had the same number of turns, on points, then badges. `tests/duel/server.test.ts` plays a game through the loop and
       replays it onto the stored state.
 - [x] **4. Board.** `components/duel/`: `Board.tsx` (the table), `TokenBoard.tsx` (the grid, the path, the win
       tile, the scrolls), `DuelCard.tsx` (a Marvel picture under the Duel band and costs, drawn inside `Card`'s
@@ -248,8 +248,8 @@ games. The same ELO math, the same hide switch.
       friend arrives, as in a private game. A Duel room
       seats two (`seatsOf` in `lib/lobby.ts`, read by the lobby page, the add-bot action and joining) and shows
       "Game: Duel" in place of the points target.
-- [ ] **5b. Rating.** The `UserDuelRating` table and migration, the rating write by rules, the "Duel" tab. Waits
-      on a go-ahead: it is a schema change.
+- [x] **5b. Rating.** Decided against a rating of its own: a Duel moves the one rating, gives XP and levels up the
+      cards its pictures stand for, exactly as the Marvel game does. No new table, no new leaderboard tab.
 - [x] **6. Polish and docs.** The question mark on the home screen asks which game first (two tiles, as on the
       home screen), then shows that game's slides; the Duel set is `DUEL_SLIDES` in `how-to-slides.tsx`. A Royal taken is announced on the board and named in the move
       log (`duelEvents` in `lib/board-events.ts`, counted by the turn clock through `eventsOf`); the win is the

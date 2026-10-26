@@ -35,7 +35,7 @@ export function WelcomeScreen() {
 }
 
 /** The main menu: the two games. With a room waiting (`lobbyId`), the Play Game tile goes straight back to it. */
-export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
+export function HomeScreen({ lobbyId, duelPlayed }: { lobbyId: string | null; duelPlayed: boolean }) {
   return (
     <Stage>
       <StageRows>
@@ -64,7 +64,7 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
           >
             <Medal className="size-6" />
           </Link>
-          <HowToPlay />
+          <HowToPlay badge={!duelPlayed} />
         </footer>
       </StageRows>
     </Stage>

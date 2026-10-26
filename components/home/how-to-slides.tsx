@@ -515,18 +515,19 @@ export const DUEL_SLIDES: Slide[] = [
   {
     text: "Each turn, do one thing: take up to 3 stones in a line, reserve a card and take a S.H.I.E.L.D., or recruit a card.",
     art: (
-      <div className="flex items-center gap-16">
-        <Pop>
+      <div className="flex items-center gap-14">
+        <Pop className="shrink-0">
           <Grid board={DUEL.board} size="sm" selected={DUEL_LINE} />
         </Pop>
-        <Pop delay={0.3} className="relative">
+        <Pop delay={0.3} className="relative shrink-0">
           <DeckBack level={2} className="rotate-6" />
           <Stone color="shield" className="absolute -top-4 -left-6" />
         </Pop>
-        <Pop delay={0.6} className="flex flex-col items-center">
-          <span className="z-10 -mb-5 flex gap-1">
+        <Pop delay={0.6} className="flex shrink-0 flex-col items-center">
+          {/* The cost in two rows, so a long one never pushes the board about. */}
+          <span className="z-10 -mb-5 grid grid-cols-4 gap-1">
             {DUEL_BUY_COST.map((s, i) => (
-              <Stone key={i} color={s} className="size-9" />
+              <Stone key={i} color={s} className="size-8" />
             ))}
           </span>
           <DuelCardView cardId={DUEL_BUY} className={CARD} />

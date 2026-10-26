@@ -26,7 +26,11 @@ export const ABILITIES: Record<Ability, { icon: LucideIcon; label: string }> = {
  * gives way when nothing fits. Dealt once from a fixed seed over the cards in id order; a picture is shared only
  * when nothing else fits.
  */
-const ART: Map<string, Card> = (() => {
+let dealt: Map<string, Card> | null = null;
+
+/** The pictures, dealt on first use so a game of the Marvel cards alone never deals them. */
+function art(): Map<string, Card> {
+  if (dealt) return dealt;
   const rng = createRng("duel-art");
   const pictured = ALL_CARDS.filter((c) => c.image);
   const printedCosts = (c: Card) => STONES.filter((s) => (c.cost[s] ?? 0) > 0).length;
@@ -44,16 +48,17 @@ const ART: Map<string, Card> = (() => {
     return shuffle(fits, rng)[0];
   };
   for (const card of DUEL_CARDS) {
-    const art = pick(card, false, false) ?? pick(card, false, true) ?? pick(card, true, false) ?? pick(card, true, true) ?? pictured.find((c) => c.level === card.level)!;
-    used.add(art.id);
-    out.set(card.id, art);
+    const picture = pick(card, false, false) ?? pick(card, false, true) ?? pick(card, true, false) ?? pick(card, true, true) ?? pictured.find((c) => c.level === card.level) ?? ALL_CARDS[0];
+    used.add(picture.id);
+    out.set(card.id, picture);
   }
+  dealt = out;
   return out;
-})();
+}
 
 /** The Marvel picture a Duel card wears. */
 export function duelArt(cardId: string): Card {
-  return ART.get(cardId) ?? ART.get(getDuelCard(cardId).id)!;
+  return art().get(cardId) ?? art().get(getDuelCard(cardId).id)!;
 }
 
 /** The Marvel card ids behind a player's Duel cards, for the team view. */

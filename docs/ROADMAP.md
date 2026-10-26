@@ -13,7 +13,7 @@ Still open from version 2; each carries on alongside version 3.
 
 The version we are in. It opened with the two-player game and the foil frames.
 
-- **Duel, Splendor for two.** Started: the engine, the bot, the board, a third home tile and a two-seat room, and the how-to slides ([DUEL.md](DUEL.md)). Still to do: a Duel rating of its own with a Duel tab on the leaderboard, which needs a new table; art for the powers, the Locations and the bag.
+- **Duel, Splendor for two.** Started: the engine, the bot, the board, a third home tile and a two-seat room, and the how-to slides ([DUEL.md](DUEL.md)). It counts for rank, XP and card levels like the Marvel game. Still to do: art for the powers, the Locations and the bag.
 - **Style the game menu.** The menu on the board, and its move log, game settings and forfeit popups, have the theme's colours but plain lists and default buttons. Bring them in line with the menus: the gold headings, pill buttons and icon-and-value settings used on the setup pages.
 - Bot banter.
 - End-to-end tests.

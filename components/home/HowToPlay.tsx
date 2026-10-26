@@ -9,6 +9,8 @@ import { LargeImages } from "@/components/game/assets";
 import { CardFanArt, DuelArt } from "@/components/home/art";
 import { DUEL_SLIDES, SLIDES } from "@/components/home/how-to-slides";
 import { ModeTile } from "@/components/home/ModeTile";
+import { markSeen, useSeen } from "@/components/seen";
+import { NewDot } from "@/components/UpdateLog";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 const ROUND =
@@ -23,9 +25,16 @@ const GAMES = {
   duel: { label: "Duel", tone: "from-sky-400 to-blue-800", art: <DuelArt />, slides: DUEL_SLIDES },
 };
 
-/** The help button and, once tapped, a choice of game, then its rules as a slideshow over the night sky. */
-export function HowToPlay() {
+/** Remembered on the device once the help has been opened, so the Duel badge shows once. */
+const DUEL_SEEN = "howto-duel-seen";
+
+/**
+ * The help button and, once tapped, a choice of game, then its rules as a slideshow over the night sky.
+ * With `badge`, for a player who has never played a Duel, a gold dot sits on the button until it is tapped.
+ */
+export function HowToPlay({ badge }: { badge?: boolean }) {
   const [open, setOpen] = useState(false);
+  const seen = useSeen(DUEL_SEEN, "1");
   const [game, setGame] = useState<HowToGame | null>(null);
   const [at, setAt] = useState(0);
   const slides = game ? GAMES[game].slides : [];
@@ -48,12 +57,14 @@ export function HowToPlay() {
         type="button"
         aria-label="How to play"
         onClick={() => {
+          markSeen(DUEL_SEEN, "1");
           pick(null);
           setOpen(true);
         }}
-        className={ROUND}
+        className={cn(ROUND, "relative")}
       >
         <CircleHelp className="size-6" />
+        {badge && seen === null ? <NewDot label="How to play Duel" className="absolute top-0 right-0" /> : null}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -77,7 +88,7 @@ export function HowToPlay() {
             {game === null ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-6">
                 <p className="card-arrive font-display text-lg font-black tracking-wide text-gold-400 uppercase">Which game?</p>
-                <div className="flex h-56 w-120 gap-6">
+                <div className="flex h-64 w-160 gap-6">
                   {(Object.keys(GAMES) as HowToGame[]).map((g) => (
                     <ModeTile key={g} label={GAMES[g].label} tone={GAMES[g].tone} art={GAMES[g].art} onClick={() => pick(g)} />
                   ))}
