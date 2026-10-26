@@ -541,7 +541,7 @@ export const DUEL_SLIDES: Slide[] = [
     art: <LineShow />,
   },
   {
-    text: "Three Privilege scrolls sit by the board. Take 3 stones of one color, take 2 Time Stones, or refill the board from the bag, and your opponent takes one.",
+    text: "Three Privilege scrolls sit by the board. The player who goes second starts with one. Take 3 stones of one color, take 2 Time Stones, or refill the board from the bag, and your opponent takes one.",
     art: (
       <div className="flex items-center gap-12">
         <Pop>
