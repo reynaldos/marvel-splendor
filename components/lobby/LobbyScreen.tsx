@@ -186,19 +186,19 @@ export function LobbyScreen({
             </button>
           </form>
 
-          <div className="flex gap-8">
+          <div className="flex gap-5">
             <Rule
-              icon={<TimerIcon className="size-10" />}
+              icon={<TimerIcon className="size-9" />}
               label="Turn time"
               value={turnTimeSeconds ? `${turnTimeSeconds} sec` : "Untimed"}
             />
             <Rule
-              icon={<Hourglass className="size-10 text-gold-400" />}
+              icon={<Hourglass className="size-9 text-gold-400" />}
               label="Game clock"
               value={gameTimeMinutes ? `${gameTimeMinutes} min` : "No clock"}
             />
             <Rule
-              icon={<Star className="size-10 fill-gold-400 text-gold-600" />}
+              icon={<Star className="size-9 fill-gold-400 text-gold-600" />}
               label={duel ? "Game" : "Points to win"}
               value={duel ? "Duel" : String(targetPoints)}
             />
@@ -209,13 +209,13 @@ export function LobbyScreen({
               <button
                 type="submit"
                 disabled={!canStart}
-                className="h-13 w-56 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
+                className="h-13 w-48 shrink-0 rounded-full bg-marvel font-display text-base font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300"
               >
                 {canStart ? "Start game" : "Need 2 players"}
               </button>
             </form>
           ) : (
-            <p className="flex h-13 w-56 items-center justify-center text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase">
+            <p className="flex h-13 w-48 shrink-0 items-center justify-center text-center font-display text-sm font-bold tracking-wide text-gold-400 uppercase">
               Waiting for the host…
             </p>
           )}
