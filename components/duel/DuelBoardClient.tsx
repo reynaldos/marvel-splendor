@@ -13,6 +13,7 @@ import { DuelBoardSkeleton } from "@/components/game/BoardSkeleton";
 import { useChatBubbles } from "@/components/game/ChatBubble";
 import { ChatButton } from "@/components/game/ChatButton";
 import { flowLock } from "@/components/game/flow-lock";
+import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
@@ -59,6 +60,7 @@ interface GameGetResponse {
   steps: GameStep[];
   start: DuelView | null;
   turnEndsInMs: number | null;
+  gameEndsInMs: number | null;
 }
 
 interface MovesPostResponse {
@@ -66,6 +68,7 @@ interface MovesPostResponse {
   status: string;
   steps: GameStep[];
   turnEndsInMs: number | null;
+  gameEndsInMs: number | null;
 }
 
 interface GameData {
@@ -74,6 +77,7 @@ interface GameData {
   players: GamePlayerInfo[];
   view: DuelView;
   turnEndsAt: number | null;
+  gameEndsAt: number | null;
   abandoned: boolean;
 }
 
@@ -199,12 +203,12 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
           await playSteps(data.steps, data.players, shown.view);
         } else if (data.start && data.steps.length > 0) {
-          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, abandoned: false });
+          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false });
           setMoveLog([]);
           await playSteps(data.steps, data.players, data.start);
         }
         setMoveLog(data.moves.map(toLogEntry));
-        commit({ id: data.id, mode: data.mode, players: data.players, view: data.view, turnEndsAt, abandoned: data.status === "ABANDONED" });
+        commit({ id: data.id, mode: data.mode, players: data.players, view: data.view, turnEndsAt, gameEndsAt: toDeadline(data.gameEndsInMs), abandoned: data.status === "ABANDONED" });
         setFatalError(null);
       } catch {
         if (!quiet) setFatalError("Could not reach the server.");
@@ -269,11 +273,11 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           if (res.status === 409) missedSignal.current = true;
           return false;
         }
-        const { view, status, steps, turnEndsInMs } = body as MovesPostResponse;
+        const { view, status, steps, turnEndsInMs, gameEndsInMs } = body as MovesPostResponse;
         setStaged(null);
         setSubmitting(false);
         await playSteps(steps, shown.players, shown.view, true);
-        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), abandoned: status === "ABANDONED" });
+        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), gameEndsAt: toDeadline(gameEndsInMs), abandoned: status === "ABANDONED" });
         return true;
       } catch {
         if (!quiet) toast.error("Could not reach the server. Please try again.");
@@ -399,6 +403,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           </div>
         ) : null}
         <div className="pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center gap-2">
+          {gameData.gameEndsAt !== null && !over ? <GameClock endsAt={gameData.gameEndsAt} lastRound={view.clockExpired} /> : null}
           {view.status === "finished" && gameOverDismissed ? (
             <button type="button" onClick={() => setGameOverDismissed(false)} className="pointer-events-auto rounded-full bg-gold-400 px-4 py-1 font-display text-xs font-black tracking-wide text-cosmos-950 uppercase shadow-md hover:bg-gold-200">
               Results

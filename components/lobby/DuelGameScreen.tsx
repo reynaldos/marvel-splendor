@@ -1,18 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { Hourglass } from "lucide-react";
 
 import { BackLink } from "@/components/BackLink";
 import { WinTile } from "@/components/duel/TokenBoard";
 import { Option } from "@/components/lobby/Option";
+import { StonesAround } from "@/components/lobby/PrivateGameScreen";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
-import { TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
+import { GAME_CLOCK_OPTIONS, nextOption, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
 
 type Action = (formData: FormData) => Promise<void>;
 
-/** The turn times on offer, and no clock at all. */
+/** The turn times on offer, and no clock at all; the game clocks, and none. */
 const TIMES = [...TURN_TIME_OPTIONS, null];
+const CLOCKS = [null, ...GAME_CLOCK_OPTIONS];
 
 /**
  * Setting up a Duel, the two-player game, as a private game is: pick the turn time and open a room for two,
@@ -20,20 +23,27 @@ const TIMES = [...TURN_TIME_OPTIONS, null];
  */
 export function DuelGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin: Action }) {
   const [turnTime, setTurnTime] = useState<number | null>(TIMES[0]);
+  const [clock, setClock] = useState<number | null>(CLOCKS[0]);
   const [code, setCode] = useState("");
 
   return (
     <Stage>
       <StageRows>
         <div className="flex items-end justify-around gap-6">
-          <Option icon={<TimerIcon className="size-24" />} label="Turn time" value={turnTime ? `${turnTime} sec` : "Off"} onNext={() => setTurnTime((v) => TIMES[(TIMES.indexOf(v) + 1) % TIMES.length])} />
+          <div className="flex gap-4">
+            <Option icon={<TimerIcon className="size-20" />} label="Turn time" value={turnTime ? `${turnTime} sec` : "Off"} onNext={() => setTurnTime((v) => nextOption(TIMES, v))} />
+            <Option icon={<Hourglass className="size-20 text-gold-400" />} label="Game clock" value={clock ? `${clock} min` : "No clock"} onNext={() => setClock((v) => nextOption(CLOCKS, v))} />
+          </div>
 
           <div className="flex w-80 flex-col gap-2">
-            <div className="flex justify-center [&>*]:w-44 [&>*]:shadow-lg [&>*]:ring-2 [&>*]:ring-gold-400">
-              <WinTile still />
-            </div>
+            <StonesAround>
+              <span className="relative flex w-44 [&>*]:w-full [&>*]:shadow-lg [&>*]:ring-2 [&>*]:ring-gold-400">
+                <WinTile still />
+              </span>
+            </StonesAround>
             <form action={onCreate} className="flex">
               <input type="hidden" name="turnTimeSeconds" value={turnTime ?? "off"} />
+              <input type="hidden" name="gameTimeMinutes" value={clock ?? "off"} />
               <button type="submit" className="h-12 flex-1 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500">
                 Create room
               </button>

@@ -9,7 +9,7 @@
 import { refill } from "./board";
 import { getDuelCard, getRoyal } from "./data";
 import { legalDuelMoves } from "./legal-moves";
-import { buyCost, crownsOf, hasWon, joinableColors, lineOwesPrivilege } from "./rules";
+import { buyCost, crownsOf, hasWon, joinableColors, lineOwesPrivilege, pointsOf } from "./rules";
 import {
   GOLD,
   HAND_LIMIT,
@@ -31,6 +31,12 @@ export function applyDuelMove(state: DuelState, seat: number, move: DuelMove): D
 
   if (move.type === "FORFEIT") {
     return { ...next, moveCount: next.moveCount + 1, pending: null, status: "finished", winnerSeat: 1 - seat };
+  }
+  // The clock running out takes nobody's turn: the game ends once both have had the same number of turns,
+  // which is now if the starting player is up with nothing left to choose, else when the turn comes back to them.
+  if (move.type === "END_BY_CLOCK") {
+    const expired = { ...next, clockExpired: true, moveCount: next.moveCount + 1 };
+    return !expired.pending && expired.currentSeat === expired.startingSeat ? finishByClock(expired) : expired;
   }
 
   if (move.type === "TIMEOUT_SKIP") {
@@ -201,16 +207,25 @@ function afterAction(state: DuelState, seat: number): DuelState {
   return endTurn(state, seat);
 }
 
-/** The win check, then the next seat: the same one again if a power said so. */
+/** The win check, then the next seat: the same one again if a power said so. With the clock run out, the game ends as the turn comes back to the starting seat. */
 function endTurn(state: DuelState, seat: number): DuelState {
   if (hasWon(state.players[seat])) {
     return { ...state, pending: null, status: "finished", winnerSeat: seat };
   }
+  const handsOver = !state.extraTurn;
   state.currentSeat = state.extraTurn ? seat : 1 - seat;
   state.extraTurn = false;
   state.refilled = false;
   state.pending = null;
+  if (state.clockExpired && handsOver && state.currentSeat === state.startingSeat) return finishByClock(state);
   return state;
+}
+
+/** The clock's end: the most points wins, then the most Avengers badges; level is a draw. */
+function finishByClock(state: DuelState): DuelState {
+  const [a, b] = state.players;
+  const lead = pointsOf(a) - pointsOf(b) || crownsOf(a) - crownsOf(b);
+  return { ...state, pending: null, status: "finished", winnerSeat: lead > 0 ? 0 : lead < 0 ? 1 : null };
 }
 
 /** Hands a Privilege to `toSeat`: from the table, else from the other player, else nothing. */

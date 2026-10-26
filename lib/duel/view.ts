@@ -39,6 +39,7 @@ export interface DuelView {
   moveCount: number;
   status: "active" | "finished";
   winnerSeat: number | null;
+  clockExpired: boolean;
 }
 
 function viewPlayer(player: DuelPlayer, viewerSeat: number): DuelViewPlayer {
@@ -69,6 +70,7 @@ export function redactDuel(state: DuelState, viewerSeat: number): DuelView {
     deckCounts: { 1: state.decks[1].length, 2: state.decks[2].length, 3: state.decks[3].length },
     pyramid: { 1: [...state.pyramid[1]], 2: [...state.pyramid[2]], 3: [...state.pyramid[3]] },
     royals: [...state.royals],
+    clockExpired: state.clockExpired ?? false,
     privileges: state.privileges,
     currentSeat: state.currentSeat,
     startingSeat: state.startingSeat,

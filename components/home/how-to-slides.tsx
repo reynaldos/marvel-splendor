@@ -426,7 +426,7 @@ const SINGLE = LINES[LINES.length - 1]?.[0] ?? 0;
 // The top row holding three of one color, which hands the opponent a Privilege.
 const TRIPLE = [1, 2, 3].map((x) => spaceAt(x, 0));
 const TRIPLE_BOARD: (TokenColor | null)[] = DUEL.board.map((t, s) => (TRIPLE.includes(s) ? "power" : t));
-const DUEL_BUY = "d1-06";
+const DUEL_BUY = "d2-11";
 const DUEL_BUY_COST = costOf(getDuelCard(DUEL_BUY).cost);
 // One card with a single bonus stone and one with two.
 const BONUS_CARDS = ["d1-05", "d2-08"];
@@ -535,7 +535,7 @@ export const DUEL_SLIDES: Slide[] = [
     ),
   },
   {
-    text: "Take 1, 2 or 3 stones side by side in a straight line: across, down or diagonal, with no gap. S.H.I.E.L.D. is never taken this way.",
+    text: "Take 1, 2 or 3 stones side by side in a straight line: across, down or diagonal, with no gap. S.H.I.E.L.D. is never taken this way. You can hold up to 10 stones.",
     sfx: "tap",
     art: <LineShow />,
   },
@@ -695,7 +695,7 @@ export const DUEL_SLIDES: Slide[] = [
     ),
   },
   {
-    text: "You can hold 10 stones. Win the moment you have 20 points, 10 Avengers badges, or 10 points of cards in one color.",
+    text: "Win the moment you have 20 points, 10 Avengers badges, or 10 points of cards in one color.",
     art: (
       <div className="flex h-full items-end gap-12">
         <Pop className="flex w-40 flex-col items-center gap-4">

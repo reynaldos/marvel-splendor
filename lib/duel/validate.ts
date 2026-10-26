@@ -23,7 +23,7 @@ export function validateDuelMove(state: DuelState, seat: number, move: DuelMove)
   if (state.status === "finished") return fail("Game is already finished.");
   if (seat !== 0 && seat !== 1) return fail("Invalid seat.");
   if (move.type === "FORFEIT") return OK;
-  if (move.type === "TIMEOUT_SKIP") return OK;
+  if (move.type === "TIMEOUT_SKIP" || move.type === "END_BY_CLOCK") return OK;
   if (seat !== state.currentSeat) return fail("It is not this seat's turn.");
 
   const player = state.players[seat];

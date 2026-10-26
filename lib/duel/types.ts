@@ -103,6 +103,8 @@ export interface DuelState {
   moveCount: number;
   status: "active" | "finished";
   winnerSeat: number | null;
+  /** The game clock has run out: the game ends once both have had the same number of turns. */
+  clockExpired?: boolean;
 }
 
 export type DuelMove =
@@ -119,4 +121,6 @@ export type DuelMove =
   | { type: "PICK_ROYAL"; royalId: string }
   | { type: "RETURN_TOKENS"; tokens: Partial<TokenCounts> }
   | { type: "TIMEOUT_SKIP"; present?: boolean; stuck?: boolean }
-  | { type: "FORFEIT" };
+  | { type: "FORFEIT" }
+  /** The server's: the game clock ran out. */
+  | { type: "END_BY_CLOCK" };

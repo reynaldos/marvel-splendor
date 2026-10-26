@@ -3,10 +3,16 @@ import { createRng, shuffle } from "@/lib/engine/rng";
 /** What the host can pick from; tapping a setting steps to the next value. */
 export const POINT_OPTIONS = [16, 18, 21];
 export const TURN_TIME_OPTIONS = [30, 60, 90];
+export const GAME_CLOCK_OPTIONS = [10, 20, 30];
 
 /** The value after `current`, wrapping round; anything not on the list starts it over. */
-export function nextOption(options: number[], current: number | null): number {
-  return options[(options.indexOf(current ?? NaN) + 1) % options.length];
+export function nextOption<T>(options: readonly T[], current: T | null): T {
+  return options[(options.indexOf(current as T) + 1) % options.length];
+}
+
+/** A submitted game clock: one of the choices on offer, else no clock. */
+export function clockOf(value: FormDataEntryValue | null): number | null {
+  return GAME_CLOCK_OPTIONS.find((o) => o === Number(value)) ?? null;
 }
 
 /** People first, then bots, each in the order they sat down. */

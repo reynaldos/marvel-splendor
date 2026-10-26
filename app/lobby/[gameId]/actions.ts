@@ -111,6 +111,8 @@ export async function startGameAction(gameId: string, cheat: boolean) {
   const settings: GameSettings = {
     ...lobby,
     botDifficulty: "normal",
+    // The game clock runs from here, not from when the room was opened.
+    startedAt: Date.now(),
     // Every pack anyone at the table owns is dealt in, for everyone.
     packs: await ownedPacks(game.players.flatMap((p) => (p.userId ? [p.userId] : []))),
     // Each bot's level follows it to its final seat.

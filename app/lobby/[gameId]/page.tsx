@@ -103,6 +103,7 @@ export default async function LobbyPage({
         targetPoints={settings.targetPoints}
         duel={settings.rules === "duel"}
         turnTimeSeconds={settings.turnTimeSeconds}
+        gameTimeMinutes={settings.gameTimeMinutes}
         onAddBot={addBotAction.bind(null, game.id)}
         onRemoveBot={(seat) => removeBotAction.bind(null, game.id, seat)}
         onSetBotDifficulty={(seat) => setBotDifficultyAction.bind(null, game.id, seat)}

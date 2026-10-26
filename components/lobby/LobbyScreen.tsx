@@ -1,7 +1,7 @@
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import type { ReactNode } from "react";
 import { cn } from "cn";
-import { ArrowLeft, Bot, Crown, Star, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bot, Crown, Hourglass, Star, UserRound, X } from "lucide-react";
 
 import { AwayTimer } from "@/components/lobby/AwayTimer";
 import { BotLevel } from "@/components/lobby/BotLevel";
@@ -36,6 +36,7 @@ interface LobbyScreenProps {
   isHost: boolean;
   targetPoints: number;
   turnTimeSeconds: number | null;
+  gameTimeMinutes: number | null;
   /** A Duel room: two seats, and the game's own three wins instead of a points target. */
   duel?: boolean;
   onAddBot: Action;
@@ -113,6 +114,7 @@ export function LobbyScreen({
   isHost,
   targetPoints,
   turnTimeSeconds,
+  gameTimeMinutes,
   duel,
   onAddBot,
   onRemoveBot,
@@ -189,6 +191,11 @@ export function LobbyScreen({
               icon={<TimerIcon className="size-10" />}
               label="Turn time"
               value={turnTimeSeconds ? `${turnTimeSeconds} sec` : "Untimed"}
+            />
+            <Rule
+              icon={<Hourglass className="size-10 text-gold-400" />}
+              label="Game clock"
+              value={gameTimeMinutes ? `${gameTimeMinutes} min` : "No clock"}
             />
             <Rule
               icon={<Star className="size-10 fill-gold-400 text-gold-600" />}

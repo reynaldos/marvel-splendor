@@ -61,6 +61,7 @@ export function rankable(state: AnyState): RankableState & { players: Array<{ se
   return {
     players: state.players.map((p) => ({ seat: p.seat, points: pointsOf(p), cards: p.cards.map((c) => c.cardId), tags: crownsOf(p) })),
     winnerSeat: state.winnerSeat,
-    sharedWinners: null,
+    // A level finish on the clock is a draw: both are winners.
+    sharedWinners: state.status === "finished" && state.winnerSeat === null ? [0, 1] : null,
   };
 }

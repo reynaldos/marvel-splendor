@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     targetPoints: targetPoints ?? DEFAULT_SETTINGS.targetPoints,
     turnTimeSeconds: turnTimeSeconds ?? DEFAULT_SETTINGS.turnTimeSeconds,
     // A Duel ends on its own conditions; it has no game clock.
-    gameTimeMinutes: rules === "duel" ? null : (gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes),
+    gameTimeMinutes: gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes,
     startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
     packs: await ownedPacks([user.id]),

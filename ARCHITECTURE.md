@@ -196,8 +196,7 @@ vs-Bot games skip Pusher entirely: the move POST response contains the bot's rep
 
 ```
 app/
-  page.tsx                          # main menu: Play vs Computer / Private Game
-  solo/                             # vs-computer setup
+  page.tsx                          # main menu: Play Game / Duel
   private/                          # create or join a private room
   join/[code]/                      # join by code (sign in or guest name)
   lobby/[gameId]/                   # pre-game lobby
@@ -285,7 +284,7 @@ A player who misses three turns in a row is marked away, and a bot plays their s
 
 - **Checked only when someone moves.** Nothing runs on the server between requests, so a game whose clock has run out carries on until the next move, which is then recorded as the start of the final round.
 - **The final round is played out.** The clock takes nobody's turn: whoever is up still plays, and the game ends when the round is complete, so everyone has had the same number of turns.
-- **Offered in Play vs Computer only.** Private games have no game clock setting.
+- **Offered on both setup screens**, Play Game and Duel, and shown in the room. In a Duel the game ends once both players have had the same number of turns: the most points wins, then the most Avengers badges, and level is a draw.
 
 **Turn timers**
 

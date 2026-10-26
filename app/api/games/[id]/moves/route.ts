@@ -5,7 +5,6 @@ import { auth0 } from "@/lib/auth0";
 import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { recordGameCoins } from "@/lib/record-coins";
-import { applyMove } from "@/lib/engine/apply";
 import { isAway, type GameSettings } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type AnyState } from "@/lib/game-rules";
@@ -76,12 +75,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // The game clock is checked whenever anyone moves. Once it has run out, that
   // is recorded first, and the round in progress becomes the last.
   const clockLeft = gameEndsInMs(stored.settings, game.createdAt);
-  // A Duel has no game clock.
-  const clockRanOut = !isDuel(stored) && clockLeft !== null && clockLeft <= 0 && !stored.clockExpired && sent.type !== "FORFEIT";
+  const clockRanOut = clockLeft !== null && clockLeft <= 0 && !stored.clockExpired && sent.type !== "FORFEIT";
   const clockMove: AppliedMove[] = clockRanOut
     ? [{ seat: stored.currentSeat, move: { type: "END_BY_CLOCK" }, ordinal: stored.moveCount }]
     : [];
-  const state: AnyState = clockRanOut && !isDuel(stored) ? applyMove(stored, stored.currentSeat, { type: "END_BY_CLOCK" }) : stored;
+  const state: AnyState = clockRanOut ? applyAny(stored, stored.currentSeat, { type: "END_BY_CLOCK" }) : stored;
   const viewerSeat = seatRow.seat;
   // A timeout is the one move made on someone else's behalf: any player may
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.

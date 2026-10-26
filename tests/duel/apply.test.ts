@@ -236,3 +236,26 @@ describe("timeouts and forfeits", () => {
     expect(quit.winnerSeat).toBe(other);
   });
 });
+
+describe("the game clock", () => {
+  const starter = base.startingSeat;
+  const second = 1 - starter;
+  // A flat board, the second player up, the starter six points ahead on a card with no bonus.
+  const table = withPlayer({ ...flat("mind"), currentSeat: second }, starter, { cards: [{ cardId: "d3-13" }] });
+
+  it("lets the second player finish their turn, then ends on points", () => {
+    const expired = play(table, second, { type: "END_BY_CLOCK" });
+    expect(expired.status).toBe("active");
+    expect(expired.clockExpired).toBe(true);
+    const done = play(expired, second, { type: "TAKE_LINE", spaces: [TOP[0]] });
+    expect(done.status).toBe("finished");
+    expect(done.winnerSeat).toBe(starter);
+  });
+
+  it("ends at once when the starting player is up, and level is a draw", () => {
+    const level = { ...flat("mind"), currentSeat: starter };
+    const done = play(level, starter, { type: "END_BY_CLOCK" });
+    expect(done.status).toBe("finished");
+    expect(done.winnerSeat).toBeNull();
+  });
+});

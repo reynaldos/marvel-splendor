@@ -117,13 +117,11 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
                   label="Turn timer"
                   value={settings.turnTimeSeconds === null ? "Untimed" : `${settings.turnTimeSeconds} sec`}
                 />
-                {settings.rules !== "duel" ? (
-                  <Rule
-                    icon={<Hourglass className={`${RULE_ICON} text-gold-400`} />}
-                    label="Game clock"
-                    value={settings.gameTimeMinutes === null ? "No clock" : `${settings.gameTimeMinutes} min`}
-                  />
-                ) : null}
+                <Rule
+                  icon={<Hourglass className={`${RULE_ICON} text-gold-400`} />}
+                  label="Game clock"
+                  value={settings.gameTimeMinutes === null ? "No clock" : `${settings.gameTimeMinutes} min`}
+                />
                 {hasBots ? (
                   <Rule
                     icon={<Bot className={`${RULE_ICON} text-gold-400`} />}

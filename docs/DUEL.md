@@ -235,7 +235,7 @@ games. The same ELO math, the same hide switch.
 - [x] **3. Server.** `lib/game-rules.ts` is the one surface over both engines (`rules` in the settings picks the
       game); the server loop, the move schema, the move and game routes, the create route, the lobby start, replay,
       playback and the records all go through it. `lib/duel/view.ts` is the redacted Duel view. Duel games are
-      unrated until 5b, and a Duel has no game clock. `tests/duel/server.test.ts` plays a game through the loop and
+      unrated until 5b. The game clock ends a Duel once both have had the same number of turns, on points, then badges. `tests/duel/server.test.ts` plays a game through the loop and
       replays it onto the stored state.
 - [x] **4. Board.** `components/duel/`: `Board.tsx` (the table), `TokenBoard.tsx` (the grid, the path, the win
       tile, the scrolls), `DuelCard.tsx` (a Marvel picture under the Duel band and costs, drawn inside `Card`'s
