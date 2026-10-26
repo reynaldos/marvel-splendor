@@ -8,16 +8,13 @@
  */
 import { randomInt, randomUUID } from "node:crypto";
 
-import { applyMove } from "@/lib/engine/apply";
-import { legalMoves } from "@/lib/engine/legal-moves";
-import { validateMove } from "@/lib/engine/validate";
-import { isAway, type GameState, type Move } from "@/lib/engine/types";
-import { chooseBotMove } from "@/lib/bot/policy";
+import { isAway } from "@/lib/engine/types";
+import { applyAny, chooseBotAny, legalAny, validateAny, type AnyMove, type AnyState } from "@/lib/game-rules";
 import { Prisma } from "@/lib/generated/prisma/client";
 
 export interface AppliedMove {
   seat: number;
-  move: Move;
+  move: AnyMove;
   /** The `Move` row ordinal this application corresponds to (== moveCount before applying). */
   ordinal: number;
 }
@@ -36,9 +33,9 @@ export interface AppliedMove {
  * of silently skipping the bot's turn.
  */
 export function runServerTurnLoop(
-  initialState: GameState,
+  initialState: AnyState,
   isBotSeat: (seat: number) => boolean,
-): { state: GameState; applied: AppliedMove[] } {
+): { state: AnyState; applied: AppliedMove[] } {
   let state = initialState;
   const applied: AppliedMove[] = [];
 
@@ -46,9 +43,9 @@ export function runServerTurnLoop(
     const seat = state.currentSeat;
     const ordinal = state.moveCount;
 
-    if (legalMoves(state, seat).length === 0) {
-      const move: Move = { type: "TIMEOUT_SKIP", stuck: true };
-      state = applyMove(state, seat, move);
+    if (legalAny(state, seat).length === 0) {
+      const move: AnyMove = { type: "TIMEOUT_SKIP", stuck: true };
+      state = applyAny(state, seat, move);
       applied.push({ seat, move, ordinal });
       continue;
     }
@@ -59,15 +56,15 @@ export function runServerTurnLoop(
       if (!isAway(state.players[seat]) || !someoneIsHere) break;
     }
 
-    const move = chooseBotMove(state, seat);
-    const validation = validateMove(state, seat, move);
+    const move = chooseBotAny(state, seat);
+    const validation = validateAny(state, seat, move);
     if (!validation.ok) {
       throw new Error(
         `Bot policy produced an illegal move for seat ${seat}: ${validation.reason}. ` +
           `move=${JSON.stringify(move)}`,
       );
     }
-    state = applyMove(state, seat, move);
+    state = applyAny(state, seat, move);
     applied.push({ seat, move, ordinal });
   }
 

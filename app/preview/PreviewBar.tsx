@@ -24,9 +24,7 @@ const PAGES = [
   { name: "Game over", href: "/preview/game-over" },
   { name: "Tiers", href: "/preview/tiers" },
   { name: "Foil", href: "/preview/foil" },
-  { name: "Profile", href: "/preview/profile" },
   { name: "Pack", href: "/preview/pack" },
-  { name: "How to", href: "/preview/how-to" },
   { name: "Squad pic", href: "/preview/team" },
   { name: "Duel", href: "/preview/duel" },
 ];
@@ -146,20 +144,16 @@ function AddressHelp() {
       </dl>
 
       <h4 className={cn(HEADING, "mt-3")}>Loading</h4>
-      <p className="text-cosmos-300">Takes nothing: it is the board&apos;s loading screen, held still.</p>
+      <dl className="flex flex-col gap-3">
+        <Entry option="?game=">
+          The board&apos;s loading screen, held still; <a href="/preview/loading?game=duel" className={OPTION}>duel</a> shows the Duel board&apos;s.
+        </Entry>
+      </dl>
 
       <h4 className={cn(HEADING, "mt-3")}>Tiers</h4>
       <p className="text-cosmos-300">
         Takes nothing: every frame tier, the rank badge and the leaderboard rows, side by side.
       </p>
-
-      <h4 className={cn(HEADING, "mt-3")}>How to</h4>
-      <dl className="flex flex-col gap-3">
-        <Entry option="?slide=">
-          Opens the how-to-play slideshow on that slide, counting from 1. Closed, with just its button, when left out.
-          <Options to={(n) => `/preview/how-to?slide=${n}`} values={[1, 4, 6, 12]} />
-        </Entry>
-      </dl>
     </details>
   );
 }

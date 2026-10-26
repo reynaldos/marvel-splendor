@@ -1,6 +1,7 @@
+import { getDuelCard } from "@/lib/duel/data";
 import { CARD_BY_ID } from "@/lib/engine/data";
 import type { FrameTier } from "@/lib/frame-tier";
-import type { GameState } from "@/lib/engine/types";
+import { isDuel, rankable, type AnyState } from "@/lib/game-rules";
 
 /** The parts of a finished game's state `rankPlayers` reads — satisfied by both `GameState` and a live `RedactedGameState`. */
 export interface RankableState {
@@ -78,14 +79,17 @@ export function rankPlayers(state: RankableState, seated: Seated[]): RankedPlaye
 
 /** Null when the seat isn't in the game. */
 export function gameRecord(
-  game: { id: string; mode: GameRecord["mode"]; endedAt: number; state: GameState; rewards: GameRecord["rewards"] },
+  game: { id: string; mode: GameRecord["mode"]; endedAt: number; state: AnyState; rewards: GameRecord["rewards"] },
   seat: number,
   seated: Seated[],
 ): GameRecord | null {
-  const players = rankPlayers(game.state, seated);
+  const record = rankable(game.state);
+  const players = rankPlayers(record, seated);
   const mine = players.find((p) => p.seat === seat);
   if (!mine) return null;
-  const levels = game.state.players[seat].cards.map((id) => CARD_BY_ID.get(id)?.level);
+  const duel = isDuel(game.state);
+  const team = record.players[seat].cards;
+  const levels = team.map((id) => (duel ? getDuelCard(id).level : CARD_BY_ID.get(id)?.level));
   return {
     id: game.id,
     mode: game.mode,
@@ -93,8 +97,9 @@ export function gameRecord(
     seat,
     won: mine.won,
     place: mine.place,
-    rounds: game.state.round,
-    team: game.state.players[seat].cards,
+    // A Duel has no rounds; its turns are counted two to a round.
+    rounds: isDuel(game.state) ? Math.ceil(game.state.moveCount / 2) : game.state.round,
+    team,
     cardsByLevel: [1, 2, 3].map((level) => levels.filter((l) => l === level).length) as [number, number, number],
     players,
     rewards: game.rewards,

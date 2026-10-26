@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 import { auth0 } from "@/lib/auth0";
 import { ChatSchema, cooldownLeftMs } from "@/lib/chat";
+import type { AnyState } from "@/lib/game-rules";
 import { prisma } from "@/lib/db";
-import { isAway, type GameState } from "@/lib/engine/types";
+import { isAway,  } from "@/lib/engine/types";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { notifyChat } from "@/lib/pusher";
 
@@ -36,7 +37,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
   // Still open once the game is over, for a "Good game!".
   const open = game.mode === "MULTIPLAYER" && (game.status === "ACTIVE" || game.status === "FINISHED");
-  const player = (game.state as unknown as GameState).players?.[seat];
+  const player = (game.state as unknown as AnyState).players?.[seat];
   if (!open || !player || isAway(player)) {
     return NextResponse.json({ error: "You can't send anything in this game right now." }, { status: 409 });
   }

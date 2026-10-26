@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { boardEvents, leavesATrace } from "@/lib/board-events";
+import { boardEvents, duelEvents, leavesATrace } from "@/lib/board-events";
+import { createDuel } from "@/lib/duel/setup";
 import { emptyTokens } from "@/lib/engine/types";
 
 import { makePlayer, makeState } from "./engine/helpers";
@@ -54,5 +55,14 @@ describe("leavesATrace", () => {
     expect(leavesATrace({ type: "RETURN_TOKENS", tokens: {} })).toBe(false);
     expect(leavesATrace({ type: "CHOOSE_LOCATION", locationId: "l1" })).toBe(false);
     expect(leavesATrace({ type: "TIMEOUT_SKIP" })).toBe(false);
+  });
+});
+
+describe("duelEvents", () => {
+  it("finds a Royal taken, and by whom", () => {
+    const before = createDuel("events");
+    const after = { ...before, players: [before.players[0], { ...before.players[1], royals: ["r-2"] }] as typeof before.players };
+    expect(duelEvents(before, after)).toEqual([{ kind: "royal", seat: 1, royalId: "r-2" }]);
+    expect(duelEvents(after, after)).toEqual([]);
   });
 });

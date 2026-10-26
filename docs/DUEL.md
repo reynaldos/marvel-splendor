@@ -144,8 +144,13 @@ color a wild card joins. Reused as is: `Card`, `PlayerPlaque`, `TurnTimer`, `Gam
 
 ### 6. Polish and docs
 
-Traces for an opponent's line and buy, announcements for Royals and the win, the move log's wording, how-to slides
-for Duel, sounds, `ARCHITECTURE.md`, `ROADMAP.md`, the changelog entry.
+Traces for an opponent's line and buy, announcements for Royals and the win, the move log's wording, sounds,
+`ARCHITECTURE.md`, `ROADMAP.md`, the changelog entry.
+
+**How to play.** The question mark on the home screen opens a choice of two buttons first, one per game, and each
+goes to its own slide flow: the Marvel slides as they are, and a new Duel set in `how-to-slides.tsx`'s shape: the
+board, the turn's free and mandatory moves, lines on the token board, Privileges, buying with bonuses and Gold,
+powers and wild cards, Royals, the three wins.
 
 ## What we found
 
@@ -206,20 +211,51 @@ the table is capped at two: one other player by code, or one bot. The solo scree
 in the lobby changes; the join code, the away timer, the start all carry over.
 
 **Stats and rewards.** Games played and wins count as now. Duel has no Avengers tiles or Locations, so those stats
-stay at zero for Duel games. Rating is per game mode today, so Duel can share it or have its own column; sharing is
-the smaller change and fine to start. The card collection is Marvel's; Duel cards join it only with the Marvel skin.
+stay at zero for Duel games. The card collection is Marvel's.
+
+**Rating: its own.** Decided: Duel has a separate rating and a third tab on the leaderboard, "Duel", beside Ranked
+and XP. `UserRating` holds one row per user, so Duel needs its own row: a `UserDuelRating` table shaped like
+`UserRating` (`userId`, `rating`, `gamesRated`, `updatedAt`), one migration in `prisma/sql/`. `recordGameRating`
+takes which table to write by the game's rules; `buildLeaderboard` reads both and returns a `duel` list;
+`LeaderboardScreen` gets the tab with its own empty text; the profile's rank badge shows the Duel rank on Duel
+games. The same ELO math, the same hide switch.
 
 ## Steps
 
 - [x] **0. Card data.** `data/duel/cards.json`, `data/duel/royals.json` and `tests/duel-data.test.ts`.
 - [x] **Board design.** `/preview/duel`, locked in above.
-- [ ] **1. Engine.** As in the game plan. First issue: `types.ts`, `setup.ts` and `board.ts` (the spiral, lines on
-      the grid), with tests for the deal and for which lines are legal.
-- [ ] **2. Bot.**
-- [ ] **3. Server.**
-- [ ] **4. Board.**
-- [ ] **5. The way in.** Home tile, Duel setup screen, the two-seat lobby.
-- [ ] **6. Polish and docs.**
+- [ ] **1. Engine.** As in the game plan.
+  - [x] `types.ts`, `data.ts`, `board.ts` (the spiral, lines, refill) and `setup.ts`, with `tests/duel/setup.test.ts`.
+  - [x] `rules.ts` (bonuses, costs, crowns, points, the wins), `validate.ts` and `legal-moves.ts`, with
+        `tests/duel/moves.test.ts`.
+  - [x] `apply.ts`: the turn, powers, Royals, the hand limit, the wins, with `tests/duel/apply.test.ts`. The turn
+        ends on its own once the action and its choices are done, as the Marvel game's does: no End turn move.
+- [x] **2. Bot.** `lib/bot/duel-policy.ts`, one ply with easy, normal and hard weights; `tests/duel/bot.test.ts`
+      plays seeded games to the end at each level.
+- [x] **3. Server.** `lib/game-rules.ts` is the one surface over both engines (`rules` in the settings picks the
+      game); the server loop, the move schema, the move and game routes, the create route, the lobby start, replay,
+      playback and the records all go through it. `lib/duel/view.ts` is the redacted Duel view. Duel games are
+      unrated until 5b, and a Duel has no game clock. `tests/duel/server.test.ts` plays a game through the loop and
+      replays it onto the stored state.
+- [x] **4. Board.** `components/duel/`: `Board.tsx` (the table), `TokenBoard.tsx` (the grid, the path, the win
+      tile, the scrolls), `DuelCard.tsx` (a Marvel picture under the Duel band and costs, drawn inside `Card`'s
+      new `overlay` slot), `DuelChoices.tsx` (the four popups; the token return reuses the Marvel one),
+      `DuelBoardClient.tsx` (fetch, stage, submit, play back). `duel-art.ts` fixes which picture each Duel card
+      wears, once for everyone. The play page picks the client by the game's rules. `/preview/duel` is the real
+      board on a bot-played table, `?show=` opens each choice.
+- [x] **5. The way in.** A third home tile, "Duel", to `/duel`: the setup screen (`DuelGameScreen`) is the private
+      game's two steps: the turn time, then "Create room" or a code to join; the room is where a bot is added or a
+      friend arrives, as in a private game. A Duel room
+      seats two (`seatsOf` in `lib/lobby.ts`, read by the lobby page, the add-bot action and joining) and shows
+      "Game: Duel" in place of the points target.
+- [ ] **5b. Rating.** The `UserDuelRating` table and migration, the rating write by rules, the "Duel" tab. Waits
+      on a go-ahead: it is a schema change.
+- [x] **6. Polish and docs.** The question mark on the home screen asks which game first (two tiles, as on the
+      home screen), then shows that game's slides; the Duel set is `DUEL_SLIDES` in `how-to-slides.tsx`. A Royal taken is announced on the board and named in the move
+      log (`duelEvents` in `lib/board-events.ts`, counted by the turn clock through `eventsOf`); the win is the
+      results popup both games share. Opponents' lines and buys are outlined before they go, with the Marvel
+      sounds. `ARCHITECTURE.md` has a Duel section and points here, `ROADMAP.md` lists what is left, and
+      2.15.0 is in the changelog.
 - [ ] **7. Art.** The five power icons, the scroll, four Royal pictures, a bag.
 
 ## Risks

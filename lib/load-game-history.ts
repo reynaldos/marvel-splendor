@@ -1,7 +1,7 @@
 import { botAvatarKeys } from "@/lib/avatars";
 import { careerStats, type CareerStats } from "@/lib/career-stats";
 import { prisma } from "@/lib/db";
-import type { GameState } from "@/lib/engine/types";
+import { rankable, type AnyState } from "@/lib/game-rules";
 import { gameRecord, type GameRecord, type GameRewards } from "@/lib/game-record";
 import { botName } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
@@ -45,8 +45,9 @@ export async function loadGameHistory(userId: string): Promise<{
   });
 
   const played = seats.flatMap(({ seat, game }) => {
-    const state = game.state as unknown as GameState;
+    const state = game.state as unknown as AnyState;
     if (!state.players?.[seat]) return [];
+    const mine = rankable(state).players[seat];
     const botAvatars = botAvatarKeys(game.seed, game.players);
     const record = gameRecord(
       {
@@ -64,7 +65,7 @@ export async function loadGameHistory(userId: string): Promise<{
       })),
     );
     const againstPeople = game.players.some((p) => !p.isBot && p.seat !== seat);
-    return record ? [{ record, mine: state.players[seat], againstPeople }] : [];
+    return record ? [{ record, mine, againstPeople }] : [];
   });
   const stats = (games: typeof played) =>
     careerStats(

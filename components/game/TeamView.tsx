@@ -2,8 +2,11 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
+import { duelArt } from "@/components/duel/duel-art";
+import { DuelCardView } from "@/components/duel/DuelCard";
 import { CardView } from "@/components/game/Card";
 import { Zoomable } from "@/components/game/Zoomable";
+import { getDuelCard } from "@/lib/duel/data";
 import { getCard } from "@/lib/engine/data";
 import type { Card } from "@/lib/engine/types";
 
@@ -12,6 +15,8 @@ interface TeamViewProps {
   owner: string;
   /** Recruited card ids, in any order. */
   cardIds: string[];
+  /** The ids are Duel cards: shown with their Duel faces, strongest by Duel's points and badges first. */
+  duel?: boolean;
   className?: string;
   /** What to tap to open it. */
   children: ReactNode;
@@ -48,7 +53,7 @@ const REST_MS = 150;
  * row goes round forever: past the weakest card comes the strongest again.
  * The browser does the scrolling, so touch and momentum feel native.
  */
-function TeamRow({ cards }: { cards: Card[] }) {
+function TeamRow({ cards }: { cards: Array<{ id: string; face: ReactNode }> }) {
   const row = useRef<HTMLDivElement>(null);
   const rest = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [looping, setLooping] = useState(false);
@@ -84,7 +89,7 @@ function TeamRow({ cards }: { cards: Card[] }) {
         cards.map((card) => (
           // A margin, not a gap, so every copy is exactly the same width.
           <span key={`${copy}-${card.id}`} aria-hidden={copy !== (looping ? MIDDLE : 0)} className="mx-2 shrink-0">
-            <CardView card={card} className="w-38 rounded-[10%/7.1%]" />
+            {card.face}
           </span>
         )),
       )}
@@ -96,8 +101,17 @@ function TeamRow({ cards }: { cards: Card[] }) {
  * Tapping `children` shows every card a player has recruited, large and
  * strongest first, in a row that is swiped sideways.
  */
-export function TeamView({ owner, cardIds, className, children }: TeamViewProps) {
-  const cards = cardIds.map(getCard).sort(byStrength);
+export function TeamView({ owner, cardIds, duel, className, children }: TeamViewProps) {
+  const face = "w-38 rounded-[10%/7.1%]";
+  const cards = duel
+    ? cardIds
+        .map((id) => ({ id, card: getDuelCard(id) }))
+        .sort((a, b) => b.card.points - a.card.points || b.card.crowns - a.card.crowns || b.card.level - a.card.level || byStrength(duelArt(a.id), duelArt(b.id)))
+        .map(({ id }) => ({ id, face: <DuelCardView cardId={id} className={face} /> }))
+    : cardIds
+        .map(getCard)
+        .sort(byStrength)
+        .map((card) => ({ id: card.id, face: <CardView card={card} className={face} /> }));
 
   return (
     <Zoomable

@@ -169,3 +169,16 @@ export function StackedArt({ upright, children }: { upright?: boolean; children:
     </>
   );
 }
+
+/** Two at the table: a line of three stones between two cards. */
+export function DuelArt() {
+  return (
+    <>
+      <Piece src="/cards/thor.png" className={cn(CARD, "top-6 left-[6%] -rotate-12")} />
+      <Piece src="/cards/loki.png" className={cn(CARD, "top-6 right-[6%] rotate-12")} />
+      <Piece src="/assets/stones/space-token.png" className="top-5 left-[calc(50%-1.5rem)] size-12 rounded-full ring-2 ring-white/70" />
+      <Piece src="/assets/stones/reality-token.png" className="top-16 left-[calc(50%-1.5rem)] size-12 rounded-full ring-2 ring-white/70" />
+      <Piece src="/assets/stones/soul-token.png" className="top-27 left-[calc(50%-1.5rem)] size-12 rounded-full ring-2 ring-white/70" />
+    </>
+  );
+}

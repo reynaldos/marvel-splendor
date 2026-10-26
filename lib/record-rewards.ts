@@ -1,7 +1,8 @@
 import { cardFrameTier } from "@/lib/card-level";
 import { prisma } from "@/lib/db";
-import { botDifficultyForSeat, type GameState } from "@/lib/engine/types";
+import { botDifficultyForSeat } from "@/lib/engine/types";
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
+import { isDuel, rankable, type AnyState } from "@/lib/game-rules";
 import { Prisma } from "@/lib/generated/prisma/client";
 import type { UserStatsSnapshot } from "@/lib/record-stats";
 import type { CardCountChange } from "@/lib/save-collection";
@@ -19,23 +20,26 @@ export interface RewardSources {
 }
 
 /** XP the game gave each signed-in human, from how their seat finished. A guest or stand-in bot counts as a human opponent. */
-export function gameXpByUser(state: GameState, players: Array<{ seat: number; userId: string | null; isBot: boolean }>): Map<string, number> {
-  const ranked = rankPlayers(state, []);
+export function gameXpByUser(state: AnyState, players: Array<{ seat: number; userId: string | null; isBot: boolean }>): Map<string, number> {
+  const record = rankable(state);
+  const ranked = rankPlayers(record, []);
   const xp = new Map<string, number>();
   for (const p of players) {
     if (p.isBot || !p.userId) continue;
-    const seat = state.players[p.seat];
+    const seat = record.players[p.seat];
+    // In Duel the crowns stand as badges, the target is its 20 points, and there are no tiles or Time Stone.
+    const duel = isDuel(state);
     xp.set(
       p.userId,
       gameXp({
         place: ranked.find((r) => r.seat === p.seat)!.place,
         opponents: players.filter((o) => o.seat !== p.seat).map((o) => (o.isBot ? botDifficultyForSeat(state.settings, o.seat) : "human")),
-        pointsOverTarget: Math.max(0, seat.points - state.settings.targetPoints),
+        pointsOverTarget: Math.max(0, seat.points - (duel ? 20 : state.settings.targetPoints)),
         cards: seat.cards.length,
         badges: seat.tags,
-        heldAvengersTile: state.avengersHolder === p.seat,
-        locations: seat.locations.length,
-        timeStone: seat.tokens.time > 0,
+        heldAvengersTile: !duel && state.avengersHolder === p.seat,
+        locations: duel ? 0 : state.players[p.seat].locations.length,
+        timeStone: !duel && state.players[p.seat].tokens.time > 0,
       }),
     );
   }

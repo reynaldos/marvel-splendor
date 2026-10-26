@@ -4,9 +4,10 @@
  * signed in — every seat here is tied to a local `User`.
  */
 import { prisma } from "@/lib/db";
-import { DEFAULT_SETTINGS } from "@/lib/engine/types";
+import { DEFAULT_SETTINGS , type GameSettings } from "@/lib/engine/types";
 import { generateJoinCode, generateSeed, isUniqueViolation } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { rulesOf, seatsFor } from "@/lib/game-rules";
 import { notifyGame } from "@/lib/pusher";
 
 export const MAX_SEATS = 4;
@@ -79,8 +80,13 @@ export function withCheat(path: string, cheat: boolean): string {
 }
 
 /** The lowest seat number nobody holds yet, or null when the table is full. */
-export function nextFreeSeat(takenSeats: number[]): number | null {
-  for (let seat = 0; seat < MAX_SEATS; seat++) {
+/** How many may sit at this table: two for a Duel. */
+export function seatsOf(settings: unknown): number {
+  return seatsFor(rulesOf(settings as Partial<GameSettings> | null), MAX_SEATS);
+}
+
+export function nextFreeSeat(takenSeats: number[], maxSeats = MAX_SEATS): number | null {
+  for (let seat = 0; seat < maxSeats; seat++) {
     if (!takenSeats.includes(seat)) return seat;
   }
   return null;
@@ -89,7 +95,7 @@ export function nextFreeSeat(takenSeats: number[]): number | null {
 /** Creates a game in LOBBY status with `userId` hosting from seat 0. */
 export async function createLobby(
   userId: string,
-  rules: { targetPoints: number; turnTimeSeconds: number },
+  rules: { targetPoints: number; turnTimeSeconds: number | null; rules?: "duel" },
 ): Promise<string> {
   // A handful of retries covers the astronomically unlikely joinCode collision.
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -141,7 +147,7 @@ export async function joinLobby(userId: string, rawCode: string): Promise<JoinRe
     }
     if (game.status !== "LOBBY") return { ok: false, reason: "That game has already started." };
 
-    const seat = nextFreeSeat(game.players.map((p) => p.seat));
+    const seat = nextFreeSeat(game.players.map((p) => p.seat), seatsOf(game.settings));
     if (seat === null) return { ok: false, reason: "That game is full." };
 
     try {

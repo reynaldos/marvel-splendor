@@ -97,7 +97,7 @@ describe("a player who stops playing", () => {
   });
 
   it("can come back at any time, without taking a turn", () => {
-    const away = runServerTurnLoop(seatZeroMisses(3), nobodyIsABot).state;
+    const away = runServerTurnLoop(seatZeroMisses(3), nobodyIsABot).state as GameState;
     expect(validateMove(away, 0, { type: "REJOIN" }).ok).toBe(true);
     expect(validateMove(away, 1, { type: "REJOIN" }).ok).toBe(false);
 

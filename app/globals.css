@@ -501,6 +501,13 @@ body {
     100% { scale: calc(var(--lift, 1.15) * 0.6); opacity: 0; }
   }
   .trace-card { z-index: 20; animation: trace-card 1.5s ease-in-out both; }
+  /* A stone from the bag grows in over its space and settles onto it. */
+  @keyframes duel-land {
+    0% { opacity: 0; scale: 1.8; translate: 0 -40%; }
+    60% { opacity: 1; scale: 1.1; translate: 0 0; }
+    100% { scale: 1; }
+  }
+  .duel-land { animation: duel-land 0.5s ease-out both; }
 
   @keyframes announce-line {
     from { opacity: 0; scale: 1 0.4; }

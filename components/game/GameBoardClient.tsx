@@ -26,7 +26,7 @@ import { canAddTokenColor } from "@/components/game/token-rules";
 import { stagedActionToMove, tokensAfter, type StagedAction } from "@/components/game/staged-action";
 import { HAND_LIMIT, IDLE_TURNS, totalTokens, type CardLevel, type Move, type Stone, type TokenColor } from "@/lib/engine/types";
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
-import { announceMs, BOT_THINK_MS, TRACE_MS, TURN_BANNER_MS } from "@/lib/playback";
+import { announceMs, announceSfx, BOT_THINK_MS, TRACE_MS, TURN_BANNER_MS } from "@/lib/playback";
 import type { RedactedGameState } from "@/lib/game-view";
 import type { MoveSummary } from "@/lib/game-replay";
 
@@ -200,7 +200,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       setMoveLog((log) => [...log, toLogEntry({ ...step, round: shown.round, points, events: events.map((e) => e.event) })]);
       shown = step.view;
       for (const [i, announced] of events.entries()) {
-        playSfx(announced.event.kind);
+        playSfx(announceSfx(announced.event));
         setAnnouncement({ ...announced, key: `${step.view.moveCount}-${i}` });
         await delay(announceMs(announced.event));
       }

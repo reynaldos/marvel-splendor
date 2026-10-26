@@ -5,12 +5,12 @@ import { redirect } from "next/navigation";
 
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
-import { createGame } from "@/lib/engine/setup";
 import { BOT_DIFFICULTIES, DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
+import { createAny, rulesOf } from "@/lib/game-rules";
 import { runServerTurnLoop } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { MAX_SEATS, nextFreeSeat, withCheat } from "@/lib/lobby";
+import { MAX_SEATS, nextFreeSeat, seatsOf, withCheat } from "@/lib/lobby";
 import { ownedPacks } from "@/lib/record-purchase";
 import { dealSeats } from "@/lib/lobby-rules";
 import { notifyGame } from "@/lib/pusher";
@@ -53,7 +53,7 @@ async function changed(gameId: string) {
 export async function addBotAction(gameId: string) {
   const { game, isHost } = await requireLobbySeat(gameId);
   if (!isHost) return;
-  const seat = nextFreeSeat(game.players.map((p) => p.seat));
+  const seat = nextFreeSeat(game.players.map((p) => p.seat), seatsOf(game.settings));
   if (seat === null) return;
   // A seat taken in the meantime fails the unique constraint; the host can just tap again.
   await prisma.gamePlayer.create({ data: { gameId, seat, isBot: true } }).catch(() => null);
@@ -100,6 +100,9 @@ export async function leaveAction(gameId: string) {
 export async function startGameAction(gameId: string, cheat: boolean) {
   const { game, isHost } = await requireLobbySeat(gameId);
   if (!isHost || game.players.length < 2 || game.players.length > MAX_SEATS) return;
+  const rules = rulesOf(settingsOf(game));
+  // A Duel is for exactly two.
+  if (rules === "duel" && game.players.length !== 2) return;
 
   // The engine needs seats 0..n-1, dealt at random rather than in join order.
   const seated = dealSeats(game.players, game.seed).map((p, seat) => ({ id: p.id, from: p.seat, seat, isBot: p.isBot }));
@@ -119,7 +122,7 @@ export async function startGameAction(gameId: string, cheat: boolean) {
     ),
   };
 
-  const dealt = createGame(seated.length, game.seed, settings);
+  const dealt = createAny(rules, seated.length, game.seed, settings);
   // If a bot drew the first turn, play it now so the first human sees a board they can act on.
   const { state, applied } = runServerTurnLoop(dealt, (seat) => seated[seat].isBot);
 

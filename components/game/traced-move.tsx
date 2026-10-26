@@ -2,12 +2,12 @@
 
 import { createContext, useContext } from "react";
 
-import type { Move } from "@/lib/engine/types";
+import type { AnyMove } from "@/lib/game-rules";
 
 /** The move another player has just made, while what they picked is outlined on the board. */
 export interface TracedMove {
   seat: number;
-  move: Move;
+  move: AnyMove;
 }
 
 const TracedMoveContext = createContext<TracedMove | null>(null);

@@ -4,10 +4,9 @@ import { CreateGameSchema } from "@/lib/api-schemas";
 import { auth0 } from "@/lib/auth0";
 import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
-import { createGame } from "@/lib/engine/setup";
-import { DEFAULT_SETTINGS, type GameSettings, type GameState } from "@/lib/engine/types";
+import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
+import { createAny, isDuel, rankable, redactAny, seatsFor, type AnyState } from "@/lib/game-rules";
 import { generateJoinCode, generateSeed, isUniqueViolation, runServerTurnLoop } from "@/lib/game-server";
-import { redactState } from "@/lib/game-view";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { ownedPacks } from "@/lib/record-purchase";
@@ -34,20 +33,24 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const { playerCount, botDifficulty, targetPoints, turnTimeSeconds, gameTimeMinutes } = parsed.data;
+  const { botDifficulty, targetPoints, turnTimeSeconds, gameTimeMinutes } = parsed.data;
+  const rules = parsed.data.rules ?? "marvel";
+  const playerCount = seatsFor(rules, parsed.data.playerCount);
 
   const settings: GameSettings = {
     ...DEFAULT_SETTINGS,
     targetPoints: targetPoints ?? DEFAULT_SETTINGS.targetPoints,
     turnTimeSeconds: turnTimeSeconds ?? DEFAULT_SETTINGS.turnTimeSeconds,
-    gameTimeMinutes: gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes,
+    // A Duel ends on its own conditions; it has no game clock.
+    gameTimeMinutes: rules === "duel" ? null : (gameTimeMinutes ?? DEFAULT_SETTINGS.gameTimeMinutes),
     startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
     packs: await ownedPacks([user.id]),
+    ...(rules === "duel" ? { rules } : {}),
   };
 
   const seed = generateSeed();
-  const initialState = createGame(playerCount, seed, settings);
+  const initialState = createAny(rules, playerCount, seed, settings);
 
   // Seat 0 is always the human; every other seat is a bot. If the randomly
   // chosen starting seat is a bot, run the bot loop now; the board plays
@@ -71,7 +74,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       id: gameId,
-      view: redactState(finalState, 0),
+      view: redactAny(finalState, 0),
     },
     { status: 201 },
   );
@@ -82,7 +85,7 @@ async function createGameRecord(args: {
   settings: GameSettings;
   playerCount: number;
   userId: string;
-  state: GameState;
+  state: AnyState;
   applied: ReturnType<typeof runServerTurnLoop>["applied"];
 }): Promise<string> {
   const { seed, settings, playerCount, userId, state, applied } = args;
@@ -147,14 +150,14 @@ async function createGameRecord(args: {
  * does for a normal finish.
  */
 async function recordFinishedGameStats(
-  finalState: GameState,
+  finalState: AnyState,
   humanUserId: string,
   applied: ReturnType<typeof runServerTurnLoop>["applied"],
 ) {
   const humanSeat = 0;
-  const player = finalState.players[humanSeat];
-  const isWinner =
-    finalState.winnerSeat === humanSeat || (finalState.sharedWinners?.includes(humanSeat) ?? false);
+  const record = rankable(finalState);
+  const player = record.players[humanSeat];
+  const isWinner = record.winnerSeat === humanSeat || (record.sharedWinners?.includes(humanSeat) ?? false);
   const turns = applied.filter((m) => m.seat === humanSeat && isTurnPrimary(m.move.type)).length;
 
   await recordGameStats({
@@ -165,8 +168,8 @@ async function recordFinishedGameStats(
         isWinner,
         points: player.points,
         turns,
-        wonAvengersTile: finalState.avengersHolder === humanSeat,
-        locationsClaimed: player.locations.length,
+        wonAvengersTile: !isDuel(finalState) && finalState.avengersHolder === humanSeat,
+        locationsClaimed: isDuel(finalState) ? 0 : finalState.players[humanSeat].locations.length,
       },
     ],
   });

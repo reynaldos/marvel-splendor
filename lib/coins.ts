@@ -34,7 +34,7 @@ export function opponentTierFor(
 
 /** A move that takes the seat's turn — what counts as a turn played for the payout minimum. */
 export function isTurnPrimary(type: string | undefined): boolean {
-  return type === "TAKE_TOKENS" || type === "RESERVE" || type === "RECRUIT" || type === "TIMEOUT_SKIP";
+  return ["TAKE_TOKENS", "RESERVE", "RECRUIT", "TIMEOUT_SKIP", "TAKE_LINE", "BUY"].includes(type ?? "");
 }
 
 /** Coins for one player's finished-game outcome; 0 if it didn't reach the minimum turns to pay out. */

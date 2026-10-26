@@ -94,7 +94,6 @@ The round `?` button at the bottom right of the home screen (`components/home/Ho
 - **Its pieces come in one after another** as the slide opens: popping into place (`result-pop`), dropping or sinking (`howto-move` and `howto-sink` in `app/globals.css`, which move a piece by `--dx` and `--dy` steps), with the caption rising last. The taking-stones slide loops: three different stones drop into the hand and go back, then two of one colour (`howto-loop-a` and `howto-loop-b`). On the limit slide the marked stacks each give a stone back. The slide is keyed on its number, so moving to it plays it afresh. With reduced motion every piece is drawn where it ends up and the loop stays in the bank.
 - **Each slide plays the sound of what it shows** as it opens, when it has one: a stone pick, a reserve, a recruit, a Location, the Avengers tile, the Time Stone. Moving about makes no sound of its own.
 - **Moving about:** gold arrows at the sides, the dots along the bottom, or the arrow keys. The X at the top right or Escape closes it; it opens on the first slide every time.
-- **`/preview/how-to`** shows it without signing in, and `?slide=` opens it on a given slide.
 
 ## Profile
 

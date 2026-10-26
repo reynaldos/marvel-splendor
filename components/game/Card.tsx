@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { cn } from "cn";
 
 import { playSfx } from "@/components/audio";
@@ -33,6 +33,8 @@ interface CardProps {
   recruitAction?: CardActionProps;
   /** Pass a width (`w-*`) to resize; the height follows and the face scales with it. */
   className?: string;
+  /** Drawn over the art, inside the face, so it lifts and scales with the card (Duel's band and costs). */
+  overlay?: ReactNode;
 }
 
 /**
@@ -59,6 +61,7 @@ export function Card({
   reserveAction,
   recruitAction,
   className,
+  overlay,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   // Where the card sat when View was tapped, for the large one to come from; null while not viewing.
@@ -123,6 +126,7 @@ export function Card({
         )}
       >
         <CardArt card={card} />
+        {overlay}
       </button>
 
       {expanded && !viewing ? (
@@ -171,7 +175,7 @@ export function Card({
           onClosing={() => setExpanded(false)}
           onClose={close}
         >
-          <CardView card={card} className="w-61 rounded-[10%/7.1%]" />
+          <CardView card={card} className="w-61 rounded-[10%/7.1%]" overlay={overlay} />
         </ZoomedView>
       ) : null}
     </div>
@@ -183,10 +187,12 @@ export function CardView({
   card,
   className,
   style,
+  overlay,
 }: {
   card: CardType;
   className?: string;
   style?: React.CSSProperties;
+  overlay?: ReactNode;
 }) {
   return (
     <span
@@ -197,6 +203,7 @@ export function CardView({
       )}
     >
       <CardArt card={card} />
+      {overlay}
     </span>
   );
 }

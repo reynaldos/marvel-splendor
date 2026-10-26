@@ -13,6 +13,7 @@ This document covers the rules the engine implements, the stack, how a move trav
 | [docs/DESIGN.md](docs/DESIGN.md) | The design system every screen is built from: colours, type, layout, components, motion, sound |
 | [docs/PROGRESSION.md](docs/PROGRESSION.md) | XP and levels, coins and the daily bonus, rank, card levels |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | What has shipped and what is still to build |
+| [docs/DUEL.md](docs/DUEL.md) | Duel, the two-player game: its rules, its board, and how it shares the server with the Marvel game |
 
 ---
 
@@ -111,6 +112,9 @@ Some turns need a follow-up decision (return tokens over 10; choose between mult
 
 ### The bot (`lib/bot/`)
 Deterministic heuristic policy (no LLM in the loop): greedy scoring over `legalMoves` — weighted by progress toward affordable high-value cards, color-set completion (win condition needs all 5 bonuses), Time Stone acquisition, Avengers-tag races, and token efficiency. Difficulty tiers adjust lookahead/weights. Bot turns run server-side immediately after a human move in the same request (or a follow-up invocation), so vs-computer games need no realtime infra at all. OpenAI generates an in-character quip about the move it just made (non-blocking; failures are silent).
+
+### Duel (`lib/duel/`, `lib/bot/duel-policy.ts`)
+A second game, Splendor Duel for two, with its own pure engine in the same shape (`types`, `setup`, `validate`, `legal-moves`, `apply`, `view`) and a one-ply bot. `lib/game-rules.ts` is the one surface over both engines: `settings.rules` (`"marvel"` or `"duel"`) picks the game, and the server loop, the routes, replay, playback and the records call `createAny`, `validateAny`, `applyAny`, `legalAny`, `chooseBotAny` and `redactAny` instead of either engine directly. The play page picks `DuelBoardClient` or `GameBoardClient` by the same setting. The rules, the board design and the plan are in [docs/DUEL.md](docs/DUEL.md).
 
 ---
 

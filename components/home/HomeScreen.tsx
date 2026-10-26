@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Medal } from "lucide-react";
 
-import { AvengersArt, CardFanArt, WelcomeArt } from "@/components/home/art";
+import { AvengersArt, CardFanArt, DuelArt, WelcomeArt } from "@/components/home/art";
 import { HowToPlay } from "@/components/home/HowToPlay";
 import { Logo } from "@/components/home/Logo";
 import { ModeTile } from "@/components/home/ModeTile";
@@ -48,6 +48,7 @@ export function HomeScreen({ lobbyId }: { lobbyId: string | null }) {
             art={<AvengersArt />}
             className={lobbyId ? "glow-gold" : undefined}
           />
+          <ModeTile href="/duel" label="Duel" tone="from-sky-400 to-blue-800" art={<DuelArt />} />
         </div>
 
         <footer className="flex items-center gap-4">

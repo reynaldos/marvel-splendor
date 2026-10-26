@@ -36,6 +36,8 @@ interface LobbyScreenProps {
   isHost: boolean;
   targetPoints: number;
   turnTimeSeconds: number | null;
+  /** A Duel room: two seats, and the game's own three wins instead of a points target. */
+  duel?: boolean;
   onAddBot: Action;
   onRemoveBot: (seat: number) => Action;
   onSetBotDifficulty: (seat: number) => Action;
@@ -111,6 +113,7 @@ export function LobbyScreen({
   isHost,
   targetPoints,
   turnTimeSeconds,
+  duel,
   onAddBot,
   onRemoveBot,
   onSetBotDifficulty,
@@ -189,8 +192,8 @@ export function LobbyScreen({
             />
             <Rule
               icon={<Star className="size-10 fill-gold-400 text-gold-600" />}
-              label="Points to win"
-              value={String(targetPoints)}
+              label={duel ? "Game" : "Points to win"}
+              value={duel ? "Duel" : String(targetPoints)}
             />
           </div>
 
