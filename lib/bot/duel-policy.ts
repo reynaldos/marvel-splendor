@@ -1,14 +1,16 @@
 /**
  * The Duel bot: scores every legal move by the state it leaves, resolving any
- * choice the move opens the same way, and takes the best. One ply, like the
- * Marvel bot's easy and normal levels: Duel's moves are few and its games
- * short, so a flat score plays a fair game. Ties go to the first move listed,
- * so a game from a seed replays the same.
+ * choice the move opens the same way, and takes the best. Easy is greedy for
+ * points and slips to its second choice every third turn; normal weighs the
+ * whole position one move ahead; hard also asks what the rival's best answer
+ * leaves it. Ties go to the first move listed, so a game from a seed replays
+ * the same.
  */
 import { applyDuelMove } from "@/lib/duel/apply";
 import { legalDuelMoves } from "@/lib/duel/legal-moves";
 import { bonusesOf, colorPointsOf, crownsOf, pointsOf } from "@/lib/duel/rules";
 import { HAND_LIMIT, STONES, totalTokens, type DuelMove, type DuelPlayer, type DuelState } from "@/lib/duel/types";
+import { createRng } from "@/lib/engine/rng";
 import { botDifficultyForSeat, type BotDifficulty } from "@/lib/engine/types";
 
 interface Weights {
@@ -23,10 +25,13 @@ interface Weights {
 }
 
 const WEIGHTS: Record<BotDifficulty, Weights> = {
-  easy: { points: 10, crowns: 3, colorRun: 1, bonus: 2, privilege: 1, token: 0.3, rival: 0 },
+  // Points now, and little thought for what builds toward them.
+  easy: { points: 10, crowns: 2, colorRun: 0, bonus: 0.5, privilege: 1, token: 0.3, rival: 0 },
   normal: { points: 12, crowns: 5, colorRun: 3, bonus: 2.5, privilege: 2, token: 0.4, rival: 0.6 },
   hard: { points: 12, crowns: 6, colorRun: 4, bonus: 3, privilege: 2.5, token: 0.4, rival: 1 },
 };
+/** How many of its best moves hard looks at through the rival's answer. */
+const HARD_WIDTH = 8;
 
 function standing(player: DuelPlayer, w: Weights): number {
   const bonuses = bonusesOf(player);
@@ -87,15 +92,44 @@ function settle(state: DuelState, seat: number, w: Weights): DuelState {
   return next;
 }
 
+/** What a move is worth one ply out: the position it leaves, less the Privilege a refill hands over. */
+function rate(state: DuelState, seat: number, move: DuelMove, w: Weights): { move: DuelMove; after: DuelState; value: number } {
+  // A free move is only worth it for what the turn can do after it; the scorer sees that through the pick.
+  const after = take(state, seat, move, w);
+  return { move, after, value: score(after, seat, w) - (move.type === "REFILL" ? w.privilege : 0) };
+}
+
+/** The position after the rival's best answer, as the rival rates it with the same weights; the game as it stands if it is over or the turn stays. */
+function afterReply(state: DuelState, seat: number, w: Weights): DuelState {
+  if (state.status !== "active" || state.currentSeat === seat) return state;
+  const rival = 1 - seat;
+  let best = state;
+  let bestScore = -Infinity;
+  for (const move of legalDuelMoves(state, rival)) {
+    if (FREE.includes(move.type)) continue;
+    const { after, value } = rate(state, rival, move, w);
+    if (value > bestScore) [best, bestScore] = [after, value];
+  }
+  return best;
+}
+
 export function chooseDuelBotMove(state: DuelState, seat: number): DuelMove {
-  const w = WEIGHTS[botDifficultyForSeat(state.settings, seat)];
+  const level = botDifficultyForSeat(state.settings, seat);
+  const w = WEIGHTS[level];
   const candidates = legalDuelMoves(state, seat);
   if (candidates.length === 0) throw new Error(`chooseDuelBotMove: no legal moves for seat ${seat}`);
-  let best = candidates[0];
+  // Best first; a tie keeps the order the moves were listed in.
+  const rated = candidates.map((move) => rate(state, seat, move, w)).sort((a, b) => b.value - a.value);
+  if (level === "easy") {
+    // Every third turn or so it takes its second choice: the slips that make it beatable.
+    const slip = createRng(`${state.seed}:bot:${state.moveCount}`)() < 1 / 3;
+    return (slip && rated[1]) ? rated[1].move : rated[0].move;
+  }
+  if (level === "normal") return rated[0].move;
+  let best = rated[0].move;
   let bestScore = -Infinity;
-  for (const move of candidates) {
-    // A free move is only worth it for what the turn can do after it; the scorer sees that through the pick.
-    const s = score(take(state, seat, move, w), seat, w) - (move.type === "REFILL" ? w.privilege : 0);
+  for (const { move, after } of rated.slice(0, HARD_WIDTH)) {
+    const s = score(afterReply(after, seat, w), seat, w);
     if (s > bestScore) [best, bestScore] = [move, s];
   }
   return best;

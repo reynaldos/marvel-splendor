@@ -230,8 +230,11 @@ games. The same ELO math, the same hide switch.
         `tests/duel/moves.test.ts`.
   - [x] `apply.ts`: the turn, powers, Royals, the hand limit, the wins, with `tests/duel/apply.test.ts`. The turn
         ends on its own once the action and its choices are done, as the Marvel game's does: no End turn move.
-- [x] **2. Bot.** `lib/bot/duel-policy.ts`, one ply with easy, normal and hard weights; `tests/duel/bot.test.ts`
-      plays seeded games to the end at each level.
+- [x] **2. Bot.** `lib/bot/duel-policy.ts`: easy is greedy for points and slips to its second choice every third
+      turn, normal weighs the whole position one move ahead, hard also looks through the rival's best answer to its
+      eight best moves. Measured over 32 seeded games a pairing: normal beats easy 72%, hard beats easy 91%, hard
+      beats normal 69%. The bots use every move, refills and Privileges included. `tests/duel/bot.test.ts` plays
+      seeded games to the end at each level.
 - [x] **3. Server.** `lib/game-rules.ts` is the one surface over both engines (`rules` in the settings picks the
       game); the server loop, the move schema, the move and game routes, the create route, the lobby start, replay,
       playback and the records all go through it. `lib/duel/view.ts` is the redacted Duel view. Duel games are
