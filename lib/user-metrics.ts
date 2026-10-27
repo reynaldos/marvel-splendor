@@ -6,6 +6,7 @@ import { rankable, type AnyState } from "@/lib/game-rules";
 import { rankPlayers } from "@/lib/game-record";
 import type { GameSummary } from "@/lib/game-summary";
 import { botName } from "@/lib/lobby-rules";
+import { IDLE_BOT_GAME_MS, IDLE_TABLE_MS } from "@/lib/sweep-games";
 
 /** Visits are written at most once a minute, so anyone seen this recently is still here. */
 const ONLINE_MS = 5 * 60 * 1000;
@@ -193,6 +194,7 @@ export async function loadUserMetrics(now = Date.now()) {
       updatedAt: game.updatedAt.getTime(),
       playedMs: playedMs.get(game.id) ?? 0,
       live: game.status === "ACTIVE" && now - game.updatedAt.getTime() < LIVE_GAME_MS,
+      dead: game.status !== "FINISHED" && game.status !== "ABANDONED" && now - game.updatedAt.getTime() > (game.mode === "VS_BOT" && game.status === "ACTIVE" ? IDLE_BOT_GAME_MS : IDLE_TABLE_MS),
       round: state?.round ?? 0,
       moves: game._count.moves,
       players: seated.map((p) => p.name),

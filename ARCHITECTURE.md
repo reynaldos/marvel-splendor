@@ -184,7 +184,7 @@ interface GameSettings {
 - **Reconnect** → client refetches `GET /api/games/[id]/view` (redacted for the viewer) and resumes from the live channel; missed events are irrelevant because state is snapshot-based.
 - **Chat & reactions** → `POST /api/games/[id]/chat` persists a `ChatMessage` (text length-capped, basic rate-limited per seat) and triggers `chat` on the game channel. Reactions are the same pipeline with `kind: REACTION` and a curated emote set (Marvel-flavored quick reactions), rendered as transient bubbles over the sender's plaque. Chat history loads with the game view so reconnects/spectators see context.
 - **Turn timer enforcement (serverless-safe)** → turn ends are worked out from the last move's time (`lib/game-replay.ts`). The active player's device submits a `TIMEOUT_SKIP` move at zero; every other device does the same about three seconds later as a backstop, and the server checks the clock before accepting it. Three consecutive missed turns marks the seat away and a bot takes it over. The game clock runs from `settings.startedAt` and is checked on every move. Section 10 has the cases these rules do and don't cover.
-- **Timeouts/abandonment** → a stale `ACTIVE` game past a TTL can be marked `ABANDONED` (checked lazily on access — no cron needed for v1).
+- **Timeouts/abandonment** → a daily Vercel cron (`vercel.json`, `GET /api/cron/sweep-games` with `CRON_SECRET`) marks games left open as `ABANDONED`: a multiplayer game or lobby idle for a day, a game against bots idle for a week (`lib/sweep-games.ts`). The admin page runs the same sweep on a button.
 
 vs-Bot games skip Pusher entirely: the move POST response contains the bot's reply move(s) and new view.
 
