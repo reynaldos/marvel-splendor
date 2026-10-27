@@ -44,6 +44,8 @@ export function DuelGameScreen({ onCreate, onJoin }: { onCreate: Action; onJoin:
             <form action={onCreate} className="flex">
               <input type="hidden" name="turnTimeSeconds" value={turnTime ?? "off"} />
               <input type="hidden" name="gameTimeMinutes" value={clock ?? "off"} />
+              {/* "+cheat" typed in the code box turns cheat mode on for the host. */}
+              <input type="hidden" name="code" value={code} />
               <button type="submit" className="h-12 flex-1 rounded-full bg-marvel font-display text-lg font-black tracking-wide text-white uppercase shadow-lg hover:bg-red-500">
                 Create room
               </button>

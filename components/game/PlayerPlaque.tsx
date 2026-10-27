@@ -13,6 +13,7 @@ import {
   type TokenCounts,
 } from "@/lib/engine/types";
 import type { RedactedPlayerState } from "@/lib/game-view";
+import { PointsBadge } from "@/components/game/HandTray";
 import { TurnTimer } from "@/components/game/TurnTimer";
 import { ChatBubble, type ShownBubble } from "@/components/game/ChatBubble";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
@@ -172,11 +173,14 @@ export function PlayerPlaque({
 export function Holdings({
   bonuses,
   tokens,
+  colorPoints,
   cellClassName = "size-5",
   className,
 }: {
   bonuses: StoneCounts;
   tokens: TokenCounts;
+  /** Points on cards of each color, as a star on each bonus cell (Duel). */
+  colorPoints?: StoneCounts;
   cellClassName?: string;
   className?: string;
 }) {
@@ -198,9 +202,10 @@ export function Holdings({
             <span
               key={`${color}-bonus`}
               title={`${meta.label} bonuses`}
-              className={cn(cell, "rounded-sm", bonus === 0 && "opacity-25")}
+              className={cn(cell, "relative rounded-sm", bonus === 0 && "opacity-25")}
             >
               {bonus > 0 ? bonus : null}
+              {colorPoints ? <PointsBadge points={colorPoints[color as Stone]} className="-top-1 -right-1 size-3" /> : null}
             </span>
           ),
           <span

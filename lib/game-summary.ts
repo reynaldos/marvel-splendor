@@ -13,6 +13,8 @@ export interface GameSummary {
   playedMs: number;
   /** Open, and moved in recently enough to count as being played. */
   live: boolean;
+  /** Open, and idle long enough that the sweep closes it. */
+  dead: boolean;
   round: number;
   moves: number;
   /** Everyone at the table, in seat order. */

@@ -28,6 +28,8 @@ interface HandTrayProps {
   stagedCount: number;
   /** The cards are Duel cards, shown with their Duel faces. */
   duel?: boolean;
+  /** Points on cards of each color, as a star on the corner of each bonus square (Duel). */
+  colorPoints?: StoneCounts;
   /** Drawn under the Avengers count (the Duel player's Privileges). */
   extra?: ReactNode;
   className?: string;
@@ -36,6 +38,16 @@ interface HandTrayProps {
 const SLOT = "absolute flex size-7 items-center justify-center text-sm font-black tabular-nums";
 const EMPTY = "bg-foreground/10";
 
+/** Points on cards of one color, on a small gold badge in the plaque star's colors; nothing with none. */
+export function PointsBadge({ points, className }: { points: number; className?: string }) {
+  if (points === 0) return null;
+  return (
+    <span className={cn("absolute flex items-center justify-center rounded-full bg-gold-400 fs-3xs leading-none font-black text-cosmos-950 tabular-nums ring-2 ring-gold-600", className)} title="Points in this color">
+      {points}
+    </span>
+  );
+}
+
 /**
  * The viewer's own holdings (ARCHITECTURE.md §6 bottom-center): an n/10
  * token hand-limit indicator over a View team button, then one column per
@@ -43,7 +55,7 @@ const EMPTY = "bg-foreground/10";
  * its corner, its count on a badge — then the Avengers tag count. Empty
  * slots stay visible so a color never moves.
  */
-export function HandTray({ tokens, bonuses, cards, tags, stagedCount, duel, extra, className }: HandTrayProps) {
+export function HandTray({ tokens, bonuses, cards, tags, stagedCount, duel, colorPoints, extra, className }: HandTrayProps) {
   const total = totalTokens(tokens) + stagedCount;
 
   return (
@@ -80,6 +92,7 @@ export function HandTray({ tokens, bonuses, cards, tags, stagedCount, duel, extr
                   className={cn(SLOT, "top-1 left-0 rounded-md pb-1 leading-none", bonus > 0 ? filled : EMPTY)}
                 >
                   {bonus > 0 ? bonus : null}
+                  {colorPoints ? <PointsBadge points={colorPoints[color as Stone]} className="-top-1.5 -right-1.5 size-4" /> : null}
                 </span>
               ) : null}
               <span title={`${meta.label} tokens`} className="absolute bottom-0 left-0 size-7">

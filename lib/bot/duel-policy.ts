@@ -18,6 +18,8 @@ interface Weights {
   crowns: number;
   colorRun: number;
   bonus: number;
+  /** A color owned at all: the win needs one of each. */
+  colors: number;
   privilege: number;
   token: number;
   /** How much the opponent's standing counts against a move. */
@@ -26,9 +28,9 @@ interface Weights {
 
 const WEIGHTS: Record<BotDifficulty, Weights> = {
   // Points now, and little thought for what builds toward them.
-  easy: { points: 10, crowns: 2, colorRun: 0, bonus: 0.5, privilege: 1, token: 0.3, rival: 0 },
-  normal: { points: 12, crowns: 5, colorRun: 3, bonus: 2.5, privilege: 2, token: 0.4, rival: 0.6 },
-  hard: { points: 12, crowns: 6, colorRun: 4, bonus: 3, privilege: 2.5, token: 0.4, rival: 1 },
+  easy: { points: 10, crowns: 2, colorRun: 0, bonus: 0.5, colors: 1, privilege: 1, token: 0.3, rival: 0 },
+  normal: { points: 12, crowns: 5, colorRun: 3, bonus: 2.5, colors: 4, privilege: 2, token: 0.4, rival: 0.6 },
+  hard: { points: 12, crowns: 6, colorRun: 4, bonus: 3, colors: 5, privilege: 2.5, token: 0.4, rival: 1 },
 };
 /** How many of its best moves hard looks at through the rival's answer. */
 const HARD_WIDTH = 8;
@@ -42,6 +44,7 @@ function standing(player: DuelPlayer, w: Weights): number {
     crownsOf(player) * w.crowns +
     colorRun * w.colorRun +
     STONES.reduce((sum, s) => sum + bonuses[s], 0) * w.bonus +
+    STONES.filter((s) => bonuses[s] > 0).length * w.colors +
     player.privileges * w.privilege +
     Math.min(held, HAND_LIMIT) * w.token -
     Math.max(0, held - HAND_LIMIT) * 5

@@ -9,7 +9,9 @@ import {
   WIN_CROWNS,
   WIN_POINTS,
   type DuelCard,
+  type DuelMove,
   type DuelPlayer,
+  type DuelState,
   type Stone,
   type StoneCounts,
   type TokenColor,
@@ -45,12 +47,14 @@ export function pointsOf(player: DuelPlayer): number {
   );
 }
 
-/** Whether the player has won: 20 points, 10 crowns, or 10 points on one color. */
+/** Whether the player has won: 20 points, 10 crowns, or 10 points on one color, and a bonus of every color as the Marvel game asks. */
 export function hasWon(player: DuelPlayer): boolean {
+  const bonuses = bonusesOf(player);
   return (
-    pointsOf(player) >= WIN_POINTS ||
-    crownsOf(player) >= WIN_CROWNS ||
-    STONES.some((s) => colorPointsOf(player)[s] >= WIN_COLOR_POINTS)
+    STONES.every((s) => bonuses[s] > 0) &&
+    (pointsOf(player) >= WIN_POINTS ||
+      crownsOf(player) >= WIN_CROWNS ||
+      STONES.some((s) => colorPointsOf(player)[s] >= WIN_COLOR_POINTS))
   );
 }
 
@@ -93,4 +97,10 @@ export function lineOwesPrivilege(tokens: readonly TokenColor[]): boolean {
   const pearls = tokens.filter((t) => t === PEARL).length;
   if (pearls >= 2) return true;
   return STONES.some((s) => tokens.filter((t) => t === s).length >= 3);
+}
+
+/** A free move keeps the turn open: a refill, a Privilege spent, or the stone it takes. The turn clock runs on. */
+export function keepsTurn(state: DuelState, move: DuelMove): boolean {
+  if (move.type === "REFILL" || move.type === "SPEND_PRIVILEGE") return true;
+  return move.type === "PICK_TOKEN" && state.pending?.type === "PICK_TOKEN" && state.pending.reason === "privilege";
 }

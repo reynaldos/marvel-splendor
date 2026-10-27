@@ -500,7 +500,7 @@ const BUNCH = [
 /** The Duel game, a slide at a time. */
 export const DUEL_SLIDES: Slide[] = [
   {
-    text: "Duel is for two. Take stones from a board of 25, recruit cards, and be first to 20 points, 10 Avengers badges, or 10 points in one color.",
+    text: "Duel is for two. Take stones from a board of 25, recruit cards, and be first to 20 points, 10 Avengers badges, or 10 points in one color, with a card of every color.",
     art: (
       <div className="flex items-center gap-16">
         <Pop>
@@ -696,7 +696,7 @@ export const DUEL_SLIDES: Slide[] = [
     ),
   },
   {
-    text: "Win the moment you have 20 points, 10 Avengers badges, or 10 points of cards in one color.",
+    text: "Win the moment you have a card of every color and 20 points, 10 Avengers badges, or 10 points of cards in one color.",
     art: (
       <div className="flex h-full items-end gap-12">
         <Pop className="flex w-40 flex-col items-center gap-4">

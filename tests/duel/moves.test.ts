@@ -40,9 +40,12 @@ describe("rules", () => {
     expect(buyCost(card.id, rich).pay[GOLD]).toBe(Object.values(card.cost).reduce((a, b) => a + b, 0));
   });
 
-  it("knows the three wins and that reserved cards count for nothing", () => {
-    const p: DuelPlayer = { ...base.players[0], cards: [{ cardId: "d3-13" }, { cardId: "d3-12" }, { cardId: "d3-01" }, { cardId: "d3-02" }, { cardId: "d3-03" }, { cardId: "d2-24" }] };
-    expect(pointsOf(p)).toBeGreaterThanOrEqual(20);
+  it("knows the three wins, each needing a card of every color, and that reserved cards count for nothing", () => {
+    // Mind, space and soul cards, a wild joined to power, and no reality: 20 points but a color short.
+    const short: DuelPlayer = { ...base.players[0], cards: [{ cardId: "d3-13" }, { cardId: "d3-12", joined: "power" }, { cardId: "d3-01" }, { cardId: "d3-02" }, { cardId: "d3-03" }, { cardId: "d3-05" }, { cardId: "d2-24" }] };
+    expect(pointsOf(short)).toBeGreaterThanOrEqual(20);
+    expect(hasWon(short)).toBe(false);
+    const p: DuelPlayer = { ...short, cards: [...short.cards, { cardId: "d1-21" }] };
     expect(hasWon(p)).toBe(true);
     const reservedOnly: DuelPlayer = { ...base.players[0], reserved: p.cards.map((c) => ({ cardId: c.cardId, blind: false })) };
     expect(hasWon(reservedOnly)).toBe(false);

@@ -158,7 +158,7 @@ export function Board({
           ))}
         </div>
 
-        <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} />
+        <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} onUnstageTokenColor={onUnstageTokenColor} />
 
         <div className="flex w-32 flex-col gap-1">
           <div

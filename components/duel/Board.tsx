@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { DuelCard, DuelCardView, RoyalCard } from "@/components/duel/DuelCard";
 import { artIdsOf, duelArt } from "@/components/duel/duel-art";
@@ -18,7 +19,7 @@ import { useTracedMove } from "@/components/game/traced-move";
 import { Zoomable } from "@/components/game/Zoomable";
 import { isLine } from "@/lib/duel/board";
 import { ROYAL_CARDS } from "@/lib/duel/data";
-import { canBuy } from "@/lib/duel/rules";
+import { canBuy, colorPointsOf } from "@/lib/duel/rules";
 import { GOLD, HAND_LIMIT, MAX_RESERVED, totalTokens, type CardLevel, type DuelPlayer } from "@/lib/duel/types";
 import type { DuelView, DuelViewPlayer, DuelViewReserved } from "@/lib/duel/view";
 import type { RedactedPlayerState } from "@/lib/game-view";
@@ -129,6 +130,8 @@ export function DuelBoard({
   onAction,
 }: DuelBoardProps) {
   const traced = useTracedMove();
+  // The affordable outline is a hint, shown only with ?cheat=true.
+  const cheat = useSearchParams().get("cheat") === "true";
   const viewer = view.players[view.viewerSeat];
   const rival = view.players[1 - view.viewerSeat];
   const nameOf = (seat: number) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`;
@@ -170,7 +173,7 @@ export function DuelBoard({
               beside={<RivalReserve reserved={rival.reserved} ownerName={nameOf(rival.seat)} />}
             >
               {/* The badge and Privilege counts sit under the holdings, so the name's tab is left to the name. */}
-              <Holdings bonuses={rival.bonuses} tokens={rival.tokens} />
+              <Holdings bonuses={rival.bonuses} tokens={rival.tokens} colorPoints={colorPointsOf(asPlayer(rival))} />
               <span className="flex items-center gap-2 px-0.5 fs-2xs font-bold">
                 <span className="flex items-center gap-0.5" title="Avengers badges">
                   <AvengersIcon className="size-3.5" />
@@ -236,6 +239,7 @@ export function DuelBoard({
                       className="w-14"
                       traced={tracedCard === cardId}
                       disabled={disabled}
+                      affordable={cheat && canBuy(cardId, me)}
                       buy={{ onClick: () => onBuy(cardId), disabled: !myTurn || !canBuy(cardId, me) }}
                       reserve={{ onClick: () => onReservePyramid(cardId), disabled: !canReserve }}
                     />
@@ -301,6 +305,7 @@ export function DuelBoard({
             bonuses={viewer.bonuses}
             cards={viewer.cards.map((c) => c.cardId)}
             duel
+            colorPoints={colorPointsOf(me)}
             tags={viewer.crowns}
             stagedCount={stagedCount}
             extra={<HeldScrolls count={viewer.privileges} />}

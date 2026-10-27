@@ -15,6 +15,7 @@ import { ChatButton } from "@/components/game/ChatButton";
 import { flowLock } from "@/components/game/flow-lock";
 import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
+import { PausedNotice, setPaused } from "@/components/game/Pause";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -59,6 +60,8 @@ interface GameGetResponse {
   moves: Array<{ ordinal: number; seat: number; move: DuelMove } & Partial<MoveSummary>>;
   steps: GameStep[];
   start: DuelView | null;
+  /** Waiting for its player: paused by hand, or a turn against bots that ran out with nobody there. */
+  paused: boolean;
   turnEndsInMs: number | null;
   gameEndsInMs: number | null;
 }
@@ -79,6 +82,8 @@ interface GameData {
   turnEndsAt: number | null;
   gameEndsAt: number | null;
   abandoned: boolean;
+  /** Paused by its player (against bots); the clock waits and nothing can be played. */
+  paused: boolean;
 }
 
 const toDeadline = (msLeft: number | null) => (msLeft === null ? null : Date.now() + msLeft);
@@ -203,12 +208,12 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           setMoveLog(data.moves.slice(0, shown.view.moveCount).map(toLogEntry));
           await playSteps(data.steps, data.players, shown.view);
         } else if (data.start && data.steps.length > 0) {
-          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false });
+          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false, paused: false });
           setMoveLog([]);
           await playSteps(data.steps, data.players, data.start);
         }
         setMoveLog(data.moves.map(toLogEntry));
-        commit({ id: data.id, mode: data.mode, players: data.players, view: data.view, turnEndsAt, gameEndsAt: toDeadline(data.gameEndsInMs), abandoned: data.status === "ABANDONED" });
+        commit({ id: data.id, mode: data.mode, players: data.players, view: data.view, turnEndsAt, gameEndsAt: toDeadline(data.gameEndsInMs), abandoned: data.status === "ABANDONED", paused: data.paused });
         setFatalError(null);
       } catch {
         if (!quiet) setFatalError("Could not reach the server.");
@@ -277,7 +282,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
         setStaged(null);
         setSubmitting(false);
         await playSteps(steps, shown.players, shown.view, true);
-        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), gameEndsAt: toDeadline(gameEndsInMs), abandoned: status === "ABANDONED" });
+        commit({ ...shown, view, turnEndsAt: toDeadline(turnEndsInMs), gameEndsAt: toDeadline(gameEndsInMs), abandoned: status === "ABANDONED", paused: false });
         return true;
       } catch {
         if (!quiet) toast.error("Could not reach the server. Please try again.");
@@ -288,6 +293,20 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
       }
     },
     [gameId, lock, playSteps, commit],
+  );
+
+  /** Pauses a game against bots, or resumes it with a fresh turn clock. */
+  const pause = useCallback(
+    async (paused: boolean) => {
+      const result = await setPaused(gameId, paused);
+      const shown = gameRef.current;
+      if (!result || !shown) {
+        toast.error(paused ? "Could not pause the game." : "Could not resume the game.");
+        return;
+      }
+      commit({ ...shown, paused, turnEndsAt: toDeadline(result.turnEndsInMs) });
+    },
+    [gameId, commit],
   );
 
   const stagedRef = useRef(staged);
@@ -364,7 +383,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
   const viewer = view.players[view.viewerSeat];
   const isMyTurn = view.currentSeat === view.viewerSeat;
   const over = gameData.abandoned || view.status !== "active";
-  const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
+  const disabled = submitting || botPlaying || over || gameData.paused || Boolean(view.pending) || !isMyTurn;
   const gameOverOpen = view.status === "finished" && !gameOverDismissed;
   const canChat = gameData.mode === "MULTIPLAYER" && !gameData.abandoned && !viewer.away;
 
@@ -381,6 +400,8 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
               </Button>
             </div>
           </div>
+        ) : gameData.paused && !over ? (
+          <PausedNotice className={NOTICE} busy={submitting || botPlaying} onResume={() => void pause(false)} />
         ) : viewer.away && !over ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
             <div className={NOTICE}>
@@ -432,6 +453,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
                 finished={view.status === "finished"}
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
+                onPause={gameData.mode === "VS_BOT" && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
               />
             }
             onToggleSpace={toggleSpace}

@@ -5,6 +5,8 @@ import { auth0 } from "@/lib/auth0";
 import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { recordGameCoins } from "@/lib/record-coins";
+import { keepsTurn } from "@/lib/duel/rules";
+import type { DuelMove } from "@/lib/duel/types";
 import { isAway, type GameSettings } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type AnyState } from "@/lib/game-rules";
@@ -70,8 +72,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (game.status !== "ACTIVE") {
     return NextResponse.json({ error: "This game is not active." }, { status: 400 });
   }
-
   const stored = game.state as unknown as AnyState;
+  if (stored.paused) {
+    return NextResponse.json({ error: "This game is paused." }, { status: 400 });
+  }
   // The game clock is checked whenever anyone moves. Once it has run out, that
   // is recorded first, and the round in progress becomes the last.
   const clockLeft = gameEndsInMs(stored.settings, game.createdAt);
@@ -84,8 +88,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // A timeout is the one move made on someone else's behalf: any player may
   // call it on whoever's turn has run out, so a closed tab can't freeze the game.
   const seat = sent.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
-  // Only the player themselves can say they were there.
-  const move: AnyMove = sent.type === "TIMEOUT_SKIP" && seat !== viewerSeat ? { type: "TIMEOUT_SKIP" } : sent;
+  // Only the player themselves can say they were there. Against bots theirs is the only device, so they always were:
+  // a game against bots never marks its player away, and never closes on its own.
+  const present = sent.type === "TIMEOUT_SKIP" && seat === viewerSeat && (sent.present || game.mode === "VS_BOT");
+  const move: AnyMove = sent.type === "TIMEOUT_SKIP" ? (present ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" }) : sent;
 
   // A player removed for being away has no more say in the game, not even to forfeit it.
   if (isAway(state.players[viewerSeat])) {
@@ -127,6 +133,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   ];
 
   const abandoned =
+    game.mode === "MULTIPLAYER" &&
     finalState.status !== "finished" &&
     isTableIdle(
       game.players.filter((p) => !p.isBot).map((p) => p.seat),
@@ -145,8 +152,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   });
 
   const now = new Date();
-  // A move that leaves a choice to make hasn't ended the turn, so its clock keeps running.
-  const sameTurn = finalState.status === "active" && finalState.pending !== null;
+  // A move that leaves a choice to make, or a Duel free move, hasn't ended the turn, so its clock keeps running.
+  const sameTurn = finalState.status === "active" && (finalState.pending !== null || (isDuel(state) && keepsTurn(state, move as DuelMove)));
   // The clock starts once every device has shown the moves, not the instant they were saved.
   const movedAt = new Date((sameTurn ? game.updatedAt : now).getTime() + playback);
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";

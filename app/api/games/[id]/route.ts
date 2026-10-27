@@ -4,7 +4,7 @@ import { auth0 } from "@/lib/auth0";
 import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import type { GameSettings } from "@/lib/engine/types";
-import { gameEndsInMs, moveSummaries, replaySteps, turnEndsInMs } from "@/lib/game-replay";
+import { gameEndsInMs, isPaused, moveSummaries, replaySteps, turnEndsInMs } from "@/lib/game-replay";
 import type { GameRewards } from "@/lib/game-record";
 import { createAny, redactAny, rulesOf, type AnyMove, type AnyState } from "@/lib/game-rules";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
@@ -90,6 +90,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const start = steps && since === 0 ? redactAny(createAny(rulesOf(settings), game.players.length, game.seed, settings), seatRow.seat) : null;
 
   const botAvatars = botAvatarKeys(game.seed, game.players);
+  const paused = game.status === "ACTIVE" && isPaused(game.mode, state, game.updatedAt);
   return NextResponse.json({
     id: game.id,
     status: game.status,
@@ -108,7 +109,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     moves: moves.map((m, i) => ({ ...m, ...summaries[i] })),
     steps: steps ?? [],
     start,
-    turnEndsInMs: game.status === "ACTIVE" ? turnEndsInMs(state, game.updatedAt) : null,
+    paused,
+    turnEndsInMs: game.status === "ACTIVE" && !paused ? turnEndsInMs(state, game.updatedAt) : null,
     gameEndsInMs: game.status === "ACTIVE" ? gameEndsInMs(state.settings, game.createdAt) : null,
   });
 }

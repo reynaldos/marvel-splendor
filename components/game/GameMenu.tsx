@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bot, DoorOpen, Flag, History, Hourglass, Menu, Settings, Star, UsersRound } from "lucide-react";
+import { Bot, DoorOpen, Flag, History, Hourglass, Menu, Pause, Settings, Star, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +36,8 @@ interface GameMenuProps {
   /** A move is being sent or played back, so forfeiting has to wait. */
   busy: boolean;
   onForfeit: () => void;
+  /** Set for a game against bots in play: pauses it. */
+  onPause?: () => void;
 }
 
 const HEADING = "font-display text-xl font-black tracking-wide text-gold-400 uppercase";
@@ -46,8 +48,8 @@ function capitalize(s: string): string {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-/** The board's top-right menu: forfeit, move log, game settings, and leaving a finished game. */
-export function GameMenu({ moveLog, players, viewerSeat, settings, finished, busy, onForfeit }: GameMenuProps) {
+/** The board's top-right menu: pause (against bots), forfeit, move log, game settings, and leaving a finished game. */
+export function GameMenu({ moveLog, players, viewerSeat, settings, finished, busy, onForfeit, onPause }: GameMenuProps) {
   const [open, setOpen] = useState<"moves" | "settings" | "forfeit" | null>(null);
   const hasBots = players.some((p) => p.isBot);
 
@@ -69,6 +71,12 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
             Game settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+          {onPause && !finished ? (
+            <DropdownMenuItem disabled={busy} onSelect={onPause}>
+              <Pause className="size-4 text-gold-400" />
+              Pause game
+            </DropdownMenuItem>
+          ) : null}
           {finished ? (
             <DropdownMenuItem asChild>
               <Link href="/">
@@ -110,7 +118,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
                 <Rule
                   icon={<Star className={`${RULE_ICON} fill-gold-400 text-gold-600`} />}
                   label={settings.rules === "duel" ? "To win" : "Points to win"}
-                  value={settings.rules === "duel" ? "20 pts, 10 badges, or 10 in a color" : `${settings.targetPoints}`}
+                  value={settings.rules === "duel" ? "20 pts, 10 badges or 10 in a color, with every color" : `${settings.targetPoints}`}
                 />
                 <Rule
                   icon={<TimerIcon className={RULE_ICON} />}

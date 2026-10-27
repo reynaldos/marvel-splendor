@@ -83,10 +83,21 @@ export function moveSummaries(args: {
   }
 }
 
-/** Milliseconds left on the current turn, or null when turns are untimed or the game is over. */
-export function turnEndsInMs(state: Pick<AnyState, "status" | "settings">, turnStartedAt: Date, now = Date.now()): number | null {
-  if (state.status !== "active" || state.settings.turnTimeSeconds === null) return null;
+/** Milliseconds left on the current turn, or null when turns are untimed, the game is paused, or it is over. */
+export function turnEndsInMs(state: Pick<AnyState, "status" | "settings" | "paused">, turnStartedAt: Date, now = Date.now()): number | null {
+  if (state.status !== "active" || state.settings.turnTimeSeconds === null || state.paused) return null;
   return turnStartedAt.getTime() + TURN_BANNER_MS + state.settings.turnTimeSeconds * 1000 - now;
+}
+
+/**
+ * Whether a game waits for its player to come back: paused by them, or, against bots, its turn run out
+ * while nobody was at the table. The player resumes it with a fresh turn clock instead of losing the turn.
+ */
+export function isPaused(mode: string, state: Pick<AnyState, "status" | "settings" | "paused">, turnStartedAt: Date, now = Date.now()): boolean {
+  if (state.status !== "active") return false;
+  if (state.paused) return true;
+  const left = turnEndsInMs(state, turnStartedAt, now);
+  return mode === "VS_BOT" && left !== null && left <= 0;
 }
 
 /** True when nobody is playing any more: every person at the table is away. Bots don't count. */

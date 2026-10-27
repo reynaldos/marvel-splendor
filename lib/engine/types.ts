@@ -180,6 +180,8 @@ export interface GameState {
   endTriggered: boolean;
   /** Set by END_BY_CLOCK: finish the current round, then finalize regardless of qualification. */
   clockExpired: boolean;
+  /** The server's: a game against bots its player has paused. The turn clock waits, and no move is taken. */
+  paused?: boolean;
   status: "active" | "finished";
   winnerSeat: number | null;
   /** Seats sharing victory when the tiebreak ends in a true tie. */

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { auth0 } from "@/lib/auth0";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { createLobby } from "@/lib/lobby";
+import { createLobby, extractCheatCode, withCheat } from "@/lib/lobby";
 import { clockOf, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
 
 /** Opens a Duel room for two: the host and one friend by code. */
@@ -21,5 +21,6 @@ export async function createDuelRoomAction(formData: FormData) {
     turnTimeSeconds: sent === "off" ? null : (TURN_TIME_OPTIONS.find((o) => o === Number(sent)) ?? TURN_TIME_OPTIONS[0]),
     gameTimeMinutes: clockOf(formData.get("gameTimeMinutes")),
   });
-  redirect(`/lobby/${gameId}`);
+  const { cheat } = extractCheatCode(String(formData.get("code") ?? ""));
+  redirect(withCheat(`/lobby/${gameId}`, cheat));
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { cn } from "cn";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 
+import { closeDeadGamesAction, deleteGameAction } from "@/app/admin/actions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ordinal, timeAgo } from "@/lib/game-record";
 import { formatDuration, type GameSummary } from "@/lib/game-summary";
@@ -14,6 +15,38 @@ const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
 const TH = "px-4 py-3 font-bold";
 const PAGER =
   "flex size-8 items-center justify-center rounded-full bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500 disabled:opacity-40 disabled:hover:bg-cosmos-700";
+const DELETE = "flex h-9 items-center gap-2 rounded-full px-4 text-xs font-black tracking-wide uppercase disabled:opacity-40";
+
+/** Runs the sweep the daily cron runs, from the admin page. */
+function CloseDeadGames({ count }: { count: number }) {
+  const [pending, start] = useTransition();
+  return (
+    <button type="button" disabled={pending || count === 0} onClick={() => start(() => closeDeadGamesAction())} className={cn(DELETE, "bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500")}>
+      <Trash2 className="size-4" />
+      {pending ? "Closing…" : `Close ${count} left open`}
+    </button>
+  );
+}
+
+/** Deletes the game on a second tap; a finished one takes a moment, as the records are set right after it. */
+function DeleteGame({ id, finished, onDone }: { id: string; finished: boolean; onDone: () => void }) {
+  const [armed, setArmed] = useState(false);
+  const [pending, start] = useTransition();
+  return (
+    <div className="flex items-center justify-end gap-3">
+      {armed ? <span className="text-xs text-white/70">{finished ? "Its players' stats, rank, coins and cards are recounted." : "This can't be undone."}</span> : null}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => (armed ? start(async () => { await deleteGameAction(id); onDone(); }) : setArmed(true))}
+        className={cn(DELETE, armed ? "bg-marvel text-white hover:bg-red-500" : "bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500")}
+      >
+        <Trash2 className="size-4" />
+        {pending ? "Deleting…" : armed ? "Really delete" : "Delete game"}
+      </button>
+    </div>
+  );
+}
 
 function statusLabel(game: GameSummary): string {
   if (game.status === "LOBBY") return "Lobby";
@@ -49,8 +82,16 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
     return <p className="text-sm font-bold text-cosmos-300">{recent ? "No games have ended yet." : "No games or lobbies are open."}</p>;
   }
 
+  const dead = recent ? 0 : games.filter((g) => g.dead).length;
+
   return (
     <>
+      {/* The sweep's button: a day idle, or a week against bots, is a game nobody is coming back to. */}
+      {!recent ? (
+        <div className="mb-3 flex justify-end">
+          <CloseDeadGames count={dead} />
+        </div>
+      ) : null}
       <div className="overflow-x-auto rounded-xl bg-cosmos-900 ring-2 ring-cosmos-500 ring-inset">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead className="text-xs text-cosmos-300">
@@ -156,6 +197,7 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
               ) : (
                 <p className="text-sm text-white/70">Waiting in the lobby: {open.players.join(", ")}.</p>
               )}
+              <DeleteGame key={open.id} id={open.id} finished={open.status === "FINISHED"} onDone={() => setOpenId(null)} />
             </>
           ) : null}
         </DialogContent>

@@ -34,8 +34,11 @@ export function WelcomeScreen() {
   );
 }
 
-/** The main menu: the two games. With a room waiting (`lobbyId`), the Play Game tile goes straight back to it. */
-export function HomeScreen({ lobbyId, duelPlayed }: { lobbyId: string | null; duelPlayed: boolean }) {
+/**
+ * The main menu: the two games. With a room waiting (`lobbyId`), the Play Game tile goes straight back to it;
+ * with a game against bots in play (`gameId`), the footer's line is the way back to it.
+ */
+export function HomeScreen({ lobbyId, gameId, duelPlayed }: { lobbyId: string | null; gameId: string | null; duelPlayed: boolean }) {
   return (
     <Stage>
       <StageRows>
@@ -54,9 +57,20 @@ export function HomeScreen({ lobbyId, duelPlayed }: { lobbyId: string | null; du
           <ShopButton />
           {/* Keeps the line centred, with two buttons on the right. */}
           <span aria-hidden className="w-14" />
-          <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
-            Assemble the Avengers · Claim the Gauntlet
-          </p>
+          {gameId ? (
+            <span className="flex flex-1 justify-center">
+              <Link
+                href={`/play/${gameId}`}
+                className="glow-gold flex h-11 items-center rounded-full bg-linear-to-b from-gold-200 via-gold-400 to-gold-600 px-8 font-display text-sm font-black tracking-wide text-cosmos-950 uppercase ring-2 ring-gold-200 hover:brightness-110"
+              >
+                Continue your game
+              </Link>
+            </span>
+          ) : (
+            <p className="flex-1 text-center font-display text-xs font-bold tracking-widest text-gold-400 uppercase">
+              Assemble the Avengers · Claim the Gauntlet
+            </p>
+          )}
           <Link
             href="/leaderboard"
             aria-label="Leaderboard"

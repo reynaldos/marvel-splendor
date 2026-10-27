@@ -14,6 +14,7 @@ interface TokenBankProps {
   staged: StagedAction | null;
   disabled?: boolean;
   onStageTokenColor: (color: Stone) => void;
+  onUnstageTokenColor: (color: Stone) => void;
 }
 
 const ROW = "flex items-center gap-2";
@@ -56,12 +57,12 @@ function TokenPile({
 /**
  * The 7 shared token stacks, one column with the count beside each
  * (ARCHITECTURE.md §6 right rail). Tapping a basic-stone stack builds up a
- * `TAKE_TOKENS` selection 1 pick at a time (picks are undone from
- * StagedTokens); green (time) and gray (shield) are display-only here since
+ * `TAKE_TOKENS` selection 1 pick at a time; a selected stone that can take
+ * no more is put back on a tap (as from StagedTokens); green (time) and gray (shield) are display-only here since
  * they're never directly takeable. A pile you can't take from looks the
  * same as one you can; an empty pile shows its 0 beside an empty space.
  */
-export function TokenBank({ supply, staged, disabled, onStageTokenColor }: TokenBankProps) {
+export function TokenBank({ supply, staged, disabled, onStageTokenColor, onUnstageTokenColor }: TokenBankProps) {
   const selectedColors = staged?.kind === "tokens" ? staged.colors : [];
   const taken = useTracedMove()?.move;
   // Reserving a card comes with a S.H.I.E.L.D. token, while there are any.
@@ -83,12 +84,13 @@ export function TokenBank({ supply, staged, disabled, onStageTokenColor }: Token
         const stone = color as Stone;
         const selectedCount = selectedColors.filter((c) => c === stone).length;
         const left = supply[stone] - selectedCount;
+        const canAdd = canAddTokenColor(selectedColors, stone, supply);
         return (
           <button
             key={stone}
             type="button"
-            disabled={disabled || !canAddTokenColor(selectedColors, stone, supply)}
-            onClick={() => onStageTokenColor(stone)}
+            disabled={disabled || (!canAdd && selectedCount === 0)}
+            onClick={() => (canAdd ? onStageTokenColor(stone) : onUnstageTokenColor(stone))}
             className={cn(ROW, "relative disabled:cursor-default")}
           >
             <span className={COUNT}>{left}</span>
