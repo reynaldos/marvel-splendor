@@ -31,17 +31,22 @@ export function TierName({ tier, className }: { tier: FrameTier | null; classNam
 /** The corners a card drawn large gets, everywhere in the game. */
 const CORNERS = "rounded-[10%/7.1%]";
 
-/** A card in a tier's frame, with the light that tier gets; no frame at all before its first recruit. `foil` draws the shader over it. */
-function FramedCard({ cardId, tier, foil, className }: { cardId: string; tier: FrameTier | null; foil?: boolean; className?: string }) {
+/**
+ * A card in a tier's frame, with the light that tier gets; no frame at all before its first recruit. The shader draws
+ * the frame: `foil` "face" with its own layer over the whole card, "plain" the border and glow only, as the collection's
+ * grid has them, from a layer over the parent.
+ */
+function FramedCard({ cardId, tier, foil, className }: { cardId: string; tier: FrameTier | null; foil?: "face" | "plain"; className?: string }) {
   const card = CARD_BY_ID.get(cardId);
   return card ? (
     <span
       data-foil={foil && tier ? tier : undefined}
+      data-foil-plain={foil === "plain" && tier ? "" : undefined}
       className={cn("frame-gold relative aspect-card block w-full rounded-frame-lg", tier && FRAME_EFFECT[tier], className)}
       style={tier ? FRAME_STYLE[tier] : ({ "--frame-border": "transparent" } as CSSProperties)}
     >
       <CardView card={card} className={cn("size-full", CORNERS)} />
-      {foil && tier ? <FoilLayer /> : null}
+      {foil === "face" && tier ? <FoilLayer /> : null}
     </span>
   ) : null;
 }
@@ -66,7 +71,7 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
   const index = Math.floor(stage / 2);
   const up = ups[index];
   const flipped = stage % 2 === 1;
-  const [viewing, setViewing] = useState<{ card: Card; from: DOMRect } | null>(null);
+  const [viewing, setViewing] = useState<{ card: Card; tier: FrameTier | null; from: DOMRect } | null>(null);
   const n = ups.length;
   const title = ups.every((u) => u.from) ? `${n} ${n === 1 ? "card" : "cards"} ranked up` : ups.some((u) => u.from) ? `${n} new cards and rank-ups` : `${n} new ${n === 1 ? "recruit" : "recruits"}`;
 
@@ -82,8 +87,8 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
             <p className="font-display text-xl font-black tracking-widest text-gold-400 uppercase">{CARD_BY_ID.get(up.cardId)?.name}</p>
             {/* Remade for each card, so it rises in afresh; the new frame flares over the old one. */}
             <div key={index} className="card-arrive relative" style={{ width: "min(13rem, 46dvh)" }}>
-              <FramedCard cardId={up.cardId} tier={up.from} foil className={cn(flipped && "tier-out")} />
-              {flipped ? <FramedCard cardId={up.cardId} tier={up.to} foil className="tier-up absolute inset-0" /> : null}
+              <FramedCard cardId={up.cardId} tier={up.from} foil="face" className={cn(flipped && "tier-out")} />
+              {flipped ? <FramedCard cardId={up.cardId} tier={up.to} foil="face" className="tier-up absolute inset-0" /> : null}
             </div>
             <p className="h-8 text-2xl">
               {flipped ? <TierName key="to" tier={up.to} className="tier-up inline-block" /> : <TierName key="from" tier={up.from} className="text-lg" />}
@@ -99,28 +104,32 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
         ) : (
           <>
             <p className="font-display text-xl font-black tracking-widest text-gold-400 uppercase">{title}</p>
-            <ul className="flex flex-wrap items-start justify-center gap-x-5 gap-y-3">
-              {ups.map((u, i) => {
-                const card = CARD_BY_ID.get(u.cardId);
-                return card ? (
-                  <li
-                    key={u.cardId}
-                    className="card-arrive flex flex-col items-center gap-1.5"
-                    style={{ width: "min(6.5rem, 20dvh)", animationDelay: `${i * 0.1}s` }}
-                  >
-                    <button
-                      type="button"
-                      aria-label={`${card.name}. Show it large`}
-                      onClick={(e) => setViewing({ card, from: e.currentTarget.getBoundingClientRect() })}
-                      className="block w-full rounded-frame-lg"
+            {/* One layer over the whole row draws every frame, as over the collection's grid. */}
+            <div className="relative">
+              <FoilLayer tight />
+              <ul className="flex flex-wrap items-start justify-center gap-x-5 gap-y-3">
+                {ups.map((u, i) => {
+                  const card = CARD_BY_ID.get(u.cardId);
+                  return card ? (
+                    <li
+                      key={u.cardId}
+                      className="card-arrive flex flex-col items-center gap-1.5"
+                      style={{ width: "min(6.5rem, 20dvh)", animationDelay: `${i * 0.1}s` }}
                     >
-                      <FramedCard cardId={u.cardId} tier={u.to} />
-                    </button>
-                    <TierName tier={u.to} className="text-xs" />
-                  </li>
-                ) : null;
-              })}
-            </ul>
+                      <button
+                        type="button"
+                        aria-label={`${card.name}. Show it large`}
+                        onClick={(e) => setViewing({ card, tier: u.to, from: e.currentTarget.getBoundingClientRect() })}
+                        className="block w-full rounded-frame-lg"
+                      >
+                        <FramedCard cardId={u.cardId} tier={u.to} foil="plain" />
+                      </button>
+                      <TierName tier={u.to} className="text-xs" />
+                    </li>
+                  ) : null;
+                })}
+              </ul>
+            </div>
             <button type="button" onClick={onClose} className={cn(BUTTON, "mt-2 bg-gold-400 text-cosmos-950 hover:bg-gold-200")}>
               Done
             </button>
@@ -129,7 +138,8 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
         </LargeImages>
         {viewing ? (
           <ZoomedView from={viewing.from} closeLabel={`Close ${viewing.card.name}`} onClose={() => setViewing(null)}>
-            <CardView card={viewing.card} className={cn("w-[min(15.25rem,60dvh)]", CORNERS)} />
+            {/* In its new frame with the shader over it, as the collection shows a card large. */}
+            <FramedCard cardId={viewing.card.id} tier={viewing.tier} foil="face" className="w-[min(15.25rem,60dvh)]" />
           </ZoomedView>
         ) : null}
       </DialogContent>

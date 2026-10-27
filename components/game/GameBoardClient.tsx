@@ -19,6 +19,7 @@ import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
+import { PausedNotice, setPaused } from "@/components/game/Pause";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -61,6 +62,8 @@ interface GameGetResponse {
   steps: GameStep[];
   /** The board before `steps` when they are the game's opening, so a first load can play it. */
   start: RedactedGameState | null;
+  /** Waiting for its player: paused by hand, or a turn against bots that ran out with nobody there. */
+  paused: boolean;
   turnEndsInMs: number | null;
   gameEndsInMs: number | null;
 }
@@ -85,6 +88,8 @@ interface GameData {
   gameEndsAt: number | null;
   /** Closed because nobody was playing (or by hand); the board is read-only. */
   abandoned: boolean;
+  /** Paused by its player (against bots); the clock waits and nothing can be played. */
+  paused: boolean;
 }
 
 /** The server sends time remaining, not a timestamp, so device clocks needn't agree with it. */
@@ -242,7 +247,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           await playSteps(data.steps, data.players, shown.view);
         } else if (data.start && data.steps.length > 0) {
           // The bots went first: show the deal, then watch them open.
-          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false });
+          commit({ id: data.id, mode: data.mode, players: data.players, view: data.start, turnEndsAt: null, gameEndsAt: null, abandoned: false, paused: false });
           setMoveLog([]);
           await playSteps(data.steps, data.players, data.start);
         }
@@ -255,6 +260,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           turnEndsAt,
           gameEndsAt,
           abandoned: data.status === "ABANDONED",
+          paused: data.paused,
         });
         setFatalError(null);
       } catch {
@@ -360,6 +366,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
           turnEndsAt,
           gameEndsAt,
           abandoned: status === "ABANDONED",
+          paused: false,
         });
         return true;
       } catch {
@@ -371,6 +378,20 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       }
     },
     [gameId, lock, playSteps, commit],
+  );
+
+  /** Pauses a game against bots, or resumes it with a fresh turn clock. */
+  const pause = useCallback(
+    async (paused: boolean) => {
+      const result = await setPaused(gameId, paused);
+      const shown = gameRef.current;
+      if (!result || !shown) {
+        toast.error(paused ? "Could not pause the game." : "Could not resume the game.");
+        return;
+      }
+      commit({ ...shown, paused, turnEndsAt: toDeadline(result.turnEndsInMs) });
+    },
+    [gameId, commit],
   );
 
   const stagedRef = useRef(staged);
@@ -539,7 +560,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const viewer = view.players.find((p) => p.seat === view.viewerSeat);
   const isMyTurn = view.currentSeat === view.viewerSeat;
   const over = gameData.abandoned || view.status !== "active";
-  const disabled = submitting || botPlaying || over || Boolean(view.pending) || !isMyTurn;
+  const disabled = submitting || botPlaying || over || gameData.paused || Boolean(view.pending) || !isMyTurn;
   // The last move is announced before the results come up.
   const gameOverOpen = view.status === "finished" && !gameOverDismissed && !announcement;
 
@@ -567,6 +588,8 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
               </Button>
             </div>
           </div>
+        ) : gameData.paused && !over ? (
+          <PausedNotice className={NOTICE} busy={submitting || botPlaying} onResume={() => void pause(false)} />
         ) : viewer?.away && !over ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-xs">
             <div className={NOTICE}>
@@ -641,6 +664,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
                 finished={view.status === "finished"}
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
+                onPause={gameData.mode === "VS_BOT" && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
               />
             }
             onStageTokenColor={stageTokenColor}

@@ -55,6 +55,16 @@ export async function openLobbyFor(userId: string): Promise<string | null> {
   return null;
 }
 
+/** The newest game against bots the player has in play, to go back to from the home screen; null without one. */
+export async function openGameFor(userId: string): Promise<string | null> {
+  const seat = await prisma.gamePlayer.findFirst({
+    where: { userId, game: { status: "ACTIVE", mode: "VS_BOT" } },
+    select: { gameId: true },
+    orderBy: { game: { updatedAt: "desc" } },
+  });
+  return seat?.gameId ?? null;
+}
+
 /** Join codes are typed by hand, so accept any case and stray whitespace. */
 export function normalizeJoinCode(raw: string): string | null {
   const code = raw.trim().toUpperCase();

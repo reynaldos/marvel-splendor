@@ -105,6 +105,8 @@ export interface DuelState {
   winnerSeat: number | null;
   /** The game clock has run out: the game ends once both have had the same number of turns. */
   clockExpired?: boolean;
+  /** The server's: a game against bots its player has paused. The turn clock waits, and no move is taken. */
+  paused?: boolean;
 }
 
 export type DuelMove =
