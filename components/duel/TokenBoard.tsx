@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "cn";
-import { Equal, PaperBag, ScrollText } from "lucide-react";
+import { Equal, Maximize2, PaperBag, ScrollText } from "lucide-react";
 
 import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { tokenMeta } from "@/components/game/stone-colors";
@@ -113,8 +113,9 @@ export function Grid({ board, size, selected = [], traced = [], onTap, canTap, l
             ) : null}
           </>
         );
-        return tappable ? (
-          <button key={space} type="button" onClick={() => onTap!(space)} className={cn(shell, "hover:ring-2 hover:ring-gold-200")} aria-label={`${tokenMeta(token!).label} token`}>
+        // A stone's cell keeps its element as turns and picks change, or it would remount and land again.
+        return token ? (
+          <button key={space} type="button" disabled={!tappable} onClick={() => onTap?.(space)} className={cn(shell, "disabled:cursor-default", tappable && "hover:ring-2 hover:ring-gold-200")} aria-label={`${tokenMeta(token).label} token`}>
             {inner}
           </button>
         ) : (
@@ -186,22 +187,25 @@ interface TokenBoardProps extends Omit<GridProps, "size"> {
   title?: string;
 }
 
-/** The board compact in the column, and large on a tap, where lines are picked; the bag count on its corner. */
+/** The board compact in the column, where lines are picked, and large from the corner button; the bag count on the other corner. */
 export function TokenBoard({ bagCount, onRefill, title = "Take up to 3 stones in a line", ...grid }: TokenBoardProps) {
   return (
-    <Zoomable
-      label="Show the stone board large"
-      title={title}
-      interactive
-      className="relative mx-auto rounded-lg bg-cosmos-950/60 p-1.5 ring-1 ring-foreground/10"
-      zoomed={
-        <div className="flex items-start gap-5 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-gold-400">
-          <Grid {...grid} size="lg" />
-          <Reminders className="my-auto w-56 flex-col" labeled />
-        </div>
-      }
-    >
-      <Grid {...grid} size="sm" onTap={undefined} land />
+    <div className="relative mx-auto rounded-lg bg-cosmos-950/60 p-1.5 ring-1 ring-foreground/10">
+      <Grid {...grid} size="sm" land />
+      <Zoomable
+        label="Show the stone board large"
+        title={title}
+        interactive
+        className="absolute -top-2 -right-2 flex size-5 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-1 ring-gold-400/60 hover:bg-cosmos-500"
+        zoomed={
+          <div className="flex items-start gap-5 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-gold-400">
+            <Grid {...grid} size="lg" />
+            <Reminders className="my-auto w-56 flex-col" labeled />
+          </div>
+        }
+      >
+        <Maximize2 className="size-3" />
+      </Zoomable>
       {onRefill ? (
         <button
           type="button"
@@ -219,7 +223,7 @@ export function TokenBoard({ bagCount, onRefill, title = "Take up to 3 stones in
           <PaperBag className="size-3" /> {bagCount}
         </span>
       )}
-    </Zoomable>
+    </div>
   );
 }
 
@@ -236,7 +240,7 @@ export function WinTile({ still }: { still?: boolean }) {
   return (
     <Zoomable
       label="Show how to win"
-      title="Any one of these wins"
+      title="Any one of these wins, with a card of every color"
       className="@container relative mx-auto aspect-[1404/670] w-36 overflow-hidden rounded-md ring-1 ring-foreground/10"
       zoomed={
         <div className="@container relative aspect-[1404/670] w-150 overflow-hidden rounded-xl">
@@ -253,7 +257,7 @@ export function WinTile({ still }: { still?: boolean }) {
 function WinPanel() {
   const row = "flex items-center gap-[2cqw] font-display text-[length:7.5cqw] leading-none font-black text-white [-webkit-text-stroke:1px_black] [paint-order:stroke_fill]";
   return (
-    <span className="absolute inset-y-0 left-0 flex w-[30cqw] flex-col items-center justify-center gap-[5cqw] bg-cosmos-950">
+    <span className="absolute inset-y-0 left-0 flex w-[30cqw] flex-col items-center justify-center gap-[3.5cqw] bg-cosmos-950">
       <span className={row} title="20 points">
         20<span className="text-[length:4cqw] text-gold-200">PTS</span>
       </span>
@@ -274,6 +278,13 @@ function WinPanel() {
             );
           })}
         </span>
+      </span>
+      {/* And a card of every color, whichever win it is. */}
+      <span className="flex items-center gap-[1cqw]" title="With a card of every color">
+        <span className="font-display text-[length:5cqw] leading-none font-black text-gold-200">+</span>
+        {STONES.map((st) => (
+          <span key={st} className={cn("size-[3.5cqw] rounded-full", tokenMeta(st).swatch)} />
+        ))}
       </span>
     </span>
   );

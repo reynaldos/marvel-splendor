@@ -209,10 +209,10 @@ describe("Royals and the wins", () => {
     expect(taken.currentSeat).toBe(me); // the Royal's power: another turn
   });
 
-  it("ends the game at once when the player reaches 20 points", () => {
-    // Three 4-point cards with 6 crowns, and the two Royals those crowns already earned: 16 points.
+  it("ends the game at once when the player reaches 20 points with every color", () => {
+    // Three 4-point cards with 6 crowns, the two Royals those crowns already earned, and a card of the other two colors: 16 points.
     const state = withPlayer({ ...base, pyramid: { ...base.pyramid, 3: ["d3-13", null, null] }, royals: ["r-2", "r-4"] }, me, {
-      cards: [{ cardId: "d3-02" }, { cardId: "d3-04" }, { cardId: "d3-06" }],
+      cards: [{ cardId: "d3-02" }, { cardId: "d3-04" }, { cardId: "d3-06" }, { cardId: "d1-16" }, { cardId: "d1-21" }],
       royals: ["r-1", "r-3"],
       tokens: { ...emptyTokens(), [GOLD]: 9 },
     });

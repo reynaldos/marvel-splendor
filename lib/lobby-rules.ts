@@ -2,7 +2,7 @@ import { createRng, shuffle } from "@/lib/engine/rng";
 
 /** What the host can pick from; tapping a setting steps to the next value. */
 export const POINT_OPTIONS = [16, 18, 21];
-export const TURN_TIME_OPTIONS = [30, 60, 90];
+export const TURN_TIME_OPTIONS = [45, 60, 90];
 export const GAME_CLOCK_OPTIONS = [10, 20, 30];
 
 /** The value after `current`, wrapping round; anything not on the list starts it over. */

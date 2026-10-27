@@ -21,7 +21,7 @@ Two players. Each turn you may first do one or both of two free things, then you
 
 **Crowns.** Your 3rd Crown and your 6th each give you one of four Royal cards, with points and an ability.
 
-**End of turn.** More than 10 tokens, give some back to the bag. Then, if you have any one of these, you win at once:
+**End of turn.** More than 10 tokens, give some back to the bag. Then, with a card of every color (a house rule, from the Marvel game), if you have any one of these, you win at once:
 - 20 points, or
 - 10 Crowns, or
 - 10 points on cards of one color.
@@ -60,7 +60,7 @@ How the pieces read in this game's theme, with no new rules:
 | Royal cards | four leaders, each with points and an ability: the "3 and 6 Avengers marks" rewards |
 | The bag | the Vault |
 | Refill the board | "Call for reinforcements" |
-| The three wins | 20 points, 10 Avengers marks, or 10 points on cards of one stone |
+| The three wins | 20 points, 10 Avengers marks, or 10 points on cards of one stone, with a card of every stone |
 
 **The table, locked in.** The preview at `/preview/duel` is the design to build:
 - Left column: the rival's plaque with their Avengers and scroll counts on its name tab; under it the four Royal
@@ -170,7 +170,7 @@ loop, chat, timers, stats and rewards, and the card, plaque, timer, log and popu
 | Where tokens sit | a 5 by 5 grid filled along a printed spiral; you take a straight line of up to 3 | a bank: take 3 colors or 2 of one |
 | The market | a pyramid: 3, 4 and 5 cards face up | 4 per level |
 | Extras | 3 Privileges, 4 Royal cards, a bag | Locations, the Avengers tile |
-| Win | at once, on 20 points, 10 Crowns, or 10 points in one color | 16 points and all five bonuses, end of round |
+| Win | at once, on 20 points, 10 Crowns, or 10 points in one color, with all five bonuses | 16 points and all five bonuses, end of round |
 | Players | exactly 2 | 2 to 4 |
 
 **The board must change.** The Marvel board is a token bank beside three market rows. Duel is a 5 by 5 token grid

@@ -19,7 +19,7 @@ export const PYRAMID_SLOTS: Record<CardLevel, number> = { 1: 5, 2: 4, 3: 3 };
 export const PRIVILEGES = 3;
 export const MAX_RESERVED = 3;
 export const HAND_LIMIT = 10;
-/** The wins: points in all, crowns, or points on cards of one color. Any one ends the game at once. */
+/** The wins: points in all, crowns, or points on cards of one color. Any one ends the game at once, with a bonus of every color. */
 export const WIN_POINTS = 20;
 export const WIN_CROWNS = 10;
 export const WIN_COLOR_POINTS = 10;

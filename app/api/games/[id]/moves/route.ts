@@ -5,6 +5,8 @@ import { auth0 } from "@/lib/auth0";
 import { isTurnPrimary } from "@/lib/coins";
 import { prisma } from "@/lib/db";
 import { recordGameCoins } from "@/lib/record-coins";
+import { keepsTurn } from "@/lib/duel/rules";
+import type { DuelMove } from "@/lib/duel/types";
 import { isAway, type GameSettings } from "@/lib/engine/types";
 import { gameEndsInMs, isTableIdle, turnEndsInMs } from "@/lib/game-replay";
 import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type AnyState } from "@/lib/game-rules";
@@ -145,8 +147,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   });
 
   const now = new Date();
-  // A move that leaves a choice to make hasn't ended the turn, so its clock keeps running.
-  const sameTurn = finalState.status === "active" && finalState.pending !== null;
+  // A move that leaves a choice to make, or a Duel free move, hasn't ended the turn, so its clock keeps running.
+  const sameTurn = finalState.status === "active" && (finalState.pending !== null || (isDuel(state) && keepsTurn(state, move as DuelMove)));
   // The clock starts once every device has shown the moves, not the instant they were saved.
   const movedAt = new Date((sameTurn ? game.updatedAt : now).getTime() + playback);
   const status = finalState.status === "finished" ? "FINISHED" : abandoned ? "ABANDONED" : "ACTIVE";

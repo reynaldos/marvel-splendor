@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "cn";
 
+import { FoilLayer } from "@/components/Foil";
 import { LargeImages } from "@/components/game/assets";
 import { CardView } from "@/components/game/Card";
 import { ZoomedView } from "@/components/game/Zoomable";
@@ -30,15 +31,17 @@ export function TierName({ tier, className }: { tier: FrameTier | null; classNam
 /** The corners a card drawn large gets, everywhere in the game. */
 const CORNERS = "rounded-[10%/7.1%]";
 
-/** A card in a tier's frame, with the light that tier gets; no frame at all before its first recruit. */
-function FramedCard({ cardId, tier, className }: { cardId: string; tier: FrameTier | null; className?: string }) {
+/** A card in a tier's frame, with the light that tier gets; no frame at all before its first recruit. `foil` draws the shader over it. */
+function FramedCard({ cardId, tier, foil, className }: { cardId: string; tier: FrameTier | null; foil?: boolean; className?: string }) {
   const card = CARD_BY_ID.get(cardId);
   return card ? (
     <span
-      className={cn("frame-gold aspect-card block w-full rounded-frame-lg", tier && FRAME_EFFECT[tier], className)}
+      data-foil={foil && tier ? tier : undefined}
+      className={cn("frame-gold relative aspect-card block w-full rounded-frame-lg", tier && FRAME_EFFECT[tier], className)}
       style={tier ? FRAME_STYLE[tier] : ({ "--frame-border": "transparent" } as CSSProperties)}
     >
       <CardView card={card} className={cn("size-full", CORNERS)} />
+      {foil && tier ? <FoilLayer /> : null}
     </span>
   ) : null;
 }
@@ -79,8 +82,8 @@ export function CardLevelUps({ ups, onClose }: { ups: GameRewards["cardLevelUps"
             <p className="font-display text-xl font-black tracking-widest text-gold-400 uppercase">{CARD_BY_ID.get(up.cardId)?.name}</p>
             {/* Remade for each card, so it rises in afresh; the new frame flares over the old one. */}
             <div key={index} className="card-arrive relative" style={{ width: "min(13rem, 46dvh)" }}>
-              <FramedCard cardId={up.cardId} tier={up.from} className={cn(flipped && "tier-out")} />
-              {flipped ? <FramedCard cardId={up.cardId} tier={up.to} className="tier-up absolute inset-0" /> : null}
+              <FramedCard cardId={up.cardId} tier={up.from} foil className={cn(flipped && "tier-out")} />
+              {flipped ? <FramedCard cardId={up.cardId} tier={up.to} foil className="tier-up absolute inset-0" /> : null}
             </div>
             <p className="h-8 text-2xl">
               {flipped ? <TierName key="to" tier={up.to} className="tier-up inline-block" /> : <TierName key="from" tier={up.from} className="text-lg" />}

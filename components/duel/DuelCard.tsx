@@ -81,19 +81,22 @@ interface DuelCardProps {
   className?: string;
   traced?: boolean;
   disabled?: boolean;
+  /** The cheat hint: outlined as affordable now. */
+  affordable?: boolean;
   /** The two moves a card in the pyramid or the reserve offers; left out, the card only opens to look at. */
   buy?: { onClick: () => void; disabled: boolean };
   reserve?: { onClick: () => void; disabled: boolean };
 }
 
 /** A Duel card on the table: tap for Recruit, Reserve or View, as the Marvel cards do. */
-export function DuelCard({ cardId, className, traced, disabled, buy, reserve }: DuelCardProps) {
+export function DuelCard({ cardId, className, traced, disabled, affordable, buy, reserve }: DuelCardProps) {
   return (
     <Card
       card={duelArt(cardId)}
       className={className}
       traced={traced}
       disabled={disabled}
+      affordable={affordable}
       overlay={<DuelCardFace cardId={cardId} />}
       recruitAction={buy ? { label: "Recruit", ...buy } : undefined}
       reserveAction={reserve ? { label: "Reserve", ...reserve } : undefined}
