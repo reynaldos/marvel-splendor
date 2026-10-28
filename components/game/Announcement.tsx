@@ -86,7 +86,8 @@ export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) 
         <ScrollText className="size-16 text-cosmos-950" />
       </span>
     );
-    line = `${name} spent a Privilege`;
+    line = event.from === undefined ? `${name} spent a Privilege` : `${name} took a Privilege`;
+    if (event.from !== undefined) detail = `From ${nameForSeat(event.from)}`;
   } else if (event.kind === "steal") {
     piece = <TokenChip color={event.color} className="mx-auto size-32 shadow-2xl ring-4 ring-gold-400" />;
     line = `${name} took a ${tokenMeta(event.color).label} stone`;

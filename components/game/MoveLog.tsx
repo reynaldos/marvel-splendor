@@ -96,6 +96,7 @@ export function describeEvents(
       case "royal":
         return entry.move.type === "PICK_ROYAL" ? [] : `${who} claimed ${royalTile(event.royalId).name}`;
       case "privilege":
+        return event.from === undefined ? [] : `${who} took a Privilege from ${seatLabel(event.from, players, viewerSeat)}`;
       case "steal":
         return [];
     }
