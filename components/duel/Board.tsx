@@ -192,7 +192,7 @@ export function DuelBoard({
             zoomed={
               <div className="flex gap-4">
                 {ROYAL_IDS.map((id) => (
-                  <RoyalCard key={id} royalId={id} taken={!view.royals.includes(id)} className="w-40 rounded-3xl" />
+                  <RoyalCard key={id} royalId={id} tiles={view.royalTiles} taken={!view.royals.includes(id)} className="w-40 rounded-3xl" />
                 ))}
               </div>
             }
@@ -200,7 +200,7 @@ export function DuelBoard({
             <span className="grid grid-cols-2 gap-1.5" title="Locations: reach 3 Avengers badges and claim one; 6, another">
               {ROYAL_IDS.map((id) => (
                 <span key={id} data-tile={id} className="block w-14 rounded-tile">
-                  <RoyalCard royalId={id} taken={!view.royals.includes(id)} className="w-full" />
+                  <RoyalCard royalId={id} tiles={view.royalTiles} taken={!view.royals.includes(id)} className="w-full" />
                 </span>
               ))}
             </span>

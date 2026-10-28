@@ -420,7 +420,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           </div>
         ) : null}
         {announcement ? (
-          <Announcement key={announcement.key} event={announcement.event} origin={announcement.origin} nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`} />
+          <Announcement key={announcement.key} event={announcement.event} origin={announcement.origin} royalTiles={view.royalTiles} nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`} />
         ) : null}
         {isMyTurn && !over && !botPlaying && !view.pending && !announcement ? (
           <div key={view.moveCount} style={{ animationDuration: `${TURN_BANNER_MS}ms` }} className="turn-banner pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
@@ -460,6 +460,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
                 onPause={playsBotsOnly(gameData.players) && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
+                royalTiles={view.royalTiles}
               />
             }
             onToggleSpace={toggleSpace}

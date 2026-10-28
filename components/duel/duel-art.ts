@@ -8,8 +8,8 @@
 import { Coins, HandCoins, PlayingCard, Repeat, ScrollText, type LucideIcon } from "lucide-react";
 
 import { DUEL_CARDS, getDuelCard } from "@/lib/duel/data";
-import type { Ability, DuelCard, OwnedCard } from "@/lib/duel/types";
-import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID } from "@/lib/engine/data";
+import type { Ability, DuelCard, OwnedCard, RoyalTiles } from "@/lib/duel/types";
+import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID, LOCATION_BY_ID } from "@/lib/engine/data";
 import { createRng, shuffle } from "@/lib/engine/rng";
 import { STONES, type Card } from "@/lib/engine/types";
 
@@ -67,10 +67,13 @@ export function artIdsOf(cards: readonly OwnedCard[]): string[] {
   return cards.map((c) => duelArt(c.cardId).id);
 }
 
-/** Four Location tiles with art stand in for the Royal cards' pictures, until they have their own. */
-export const ROYAL_TILES = ALL_LOCATIONS.filter((l): l is typeof l & { image: string } => Boolean(l.image)).slice(4, 8);
+type Pictured = (typeof ALL_LOCATIONS)[number] & { image: string };
+/** Four Location tiles with art stand in for the Royal cards' pictures on older games, which dealt none of their own. */
+export const ROYAL_TILES = ALL_LOCATIONS.filter((l): l is Pictured => Boolean(l.image)).slice(4, 8);
 
-/** The Location a Royal card goes by. */
-export function royalTile(royalId: string) {
+/** The Location a Royal card goes by: the one the game dealt it, else one of the fixed four. */
+export function royalTile(royalId: string, tiles?: RoyalTiles): Pictured {
+  const dealt = tiles?.[royalId] ? LOCATION_BY_ID.get(tiles[royalId]) : undefined;
+  if (dealt?.image) return dealt as Pictured;
   return ROYAL_TILES[Number(royalId.split("-")[1]) - 1] ?? ROYAL_TILES[0];
 }

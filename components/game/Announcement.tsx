@@ -13,6 +13,7 @@ import { LocationTile } from "@/components/game/LocationTile";
 import { tokenMeta } from "@/components/game/stone-colors";
 import { TokenChip } from "@/components/game/TokenChip";
 import type { BoardEvent } from "@/lib/board-events";
+import type { RoyalTiles } from "@/lib/duel/types";
 import { getLocation } from "@/lib/engine/data";
 import { announceMs } from "@/lib/playback";
 
@@ -45,6 +46,8 @@ interface AnnouncementProps {
   event: BoardEvent;
   origin: TileOrigin | null;
   nameForSeat: (seat: number) => string;
+  /** The Location tile each Royal wears in this Duel. */
+  royalTiles?: RoyalTiles;
 }
 
 /**
@@ -52,7 +55,7 @@ interface AnnouncementProps {
  * or the Avengers tile glides from its place on the board to the middle of
  * the screen, a Duel Location grows out of the middle, or the Eye of Agamotto opens on the Time Stone.
  */
-export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) {
+export function Announcement({ event, origin, nameForSeat, royalTiles }: AnnouncementProps) {
   const name = nameForSeat(event.seat);
   // The Eye goes as its light does, rather than holding and then going.
   const eye = event.kind === "timeStone";
@@ -78,8 +81,8 @@ export function Announcement({ event, origin, nameForSeat }: AnnouncementProps) 
     line = `${name} assembled the Avengers`;
     if (event.from !== null) detail = `Taken from ${nameForSeat(event.from)}`;
   } else if (event.kind === "royal") {
-    piece = <RoyalCard royalId={event.royalId} className="w-full rounded-3xl shadow-2xl ring-2 ring-gold-400" />;
-    line = `${name} created a base in ${royalTile(event.royalId).name}`;
+    piece = <RoyalCard royalId={event.royalId} tiles={royalTiles} className="w-full rounded-3xl shadow-2xl ring-2 ring-gold-400" />;
+    line = `${name} created a base in ${royalTile(event.royalId, royalTiles).name}`;
   } else if (event.kind === "privilege") {
     piece = (
       <span className="mx-auto flex size-32 items-center justify-center rounded-full bg-gold-400 shadow-2xl ring-4 ring-gold-200">

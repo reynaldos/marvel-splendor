@@ -2,7 +2,7 @@
 import { getDuelCard } from "./data";
 import { bonusesOf, crownsOf, pointsOf } from "./rules";
 import { isAway } from "@/lib/engine/types";
-import type { CardLevel, DuelPending, DuelPlayer, DuelState, GameSettings, OwnedCard, StoneCounts, TokenColor, TokenCounts } from "./types";
+import type { CardLevel, DuelPending, DuelPlayer, DuelState, GameSettings, OwnedCard, RoyalTiles, StoneCounts, TokenColor, TokenCounts } from "./types";
 
 export type DuelViewReserved = { cardId: string; blind: boolean } | { hidden: true; level: CardLevel };
 
@@ -30,6 +30,8 @@ export interface DuelView {
   deckCounts: Record<CardLevel, number>;
   pyramid: Record<CardLevel, (string | null)[]>;
   royals: string[];
+  /** The Location tile each Royal wears; absent on older games, which wear fixed ones. */
+  royalTiles?: RoyalTiles;
   privileges: number;
   currentSeat: number;
   startingSeat: number;
@@ -70,6 +72,7 @@ export function redactDuel(state: DuelState, viewerSeat: number): DuelView {
     deckCounts: { 1: state.decks[1].length, 2: state.decks[2].length, 3: state.decks[3].length },
     pyramid: { 1: [...state.pyramid[1]], 2: [...state.pyramid[2]], 3: [...state.pyramid[3]] },
     royals: [...state.royals],
+    ...(state.royalTiles ? { royalTiles: state.royalTiles } : {}),
     clockExpired: state.clockExpired ?? false,
     privileges: state.privileges,
     currentSeat: state.currentSeat,

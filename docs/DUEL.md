@@ -57,7 +57,7 @@ How the pieces read in this game's theme, with no new rules:
 | Jewel cards | every Marvel card, base and packs, as a Duel card of its own: `data/duel/marvel-cards.json`, made by `pnpm duel:cards` from the box's 67 (`data/duel/cards.json`) so each level's mix of costs, points, marks and powers follows the box. A game is dealt from the base cards and the packs anyone at the table owns, as the Marvel game is (`settings.cardSet`, `settings.packs`); games from before are still dealt from the box's 67. The band of the card's color covers the printed one and carries the points, the marks and the ability; its costs cover the printed ones at the bottom left. Pearls are in the costs, as the Time stone |
 | Wild cards | the nine many-gem cards wear the grey band; bought, one joins a color you own and counts as it from then on. Three cards have no bonus at all and a dark band |
 | Privilege scrolls | "Favours", a scroll token until there is art |
-| Royal cards | four leaders, each with points and an ability: the "3 and 6 Avengers marks" rewards |
+| Royal cards | four leaders, each with points and an ability: the "3 and 6 Avengers marks" rewards. Each wears a Location tile, dealt per game from the base tiles and the Location packs the table owns (`royalTiles` in the state); older games wear a fixed four |
 | The bag | the Vault |
 | Refill the board | "Call for reinforcements" |
 | The three wins | 20 points, 10 Avengers marks, or 10 points on cards of one stone, with a card of every stone |

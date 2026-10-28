@@ -24,6 +24,7 @@ import { MoveLog, type MoveLogEntry } from "@/components/game/MoveLog";
 import { Rule } from "@/components/lobby/Rule";
 import { SoundToggles } from "@/components/SoundToggles";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
+import type { RoyalTiles } from "@/lib/duel/types";
 import type { GameSettings } from "@/lib/engine/types";
 
 interface GameMenuProps {
@@ -38,6 +39,8 @@ interface GameMenuProps {
   onForfeit: () => void;
   /** Set for a game against bots in play: pauses it. */
   onPause?: () => void;
+  /** The Location tile each Royal wears in this Duel, for the move log. */
+  royalTiles?: RoyalTiles;
 }
 
 const HEADING = "font-display text-xl font-black tracking-wide text-gold-400 uppercase";
@@ -49,7 +52,7 @@ function capitalize(s: string): string {
 }
 
 /** The board's top-right menu: pause (against bots), forfeit, move log, game settings, and leaving a finished game. */
-export function GameMenu({ moveLog, players, viewerSeat, settings, finished, busy, onForfeit, onPause }: GameMenuProps) {
+export function GameMenu({ moveLog, players, viewerSeat, settings, finished, busy, onForfeit, onPause, royalTiles }: GameMenuProps) {
   const [open, setOpen] = useState<"moves" | "settings" | "forfeit" | null>(null);
   const hasBots = players.some((p) => p.isBot);
 
@@ -100,7 +103,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
               <DialogHeader>
                 <DialogTitle className={HEADING}>Move log</DialogTitle>
               </DialogHeader>
-              <MoveLog entries={moveLog} players={players} viewerSeat={viewerSeat} />
+              <MoveLog entries={moveLog} players={players} viewerSeat={viewerSeat} royalTiles={royalTiles} />
             </>
           ) : null}
 

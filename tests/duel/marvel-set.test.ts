@@ -9,7 +9,8 @@ import { hasWon } from "@/lib/duel/rules";
 import { createDuel } from "@/lib/duel/setup";
 import { STONES } from "@/lib/duel/types";
 import { validateDuelMove } from "@/lib/duel/validate";
-import { ALL_CARDS, cardPool, PACKS } from "@/lib/engine/data";
+import { ALL_CARDS, cardPool, locationPool, PACKS } from "@/lib/engine/data";
+import { royalTile } from "@/components/duel/duel-art";
 
 // The set is made from the real cards and packs.
 vi.unmock("@/data/cards.json");
@@ -42,6 +43,20 @@ describe("the Marvel card set", () => {
     expect(dealt(base)).not.toEqual(expect.arrayContaining(pack.cards));
     // Without the setting, the box's 67 as before.
     expect(dealt(createDuel("set")).every((id) => id.startsWith("d"))).toBe(true);
+  });
+
+  it("deals the Royals' pictures from the table's tiles, packs included, and none to an older game", () => {
+    const base = createDuel("royals", { cardSet: "marvel" });
+    const tiles = Object.values(base.royalTiles!);
+    expect(new Set(tiles).size).toBe(4);
+    expect(tiles.every((id) => locationPool([]).some((l) => l.id === id && l.image))).toBe(true);
+    expect(royalTile("r-1", base.royalTiles).id).toBe(base.royalTiles!["r-1"]);
+    expect(createDuel("royals-2", { cardSet: "marvel" }).royalTiles).not.toEqual(base.royalTiles);
+    expect(createDuel("royals")).not.toHaveProperty("royalTiles");
+    const pack = PACKS.find((p) => p.locations?.length)!;
+    const seen = new Set(Array.from({ length: 20 }, (_, i) => Object.values(createDuel(`royals-${i}`, { cardSet: "marvel", packs: [pack.id] }).royalTiles!)).flat());
+    expect(pack.locations!.some((id) => seen.has(id))).toBe(true);
+    expect(Object.values(createDuel("royals", { cardSet: "marvel", packs: [] }).royalTiles!).some((id) => pack.locations!.includes(id))).toBe(false);
   });
 
   it("is played to the end by the bots", () => {
