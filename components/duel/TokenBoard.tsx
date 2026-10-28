@@ -240,7 +240,7 @@ export function WinTile({ still }: { still?: boolean }) {
   return (
     <Zoomable
       label="Show how to win"
-      title="Any one of these wins, with a card of every color"
+      title="How to win"
       className="@container relative mx-auto aspect-[1404/670] w-36 overflow-hidden rounded-md ring-1 ring-foreground/10"
       zoomed={
         <div className="@container relative aspect-[1404/670] w-150 overflow-hidden rounded-xl">
@@ -257,7 +257,7 @@ export function WinTile({ still }: { still?: boolean }) {
 function WinPanel() {
   const row = "flex items-center gap-[2cqw] font-display text-[length:7.5cqw] leading-none font-black text-white [-webkit-text-stroke:1px_black] [paint-order:stroke_fill]";
   return (
-    <span className="absolute inset-y-0 left-0 flex w-[30cqw] flex-col items-center justify-center gap-[3.5cqw] bg-cosmos-950">
+    <span className="absolute inset-y-0 left-0 flex w-[30cqw] flex-col items-center justify-center gap-[5cqw] bg-cosmos-950 pb-[5cqw]">
       <span className={row} title="20 points">
         20<span className="text-[length:4cqw] text-gold-200">PTS</span>
       </span>
@@ -279,11 +279,11 @@ function WinPanel() {
           })}
         </span>
       </span>
-      {/* And a card of every color, whichever win it is. */}
-      <span className="flex items-center gap-[1cqw]" title="With a card of every color">
-        <span className="font-display text-[length:5cqw] leading-none font-black text-gold-200">+</span>
+      {/* And a card of every color, whichever win it is: a small line along the foot, under the three. */}
+      <span className="absolute inset-x-0 bottom-[1.5cqw] flex items-center justify-center gap-[1cqw]" title="With a card of every color">
+        <span className="font-display text-[length:3.5cqw] leading-none font-black text-gold-200">+</span>
         {STONES.map((st) => (
-          <span key={st} className={cn("size-[3.5cqw] rounded-full", tokenMeta(st).swatch)} />
+          <span key={st} className={cn("size-[2.2cqw] rounded-full", tokenMeta(st).swatch)} />
         ))}
       </span>
     </span>
