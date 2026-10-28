@@ -15,6 +15,8 @@ export async function createDuelRoomAction(formData: FormData) {
   const sent = formData.get("turnTimeSeconds");
   const gameId = await createLobby(user.id, {
     rules: "duel",
+    // Dealt from the Marvel cards, with the packs the table owns, not the box's 67.
+    cardSet: "marvel",
     // Duel ends on its own three conditions; the points field is not read.
     targetPoints: 20,
     // "off" is a game with no turn clock.

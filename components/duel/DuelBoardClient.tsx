@@ -15,7 +15,8 @@ import { ChatButton } from "@/components/game/ChatButton";
 import { flowLock } from "@/components/game/flow-lock";
 import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
-import { PausedNotice, setPaused } from "@/components/game/Pause";
+import { PausedNotice, setPaused, usePauseWhenHidden } from "@/components/game/Pause";
+import { playsBotsOnly } from "@/lib/lobby-rules";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -319,16 +320,21 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
   const turnEndsAt = gameData?.turnEndsAt ?? null;
   const timed = live?.status === "active" && turnEndsAt !== null && !submitting && !botPlaying;
   const isMine = live?.currentSeat === live?.viewerSeat;
+  // Against bots alone the game waits for its player: it pauses as the tab goes into the background, and a
+  // turn that runs out while it is hidden is never skipped; the server reads it as paused when the tab is back.
+  const solo = gameData !== null && playsBotsOnly(gameData.players);
+  usePauseWhenHidden(solo && timed && !gameData.paused, () => void pause(true));
   useEffect(() => {
     if (!timed || turnEndsAt === null) return;
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
     const timer = setTimeout(async () => {
+      if (solo && document.visibilityState === "hidden") return;
       const picked = isMine && !gameRef.current?.view.pending ? stagedRef.current : null;
       if (picked && (await submitMove(stagedToMove(picked), true))) return;
       await submitMove(picked ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" });
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
-  }, [timed, isMine, turnEndsAt, submitMove]);
+  }, [timed, isMine, turnEndsAt, submitMove, solo]);
   useEffect(() => {
     if (!timed || !isMine || turnEndsAt === null) return;
     return scheduleClockTicks(turnEndsAt);
@@ -414,7 +420,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
           </div>
         ) : null}
         {announcement ? (
-          <Announcement key={announcement.key} event={announcement.event} origin={announcement.origin} nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`} />
+          <Announcement key={announcement.key} event={announcement.event} origin={announcement.origin} royalTiles={view.royalTiles} nameForSeat={(seat) => players.find((p) => p.seat === seat)?.name ?? `Seat ${seat + 1}`} />
         ) : null}
         {isMyTurn && !over && !botPlaying && !view.pending && !announcement ? (
           <div key={view.moveCount} style={{ animationDuration: `${TURN_BANNER_MS}ms` }} className="turn-banner pointer-events-none absolute inset-0 z-40 flex items-center justify-center">
@@ -453,7 +459,8 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
                 finished={view.status === "finished"}
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
-                onPause={gameData.mode === "VS_BOT" && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
+                onPause={playsBotsOnly(gameData.players) && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
+                royalTiles={view.royalTiles}
               />
             }
             onToggleSpace={toggleSpace}

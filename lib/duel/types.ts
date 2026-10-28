@@ -48,6 +48,9 @@ export interface RoyalCard {
   ability: Ability | null;
 }
 
+/** The Location tile each Royal card wears this game, by Royal id. */
+export type RoyalTiles = Record<string, string>;
+
 /** A card a player owns: a wild card remembers the color it joined. */
 export interface OwnedCard {
   cardId: string;
@@ -91,6 +94,8 @@ export interface DuelState {
   decks: Record<CardLevel, string[]>;
   pyramid: Record<CardLevel, (string | null)[]>;
   royals: string[];
+  /** The Location tile each Royal wears, dealt from the table's tiles; absent on older games, which wear fixed ones. */
+  royalTiles?: RoyalTiles;
   /** Privilege scrolls still on the table. */
   privileges: number;
   currentSeat: number;

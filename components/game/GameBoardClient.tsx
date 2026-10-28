@@ -19,7 +19,8 @@ import { useNotchSide } from "@/components/use-notch-side";
 import { useGameUpdates } from "@/components/game/use-game-updates";
 import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
-import { PausedNotice, setPaused } from "@/components/game/Pause";
+import { PausedNotice, setPaused, usePauseWhenHidden } from "@/components/game/Pause";
+import { playsBotsOnly } from "@/lib/lobby-rules";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -424,10 +425,15 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
   const turnEndsAt = gameData?.turnEndsAt ?? null;
   const timed = live?.status === "active" && turnEndsAt !== null && !submitting && !botPlaying;
   const isMine = live?.currentSeat === live?.viewerSeat;
+  // Against bots alone the game waits for its player: it pauses as the tab goes into the background, and a
+  // turn that runs out while it is hidden is never skipped; the server reads it as paused when the tab is back.
+  const solo = gameData !== null && playsBotsOnly(gameData.players);
+  usePauseWhenHidden(solo && timed && !gameData.paused, () => void pause(true));
   useEffect(() => {
     if (!timed || turnEndsAt === null) return;
     const wait = turnEndsAt - Date.now() + (isMine ? 0 : OTHERS_CLAIM_DELAY_MS);
     const timer = setTimeout(async () => {
+      if (solo && document.visibilityState === "hidden") return;
       const picked = isMine ? stagedRef.current : null;
       const giveBack = isMine ? returnPicked.current : null;
       const mine = gameRef.current?.view.players.find((p) => p.seat === gameRef.current?.view.viewerSeat);
@@ -446,7 +452,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
       }
     }, Math.max(0, wait));
     return () => clearTimeout(timer);
-  }, [timed, isMine, turnEndsAt, submitMove, playThenReturn]);
+  }, [timed, isMine, turnEndsAt, submitMove, playThenReturn, solo]);
   // The clock ticks through the last seconds of your own turn.
   useEffect(() => {
     if (!timed || !isMine || turnEndsAt === null) return;
@@ -664,7 +670,7 @@ export function GameBoardClient({ gameId }: { gameId: string }) {
                 finished={view.status === "finished"}
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
-                onPause={gameData.mode === "VS_BOT" && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
+                onPause={playsBotsOnly(gameData.players) && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
               />
             }
             onStageTokenColor={stageTokenColor}

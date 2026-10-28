@@ -106,8 +106,8 @@ function asPlaquePlayer(p: DuelViewPlayer): RedactedPlayerState {
 }
 
 /**
- * The Duel table: the rival with the Royals and the Privileges down the left, the pyramid in the middle, the
- * win tile over the token board on the right, and the tray below. Props in, taps out; the client owns state.
+ * The Duel table: the rival with the Royals down the left, the pyramid in the middle, the win tile over the
+ * token board with the Privileges under it on the right, and the tray below. Props in, taps out; the client owns state.
  */
 export function DuelBoard({
   view,
@@ -156,7 +156,8 @@ export function DuelBoard({
     <div className="flex h-100 w-full flex-col gap-2 p-2 pb-0">
       <div className="flex min-h-0 flex-1 justify-between gap-2">
         {/* The rival, the Royal cards, the Privileges. */}
-        <div className="flex w-44 flex-col gap-3">
+        {/* Room at the foot for the tab of the tray's plaque, so the Royals sit midway between the two plaques. */}
+        <div className="flex w-44 flex-col gap-3 pb-12">
           {/* Tapping the plaque shows the rival's team; the reserved cards open on their own. */}
           <TeamView owner={`${nameOf(rival.seat)}'s`} cardIds={rival.cards.map((c) => c.cardId)} duel>
             <PlayerPlaque
@@ -187,28 +188,23 @@ export function DuelBoard({
           <Zoomable
             label="Show the Locations"
             title="Locations"
-            className="w-fit rounded-lg bg-cosmos-950/60 p-2 ring-1 ring-foreground/10"
+            className="m-auto w-fit rounded-lg bg-cosmos-950/60 p-2 ring-1 ring-foreground/10"
             zoomed={
               <div className="flex gap-4">
                 {ROYAL_IDS.map((id) => (
-                  <RoyalCard key={id} royalId={id} taken={!view.royals.includes(id)} className="w-40 rounded-3xl" />
+                  <RoyalCard key={id} royalId={id} tiles={view.royalTiles} taken={!view.royals.includes(id)} className="w-40 rounded-3xl" />
                 ))}
               </div>
             }
           >
             <span className="grid grid-cols-2 gap-1.5" title="Locations: reach 3 Avengers badges and claim one; 6, another">
               {ROYAL_IDS.map((id) => (
-                <span key={id} data-tile={id} className="block w-12 rounded-tile">
-                  <RoyalCard royalId={id} taken={!view.royals.includes(id)} className="w-full" />
+                <span key={id} data-tile={id} className="block w-14 rounded-tile">
+                  <RoyalCard royalId={id} tiles={view.royalTiles} taken={!view.royals.includes(id)} className="w-full" />
                 </span>
               ))}
             </span>
           </Zoomable>
-          <div className="flex w-fit gap-2 rounded-lg bg-cosmos-950/60 p-2 ring-1 ring-foreground/10" title="Privileges: spend one you hold to take any one stone, not S.H.I.E.L.D.">
-            {scrolls.map((holder, i) => (
-              <Privilege key={i} takenBy={holder} onSpend={holder === "You" && myTurn && !staged ? onSpendPrivilege : undefined} />
-            ))}
-          </div>
         </div>
 
         {/* The pyramid, each row beside its deck, the rows as far apart as the Marvel market's. */}
@@ -253,8 +249,8 @@ export function DuelBoard({
         </div>
 
         {/* How to win, and the token board. */}
-        <div className="flex w-47 flex-col gap-1.5">
-          <div className="flex items-start justify-between gap-1">
+        <div className="flex w-47 flex-col gap-2">
+          <div className="mb-1 flex items-start justify-between gap-1">
             <WinTile />
             {menu}
           </div>
@@ -267,6 +263,12 @@ export function DuelBoard({
             canTap={(space) => lineSpaces.includes(space) || isLine(view.board, [...lineSpaces, space])}
             onRefill={canRefill ? onRefill : undefined}
           />
+          {/* The Privileges, under the board they are spent on. */}
+          <div className="mx-auto flex w-fit gap-2 rounded-lg bg-cosmos-950/60 p-1.5 ring-1 ring-foreground/10" title="Privileges: spend one you hold to take any one stone, not S.H.I.E.L.D.">
+            {scrolls.map((holder, i) => (
+              <Privilege key={i} takenBy={holder} onSpend={holder === "You" && myTurn && !staged ? onSpendPrivilege : undefined} />
+            ))}
+          </div>
         </div>
       </div>
 

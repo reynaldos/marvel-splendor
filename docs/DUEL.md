@@ -54,18 +54,17 @@ How the pieces read in this game's theme, with no new rules:
 | Pearls | the Time stone: two in the bag, no card gives a bonus of it |
 | Gold | the S.H.I.E.L.D. token |
 | Crowns | the Avengers mark already printed on the cards |
-| Jewel cards | the box's 67 cards from `data/duel/cards.json`, each drawn over a Marvel picture of its level and color: the band of its color covers the printed one and carries the points, the marks and the ability; its costs cover the printed ones at the bottom left. Pearls are in the costs, as the Time stone |
+| Jewel cards | every Marvel card, base and packs, as a Duel card of its own: `data/duel/marvel-cards.json`, made by `pnpm duel:cards` from the box's 67 (`data/duel/cards.json`) so each level's mix of costs, points, marks and powers follows the box. A game is dealt from the base cards and the packs anyone at the table owns, as the Marvel game is (`settings.cardSet`, `settings.packs`); games from before are still dealt from the box's 67. The band of the card's color covers the printed one and carries the points, the marks and the ability; its costs cover the printed ones at the bottom left. Pearls are in the costs, as the Time stone |
 | Wild cards | the nine many-gem cards wear the grey band; bought, one joins a color you own and counts as it from then on. Three cards have no bonus at all and a dark band |
 | Privilege scrolls | "Favours", a scroll token until there is art |
-| Royal cards | four leaders, each with points and an ability: the "3 and 6 Avengers marks" rewards |
+| Royal cards | four leaders, each with points and an ability: the "3 and 6 Avengers marks" rewards. Each wears a Location tile, dealt per game from the base tiles and the Location packs the table owns (`royalTiles` in the state); older games wear a fixed four |
 | The bag | the Vault |
 | Refill the board | "Call for reinforcements" |
 | The three wins | 20 points, 10 Avengers marks, or 10 points on cards of one stone, with a card of every stone |
 
 **The table, locked in.** The preview at `/preview/duel` is the design to build:
 - Left column: the rival's plaque with their Avengers and scroll counts on its name tab; under it the four Royal
-  cards two by two (Location tiles with a panel over the printed strip: points, mark, power); under those the three
-  Privilege scrolls, a taken one dim with its holder's name.
+  cards two by two (Location tiles with a panel over the printed strip: points, mark, power).
 - Middle: the pyramid, 3, 4, 5, each row beside its deck. A card is the box's Duel card drawn over a Marvel picture:
   the band of its color over the printed one with the points in Orbitron, the Avengers marks, the power badge, a
   second stone for a double bonus; the grey many-gem band for wild cards, the plain grey band for the three with no
@@ -74,7 +73,7 @@ How the pieces read in this game's theme, with no new rules:
 - Right column: the win tile (the gauntlet, with 20 pts, 10 marks, and 10 in a color as five dots on a pentagon over
   its printed strip) above the 5 by 5 token board. Empty spaces show the printed spiral through them, the middle one
   tinted. The board is a button: tapping it opens it large with the three reminders stacked beside it, which is
-  where a line is picked. The bag count sits on its corner.
+  where a line is picked. The bag count sits on its corner. Under the board the three Privilege scrolls, a taken one dim with its holder's name.
 - The tray as the Marvel board has it, a little shorter: your plaque with what the staged line takes, your tokens and
   bonuses, your reserved cards, End turn.
 - Icons until there is art: Repeat for another turn, Grape for the wild bonus, Copy for a token of this color,

@@ -1,6 +1,6 @@
 {
   "name": "marvel-splendor",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
@@ -16,6 +16,7 @@
     "rating:backfill": "npx tsx scripts/backfill-rating.ts",
     "coins:backfill": "npx tsx scripts/backfill-coins.ts",
     "looks:backfill": "npx tsx scripts/card-looks.ts",
+    "duel:cards": "npx tsx scripts/duel-cards.ts",
     "rewards:backfill": "npx tsx scripts/backfill-rewards.ts",
     "visits:backfill": "npx tsx scripts/backfill-visits.ts",
     "xp:lab": "npx tsx scripts/export-xp-lab.ts",

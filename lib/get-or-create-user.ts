@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { randomLibraryAvatarKey } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { Prisma, type User } from "@/lib/generated/prisma/client";
@@ -87,6 +89,8 @@ function isUniqueConstraintError(error: unknown, field: string): boolean {
  */
 export async function getOrCreateUser(profile: Auth0Profile): Promise<User> {
   const user = await provisionUser(profile);
+  // An account an admin blocked is signed out wherever it turns up.
+  if (user.blockedAt) redirect("/auth/logout");
   await recordVisit(user.id);
   return user;
 }

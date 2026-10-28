@@ -2,11 +2,11 @@ import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
 import { shopItem } from "@/lib/shop";
 import type { GameSettings, GameState } from "@/lib/engine/types";
-import { rankable, type AnyState } from "@/lib/game-rules";
+import { rankable, rulesOf, type AnyState } from "@/lib/game-rules";
 import { rankPlayers } from "@/lib/game-record";
 import type { GameSummary } from "@/lib/game-summary";
-import { botName } from "@/lib/lobby-rules";
-import { IDLE_BOT_GAME_MS, IDLE_TABLE_MS } from "@/lib/sweep-games";
+import { botName, kindOf, mostAtOnce } from "@/lib/lobby-rules";
+import { isDead } from "@/lib/sweep-games";
 
 /** Visits are written at most once a minute, so anyone seen this recently is still here. */
 const ONLINE_MS = 5 * 60 * 1000;
@@ -117,6 +117,7 @@ export async function loadUserMetrics(now = Date.now()) {
         email: true,
         auth0Sub: true,
         createdAt: true,
+        blockedAt: true,
         stats: { select: { wins: true } },
         coins: { select: { balance: true } },
         purchases: { orderBy: { createdAt: "desc" }, select: { kind: true, itemId: true, price: true, createdAt: true } },
@@ -124,7 +125,7 @@ export async function loadUserMetrics(now = Date.now()) {
           orderBy: { lastSeenAt: "desc" },
           select: { ip: true, userAgent: true, startedAt: true, lastSeenAt: true },
         },
-        players: { select: { gameId: true, game: { select: { status: true } } } },
+        players: { select: { gameId: true, game: { select: { status: true, createdAt: true, updatedAt: true } } } },
       },
     }),
     prisma.move.groupBy({ by: ["gameId"], _min: { createdAt: true }, _max: { createdAt: true } }),
@@ -163,12 +164,15 @@ export async function loadUserMetrics(now = Date.now()) {
         email: user.email,
         signIn: signInMethod(user.auth0Sub),
         signedUpAt: user.createdAt,
+        blocked: user.blockedAt !== null,
         ...visits,
         online: visits.lastSeenAt !== null && now - visits.lastSeenAt.getTime() < ONLINE_MS,
         playingMs: user.players.reduce((sum, p) => sum + (playedMs.get(p.gameId) ?? 0), 0),
         finished: games("FINISHED"),
         abandoned: games("ABANDONED"),
         inPlay: games("ACTIVE"),
+        // More than the cap allows means games were run side by side before it, or around it.
+        atOnce: mostAtOnce(user.players.map((p) => p.game), now),
         wins: user.stats?.wins ?? 0,
         coins: user.coins?.balance ?? 0,
         purchases: user.purchases.map((p) => ({ ...p, title: shopItem(p.kind, p.itemId)?.title ?? p.itemId })),
@@ -188,13 +192,14 @@ export async function loadUserMetrics(now = Date.now()) {
     return {
       id: game.id,
       status: game.status,
-      mode: game.mode,
+      kind: kindOf(game.players),
+      duel: rulesOf(settings) === "duel",
       joinCode: game.joinCode,
       createdAt: game.createdAt.getTime(),
       updatedAt: game.updatedAt.getTime(),
       playedMs: playedMs.get(game.id) ?? 0,
       live: game.status === "ACTIVE" && now - game.updatedAt.getTime() < LIVE_GAME_MS,
-      dead: game.status !== "FINISHED" && game.status !== "ABANDONED" && now - game.updatedAt.getTime() > (game.mode === "VS_BOT" && game.status === "ACTIVE" ? IDLE_BOT_GAME_MS : IDLE_TABLE_MS),
+      dead: isDead(game, now),
       round: state?.round ?? 0,
       moves: game._count.moves,
       players: seated.map((p) => p.name),

@@ -150,7 +150,7 @@ function ChoiceBody({
     body = (
       <div className="flex flex-wrap justify-center gap-3">
         {view.royals.map((id) => (
-          <RoyalCard key={id} royalId={id} className="w-28" selectable onClick={() => !submitting && onPickRoyal(id)} />
+          <RoyalCard key={id} royalId={id} tiles={view.royalTiles} className="w-28" selectable onClick={() => !submitting && onPickRoyal(id)} />
         ))}
       </div>
     );

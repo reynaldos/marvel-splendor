@@ -1,6 +1,7 @@
 /** Deals a new Duel game from a seed: the bag onto the board, the decks and pyramid, the Royals, one Privilege to the second player. */
-import { DEFAULT_SETTINGS, emptyTokens } from "@/lib/engine/types";
+import { locationPool } from "@/lib/engine/data";
 import { createRng, shuffle } from "@/lib/engine/rng";
+import { DEFAULT_SETTINGS, emptyTokens } from "@/lib/engine/types";
 
 import { refill } from "./board";
 import { duelCardsOfLevel, ROYAL_CARDS } from "./data";
@@ -14,8 +15,15 @@ import {
   type DuelPlayer,
   type DuelState,
   type GameSettings,
+  type RoyalTiles,
   type TokenColor,
 } from "./types";
+
+/** The Royals' pictures: four Location tiles with art, dealt from the base tiles and the packs given, on a seed of their own so the deal of the cards stays as it was. */
+function dealRoyalTiles(seed: string, packs: readonly string[] = []): RoyalTiles {
+  const tiles = shuffle(locationPool(packs).filter((l) => l.image).map((l) => l.id), createRng(`${seed}:royals`));
+  return Object.fromEntries(ROYAL_CARDS.map((r, i) => [r.id, tiles[i % tiles.length]]));
+}
 
 function player(seat: number): DuelPlayer {
   return { seat, tokens: emptyTokens(), cards: [], reserved: [], privileges: 0, royals: [] };
@@ -23,6 +31,7 @@ function player(seat: number): DuelPlayer {
 
 export function createDuel(seed: string, settings: Partial<GameSettings> = {}): DuelState {
   const rng = createRng(seed);
+  const cardsOf = (level: CardLevel) => duelCardsOfLevel(level, settings.cardSet, settings.packs);
 
   const bag: TokenColor[] = shuffle(
     TOKEN_COLORS.flatMap((t) => Array<TokenColor>(BAG_COUNTS[t]).fill(t)),
@@ -33,7 +42,7 @@ export function createDuel(seed: string, settings: Partial<GameSettings> = {}): 
   const decks = {} as Record<CardLevel, string[]>;
   const pyramid = {} as Record<CardLevel, (string | null)[]>;
   for (const level of [1, 2, 3] as const) {
-    const deck = shuffle(duelCardsOfLevel(level).map((c) => c.id), rng);
+    const deck = shuffle(cardsOf(level).map((c) => c.id), rng);
     pyramid[level] = deck.slice(0, PYRAMID_SLOTS[level]);
     decks[level] = deck.slice(PYRAMID_SLOTS[level]);
   }
@@ -53,6 +62,7 @@ export function createDuel(seed: string, settings: Partial<GameSettings> = {}): 
     decks,
     pyramid,
     royals: ROYAL_CARDS.map((r) => r.id),
+    ...(settings.cardSet === "marvel" ? { royalTiles: dealRoyalTiles(seed, settings.packs) } : {}),
     privileges: PRIVILEGES - 1,
     currentSeat: startingSeat,
     startingSeat,

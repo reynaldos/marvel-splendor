@@ -30,6 +30,16 @@ export async function deleteGameAction(id: string): Promise<void> {
   refresh();
 }
 
+/** Blocks an account, or lets it back in. Admins only, and never themselves. */
+export async function setBlockedAction(userId: string, blocked: boolean): Promise<void> {
+  const session = await auth0.getSession();
+  if (!session || !isAdmin(session.user)) return;
+  const me = await prisma.user.findUnique({ where: { auth0Sub: session.user.sub }, select: { id: true } });
+  if (me?.id === userId) return;
+  await prisma.user.update({ where: { id: userId }, data: { blockedAt: blocked ? new Date() : null } });
+  refresh();
+}
+
 /** Closes the games left open past their idle time, as the daily cron does. Admins only. */
 export async function closeDeadGamesAction(): Promise<void> {
   const session = await auth0.getSession();

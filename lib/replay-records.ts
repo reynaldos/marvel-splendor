@@ -12,6 +12,7 @@ import { prisma } from "@/lib/db";
 import type { GameSettings } from "@/lib/engine/types";
 import { rankPlayers, type GameRewards } from "@/lib/game-record";
 import { isDuel, rankable, type AnyMove, type AnyState } from "@/lib/game-rules";
+import { statsModeOf } from "@/lib/lobby-rules";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { defaultRatingSnapshot, nextRatings, type RatingSnapshot } from "@/lib/rating";
 import { buildGameRewards, gameXpByUser, type RewardSources } from "@/lib/record-rewards";
@@ -66,7 +67,7 @@ export function replayRecords(games: ReplayGame[]): Records {
           wonAvengersTile: !isDuel(state) && state.avengersHolder === p.seat,
           locationsClaimed: isDuel(state) ? 0 : state.players[p.seat].locations.length,
         },
-        game.mode,
+        statsModeOf(game.players),
       );
       records.stats.set(p.userId!, next);
       from.stats.push({ userId: p.userId!, prev, next });

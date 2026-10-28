@@ -1,14 +1,15 @@
 /**
- * How Duel's pieces look in this game. The Duel cards have no art of their
- * own: each wears a Marvel picture of its level and color, chosen once, the
- * same for every player and every game. The powers have an icon each until
- * there is art for them.
+ * How Duel's pieces look in this game. A card of the Marvel set is a Marvel
+ * card and wears its own picture. The box's cards have no art of their own:
+ * each wears a Marvel picture of its level and color, chosen once, the same
+ * for every player and every game. The powers have an icon each until there
+ * is art for them.
  */
 import { Coins, HandCoins, PlayingCard, Repeat, ScrollText, type LucideIcon } from "lucide-react";
 
 import { DUEL_CARDS, getDuelCard } from "@/lib/duel/data";
-import type { Ability, DuelCard, OwnedCard } from "@/lib/duel/types";
-import { ALL_CARDS, ALL_LOCATIONS } from "@/lib/engine/data";
+import type { Ability, DuelCard, OwnedCard, RoyalTiles } from "@/lib/duel/types";
+import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID, LOCATION_BY_ID } from "@/lib/engine/data";
 import { createRng, shuffle } from "@/lib/engine/rng";
 import { STONES, type Card } from "@/lib/engine/types";
 
@@ -56,9 +57,9 @@ function art(): Map<string, Card> {
   return out;
 }
 
-/** The Marvel picture a Duel card wears. */
+/** The Marvel picture a Duel card wears: its own for a card of the Marvel set. */
 export function duelArt(cardId: string): Card {
-  return art().get(cardId) ?? art().get(getDuelCard(cardId).id)!;
+  return CARD_BY_ID.get(cardId) ?? art().get(cardId) ?? art().get(getDuelCard(cardId).id)!;
 }
 
 /** The Marvel card ids behind a player's Duel cards, for the team view. */
@@ -66,10 +67,13 @@ export function artIdsOf(cards: readonly OwnedCard[]): string[] {
   return cards.map((c) => duelArt(c.cardId).id);
 }
 
-/** Four Location tiles with art stand in for the Royal cards' pictures, until they have their own. */
-export const ROYAL_TILES = ALL_LOCATIONS.filter((l): l is typeof l & { image: string } => Boolean(l.image)).slice(4, 8);
+type Pictured = (typeof ALL_LOCATIONS)[number] & { image: string };
+/** Four Location tiles with art stand in for the Royal cards' pictures on older games, which dealt none of their own. */
+export const ROYAL_TILES = ALL_LOCATIONS.filter((l): l is Pictured => Boolean(l.image)).slice(4, 8);
 
-/** The Location a Royal card goes by. */
-export function royalTile(royalId: string) {
+/** The Location a Royal card goes by: the one the game dealt it, else one of the fixed four. */
+export function royalTile(royalId: string, tiles?: RoyalTiles): Pictured {
+  const dealt = tiles?.[royalId] ? LOCATION_BY_ID.get(tiles[royalId]) : undefined;
+  if (dealt?.image) return dealt as Pictured;
   return ROYAL_TILES[Number(royalId.split("-")[1]) - 1] ?? ROYAL_TILES[0];
 }

@@ -7,7 +7,6 @@ import { Star, Timer, UsersRound } from "lucide-react";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import { ordinal, timeAgo, type GameRecord } from "@/lib/game-record";
 
-const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
 const LEVELS = ["I", "II", "III"];
 const GOLD_ICON = "fill-gold-400 text-gold-400";
 
@@ -71,7 +70,7 @@ export function GameRecords({ games }: { games: GameRecord[] }) {
                 ))}
               </Figure>
               <span className="absolute top-2 right-2 rounded-full bg-black/50 px-2.5 py-0.5 fs-2xs font-bold">
-                {MODE[game.mode]}
+                {game.duel ? "Duel" : "Original"} · {game.kind}
               </span>
             </button>
           </li>

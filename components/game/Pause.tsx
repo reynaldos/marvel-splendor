@@ -1,13 +1,27 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
 /** Pauses or resumes a game against bots; the turn clock's time left on a resume, or null when it failed. */
 export async function setPaused(gameId: string, paused: boolean): Promise<{ turnEndsInMs: number | null } | null> {
-  const res = await fetch(`/api/games/${gameId}/pause`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paused }) });
+  // Sent as the tab goes into the background too, so it must outlive the page.
+  const res = await fetch(`/api/games/${gameId}/pause`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paused }), keepalive: true });
   return res.ok ? ((await res.json()) as { turnEndsInMs: number | null }) : null;
+}
+
+/** Pauses the game as the tab goes into the background, while `on`: a game against bots waits for its player. */
+export function usePauseWhenHidden(on: boolean, pause: () => void) {
+  useEffect(() => {
+    if (!on) return;
+    const onHide = () => {
+      if (document.visibilityState === "hidden") pause();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, [on, pause]);
 }
 
 /** Over a paused board: resume, or go home and come back later. */

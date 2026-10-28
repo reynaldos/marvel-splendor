@@ -65,4 +65,18 @@ describe("duelEvents", () => {
     expect(duelEvents(before, after)).toEqual([{ kind: "royal", seat: 1, royalId: "r-2" }]);
     expect(duelEvents(after, after)).toEqual([]);
   });
+
+  it("tells a Privilege spent from one taken off the other player", () => {
+    const before = createDuel("events");
+    const holder = before.players.findIndex((p) => p.privileges > 0);
+    const other = 1 - holder;
+    const players = (a: number, b: number) => [{ ...before.players[0], privileges: a }, { ...before.players[1], privileges: b }] as typeof before.players;
+    // The holder spends it: back to the table.
+    const spent = { ...before, players: holder === 0 ? players(0, 0) : players(0, 0), privileges: before.privileges + 1 };
+    expect(duelEvents(before, spent, { seat: holder, move: { type: "SPEND_PRIVILEGE" } })).toEqual([{ kind: "privilege", seat: holder }]);
+    // The other player earns one with the table bare: it comes off the holder.
+    const bare = { ...before, privileges: 0 };
+    const taken = { ...bare, players: holder === 0 ? players(0, 1) : players(1, 0) };
+    expect(duelEvents(bare, taken, { seat: other, move: { type: "REFILL" } })).toEqual([{ kind: "privilege", seat: other, from: holder }]);
+  });
 });

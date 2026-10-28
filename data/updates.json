@@ -1,5 +1,27 @@
 [
   {
+    "version": "3.2.0",
+    "date": "2026-10-27",
+    "title": "Duel with every card",
+    "summary": "Duel is dealt from the whole Marvel library, games against the computer wait for you, and the board is easier to play.",
+    "pulls": [],
+    "new": [
+      "Pause a game against the computer from the menu, or just leave it: it waits for you, pauses itself when you switch away, and Continue your game on the home screen takes you back",
+      "A Duel win needs a card of every color, as the original game asks",
+      "Duel is dealt from every Marvel card, base cards and the packs you own: each is a Duel card of its own, with its own cost, points, badges and power, and the Royal cards wear different Locations each game"
+    ],
+    "improved": [
+      "Pick stones straight off the small board in Duel; the button on its corner opens it large",
+      "Tap a selected stone again to put it back, in both games",
+      "Points held in each color show on a gold badge on your bonus squares in Duel, and on your rival's"
+    ],
+    "fixed": [
+      "Cards that rank up at the end of a game show their frames in the live foil, and open large in them",
+      "A game against the computer never closes on its own, and a turn that ran out while you were away is not skipped, game gets paused.",
+      "Your game records say which game it was, Original or Duel, and whether you played the computer or other people."
+    ]
+  },
+  {
     "version": "3.1.0",
     "date": "2026-10-25",
     "title": "Duel",

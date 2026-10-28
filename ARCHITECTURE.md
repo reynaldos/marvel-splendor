@@ -114,7 +114,7 @@ Some turns need a follow-up decision (return tokens over 10; choose between mult
 Deterministic heuristic policy (no LLM in the loop): greedy scoring over `legalMoves` — weighted by progress toward affordable high-value cards, color-set completion (win condition needs all 5 bonuses), Time Stone acquisition, Avengers-tag races, and token efficiency. Difficulty tiers adjust lookahead/weights. Bot turns run server-side immediately after a human move in the same request (or a follow-up invocation), so vs-computer games need no realtime infra at all. OpenAI generates an in-character quip about the move it just made (non-blocking; failures are silent).
 
 ### Duel (`lib/duel/`, `lib/bot/duel-policy.ts`)
-A second game, Splendor Duel for two, with its own pure engine in the same shape (`types`, `setup`, `validate`, `legal-moves`, `apply`, `view`) and a bot whose three levels are a greedy one that slips, a one-ply one, and one that looks through the rival's best answer. `lib/game-rules.ts` is the one surface over both engines: `settings.rules` (`"marvel"` or `"duel"`) picks the game, and the server loop, the routes, replay, playback and the records call `createAny`, `validateAny`, `applyAny`, `legalAny`, `chooseBotAny` and `redactAny` instead of either engine directly. The play page picks `DuelBoardClient` or `GameBoardClient` by the same setting. The rules, the board design and the plan are in [docs/DUEL.md](docs/DUEL.md).
+A second game, Splendor Duel for two, dealt from the Marvel cards and packs (`data/duel/marvel-cards.json`, one Duel card per Marvel card; `pnpm duel:cards` adds any missing), with its own pure engine in the same shape (`types`, `setup`, `validate`, `legal-moves`, `apply`, `view`) and a bot whose three levels are a greedy one that slips, a one-ply one, and one that looks through the rival's best answer. `lib/game-rules.ts` is the one surface over both engines: `settings.rules` (`"marvel"` or `"duel"`) picks the game, and the server loop, the routes, replay, playback and the records call `createAny`, `validateAny`, `applyAny`, `legalAny`, `chooseBotAny` and `redactAny` instead of either engine directly. The play page picks `DuelBoardClient` or `GameBoardClient` by the same setting. The rules, the board design and the plan are in [docs/DUEL.md](docs/DUEL.md).
 
 ---
 
@@ -142,7 +142,7 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 
 | Model | Holds |
 |---|---|
-| `User` | The Auth0-linked profile: username, optional name, email as last seen at sign-in, picture key, and the two level-frame switches |
+| `User` | The Auth0-linked profile: username, optional name, email as last seen at sign-in, picture key, the two level-frame switches, and when an admin blocked the account, if they did |
 | `UserStats` | Running totals from finished games: played, wins, vs-bot wins, best points, fastest win, Avengers tiles, Locations |
 | `UserRating` | The ELO-style rank and how many rated games fed it |
 | `UserCoins` | The cached coin balance; `CoinTransaction` is the source of truth |

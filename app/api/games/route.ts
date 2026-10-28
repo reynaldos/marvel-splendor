@@ -9,6 +9,8 @@ import { createAny, isDuel, rankable, redactAny, seatsFor, type AnyState } from 
 import { generateJoinCode, generateSeed, isUniqueViolation, runServerTurnLoop } from "@/lib/game-server";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { OPEN_GAMES_REASON, openGamesOf } from "@/lib/lobby";
+import { MAX_OPEN_GAMES } from "@/lib/lobby-rules";
 import { ownedPacks } from "@/lib/record-purchase";
 import { recordGameStats } from "@/lib/record-stats";
 
@@ -24,6 +26,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
   const user = await getOrCreateUser(session.user);
+  if ((await openGamesOf(user.id)) >= MAX_OPEN_GAMES) {
+    return NextResponse.json({ error: OPEN_GAMES_REASON }, { status: 429 });
+  }
 
   const body = await request.json().catch(() => null);
   const parsed = CreateGameSchema.safeParse(body);
@@ -46,7 +51,7 @@ export async function POST(request: Request) {
     startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
     packs: await ownedPacks([user.id]),
-    ...(rules === "duel" ? { rules } : {}),
+    ...(rules === "duel" ? { rules, cardSet: "marvel" as const } : {}),
   };
 
   const seed = generateSeed();

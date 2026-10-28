@@ -7,7 +7,7 @@ import { ASSETS, AssetImage, AvengersIcon } from "@/components/game/assets";
 import { Card, CardView } from "@/components/game/Card";
 import { tokenMeta } from "@/components/game/stone-colors";
 import { getDuelCard, getRoyal } from "@/lib/duel/data";
-import { STONES, TOKEN_COLORS } from "@/lib/duel/types";
+import { STONES, TOKEN_COLORS, type RoyalTiles } from "@/lib/duel/types";
 
 /**
  * What makes a Marvel picture a Duel card: the band of its bonus color over the printed one, carrying the
@@ -110,9 +110,9 @@ export function DuelCardView({ cardId, className, style }: { cardId: string; cla
 }
 
 /** A Royal card, a Location to the player: its tile with a panel over the printed left bar carrying the points and power. */
-export function RoyalCard({ royalId, taken, selectable, onClick, className }: { royalId: string; taken?: boolean; selectable?: boolean; onClick?: () => void; className?: string }) {
+export function RoyalCard({ royalId, tiles, taken, selectable, onClick, className }: { royalId: string; tiles?: RoyalTiles; taken?: boolean; selectable?: boolean; onClick?: () => void; className?: string }) {
   const royal = getRoyal(royalId);
-  const tile = royalTile(royalId);
+  const tile = royalTile(royalId, tiles);
   const Icon = royal.ability ? ABILITIES[royal.ability].icon : null;
   const face = (
     <>

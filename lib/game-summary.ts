@@ -1,10 +1,14 @@
 import type { RankedPlayer } from "@/lib/game-record";
+import type { GameKind } from "@/lib/lobby-rules";
 
 /** One game as the admin's tables show it, open or over. */
 export interface GameSummary {
   id: string;
   status: "LOBBY" | "ACTIVE" | "FINISHED" | "ABANDONED";
-  mode: "VS_BOT" | "MULTIPLAYER";
+  /** Against the bots alone, or with other people at the table. */
+  kind: GameKind;
+  /** A Duel, else the Marvel game. */
+  duel: boolean;
   joinCode: string;
   /** Epoch ms. */
   createdAt: number;

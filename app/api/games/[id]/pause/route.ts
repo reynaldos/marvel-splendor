@@ -6,6 +6,7 @@ import { turnEndsInMs } from "@/lib/game-replay";
 import type { AnyState } from "@/lib/game-rules";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { playsBotsOnly } from "@/lib/lobby-rules";
 
 /**
  * POST /api/games/[id]/pause — { paused: boolean }. Pauses a game against bots, or resumes it with a fresh
@@ -20,10 +21,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const body = await request.json().catch(() => null);
   if (typeof body?.paused !== "boolean") return NextResponse.json({ error: "Expected { paused: boolean }." }, { status: 400 });
 
-  const game = await prisma.game.findUnique({ where: { id }, include: { players: { select: { userId: true } } } });
+  const game = await prisma.game.findUnique({ where: { id }, include: { players: { select: { userId: true, isBot: true } } } });
   if (!game) return NextResponse.json({ error: "Game not found." }, { status: 404 });
   if (!game.players.some((p) => p.userId === user.id)) return NextResponse.json({ error: "You are not a participant in this game." }, { status: 403 });
-  if (game.mode !== "VS_BOT") return NextResponse.json({ error: "Only a game against bots can be paused." }, { status: 400 });
+  if (!playsBotsOnly(game.players)) return NextResponse.json({ error: "Only a game against bots can be paused." }, { status: 400 });
   if (game.status !== "ACTIVE") return NextResponse.json({ error: "This game is not active." }, { status: 400 });
 
   const state = { ...(game.state as unknown as AnyState), paused: body.paused };

@@ -5,6 +5,7 @@ import { duelArt, royalTile } from "@/components/duel/duel-art";
 import { getCard, getLocation } from "@/lib/engine/data";
 import { tokenMeta } from "@/components/game/stone-colors";
 import type { BoardEvent } from "@/lib/board-events";
+import type { RoyalTiles } from "@/lib/duel/types";
 import type { TokenColor } from "@/lib/engine/types";
 import type { AnyMove } from "@/lib/game-rules";
 
@@ -28,11 +29,13 @@ interface MoveLogProps {
   entries: MoveLogEntry[];
   players: Array<{ seat: number; name: string }>;
   viewerSeat: number;
+  /** The Location tile each Royal wears in this Duel. */
+  royalTiles?: RoyalTiles;
   className?: string;
 }
 
 /** Scrollable move list, newest first, with a bar at the start of each round. */
-export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProps) {
+export function MoveLog({ entries, players, viewerSeat, royalTiles, className }: MoveLogProps) {
   const newestFirst = [...entries].reverse();
   return (
     <div className={className}>
@@ -54,8 +57,8 @@ export function MoveLog({ entries, players, viewerSeat, className }: MoveLogProp
                     </li>
                   )}
                   <li className="text-base">
-                    {describeMove(entry, players, viewerSeat)}
-                    {describeEvents(entry, players, viewerSeat).map((line) => (
+                    {describeMove(entry, players, viewerSeat, royalTiles)}
+                    {describeEvents(entry, players, viewerSeat, royalTiles).map((line) => (
                       <span key={line} className="block text-sm text-gold-400">
                         {line}
                       </span>
@@ -81,6 +84,7 @@ export function describeEvents(
   entry: MoveLogEntry,
   players: Array<{ seat: number; name: string }>,
   viewerSeat: number,
+  royalTiles?: RoyalTiles,
 ): string[] {
   const who = seatLabel(entry.seat, players, viewerSeat);
   return (entry.events ?? []).flatMap((event) => {
@@ -94,8 +98,9 @@ export function describeEvents(
       case "location":
         return entry.move.type === "CHOOSE_LOCATION" ? [] : `${who} claimed ${getLocation(event.locationId).name}`;
       case "royal":
-        return entry.move.type === "PICK_ROYAL" ? [] : `${who} claimed ${royalTile(event.royalId).name}`;
+        return entry.move.type === "PICK_ROYAL" ? [] : `${who} claimed ${royalTile(event.royalId, royalTiles).name}`;
       case "privilege":
+        return event.from === undefined ? [] : `${who} took a Privilege from ${seatLabel(event.from, players, viewerSeat)}`;
       case "steal":
         return [];
     }
@@ -112,6 +117,7 @@ export function describeMove(
   entry: MoveLogEntry,
   players: Array<{ seat: number; name: string }>,
   viewerSeat: number,
+  royalTiles?: RoyalTiles,
 ): string {
   const name = seatLabel(entry.seat, players, viewerSeat);
   const who = entry.points === undefined ? name : `${name} (${entry.points}★)`;
@@ -157,7 +163,7 @@ export function describeMove(
     case "PICK_JOIN_COLOR":
       return `${who}'s wild card joined ${tokenMeta(move.color).label}`;
     case "PICK_ROYAL":
-      return `${who} claimed ${royalTile(move.royalId).name}`;
+      return `${who} claimed ${royalTile(move.royalId, royalTiles).name}`;
     default:
       return `${who} made a move.`;
   }
