@@ -11,6 +11,13 @@ export const MAX_OPEN_GAMES = 2;
 /** A table where one person plays the bots: theirs to pause, and nobody else's to lose. */
 export const playsBotsOnly = (players: Array<{ isBot: boolean }>): boolean => players.filter((p) => !p.isBot).length <= 1;
 
+export type GameKind = "VS Computer" | "Private Game";
+/** What a table is called: one person against the bots, or people playing each other, however many bots sit with them. */
+export const kindOf = (players: Array<{ isBot: boolean }>): GameKind => (playsBotsOnly(players) ? "VS Computer" : "Private Game");
+
+/** The stats' mode for a table: a win against bots alone counts as one, whatever mode the game row says. */
+export const statsModeOf = (players: Array<{ isBot: boolean }>): "VS_BOT" | "MULTIPLAYER" => (playsBotsOnly(players) ? "VS_BOT" : "MULTIPLAYER");
+
 /** The most of these games that were open at the same time: each from its creation to its last move, or to now while open. */
 export function mostAtOnce(games: Array<{ status: string; createdAt: Date; updatedAt: Date }>, now: number): number {
   const open = (g: { status: string }) => g.status === "LOBBY" || g.status === "ACTIVE";

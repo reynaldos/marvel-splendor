@@ -13,7 +13,7 @@ import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type 
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { playbackMs } from "@/lib/playback";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { playsBotsOnly } from "@/lib/lobby-rules";
+import { playsBotsOnly, statsModeOf } from "@/lib/lobby-rules";
 import { accountXpByUser } from "@/lib/load-xp";
 import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
@@ -178,7 +178,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (finalState.status === "finished") {
     const outcomes = await buildHumanOutcomes(id, finalState, game.players, localUser.id);
-    const stats = await recordGameStats({ mode: game.mode, players: outcomes });
+    const stats = await recordGameStats({ mode: statsModeOf(game.players), players: outcomes });
     const rating = await recordFinishedGameRating(game.mode, finalState, game.players, localUser.id);
     const coins = await recordFinishedGameCoins(id, finalState.settings, game.players, outcomes);
     const xpBefore = await accountXpByUser(outcomes.map((o) => o.userId));

@@ -11,7 +11,6 @@ import { ordinal, timeAgo } from "@/lib/game-record";
 import { formatDuration, type GameSummary } from "@/lib/game-summary";
 
 const PAGE = 25;
-const MODE = { VS_BOT: "VS Computer", MULTIPLAYER: "Private Game" };
 const TH = "px-4 py-3 font-bold";
 const PAGER =
   "flex size-8 items-center justify-center rounded-full bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500 disabled:opacity-40 disabled:hover:bg-cosmos-700";
@@ -97,6 +96,7 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
           <thead className="text-xs text-cosmos-300">
             <tr>
               <th className={TH}>Status</th>
+              <th className={TH}>Game</th>
               <th className={TH}>Kind</th>
               <th className={TH}>Players</th>
               {recent ? <th className={TH}>Winner</th> : null}
@@ -112,14 +112,15 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
                 <td>
                   <Dot game={game} />
                 </td>
-                <td>{MODE[game.mode]}</td>
+                <td>{game.duel ? "Duel" : "Original"}</td>
+                <td>{game.kind}</td>
                 <td>{game.players.join(", ")}</td>
                 {recent ? <td>{winners(game).join(", ") || "—"}</td> : null}
                 <td>{game.status === "LOBBY" ? "" : game.round}</td>
                 {recent ? (
                   <td>{game.playedMs ? formatDuration(game.playedMs) : "—"}</td>
                 ) : (
-                  <td className="font-mono">{game.mode === "MULTIPLAYER" ? game.joinCode : ""}</td>
+                  <td className="font-mono">{game.joinCode}</td>
                 )}
                 <td>{timeAgo(game.createdAt)}</td>
                 <td>{timeAgo(game.updatedAt)}</td>
@@ -146,7 +147,7 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
             <>
               <DialogHeader>
                 <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
-                  {MODE[open.mode]} · {statusLabel(open)}
+                  {open.duel ? "Duel" : "Original"} · {open.kind} · {statusLabel(open)}
                 </DialogTitle>
                 <DialogDescription className="text-sm text-white/70">
                   Opened {timeAgo(open.createdAt)}, last change {timeAgo(open.updatedAt)}.
@@ -164,7 +165,7 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
                 </div>
                 <div>
                   <dt>Room code</dt>
-                  <dd className="font-mono">{open.mode === "MULTIPLAYER" ? open.joinCode : "—"}</dd>
+                  <dd className="font-mono">{open.joinCode}</dd>
                 </div>
               </dl>
               {open.standings ? (

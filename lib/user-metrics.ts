@@ -2,10 +2,10 @@ import { EMOJIS, MESSAGES } from "@/lib/chat";
 import { prisma } from "@/lib/db";
 import { shopItem } from "@/lib/shop";
 import type { GameSettings, GameState } from "@/lib/engine/types";
-import { rankable, type AnyState } from "@/lib/game-rules";
+import { rankable, rulesOf, type AnyState } from "@/lib/game-rules";
 import { rankPlayers } from "@/lib/game-record";
 import type { GameSummary } from "@/lib/game-summary";
-import { botName, mostAtOnce } from "@/lib/lobby-rules";
+import { botName, kindOf, mostAtOnce } from "@/lib/lobby-rules";
 import { isDead } from "@/lib/sweep-games";
 
 /** Visits are written at most once a minute, so anyone seen this recently is still here. */
@@ -192,7 +192,8 @@ export async function loadUserMetrics(now = Date.now()) {
     return {
       id: game.id,
       status: game.status,
-      mode: game.mode,
+      kind: kindOf(game.players),
+      duel: rulesOf(settings) === "duel",
       joinCode: game.joinCode,
       createdAt: game.createdAt.getTime(),
       updatedAt: game.updatedAt.getTime(),

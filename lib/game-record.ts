@@ -2,6 +2,7 @@ import { getDuelCard } from "@/lib/duel/data";
 import { CARD_BY_ID } from "@/lib/engine/data";
 import type { FrameTier } from "@/lib/frame-tier";
 import { isDuel, rankable, type AnyState } from "@/lib/game-rules";
+import { kindOf, type GameKind } from "@/lib/lobby-rules";
 
 /** The parts of a finished game's state `rankPlayers` reads — satisfied by both `GameState` and a live `RedactedGameState`. */
 export interface RankableState {
@@ -26,7 +27,10 @@ export interface RankedPlayer {
 /** One finished game, as the player whose record it is saw it end. */
 export interface GameRecord {
   id: string;
-  mode: "VS_BOT" | "MULTIPLAYER";
+  /** Against the bots alone, or with other people at the table. */
+  kind: GameKind;
+  /** A Duel, else the Marvel game. */
+  duel: boolean;
   /** When it ended, in milliseconds. */
   endedAt: number;
   seat: number;
@@ -79,7 +83,7 @@ export function rankPlayers(state: RankableState, seated: Seated[]): RankedPlaye
 
 /** Null when the seat isn't in the game. */
 export function gameRecord(
-  game: { id: string; mode: GameRecord["mode"]; endedAt: number; state: AnyState; rewards: GameRecord["rewards"] },
+  game: { id: string; players: Array<{ isBot: boolean }>; endedAt: number; state: AnyState; rewards: GameRecord["rewards"] },
   seat: number,
   seated: Seated[],
 ): GameRecord | null {
@@ -92,7 +96,8 @@ export function gameRecord(
   const levels = team.map((id) => (duel ? getDuelCard(id).level : CARD_BY_ID.get(id)?.level));
   return {
     id: game.id,
-    mode: game.mode,
+    kind: kindOf(game.players),
+    duel,
     endedAt: game.endedAt,
     seat,
     won: mine.won,

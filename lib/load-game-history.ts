@@ -26,7 +26,6 @@ export async function loadGameHistory(userId: string): Promise<{
       game: {
         select: {
           id: true,
-          mode: true,
           seed: true,
           updatedAt: true,
           state: true,
@@ -52,7 +51,7 @@ export async function loadGameHistory(userId: string): Promise<{
     const record = gameRecord(
       {
         id: game.id,
-        mode: game.mode,
+        players: game.players,
         endedAt: game.updatedAt.getTime(),
         state,
         rewards: game.players.flatMap((p) => (p.rewards ? [[p.seat, p.rewards as unknown as GameRewards] as const] : [])),

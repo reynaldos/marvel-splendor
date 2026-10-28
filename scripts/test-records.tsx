@@ -18,7 +18,7 @@ assert.ok(html.includes("Games played"));
 async function main() {
   for (const { id } of await prisma.user.findMany({ select: { id: true } })) {
     const { games, career, records } = await loadGameHistory(id);
-    const withPeople = games.filter((g) => g.mode === "MULTIPLAYER").length;
+    const withPeople = games.filter((g) => g.kind === "Private Game").length;
     assert.ok(records.bestPoints <= career.bestPoints && records.mostTags <= career.mostTags);
     if (withPeople === 0) assert.deepEqual([records.bestPoints, records.bestWinPoints, records.fastestWinTurns], [0, null, null]);
     console.log(`games ${games.length}, private ${withPeople}: highest ${career.bestPoints} -> ${records.bestPoints}, fastest win ${career.fastestWinTurns} -> ${records.fastestWinTurns}`);
