@@ -114,7 +114,7 @@ export function nextFreeSeat(takenSeats: number[], maxSeats = MAX_SEATS): number
 /** Creates a game in LOBBY status with `userId` hosting from seat 0. */
 export async function createLobby(
   userId: string,
-  rules: { targetPoints: number; turnTimeSeconds: number | null; gameTimeMinutes: number | null; rules?: "duel" },
+  rules: { targetPoints: number; turnTimeSeconds: number | null; gameTimeMinutes: number | null; rules?: "duel"; cardSet?: "marvel" },
 ): Promise<string> {
   if ((await openGamesOf(userId)) >= MAX_OPEN_GAMES) throw new Error(OPEN_GAMES_REASON);
   // A handful of retries covers the astronomically unlikely joinCode collision.

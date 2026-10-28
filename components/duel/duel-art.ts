@@ -1,14 +1,15 @@
 /**
- * How Duel's pieces look in this game. The Duel cards have no art of their
- * own: each wears a Marvel picture of its level and color, chosen once, the
- * same for every player and every game. The powers have an icon each until
- * there is art for them.
+ * How Duel's pieces look in this game. A card of the Marvel set is a Marvel
+ * card and wears its own picture. The box's cards have no art of their own:
+ * each wears a Marvel picture of its level and color, chosen once, the same
+ * for every player and every game. The powers have an icon each until there
+ * is art for them.
  */
 import { Coins, HandCoins, PlayingCard, Repeat, ScrollText, type LucideIcon } from "lucide-react";
 
 import { DUEL_CARDS, getDuelCard } from "@/lib/duel/data";
 import type { Ability, DuelCard, OwnedCard } from "@/lib/duel/types";
-import { ALL_CARDS, ALL_LOCATIONS } from "@/lib/engine/data";
+import { ALL_CARDS, ALL_LOCATIONS, CARD_BY_ID } from "@/lib/engine/data";
 import { createRng, shuffle } from "@/lib/engine/rng";
 import { STONES, type Card } from "@/lib/engine/types";
 
@@ -56,9 +57,9 @@ function art(): Map<string, Card> {
   return out;
 }
 
-/** The Marvel picture a Duel card wears. */
+/** The Marvel picture a Duel card wears: its own for a card of the Marvel set. */
 export function duelArt(cardId: string): Card {
-  return art().get(cardId) ?? art().get(getDuelCard(cardId).id)!;
+  return CARD_BY_ID.get(cardId) ?? art().get(cardId) ?? art().get(getDuelCard(cardId).id)!;
 }
 
 /** The Marvel card ids behind a player's Duel cards, for the team view. */

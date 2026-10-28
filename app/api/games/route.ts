@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     startedAt: Date.now(),
     botDifficulty: botDifficulty ?? "normal",
     packs: await ownedPacks([user.id]),
-    ...(rules === "duel" ? { rules } : {}),
+    ...(rules === "duel" ? { rules, cardSet: "marvel" as const } : {}),
   };
 
   const seed = generateSeed();

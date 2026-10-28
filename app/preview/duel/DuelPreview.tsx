@@ -35,7 +35,7 @@ export const SHOWS: Record<string, DuelPending> = {
  */
 export function DuelPreview({ show }: { show?: string }) {
   const view = useMemo(() => {
-    let state = createDuel("duel-preview", { botDifficulty: "normal" });
+    let state = createDuel("duel-preview", { botDifficulty: "normal", cardSet: "marvel" });
     for (let i = 0; i < 12 && state.status === "active"; i++) state = applyDuelMove(state, state.currentSeat, chooseDuelBotMove(state, state.currentSeat));
     // Seat 0 on turn, holding a Privilege and a reserved card, with a pending choice when asked for.
     state = { ...state, currentSeat: 0, pending: (show ? SHOWS[show] : null) ?? null };

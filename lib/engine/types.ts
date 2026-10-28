@@ -61,6 +61,8 @@ export interface GameSettings {
   botDifficultyBySeat?: Partial<Record<number, BotDifficulty>>;
   /** The card packs dealt in besides the base cards: every pack someone at the table owns. Absent on older games. */
   packs?: string[];
+  /** A Duel dealt from the Marvel cards, `packs` included, instead of the box's 67. Absent on older Duels. */
+  cardSet?: "marvel";
   /** Which game is played: Splendor Duel, or the Marvel game when absent. */
   rules?: "marvel" | "duel";
 }

@@ -23,6 +23,7 @@ function player(seat: number): DuelPlayer {
 
 export function createDuel(seed: string, settings: Partial<GameSettings> = {}): DuelState {
   const rng = createRng(seed);
+  const cardsOf = (level: CardLevel) => duelCardsOfLevel(level, settings.cardSet, settings.packs);
 
   const bag: TokenColor[] = shuffle(
     TOKEN_COLORS.flatMap((t) => Array<TokenColor>(BAG_COUNTS[t]).fill(t)),
@@ -33,7 +34,7 @@ export function createDuel(seed: string, settings: Partial<GameSettings> = {}): 
   const decks = {} as Record<CardLevel, string[]>;
   const pyramid = {} as Record<CardLevel, (string | null)[]>;
   for (const level of [1, 2, 3] as const) {
-    const deck = shuffle(duelCardsOfLevel(level).map((c) => c.id), rng);
+    const deck = shuffle(cardsOf(level).map((c) => c.id), rng);
     pyramid[level] = deck.slice(0, PYRAMID_SLOTS[level]);
     decks[level] = deck.slice(PYRAMID_SLOTS[level]);
   }
