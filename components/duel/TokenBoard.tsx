@@ -241,7 +241,7 @@ export function WinTile({ still }: { still?: boolean }) {
     <Zoomable
       label="Show how to win"
       title="How to win"
-      className="@container relative mx-auto aspect-[1404/670] w-36 overflow-hidden rounded-md ring-1 ring-foreground/10"
+      className="@container relative mx-auto aspect-[1404/670] w-28 overflow-hidden rounded-md ring-1 ring-foreground/10"
       zoomed={
         <div className="@container relative aspect-[1404/670] w-150 overflow-hidden rounded-xl">
           {image ? <AssetImage src={image} alt="" sizes="75vw" /> : null}

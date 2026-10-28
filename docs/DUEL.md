@@ -64,8 +64,7 @@ How the pieces read in this game's theme, with no new rules:
 
 **The table, locked in.** The preview at `/preview/duel` is the design to build:
 - Left column: the rival's plaque with their Avengers and scroll counts on its name tab; under it the four Royal
-  cards two by two (Location tiles with a panel over the printed strip: points, mark, power); under those the three
-  Privilege scrolls, a taken one dim with its holder's name.
+  cards two by two (Location tiles with a panel over the printed strip: points, mark, power).
 - Middle: the pyramid, 3, 4, 5, each row beside its deck. A card is the box's Duel card drawn over a Marvel picture:
   the band of its color over the printed one with the points in Orbitron, the Avengers marks, the power badge, a
   second stone for a double bonus; the grey many-gem band for wild cards, the plain grey band for the three with no
@@ -74,7 +73,7 @@ How the pieces read in this game's theme, with no new rules:
 - Right column: the win tile (the gauntlet, with 20 pts, 10 marks, and 10 in a color as five dots on a pentagon over
   its printed strip) above the 5 by 5 token board. Empty spaces show the printed spiral through them, the middle one
   tinted. The board is a button: tapping it opens it large with the three reminders stacked beside it, which is
-  where a line is picked. The bag count sits on its corner.
+  where a line is picked. The bag count sits on its corner. Under the board the three Privilege scrolls, a taken one dim with its holder's name.
 - The tray as the Marvel board has it, a little shorter: your plaque with what the staged line takes, your tokens and
   bonuses, your reserved cards, End turn.
 - Icons until there is art: Repeat for another turn, Grape for the wild bonus, Copy for a token of this color,
