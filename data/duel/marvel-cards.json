@@ -154,7 +154,7 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "reality": 3
+        "mind": 3
       }
     },
     {
@@ -194,7 +194,7 @@
       "bonusCount": 0,
       "ability": null,
       "cost": {
-        "reality": 4,
+        "space": 4,
         "time": 1
       }
     },
@@ -273,8 +273,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "soul": 2,
-        "reality": 3
+        "power": 2,
+        "space": 3
       }
     },
     {
@@ -286,7 +286,7 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "power": 3
+        "mind": 3
       }
     },
     {
@@ -299,7 +299,7 @@
       "ability": null,
       "cost": {
         "space": 2,
-        "soul": 3
+        "reality": 3
       }
     },
     {
@@ -311,7 +311,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "power": 4,
+        "space": 4,
         "time": 1
       }
     },
@@ -377,8 +377,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "mind": 3,
-        "power": 2
+        "reality": 3,
+        "space": 2
       }
     },
     {
@@ -390,10 +390,9 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 1,
-        "mind": 1,
         "power": 1,
-        "reality": 1
+        "reality": 2,
+        "mind": 1
       }
     },
     {
@@ -405,8 +404,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "power": 3,
-        "reality": 2
+        "soul": 3,
+        "mind": 2
       }
     },
     {
@@ -418,7 +417,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "mind": 4,
+        "reality": 4,
         "time": 1
       }
     },
@@ -456,8 +455,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 3,
-        "mind": 2
+        "power": 3,
+        "soul": 2
       }
     },
     {
@@ -494,13 +493,13 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "soul": 3
+        "reality": 3
       }
     },
     {
       "id": "c1-38",
       "level": 1,
-      "points": 3,
+      "points": 2,
       "crowns": 1,
       "bonus": null,
       "bonusCount": 0,
@@ -519,9 +518,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 1,
-        "mind": 1,
         "soul": 1,
+        "space": 2,
         "power": 1
       }
     },
@@ -575,7 +573,7 @@
       "bonusCount": 1,
       "ability": "again",
       "cost": {
-        "power": 2,
+        "space": 2,
         "reality": 2,
         "time": 1
       }
@@ -589,7 +587,7 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "reality": 3
+        "space": 3
       }
     },
     {
@@ -614,9 +612,8 @@
       "ability": null,
       "cost": {
         "mind": 1,
-        "soul": 1,
-        "power": 1,
-        "reality": 1
+        "soul": 2,
+        "power": 1
       }
     },
     {
@@ -629,9 +626,8 @@
       "ability": null,
       "cost": {
         "space": 1,
-        "mind": 1,
-        "soul": 1,
-        "reality": 1
+        "reality": 1,
+        "soul": 2
       }
     },
     {
@@ -643,8 +639,8 @@
       "bonusCount": 1,
       "ability": "again",
       "cost": {
-        "space": 2,
         "mind": 2,
+        "soul": 2,
         "time": 1
       }
     },
@@ -657,7 +653,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "mind": 4,
+        "soul": 4,
         "time": 1
       }
     },
@@ -670,8 +666,8 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
         "mind": 2,
+        "power": 2,
         "soul": 2,
         "time": 1
       }
@@ -766,7 +762,7 @@
       "bonusCount": 0,
       "ability": null,
       "cost": {
-        "space": 6,
+        "power": 6,
         "time": 1
       }
     },
@@ -850,7 +846,7 @@
       "ability": "privilege",
       "cost": {
         "mind": 4,
-        "power": 2,
+        "soul": 2,
         "time": 1
       }
     },
@@ -889,7 +885,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "soul": 6,
+        "power": 6,
         "time": 1
       }
     },
@@ -902,9 +898,9 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
-        "mind": 2,
+        "reality": 2,
         "power": 2,
+        "mind": 2,
         "time": 1
       }
     },
@@ -918,8 +914,8 @@
       "ability": null,
       "cost": {
         "space": 2,
+        "mind": 2,
         "soul": 2,
-        "reality": 2,
         "time": 1
       }
     },
@@ -945,9 +941,9 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "mind": 2,
         "power": 2,
-        "reality": 2,
+        "mind": 2,
+        "soul": 2,
         "time": 1
       }
     },
@@ -975,7 +971,7 @@
       "ability": "privilege",
       "cost": {
         "power": 4,
-        "reality": 2,
+        "soul": 2,
         "time": 1
       }
     },
@@ -988,9 +984,9 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
-        "mind": 2,
         "soul": 2,
+        "space": 2,
+        "power": 2,
         "time": 1
       }
     },
@@ -1003,16 +999,16 @@
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
-        "soul": 2,
+        "mind": 2,
         "reality": 2,
+        "soul": 2,
         "time": 1
       }
     },
     {
       "id": "c2-26",
       "level": 2,
-      "points": 0,
+      "points": 1,
       "crowns": 1,
       "bonus": "wild",
       "bonusCount": 1,
@@ -1031,7 +1027,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "soul": 6,
+        "reality": 6,
         "time": 1
       }
     },
@@ -1044,7 +1040,7 @@
       "bonusCount": 1,
       "ability": "wild",
       "cost": {
-        "soul": 6,
+        "mind": 6,
         "time": 1
       }
     },
@@ -1057,7 +1053,7 @@
       "bonusCount": 1,
       "ability": "privilege",
       "cost": {
-        "soul": 2,
+        "mind": 2,
         "reality": 4,
         "time": 1
       }
@@ -1065,7 +1061,7 @@
     {
       "id": "c2-30",
       "level": 2,
-      "points": 0,
+      "points": 1,
       "crowns": 1,
       "bonus": "wild",
       "bonusCount": 1,
@@ -1113,7 +1109,7 @@
       "ability": "privilege",
       "cost": {
         "space": 4,
-        "mind": 2,
+        "power": 2,
         "time": 1
       }
     },
@@ -1152,7 +1148,7 @@
       "bonusCount": 1,
       "ability": "steal",
       "cost": {
-        "soul": 4,
+        "mind": 4,
         "power": 3
       }
     },
@@ -1195,14 +1191,14 @@
       "bonusCount": 1,
       "ability": "steal",
       "cost": {
-        "space": 4,
-        "reality": 3
+        "power": 4,
+        "soul": 3
       }
     },
     {
       "id": "c3-01",
       "level": 3,
-      "points": 3,
+      "points": 4,
       "crowns": 1,
       "bonus": "space",
       "bonusCount": 1,
@@ -1217,13 +1213,13 @@
     {
       "id": "c3-02",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "soul",
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
+        "power": 2,
         "soul": 6,
         "reality": 2
       }
@@ -1231,7 +1227,7 @@
     {
       "id": "c3-03",
       "level": 3,
-      "points": 3,
+      "points": 4,
       "crowns": 1,
       "bonus": "soul",
       "bonusCount": 1,
@@ -1274,7 +1270,7 @@
     {
       "id": "c3-06",
       "level": 3,
-      "points": 3,
+      "points": 4,
       "crowns": 1,
       "bonus": "power",
       "bonusCount": 1,
@@ -1289,7 +1285,7 @@
     {
       "id": "c3-07",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "mind",
       "bonusCount": 1,
@@ -1297,13 +1293,13 @@
       "cost": {
         "space": 2,
         "mind": 6,
-        "power": 2
+        "reality": 2
       }
     },
     {
       "id": "c3-08",
       "level": 3,
-      "points": 3,
+      "points": 4,
       "crowns": 1,
       "bonus": "reality",
       "bonusCount": 1,
@@ -1318,15 +1314,15 @@
     {
       "id": "c3-09",
       "level": 3,
-      "points": 3,
+      "points": 5,
       "crowns": 0,
       "bonus": "power",
       "bonusCount": 1,
       "ability": null,
       "cost": {
         "mind": 3,
-        "soul": 5,
-        "reality": 3,
+        "reality": 5,
+        "soul": 3,
         "time": 1
       }
     },
@@ -1339,21 +1335,21 @@
       "bonusCount": 0,
       "ability": null,
       "cost": {
-        "mind": 8
+        "reality": 8
       }
     },
     {
       "id": "c3-11",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "mind",
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 2,
+        "soul": 2,
         "mind": 6,
-        "power": 2
+        "reality": 2
       }
     },
     {
@@ -1373,21 +1369,21 @@
     {
       "id": "c3-13",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "space",
       "bonusCount": 1,
       "ability": null,
       "cost": {
         "space": 6,
-        "mind": 2,
-        "soul": 2
+        "reality": 2,
+        "power": 2
       }
     },
     {
       "id": "c3-14",
       "level": 3,
-      "points": 0,
+      "points": 1,
       "crowns": 2,
       "bonus": "wild",
       "bonusCount": 1,
@@ -1399,21 +1395,21 @@
     {
       "id": "c3-15",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "reality",
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "soul": 2,
-        "power": 2,
+        "mind": 2,
+        "space": 2,
         "reality": 6
       }
     },
     {
       "id": "c3-16",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "power",
       "bonusCount": 1,
@@ -1421,20 +1417,20 @@
       "cost": {
         "mind": 2,
         "power": 6,
-        "reality": 2
+        "soul": 2
       }
     },
     {
       "id": "c3-17",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "reality",
       "bonusCount": 1,
       "ability": null,
       "cost": {
         "soul": 2,
-        "power": 2,
+        "space": 2,
         "reality": 6
       }
     },
@@ -1447,7 +1443,7 @@
       "bonusCount": 1,
       "ability": "again",
       "cost": {
-        "reality": 8
+        "mind": 8
       }
     },
     {
@@ -1467,7 +1463,7 @@
     {
       "id": "c3-20",
       "level": 3,
-      "points": 4,
+      "points": 5,
       "crowns": 1,
       "bonus": "mind",
       "bonusCount": 1,
@@ -1493,7 +1489,7 @@
     {
       "id": "c3-22",
       "level": 3,
-      "points": 3,
+      "points": 5,
       "crowns": 0,
       "bonus": "mind",
       "bonusCount": 1,
@@ -1508,7 +1504,7 @@
     {
       "id": "c3-23",
       "level": 3,
-      "points": 4,
+      "points": 6,
       "crowns": 0,
       "bonus": "power",
       "bonusCount": 1,
@@ -1516,21 +1512,21 @@
       "cost": {
         "mind": 2,
         "power": 6,
-        "reality": 2
+        "space": 2
       }
     },
     {
       "id": "c3-24",
       "level": 3,
-      "points": 3,
+      "points": 5,
       "crowns": 0,
       "bonus": "reality",
       "bonusCount": 1,
       "ability": null,
       "cost": {
         "space": 5,
-        "soul": 3,
         "power": 3,
+        "mind": 3,
         "time": 1
       }
     },
@@ -1543,13 +1539,13 @@
       "bonusCount": 1,
       "ability": "again",
       "cost": {
-        "reality": 8
+        "soul": 8
       }
     },
     {
       "id": "c3-26",
       "level": 3,
-      "points": 6,
+      "points": 5,
       "crowns": 1,
       "bonus": null,
       "bonusCount": 0,
@@ -1561,13 +1557,13 @@
     {
       "id": "c3-27",
       "level": 3,
-      "points": 3,
+      "points": 5,
       "crowns": 0,
       "bonus": "soul",
       "bonusCount": 1,
       "ability": null,
       "cost": {
-        "space": 3,
+        "power": 3,
         "mind": 5,
         "reality": 3,
         "time": 1

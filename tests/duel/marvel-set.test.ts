@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 import { duelArt } from "@/components/duel/duel-art";
 import { chooseDuelBotMove } from "@/lib/bot/duel-policy";
 import { applyDuelMove } from "@/lib/duel/apply";
-import { getDuelCard, MARVEL_DUEL_CARDS } from "@/lib/duel/data";
+import { DUEL_CARDS, getDuelCard, MARVEL_DUEL_CARDS } from "@/lib/duel/data";
 import { legalDuelMoves } from "@/lib/duel/legal-moves";
 import { hasWon } from "@/lib/duel/rules";
 import { createDuel } from "@/lib/duel/setup";
-import { STONES } from "@/lib/duel/types";
+import { STONES, type DuelCard } from "@/lib/duel/types";
 import { validateDuelMove } from "@/lib/duel/validate";
 import { ALL_CARDS, cardPool, locationPool, PACKS } from "@/lib/engine/data";
 import { royalTile } from "@/components/duel/duel-art";
@@ -31,6 +31,19 @@ describe("the Marvel card set", () => {
     expect(new Set(MARVEL_DUEL_CARDS.map((c) => c.ability))).toEqual(new Set([null, "again", "token", "privilege", "steal", "wild"]));
     expect(MARVEL_DUEL_CARDS.some((c) => c.bonus === null)).toBe(true);
     for (const s of STONES) expect(MARVEL_DUEL_CARDS.some((c) => c.bonus === s)).toBe(true);
+  });
+
+  it("gives every card a box card's value, its Marvel marks as badges, and a cost of its own", () => {
+    const tokens = (c: DuelCard) => Object.entries(c.cost).reduce((n, [t, v]) => (t === "time" ? n : n + (v ?? 0)), 0);
+    const sameValue = (c: DuelCard, t: DuelCard) =>
+      t.level === c.level && t.bonus === c.bonus && t.ability === c.ability && t.bonusCount === c.bonusCount &&
+      tokens(t) === tokens(c) && (t.cost.time ?? 0) === (c.cost.time ?? 0) && t.points + t.crowns === c.points + c.crowns;
+    for (const card of MARVEL_DUEL_CARDS) {
+      expect(DUEL_CARDS.some((t) => sameValue(card, t))).toBe(true);
+      expect(card.crowns).toBe(ALL_CARDS.find((c) => c.id === card.id)!.tags);
+    }
+    const costs = MARVEL_DUEL_CARDS.map((c) => `${c.level}|${c.bonus}|${JSON.stringify(Object.entries(c.cost).sort())}`);
+    expect(new Set(costs).size).toBe(costs.length);
   });
 
   it("deals a new Duel from the base cards, and a pack's cards only when the table owns it", () => {
