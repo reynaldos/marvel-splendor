@@ -5,6 +5,7 @@ import { cn } from "cn";
 import { ArrowLeft, Eye } from "lucide-react";
 
 import { AdminTabs } from "@/components/admin/AdminTabs";
+import { BlockButton } from "@/components/admin/BlockButton";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { FeedbackTable } from "@/components/admin/FeedbackTable";
 import { GamesTable } from "@/components/admin/GamesTable";
@@ -14,6 +15,7 @@ import { loadFeedback } from "@/lib/load-feedback";
 import { timeAgo } from "@/lib/game-record";
 import { pageMetadata } from "@/lib/site";
 import { formatDuration } from "@/lib/game-summary";
+import { MAX_OPEN_GAMES } from "@/lib/lobby-rules";
 import { loadUserMetrics } from "@/lib/user-metrics";
 
 export const metadata = pageMetadata("Admin dashboard", "Who is playing, and how much.", true);
@@ -145,11 +147,13 @@ export default async function AdminUsersPage() {
                     "Time in app",
                     "Time playing",
                     "Games",
+                    "At once",
                     "Wins",
                     "Coins",
                     "Purchases",
                     "Device",
                     "IP address",
+                    "Access",
                   ]}
                 >
                   {users.map((user) => (
@@ -171,6 +175,9 @@ export default async function AdminUsersPage() {
                       <td title={`${user.finished} finished, ${user.inPlay} open, ${user.abandoned} abandoned`}>
                         {user.finished + user.inPlay + user.abandoned}
                       </td>
+                      <td className={cn(user.atOnce > MAX_OPEN_GAMES && "font-bold text-marvel")} title="The most games open at the same time">
+                        {user.atOnce}
+                      </td>
                       <td>{user.wins}</td>
                       <td>{user.coins.toLocaleString()}</td>
                       <td title={user.purchases.map((p) => `${p.title}, ${p.price} coins, ${day(p.createdAt)}`).join("\n")}>
@@ -180,6 +187,12 @@ export default async function AdminUsersPage() {
                       <td className="font-mono" title={user.ips.join("\n")}>
                         {user.ips[0]}
                         {user.ips.length > 1 ? ` +${user.ips.length - 1}` : ""}
+                      </td>
+                      <td className={cn(user.blocked && "text-marvel")}>
+                        <span className="flex items-center gap-2">
+                          {user.blocked ? "Blocked" : ""}
+                          <BlockButton userId={user.id} blocked={user.blocked} self={user.email === session.user.email} />
+                        </span>
                       </td>
                     </tr>
                   ))}

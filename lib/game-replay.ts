@@ -90,14 +90,14 @@ export function turnEndsInMs(state: Pick<AnyState, "status" | "settings" | "paus
 }
 
 /**
- * Whether a game waits for its player to come back: paused by them, or, against bots, its turn run out
- * while nobody was at the table. The player resumes it with a fresh turn clock instead of losing the turn.
+ * Whether a game waits for its player to come back: paused by them, or, `solo` against bots, its turn run
+ * out while nobody was at the table. The player resumes it with a fresh turn clock instead of losing the turn.
  */
-export function isPaused(mode: string, state: Pick<AnyState, "status" | "settings" | "paused">, turnStartedAt: Date, now = Date.now()): boolean {
+export function isPaused(solo: boolean, state: Pick<AnyState, "status" | "settings" | "paused">, turnStartedAt: Date, now = Date.now()): boolean {
   if (state.status !== "active") return false;
   if (state.paused) return true;
   const left = turnEndsInMs(state, turnStartedAt, now);
-  return mode === "VS_BOT" && left !== null && left <= 0;
+  return solo && left !== null && left <= 0;
 }
 
 /** True when nobody is playing any more: every person at the table is away. Bots don't count. */

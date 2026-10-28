@@ -51,6 +51,8 @@ model User {
   xpCardStyle         Boolean           @default(false)
   // Whether they have asked to be left off the leaderboard.
   hideFromLeaderboard Boolean           @default(false)
+  // Set by an admin: the account is signed out and cannot play until it is cleared.
+  blockedAt           DateTime?
   createdAt           DateTime          @default(now())
   players             GamePlayer[]
   stats               UserStats?

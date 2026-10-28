@@ -13,6 +13,7 @@ import { applyAny, isDuel, rankable, redactAny, validateAny, type AnyMove, type 
 import { runServerTurnLoop, type AppliedMove } from "@/lib/game-server";
 import { playbackMs } from "@/lib/playback";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { playsBotsOnly } from "@/lib/lobby-rules";
 import { accountXpByUser } from "@/lib/load-xp";
 import { rankPlayers } from "@/lib/game-record";
 import { notifyGame } from "@/lib/pusher";
@@ -27,6 +28,8 @@ import { saveCollectedCards } from "@/lib/save-collection";
 const TIMEOUT_GRACE_MS = 1000;
 /** Extra wait before another player may time someone out, so their own device goes first. */
 const OTHERS_CLAIM_DELAY_MS = 2000;
+/** How early before the turn clock starts a move may still land: a device's playback can run a little short. */
+const EARLY_MOVE_GRACE_MS = 1000;
 
 /**
  * POST /api/games/[id]/moves — submit the current seat's move, then run the
@@ -90,7 +93,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const seat = sent.type === "TIMEOUT_SKIP" ? state.currentSeat : viewerSeat;
   // Only the player themselves can say they were there. Against bots theirs is the only device, so they always were:
   // a game against bots never marks its player away, and never closes on its own.
-  const present = sent.type === "TIMEOUT_SKIP" && seat === viewerSeat && (sent.present || game.mode === "VS_BOT");
+  const solo = playsBotsOnly(game.players);
+  const present = sent.type === "TIMEOUT_SKIP" && seat === viewerSeat && (sent.present || solo);
   const move: AnyMove = sent.type === "TIMEOUT_SKIP" ? (present ? { type: "TIMEOUT_SKIP", present: true } : { type: "TIMEOUT_SKIP" }) : sent;
 
   // A player removed for being away has no more say in the game, not even to forfeit it.
@@ -101,6 +105,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Forfeiting doesn't wait for your turn.
   if (move.type !== "FORFEIT" && seat !== state.currentSeat) {
     return NextResponse.json({ error: "It is not your turn." }, { status: 403 });
+  }
+  // Every screen shows the last moves before the turn clock starts; a move that lands before then came from a script.
+  if (move.type !== "FORFEIT" && move.type !== "TIMEOUT_SKIP" && Date.now() < game.updatedAt.getTime() - EARLY_MOVE_GRACE_MS) {
+    return NextResponse.json({ error: "The last moves are still being shown." }, { status: 429 });
   }
 
   if (move.type === "TIMEOUT_SKIP") {
@@ -133,7 +141,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   ];
 
   const abandoned =
-    game.mode === "MULTIPLAYER" &&
+    !solo &&
     finalState.status !== "finished" &&
     isTableIdle(
       game.players.filter((p) => !p.isBot).map((p) => p.seat),

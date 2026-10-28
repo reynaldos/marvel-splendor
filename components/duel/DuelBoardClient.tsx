@@ -16,6 +16,7 @@ import { flowLock } from "@/components/game/flow-lock";
 import { GameClock } from "@/components/game/GameClock";
 import { GameMenu } from "@/components/game/GameMenu";
 import { PausedNotice, setPaused } from "@/components/game/Pause";
+import { playsBotsOnly } from "@/lib/lobby-rules";
 import { GameOverDialog } from "@/components/game/GameOverDialog";
 import type { MoveLogEntry } from "@/components/game/MoveLog";
 import { PendingActionModals } from "@/components/game/PendingActionModals";
@@ -453,7 +454,7 @@ export function DuelBoardClient({ gameId }: { gameId: string }) {
                 finished={view.status === "finished"}
                 busy={submitting || botPlaying}
                 onForfeit={() => void submitMove({ type: "FORFEIT" })}
-                onPause={gameData.mode === "VS_BOT" && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
+                onPause={playsBotsOnly(gameData.players) && !over && !gameData.paused && !view.pending ? () => void pause(true) : undefined}
               />
             }
             onToggleSpace={toggleSpace}

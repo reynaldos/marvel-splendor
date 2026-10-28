@@ -8,6 +8,7 @@ import { DEFAULT_SETTINGS , type GameSettings } from "@/lib/engine/types";
 import { generateJoinCode, generateSeed, isUniqueViolation } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { rulesOf, seatsFor } from "@/lib/game-rules";
+import { MAX_OPEN_GAMES } from "@/lib/lobby-rules";
 import { notifyGame } from "@/lib/pusher";
 
 export const MAX_SEATS = 4;
@@ -55,10 +56,18 @@ export async function openLobbyFor(userId: string): Promise<string | null> {
   return null;
 }
 
-/** The newest game against bots the player has in play, to go back to from the home screen; null without one. */
+/** Why a player at the cap can't open or join another game. */
+export const OPEN_GAMES_REASON = `You have ${MAX_OPEN_GAMES} games open. Finish or forfeit one before you open another.`;
+
+/** How many games the player has open: lobbies and games in play. */
+export async function openGamesOf(userId: string): Promise<number> {
+  return prisma.gamePlayer.count({ where: { userId, game: { status: { in: ["LOBBY", "ACTIVE"] } } } });
+}
+
+/** The newest game the player has in play, to go back to from the home screen; null without one. */
 export async function openGameFor(userId: string): Promise<string | null> {
   const seat = await prisma.gamePlayer.findFirst({
-    where: { userId, game: { status: "ACTIVE", mode: "VS_BOT" } },
+    where: { userId, game: { status: "ACTIVE" } },
     select: { gameId: true },
     orderBy: { game: { updatedAt: "desc" } },
   });
@@ -107,6 +116,7 @@ export async function createLobby(
   userId: string,
   rules: { targetPoints: number; turnTimeSeconds: number | null; gameTimeMinutes: number | null; rules?: "duel" },
 ): Promise<string> {
+  if ((await openGamesOf(userId)) >= MAX_OPEN_GAMES) throw new Error(OPEN_GAMES_REASON);
   // A handful of retries covers the astronomically unlikely joinCode collision.
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
@@ -156,6 +166,7 @@ export async function joinLobby(userId: string, rawCode: string): Promise<JoinRe
       return { ok: true, gameId: game.id, status: game.status };
     }
     if (game.status !== "LOBBY") return { ok: false, reason: "That game has already started." };
+    if ((await openGamesOf(userId)) >= MAX_OPEN_GAMES) return { ok: false, reason: OPEN_GAMES_REASON };
 
     const seat = nextFreeSeat(game.players.map((p) => p.seat), seatsOf(game.settings));
     if (seat === null) return { ok: false, reason: "That game is full." };

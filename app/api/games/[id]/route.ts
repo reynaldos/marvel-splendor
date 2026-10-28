@@ -8,7 +8,7 @@ import { gameEndsInMs, isPaused, moveSummaries, replaySteps, turnEndsInMs } from
 import type { GameRewards } from "@/lib/game-record";
 import { createAny, redactAny, rulesOf, type AnyMove, type AnyState } from "@/lib/game-rules";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
-import { botName } from "@/lib/lobby-rules";
+import { botName, playsBotsOnly } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
 
 /**
@@ -90,7 +90,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const start = steps && since === 0 ? redactAny(createAny(rulesOf(settings), game.players.length, game.seed, settings), seatRow.seat) : null;
 
   const botAvatars = botAvatarKeys(game.seed, game.players);
-  const paused = game.status === "ACTIVE" && isPaused(game.mode, state, game.updatedAt);
+  const paused = game.status === "ACTIVE" && isPaused(playsBotsOnly(game.players), state, game.updatedAt);
   return NextResponse.json({
     id: game.id,
     status: game.status,

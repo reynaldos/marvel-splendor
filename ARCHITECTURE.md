@@ -142,7 +142,7 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 
 | Model | Holds |
 |---|---|
-| `User` | The Auth0-linked profile: username, optional name, email as last seen at sign-in, picture key, and the two level-frame switches |
+| `User` | The Auth0-linked profile: username, optional name, email as last seen at sign-in, picture key, the two level-frame switches, and when an admin blocked the account, if they did |
 | `UserStats` | Running totals from finished games: played, wins, vs-bot wins, best points, fastest win, Avengers tiles, Locations |
 | `UserRating` | The ELO-style rank and how many rated games fed it |
 | `UserCoins` | The cached coin balance; `CoinTransaction` is the source of truth |
