@@ -7,10 +7,10 @@ export const CHAT_COOLDOWN_MS = 6000;
 /** How long it is shown on the sender's card. */
 export const CHAT_BUBBLE_MS = 3000;
 
-export const EMOJIS = ["👍", "😂", "😮", "😢", "😴" ,"😡", "🔥", "🫡",] as const;
+export const EMOJIS = ["👀", "😂", "😮", "😢", "😴", "😡", "💀", "🫡"] as const;
 // Kept short: each has to fit across a player's name.
 export const MESSAGES = [
-  "Good luck!",
+  "That card is mine!",
   "Nice move!",
   "So close!",
   "Oops!",
@@ -19,7 +19,7 @@ export const MESSAGES = [
   "Avengers, assemble!",
   "I am inevitable.",
   "Good game!",
-  "Your team is strong!",
+  "I can do this all day.",
 ] as const;
 
 /** Only what is on the lists can be sent, so nothing needs moderating. */
