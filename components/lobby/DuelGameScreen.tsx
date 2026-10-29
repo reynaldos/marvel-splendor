@@ -9,12 +9,12 @@ import { Option } from "@/components/lobby/Option";
 import { StonesAround } from "@/components/lobby/PrivateGameScreen";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Stage, StageRows } from "@/components/Stage";
-import { GAME_CLOCK_OPTIONS, nextOption, TURN_TIME_OPTIONS } from "@/lib/lobby-rules";
+import { DUEL_TURN_TIME_OPTIONS, GAME_CLOCK_OPTIONS, nextOption } from "@/lib/lobby-rules";
 
 type Action = (formData: FormData) => Promise<void>;
 
 /** The turn times on offer, and no clock at all; the game clocks, and none. */
-const TIMES = [...TURN_TIME_OPTIONS, null];
+const TIMES = [...DUEL_TURN_TIME_OPTIONS, null];
 const CLOCKS = [null, ...GAME_CLOCK_OPTIONS];
 
 /**
