@@ -81,6 +81,16 @@ function isUniqueConstraintError(error: unknown, field: string): boolean {
   return false;
 }
 
+/** How another account that holds this sign-in's email signs in ("google-oauth2", "auth0"); null when none does. */
+export async function otherSignIn(profile: Auth0Profile): Promise<string | null> {
+  if (!profile.email) return null;
+  const owner = await prisma.user.findFirst({
+    where: { email: { equals: profile.email, mode: "insensitive" }, auth0Sub: { not: profile.sub } },
+    select: { auth0Sub: true },
+  });
+  return owner ? owner.auth0Sub.split("|")[0] : null;
+}
+
 /**
  * Ensures a `User` (+ empty `UserStats`) row exists for the given Auth0
  * `sub`, creating one on first sight. Idempotent and safe to call on every
@@ -98,10 +108,14 @@ export async function getOrCreateUser(profile: Auth0Profile): Promise<User> {
 async function provisionUser(profile: Auth0Profile): Promise<User> {
   const existing = await prisma.user.findUnique({ where: { auth0Sub: profile.sub } });
   if (existing) {
-    // Keeps the email in step with the sign-in, writing only when it has changed.
-    if (!profile.email || profile.email === existing.email) return existing;
+    // Keeps the email in step with the sign-in, writing only when it has changed and no other account holds it.
+    if (!profile.email || profile.email === existing.email || (await otherSignIn(profile))) return existing;
     return prisma.user.update({ where: { id: existing.id }, data: { email: profile.email } });
   }
+
+  // One account per email: a new way in is sent to sign in the way that email already does.
+  // ponytail: app-level check, two first sign-ins at once can both pass; a unique index on lower(email) closes it
+  if (await otherSignIn(profile)) redirect("/sign-in-with");
 
   const base = deriveUsernameBase(profile);
 
