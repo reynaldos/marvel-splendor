@@ -1,5 +1,21 @@
 [
   {
+    "version": "3.2.1",
+    "date": "2026-10-29",
+    "title": "Chat additions and fixes",
+    "summary": "Fresh things to say at the table, a 30 second turn clock added back the original game.",
+    "pulls": [],
+    "new": [
+      "New chat messages added."
+    ],
+    "improved": [
+    ],
+    "fixed": [
+      "The original game's turn time reverted back to 30 seconds default, with 45, 60 and 90 still a tap away; Duel still starts at 45",
+      "The chat menu sometimes opened as a thin empty bar on an iPhone; it now always opens in full"
+    ]
+  },
+  {
     "version": "3.2.0",
     "date": "2026-10-27",
     "title": "Duel with every card",
