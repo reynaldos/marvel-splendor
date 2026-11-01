@@ -127,12 +127,13 @@ interface StagedTokensProps {
   colors: Stone[];
   disabled?: boolean;
   onUnstageTokenColor: (color: Stone) => void;
+  className?: string;
 }
 
 /** The tokens being taken this turn, kept apart from owned ones; tap one to put it back. */
-export function StagedTokens({ colors, disabled, onUnstageTokenColor }: StagedTokensProps) {
+export function StagedTokens({ colors, disabled, onUnstageTokenColor, className }: StagedTokensProps) {
   return (
-    <div className="flex min-h-0 flex-1 items-center gap-1.5 px-1">
+    <div className={cn("flex min-h-0 flex-1 items-center gap-1.5 px-1", className)}>
       {colors.map((c, i) => (
         <button
           key={`${c}-${i}`}

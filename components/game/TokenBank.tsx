@@ -15,6 +15,7 @@ interface TokenBankProps {
   disabled?: boolean;
   onStageTokenColor: (color: Stone) => void;
   onUnstageTokenColor: (color: Stone) => void;
+  className?: string;
 }
 
 const ROW = "flex items-center gap-2";
@@ -62,7 +63,7 @@ function TokenPile({
  * they're never directly takeable. A pile you can't take from looks the
  * same as one you can; an empty pile shows its 0 beside an empty space.
  */
-export function TokenBank({ supply, staged, disabled, onStageTokenColor, onUnstageTokenColor }: TokenBankProps) {
+export function TokenBank({ supply, staged, disabled, onStageTokenColor, onUnstageTokenColor, className }: TokenBankProps) {
   const selectedColors = staged?.kind === "tokens" ? staged.colors : [];
   const taken = useTracedMove()?.move;
   // Reserving a card comes with a S.H.I.E.L.D. token, while there are any.
@@ -71,7 +72,7 @@ export function TokenBank({ supply, staged, disabled, onStageTokenColor, onUnsta
   const traced = (color: TokenColor) => tracedColors.filter((c) => c === color).length;
 
   return (
-    <div className="flex flex-col justify-between">
+    <div className={cn("flex flex-col justify-between", className)}>
       {TOKEN_COLORS.map((color) => {
         if (!STONES.includes(color as Stone)) {
           return (
