@@ -64,9 +64,11 @@ export function ProfileScreen({
   return (
     <Stage>
       <StageRows>
-        <div className="flex items-end gap-6">
+        {/* On a screen taller than a phone the stats panel grows, up to a point. */}
+        <div className="flex items-end gap-6 tall:max-h-88 tall:min-h-0 tall:flex-1">
           <div
-            className="frame-gold relative flex h-62 w-52 shrink-0 flex-col items-center justify-center gap-0 rounded-3xl px-3 text-center pt-3"
+            // On a taller screen it stands as tall as the stats panel, under the row of tabs.
+            className="frame-gold relative flex h-62 w-52 shrink-0 flex-col items-center justify-center gap-0 rounded-3xl px-3 text-center pt-3 tall:mt-8 tall:h-auto tall:self-stretch"
             style={xpCardStyle ? FRAME_STYLE[tier] : PLAIN_FRAME}
             title={`Level ${level}`}
           >
@@ -85,7 +87,8 @@ export function ProfileScreen({
               name={username}
               // The switches are the player's own view of their own picture; everyone else sees the full frame.
               {...(isOwn ? ownFrame(tier, xpAvatarStyle, xpCardStyle) : { tier })}
-              className="size-24 text-4xl"
+              // On the taller card the picture and names sit midway, the badges keep the foot.
+              className="size-24 text-4xl tall:mt-auto"
             />
             <p className="w-full truncate text-xl font-black text-gold-400">{name ?? username}</p>
             {name ? <p className="w-full truncate text-sm font-bold">@{username}</p> : null}

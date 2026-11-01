@@ -370,7 +370,7 @@ export function DuelBoard({
       <div className="flex min-h-0 flex-1 justify-between gap-2">
         {/* The rival, the Royal cards, the Privileges. */}
         {/* Room at the foot for the tab of the tray's plaque, so the Royals sit midway between the two plaques. */}
-        <div className="flex w-44 flex-col gap-3 pb-12 desk:justify-between">
+        <div className="flex w-44 flex-col gap-3 pb-12 tall:justify-between">
           {rivalPlaque}
           {royals}
         </div>

@@ -155,7 +155,7 @@ export function Board({
   ));
 
   const market = (
-    <div className={cn("flex flex-col", tablet ? "justify-center gap-3 pb-8" : "justify-between desk:h-76 desk:self-center")}>
+    <div className={cn("flex flex-col", tablet ? "justify-center gap-3 pb-8" : "justify-between tall:h-76 tall:self-center")}>
       {([3, 2, 1] as CardLevel[]).map((level) => (
         <CardMarket
           key={level}
@@ -182,7 +182,7 @@ export function Board({
       disabled={disabled}
       onStageTokenColor={onStageTokenColor}
       onUnstageTokenColor={onUnstageTokenColor}
-      className={tablet ? undefined : "desk:h-76 desk:self-center"}
+      className={tablet ? undefined : "tall:h-76 tall:self-center"}
     />
   );
 

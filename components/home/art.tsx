@@ -20,14 +20,14 @@ function Piece({ src, className, drift, style }: { src: string; className: strin
   );
 }
 
-const CARD = "aspect-card w-27 rounded-lg ring-1 ring-black/40";
+const CARD = "aspect-card w-30 rounded-lg ring-1 ring-black/40";
 
-/** A hand of heroes, fanned round the middle of the tile whatever its width. */
+/** A hand of heroes, fanned round the middle of the tile whatever its width or height. */
 export function CardFanArt() {
   return (
-    <span className="absolute inset-0 flex items-start justify-center pt-3">
+    <span className="absolute inset-0 flex items-center justify-center">
       <Piece src="/cards/hulk.png" className={cn(CARD, "relative top-4 -mr-6 -rotate-12")} />
-      <Piece src="/cards/iron-man.png" className={cn(CARD, "relative z-10 w-30")} />
+      <Piece src="/cards/iron-man.png" className={cn(CARD, "relative z-10 w-33")} />
       <Piece src="/cards/captain-america.png" className={cn(CARD, "relative top-4 -ml-6 rotate-12")} />
     </span>
   );
@@ -187,7 +187,7 @@ const GEM_CLOUD = [
 /** Two at the table: Thor and Loki head to head, in a cloud of gems kept inside the picture. */
 export function DuelArt() {
   return (
-    <span className="absolute inset-0 flex items-start justify-center gap-3 overflow-hidden rounded-t-3xl pt-4">
+    <span className="absolute inset-0 flex items-center justify-center gap-3 overflow-hidden rounded-t-3xl">
       {GEM_CLOUD.map(({ stone, left, top, size, front }, i) => (
         <Piece
           key={i}
@@ -196,8 +196,8 @@ export function DuelArt() {
           style={{ left: `${left}%`, top: `${top}%` }}
         />
       ))}
-      <Piece src="/cards/thor.png" className={cn(CARD, "relative top-3 rotate-12")} />
-      <Piece src="/cards/loki.png" className={cn(CARD, "relative top-3 -rotate-12")} />
+      <Piece src="/cards/thor.png" className={cn(CARD, "relative rotate-12")} />
+      <Piece src="/cards/loki.png" className={cn(CARD, "relative -rotate-12")} />
     </span>
   );
 }

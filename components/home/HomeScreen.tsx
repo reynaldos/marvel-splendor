@@ -42,7 +42,8 @@ export function HomeScreen({ lobbyId, gameId, duelPlayed }: { lobbyId: string | 
   return (
     <Stage>
       <StageRows>
-        <div className="flex h-64 gap-6">
+        {/* On a screen taller than a phone the tiles grow, up to a point. */}
+        <div className="flex max-h-80 min-h-64 flex-1 gap-6">
           <ModeTile
             href={lobbyId ? `/lobby/${lobbyId}` : "/private"}
             label={lobbyId ? "Rejoin your room" : "Play Game"}

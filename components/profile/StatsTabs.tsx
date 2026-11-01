@@ -109,7 +109,7 @@ interface StatsTabsProps {
   games: GameRecord[] | null;
 }
 
-const PANEL = "h-50 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset";
+const PANEL = "h-50 rounded-2xl bg-cosmos-950/80 ring-3 ring-cosmos-500 ring-inset tall:min-h-0 tall:flex-1";
 
 /** A player's stats, a few at a time, then their games: tabs along the top. */
 export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
@@ -118,7 +118,7 @@ export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
   const shown = all.at(open);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-w-0 flex-1 flex-col tall:self-stretch tall:justify-end">
       <div role="tablist" className="flex gap-1 px-3">
         {[...all.map((tab) => tab.name), ...(games ? ["Game Record"] : [])].map((name, i) => (
           <button
@@ -142,14 +142,14 @@ export function StatsTabs({ stats, career, records, games }: StatsTabsProps) {
           role="tabpanel"
           className={cn(
             PANEL,
-            "grid content-center gap-x-5 gap-y-5 px-5",
+            "grid content-center gap-x-5 gap-y-5 px-5 tall:gap-y-8",
             shown.stats.length > 4 ? "grid-cols-3" : "grid-cols-2",
           )}
         >
           {shown.stats.map((stat) => (
             <div key={stat.label} className="flex min-w-0 flex-col gap-1">
               <dt className="truncate px-3 text-sm font-bold">{stat.label}</dt>
-              <dd className="relative flex h-10 items-center justify-center rounded-full bg-cosmos-900 pr-3 pl-10 ring-2 ring-cosmos-500 ring-inset">
+              <dd className="relative flex h-10 items-center justify-center rounded-full bg-cosmos-900 pr-3 pl-10 ring-2 ring-cosmos-500 ring-inset tall:h-14">
                 <span className="absolute left-3 flex">{stat.icon}</span>
                 {/* Words are set smaller than numbers, to fit beside the icon. */}
                 <span
