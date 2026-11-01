@@ -1,5 +1,19 @@
 [
   {
+    "version": "3.2.2",
+    "date": "2026-11-01",
+    "title": "A board for every screen",
+    "summary": "The table fits an iPad, an opened fold and a desktop window, drawn as large as the screen allows.",
+    "pulls": [],
+    "new": [
+    ],
+    "improved": [
+      "On an iPad or an opened fold the other players sit across the top, your name stands on your tray, and the cards, tokens and tiles are drawn a quarter larger",
+      "A desktop window is filled top to bottom, with the table kept at its size in the middle"
+    ],
+    "fixed": []
+  },
+  {
     "version": "3.2.1",
     "date": "2026-10-29",
     "title": "Chat additions and fixes",
