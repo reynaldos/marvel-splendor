@@ -66,7 +66,9 @@ export function afterViewer<T extends { seat: number }>(players: T[], viewerSeat
 /**
  * Top-level board layout (ARCHITECTURE.md §6), built for a landscape phone:
  * a canvas 100 spacing steps tall that never scrolls (see `.game-board` in
- * globals.css for how a step scales with the viewport).
+ * globals.css for how a step scales with the viewport). A desktop window is
+ * taller: the board fills it, the tiles spread over the height, and the
+ * market and bank keep their size in the middle.
  *
  *   opponents | III/II/I market rows | token bank | target, menu, tiles
  *   ----------+----------------------+------------+--------------------
@@ -153,7 +155,7 @@ export function Board({
   ));
 
   const market = (
-    <div className={cn("flex flex-col", tablet ? "justify-center gap-3 pb-8" : "justify-between")}>
+    <div className={cn("flex flex-col", tablet ? "justify-center gap-3 pb-8" : "justify-between desk:h-76 desk:self-center")}>
       {([3, 2, 1] as CardLevel[]).map((level) => (
         <CardMarket
           key={level}
@@ -173,7 +175,16 @@ export function Board({
     </div>
   );
 
-  const bank = <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} onUnstageTokenColor={onUnstageTokenColor} />;
+  const bank = (
+    <TokenBank
+      supply={view.supply}
+      staged={staged}
+      disabled={disabled}
+      onStageTokenColor={onStageTokenColor}
+      onUnstageTokenColor={onUnstageTokenColor}
+      className={tablet ? undefined : "desk:h-76 desk:self-center"}
+    />
+  );
 
   const header = (
     <div
@@ -286,7 +297,7 @@ export function Board({
   }
 
   return (
-    <div className="flex h-100 w-full flex-col gap-2 p-2 pb-0">
+    <div className="flex h-full w-full flex-col gap-2 p-2 pb-0">
       <div className="flex min-h-0 flex-1 justify-between gap-2">
         <div className="flex flex-col gap-1.5">{opponents}</div>
         {market}

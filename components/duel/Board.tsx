@@ -111,6 +111,7 @@ function asPlaquePlayer(p: DuelViewPlayer): RedactedPlayerState {
 /**
  * The Duel table: the rival with the Royals down the left, the pyramid in the middle, the win tile over the
  * token board with the Privileges under it on the right, and the tray below. Props in, taps out; the client owns state.
+ * A desktop window is taller: the board fills it and the Royals go down to the foot of their column.
  * On a tablet-shaped screen the rival, Royals, win tile and menu go across the top, the stones being taken go
  * under the Privileges, and the viewer's name tab stands on the tray itself, so the pyramid stops short of it.
  */
@@ -365,11 +366,11 @@ export function DuelBoard({
   }
 
   return (
-    <div className="flex h-100 w-full flex-col gap-2 p-2 pb-0">
+    <div className="flex h-full w-full flex-col gap-2 p-2 pb-0">
       <div className="flex min-h-0 flex-1 justify-between gap-2">
         {/* The rival, the Royal cards, the Privileges. */}
         {/* Room at the foot for the tab of the tray's plaque, so the Royals sit midway between the two plaques. */}
-        <div className="flex w-44 flex-col gap-3 pb-12">
+        <div className="flex w-44 flex-col gap-3 pb-12 desk:justify-between">
           {rivalPlaque}
           {royals}
         </div>

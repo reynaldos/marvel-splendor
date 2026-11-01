@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* A desktop window: wider than a tablet, yet with room under the phone board, which then fills the height. */
+@custom-variant desk (@media (min-aspect-ratio: 164/100) and (max-aspect-ratio: 2/1));
 
 :root {
   --radius: 0.625rem;
