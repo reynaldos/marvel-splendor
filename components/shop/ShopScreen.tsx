@@ -89,7 +89,7 @@ export function ShopScreen({ coins: startingCoins, owned: startingOwned, onPurch
 
   return (
     <Stage>
-      <div className="flex h-100 w-full gap-3 px-4 pt-17 pb-3">
+      <div className="flex h-full w-full gap-3 px-4 pt-17 pb-3">
         {/* The shelves, with the way back under them. */}
         <nav className="flex w-40 shrink-0 flex-col justify-between gap-2">
           <ul className="scroll-fade flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

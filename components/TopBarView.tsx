@@ -71,8 +71,7 @@ export function TopBarView({
   return (
     <div
       data-notch={useNotchSide()}
-      // Level with the top of the canvas, which sits in the middle of a screen taller than it.
-      className="stage dark pointer-events-none fixed inset-x-0 top-[calc((var(--screen-h)-var(--pad-b)-var(--spacing)*100)/2)] z-20 text-white"
+      className="stage dark pointer-events-none fixed inset-x-0 top-0 z-20 text-white"
     >
       <header className="pointer-events-auto relative mx-4 mt-2 flex h-12 items-center gap-3">
         <FoilLayer tight />
