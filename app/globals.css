@@ -197,6 +197,16 @@ body {
   --text-3xl: calc(var(--spacing) * 7.5);
   --text-5xl: calc(var(--spacing) * 12);
 }
+/*
+ * A screen short for its width (an iPad, an opened fold) gets a board 160
+ * steps by 130 instead of 200 by 100: the other players go across the top
+ * (use-tablet-layout.ts asks the same question), so everything else is drawn larger.
+ */
+@media (max-aspect-ratio: 164/100) {
+  .game-board {
+    --spacing: min(calc((var(--screen-h) - var(--pad-b)) / 130), calc((100dvw - var(--pad-l) - var(--pad-r)) / 160));
+  }
+}
 .game-board[data-notch="left"] {
   --pad-r: calc(env(safe-area-inset-right, 0px) * 0.3);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { cn } from "cn";
 
 import { ASSETS, AssetImage } from "@/components/game/assets";
 import { CardMarket } from "@/components/game/CardMarket";
@@ -14,6 +15,7 @@ import { TeamView } from "@/components/game/TeamView";
 import { TileRail } from "@/components/game/TileRail";
 import { Zoomable } from "@/components/game/Zoomable";
 import { TokenBank } from "@/components/game/TokenBank";
+import { useTabletLayout } from "@/components/use-tablet-layout";
 import { HAND_LIMIT, totalTokens, type CardLevel, type Stone } from "@/lib/engine/types";
 import type { RedactedGameState } from "@/lib/game-view";
 import { tokensAfter, type StagedAction } from "@/components/game/staged-action";
@@ -52,6 +54,8 @@ interface BoardProps {
 }
 
 const TRAY_PANEL = "rounded-t-2xl rounded-b-none bg-card";
+/** The viewer's plaque is a tray panel: named after the tray's corners, or they undo it. */
+const VIEWER_PLAQUE = `${TRAY_PANEL} rounded-tl-none [--tab:calc(var(--spacing)*8)]`;
 
 /** Everyone but the viewer, in the order their turns come after the viewer's. */
 export function afterViewer<T extends { seat: number }>(players: T[], viewerSeat: number): T[] {
@@ -68,6 +72,17 @@ export function afterViewer<T extends { seat: number }>(players: T[], viewerSeat
  *   ----------+----------------------+------------+--------------------
  *   taking    | your tray: n/10, holdings,        | End Turn
  *   this turn | reserved-card fan                 |
+ *
+ * A tablet-shaped screen is 130 steps tall and 160 wide: the opponents go
+ * across the top, the market and bank sit centered left of the tiles, what is
+ * being taken goes under the tiles, and your name's tab stands on the tray
+ * itself, so the market stops short of it.
+ *
+ *   opponents across the top
+ *   ------------------------------------------------
+ *   III/II/I market rows | token bank | target, menu, tiles, taking this turn
+ *   ------------------------------------------------
+ *   your tray: n/10, holdings, reserved-card fan | End Turn
  *
  * Purely props-in — all fetching/mutation lives in GameBoardClient; this
  * component only wires tap input to the staging callbacks it's handed.
@@ -90,6 +105,7 @@ export function Board({
   onConfirm,
   onReturn,
 }: BoardProps) {
+  const tablet = useTabletLayout();
   const viewerSeat = view.viewerSeat;
   const viewer = view.players.find((p) => p.seat === viewerSeat);
   const others = afterViewer(view.players, viewerSeat);
@@ -107,137 +123,189 @@ export function Board({
 
   if (!viewer) return null;
 
+  const opponents = others.map((p, i) => (
+    // Tapping a plaque shows that player's team; its reserved cards open on their own.
+    <TeamView key={p.seat} owner={`${nameForSeat(p.seat)}'s`} cardIds={p.cards}>
+      <PlayerPlaque
+        player={p}
+        name={nameForSeat(p.seat)}
+        avatarUrl={avatarForSeat(p.seat)}
+        startedGame={view.startingSeat === p.seat}
+        isCurrentTurn={turnSeat === p.seat}
+        turnEndsAt={turnEndsAt}
+        turnSeconds={view.settings.turnTimeSeconds}
+        bubble={bubbles[p.seat]}
+        // Room above the card for its tab.
+        className="mt-7"
+        // Across the top, the last plaque's bubble would run off the right edge, so it goes left.
+        bubbleClassName={tablet && i > 0 && i === others.length - 1 ? "left-auto right-full ml-0 mr-1 origin-right" : undefined}
+        beside={
+          <ReserveTray
+            reserved={p.reserved}
+            seat={p.seat}
+            ownerName={nameForSeat(p.seat)}
+            className="gap-0.5"
+            cardClassName="w-4 rounded-sm"
+          />
+        }
+      />
+    </TeamView>
+  ));
+
+  const market = (
+    <div className={cn("flex flex-col", tablet ? "justify-center gap-3 pb-8" : "justify-between")}>
+      {([3, 2, 1] as CardLevel[]).map((level) => (
+        <CardMarket
+          key={level}
+          level={level}
+          slots={view.market[level]}
+          deckCount={view.deckCounts[level]}
+          viewerTokens={viewer.tokens}
+          viewerBonuses={viewer.bonuses}
+          viewerReservedCount={viewer.reserved.length}
+          staged={staged}
+          disabled={disabled}
+          onStageReserveMarket={onStageReserveMarket}
+          onStageReserveDeck={onStageReserveDeck}
+          onStageRecruit={(cardId) => onStageRecruit("market", cardId)}
+        />
+      ))}
+    </div>
+  );
+
+  const bank = <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} onUnstageTokenColor={onUnstageTokenColor} />;
+
+  const header = (
+    <div
+      className="flex shrink-0 items-center justify-end gap-2"
+      style={{ height: `calc(var(--spacing) * ${headerHeight})` }}
+    >
+      {winTile ? (
+        <Zoomable
+          label={`Show the win tile: ${winTile.points} points to win`}
+          className="relative aspect-[1404/688] h-full overflow-hidden rounded-md ring-1 ring-foreground/10"
+          zoomed={
+            <div className="relative aspect-[1404/688] w-150 overflow-hidden rounded-xl">
+              <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="75vw" />
+            </div>
+          }
+        >
+          <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="12vw" />
+        </Zoomable>
+      ) : (
+        <span className="text-sm font-bold" title="Points needed to win">
+          {view.settings.targetPoints} pts to win
+        </span>
+      )}
+      {menu}
+    </div>
+  );
+
+  const rail = (
+    <TileRail
+      locations={view.locations}
+      avengersHolder={view.avengersHolder}
+      players={view.players}
+      nameForSeat={nameForSeat}
+      height={74 - headerHeight}
+    />
+  );
+
+  const taking = (
+    <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} className={tablet ? "h-10 flex-none justify-center" : undefined} />
+  );
+
+  const viewerPlaque = {
+    player: viewer,
+    name: nameForSeat(viewerSeat),
+    avatarUrl: avatarForSeat(viewerSeat),
+    startedGame: view.startingSeat === viewerSeat,
+    isCurrentTurn: turnSeat === viewerSeat,
+    turnEndsAt,
+    turnSeconds: view.settings.turnTimeSeconds,
+    bubble: bubbles[viewerSeat],
+    hideTags: true,
+    // The button sits on the corner of the name's tab, left of the points, and what is
+    // sent shows to the right of it, above the points.
+    tabExtra: chat ? <div className="absolute -top-2 -right-2">{chat}</div> : null,
+    openBottom: true,
+    tabClassName: "w-32",
+    bubbleClassName: "top-auto bottom-full left-32 mb-4 ml-4",
+  };
+
+  const holdings = (
+    <>
+      <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} cards={viewer.cards} tags={viewer.tags} stagedCount={stagedColors.length} />
+      <ReservedCards
+        reserved={viewer.reserved}
+        viewerTokens={viewer.tokens}
+        viewerBonuses={viewer.bonuses}
+        selected={staged?.kind === "recruit" && staged.from === "reserve"}
+        disabled={disabled}
+        onStageRecruit={(cardId) => onStageRecruit("reserve", cardId)}
+      />
+    </>
+  );
+
+  const endTurn = (
+    <EndTurnBar
+      hasStaged={staged !== null}
+      overLimit={totalTokens(tokensAfter(staged, viewer.tokens, view.supply)) > HAND_LIMIT}
+      disabled={disabled}
+      submitting={submitting}
+      onConfirm={onConfirm}
+      onReturn={onReturn}
+    />
+  );
+
+  if (tablet) {
+    return (
+      <div className="flex h-130 w-full flex-col gap-2 p-2 pb-0">
+        <div className="flex justify-evenly gap-2">{opponents}</div>
+        <div className="flex min-h-0 flex-1 justify-between gap-2">
+          {/* Centered in the room left of the tiles. */}
+          <div className="flex min-w-0 flex-1 justify-end gap-4">
+            {market}
+            {bank}
+          </div>
+          <div className="flex w-32 flex-col gap-1">
+            {header}
+            {rail}
+            {taking}
+          </div>
+        </div>
+        {/* Panels run off the bottom edge, like a physical tray. */}
+        <div className="flex h-20 shrink-0 items-stretch justify-center gap-2">
+          <PlayerPlaque {...viewerPlaque} className={`w-fit flex-row items-center gap-2 px-1.5 py-0 ${VIEWER_PLAQUE}`}>
+            {holdings}
+          </PlayerPlaque>
+          {endTurn}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-100 w-full flex-col gap-2 p-2 pb-0">
       <div className="flex min-h-0 flex-1 justify-between gap-2">
-        <div className="flex flex-col gap-1.5">
-          {others.map((p) => (
-            // Tapping a plaque shows that player's team; its reserved cards open on their own.
-            <TeamView key={p.seat} owner={`${nameForSeat(p.seat)}'s`} cardIds={p.cards}>
-              <PlayerPlaque
-                player={p}
-                name={nameForSeat(p.seat)}
-                avatarUrl={avatarForSeat(p.seat)}
-                startedGame={view.startingSeat === p.seat}
-                isCurrentTurn={turnSeat === p.seat}
-                turnEndsAt={turnEndsAt}
-                turnSeconds={view.settings.turnTimeSeconds}
-                bubble={bubbles[p.seat]}
-                // Room above the card for its tab.
-                className="mt-7"
-                beside={
-                  <ReserveTray
-                    reserved={p.reserved}
-                    seat={p.seat}
-                    ownerName={nameForSeat(p.seat)}
-                    className="gap-0.5"
-                    cardClassName="w-4 rounded-sm"
-                  />
-                }
-              />
-            </TeamView>
-          ))}
-        </div>
-
-        <div className="flex flex-col justify-between">
-          {([3, 2, 1] as CardLevel[]).map((level) => (
-            <CardMarket
-              key={level}
-              level={level}
-              slots={view.market[level]}
-              deckCount={view.deckCounts[level]}
-              viewerTokens={viewer.tokens}
-              viewerBonuses={viewer.bonuses}
-              viewerReservedCount={viewer.reserved.length}
-              staged={staged}
-              disabled={disabled}
-              onStageReserveMarket={onStageReserveMarket}
-              onStageReserveDeck={onStageReserveDeck}
-              onStageRecruit={(cardId) => onStageRecruit("market", cardId)}
-            />
-          ))}
-        </div>
-
-        <TokenBank supply={view.supply} staged={staged} disabled={disabled} onStageTokenColor={onStageTokenColor} onUnstageTokenColor={onUnstageTokenColor} />
-
+        <div className="flex flex-col gap-1.5">{opponents}</div>
+        {market}
+        {bank}
         <div className="flex w-32 flex-col gap-1">
-          <div
-            className="flex shrink-0 items-center justify-end gap-2"
-            style={{ height: `calc(var(--spacing) * ${headerHeight})` }}
-          >
-            {winTile ? (
-              <Zoomable
-                label={`Show the win tile: ${winTile.points} points to win`}
-                className="relative aspect-[1404/688] h-full overflow-hidden rounded-md ring-1 ring-foreground/10"
-                zoomed={
-                  <div className="relative aspect-[1404/688] w-150 overflow-hidden rounded-xl">
-                    <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="75vw" />
-                  </div>
-                }
-              >
-                <AssetImage src={winTile.image} alt={`${winTile.points} points to win`} sizes="12vw" />
-              </Zoomable>
-            ) : (
-              <span className="text-sm font-bold" title="Points needed to win">
-                {view.settings.targetPoints} pts to win
-              </span>
-            )}
-            {menu}
-          </div>
-          <TileRail
-            locations={view.locations}
-            avengersHolder={view.avengersHolder}
-            players={view.players}
-            nameForSeat={nameForSeat}
-            height={74 - headerHeight}
-          />
+          {header}
+          {rail}
         </div>
       </div>
 
       {/* Panels run off the bottom edge, like a physical tray. */}
       <div className="flex h-20 shrink-0 items-stretch gap-2">
-        <PlayerPlaque
-          player={viewer}
-          name={nameForSeat(viewerSeat)}
-          avatarUrl={avatarForSeat(viewerSeat)}
-          startedGame={view.startingSeat === viewerSeat}
-          isCurrentTurn={turnSeat === viewerSeat}
-          turnEndsAt={turnEndsAt}
-          turnSeconds={view.settings.turnTimeSeconds}
-          bubble={bubbles[viewerSeat]}
-          hideTags
-          // The button sits on the corner of the name's tab, left of the points, and what is
-          // sent shows to the right of it, above the points.
-          tabExtra={chat ? <div className="absolute -top-2 -right-2">{chat}</div> : null}
-          // Named after the tray's corners, or they undo it.
-          className={`w-40 ${TRAY_PANEL} rounded-tl-none [--tab:calc(var(--spacing)*8)]`}
-          openBottom
-          tabClassName="w-32"
-          bubbleClassName="top-auto bottom-full left-32 mb-4 ml-4"
-        >
-          <StagedTokens colors={stagedColors} disabled={disabled} onUnstageTokenColor={onUnstageTokenColor} />
+        <PlayerPlaque {...viewerPlaque} className={`w-40 ${VIEWER_PLAQUE}`}>
+          {taking}
         </PlayerPlaque>
 
-        <div className={`mx-auto flex shrink-0 items-center gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>
-          <HandTray tokens={viewer.tokens} bonuses={viewer.bonuses} cards={viewer.cards} tags={viewer.tags} stagedCount={stagedColors.length} />
-          <ReservedCards
-            reserved={viewer.reserved}
-            viewerTokens={viewer.tokens}
-            viewerBonuses={viewer.bonuses}
-            selected={staged?.kind === "recruit" && staged.from === "reserve"}
-            disabled={disabled}
-            onStageRecruit={(cardId) => onStageRecruit("reserve", cardId)}
-          />
-        </div>
+        <div className={`mx-auto flex shrink-0 items-center gap-2 px-1.5 ring-1 ring-foreground/10 ${TRAY_PANEL}`}>{holdings}</div>
 
-        <EndTurnBar
-          hasStaged={staged !== null}
-          overLimit={totalTokens(tokensAfter(staged, viewer.tokens, view.supply)) > HAND_LIMIT}
-          disabled={disabled}
-          submitting={submitting}
-          onConfirm={onConfirm}
-          onReturn={onReturn}
-        />
+        {endTurn}
       </div>
     </div>
   );
