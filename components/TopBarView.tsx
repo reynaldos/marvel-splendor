@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trophy } from "lucide-react";
+import { ChevronLeft, Coins, Info, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trophy } from "lucide-react";
 
 import { DailyBonus } from "@/components/DailyBonus";
 import { FeedbackForm } from "@/components/FeedbackForm";
@@ -214,6 +214,12 @@ export function TopBarView({
                   </span>
                   Feedback
                 </button>
+                <Link href="/about" onClick={close} className={CHOICE}>
+                  <span className={CHOICE_ICON}>
+                    <Info className="size-7" />
+                  </span>
+                  About
+                </Link>
                 {isAdmin ? (
                   <Link href="/admin/users" onClick={close} className={CHOICE}>
                     <span className={CHOICE_ICON}>
