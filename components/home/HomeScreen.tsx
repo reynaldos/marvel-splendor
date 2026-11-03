@@ -29,7 +29,7 @@ export function WelcomeScreen() {
             Sign in to play
           </a>
           <Link href="/about" className="text-xs text-cosmos-300 underline underline-offset-2 hover:text-gold-200">
-            Credits, privacy and terms
+            privacy and terms
           </Link>
         </div>
       </div>
