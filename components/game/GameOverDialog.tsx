@@ -74,8 +74,8 @@ export function GameOverDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "theme-cosmos dark grid max-h-[calc(var(--screen-h)*0.94)] min-h-[calc(var(--screen-h)*0.86)] w-[92dvw] grid-cols-[2fr_3fr] gap-0 overflow-x-hidden overflow-y-auto border-2 p-0 sm:max-w-4xl",
-          won ? "result-glow-gold border-gold-400" : "result-glow-red border-red-600",
+          "grid max-h-[calc(var(--screen-h)*0.94)] min-h-[calc(var(--screen-h)*0.86)] w-[92dvw] grid-cols-[2fr_3fr] gap-0 overflow-x-hidden overflow-y-auto p-0 sm:max-w-4xl sm:p-0",
+          won ? "result-glow-gold" : "result-glow-red [--frame-border:var(--color-red-600)]",
         )}
       >
         {/* Behind everything else, so the stones pass under the names and numbers. */}

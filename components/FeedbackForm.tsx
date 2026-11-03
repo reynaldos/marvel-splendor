@@ -4,17 +4,16 @@ import { useState, useTransition } from "react";
 import { Bug, UserRoundPlus, Wrench } from "lucide-react";
 import { toast } from "sonner";
 
-import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pill } from "@/components/ui/pill";
 import { FEEDBACK_KIND_LABEL, FEEDBACK_MAX } from "@/lib/feedback";
 import type { FeedbackKind } from "@/lib/generated/prisma/enums";
 import { submitFeedbackAction } from "@/app/feedback/actions";
 
-const TITLE = "font-display text-base font-black tracking-widest text-gold-400 uppercase";
 const CHOICE =
   "group flex w-24 flex-col items-center gap-1.5 text-center text-xs leading-tight font-bold tracking-wide uppercase outline-none [&>span]:focus-visible:ring-gold-400";
 const CHOICE_ICON =
   "flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset group-hover:bg-cosmos-500";
-const WIDE = "flex h-12 flex-1 items-center justify-center rounded-full text-base font-bold outline-none focus-visible:ring-2 focus-visible:ring-gold-400";
 
 /** The menu's Feedback view: pick a feature request or a bug report, then write it. Goes inside a DialogContent. */
 export function FeedbackForm({ onSent }: { onSent: () => void }) {
@@ -26,10 +25,10 @@ export function FeedbackForm({ onSent }: { onSent: () => void }) {
     return (
       <>
         <DialogHeader>
-          <DialogTitle className={TITLE}>Feedback</DialogTitle>
+          <DialogTitle>Feedback</DialogTitle>
           <DialogDescription className="sr-only">Ask for something, or tell us what went wrong.</DialogDescription>
         </DialogHeader>
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-1 items-center justify-center gap-4">
           <button type="button" onClick={() => setKind("FEATURE")} className={CHOICE}>
             <span className={CHOICE_ICON}>
               <Wrench className="size-7" />
@@ -70,10 +69,10 @@ export function FeedbackForm({ onSent }: { onSent: () => void }) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle className={TITLE}>{FEEDBACK_KIND_LABEL[kind]}</DialogTitle>
+        <DialogTitle>{FEEDBACK_KIND_LABEL[kind]}</DialogTitle>
         <DialogDescription className="sr-only">Write it below and send it.</DialogDescription>
       </DialogHeader>
-      <label className="relative flex">
+      <label className="relative flex flex-1">
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
@@ -81,25 +80,20 @@ export function FeedbackForm({ onSent }: { onSent: () => void }) {
           autoFocus
           placeholder="Please share your feedback"
           aria-label={FEEDBACK_KIND_LABEL[kind]}
-          className="h-40 w-full resize-none rounded-2xl bg-cosmos-950 p-4 pb-8 text-base ring-2 ring-cosmos-500 ring-inset outline-none placeholder:text-cosmos-500 focus-visible:ring-gold-400"
+          className="min-h-40 w-full resize-none rounded-2xl bg-cosmos-950 p-4 pb-8 text-base ring-2 ring-cosmos-500 ring-inset outline-none placeholder:text-cosmos-500 focus-visible:ring-gold-400"
         />
         <span className="pointer-events-none absolute right-4 bottom-3 text-xs font-bold text-cosmos-300 tabular-nums">
           {body.length}/{FEEDBACK_MAX}
         </span>
       </label>
-      <div className="flex gap-3">
-        <button type="button" onClick={() => setKind(null)} className={`${WIDE} bg-marvel text-white hover:bg-red-500`}>
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={send}
-          disabled={sending || body.trim() === ""}
-          className={`${WIDE} bg-gold-400 text-cosmos-950 hover:bg-gold-200 disabled:bg-cosmos-700 disabled:text-cosmos-300`}
-        >
+      <DialogFooter>
+        <Pill className="flex-1" onClick={() => setKind(null)}>
+          Back
+        </Pill>
+        <Pill tone="gold" className="flex-1" onClick={send} disabled={sending || body.trim() === ""}>
           {sending ? "Sending…" : "Submit"}
-        </button>
-      </div>
+        </Pill>
+      </DialogFooter>
     </>
   );
 }

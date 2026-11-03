@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { cn } from "cn";
 
-import { Button } from "@/components/ui/button";
+import { Pill } from "@/components/ui/pill";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LocationTile } from "@/components/game/LocationTile";
 import { TokenChip } from "@/components/game/TokenChip";
@@ -94,7 +95,7 @@ function ReturnTokensDialog({
 }) {
   return (
     <Dialog open={Boolean(pending) && open} onOpenChange={onOpenChange}>
-      <DialogContent className="theme-cosmos dark max-h-[calc(var(--screen-h)*0.9)] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-xl">
+      <DialogContent className="max-h-[calc(var(--screen-h)*0.9)] gap-3 overflow-y-auto sm:max-w-xl">
         {pending ? (
           // Keyed so each new request starts with nothing picked.
           <ReturnTokens
@@ -161,7 +162,7 @@ export function ReturnTokens({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="flex items-center gap-3 font-display tracking-wide text-gold-400 uppercase">
+        <DialogTitle className="flex items-center gap-3">
           {timer}
           Too many tokens
         </DialogTitle>
@@ -219,14 +220,9 @@ export function ReturnTokens({
       </div>
 
       <DialogFooter>
-        <Button
-          type="button"
-          className="w-full bg-marvel font-display font-black tracking-wide text-white uppercase hover:bg-red-500"
-          disabled={left !== 0 || submitting}
-          onClick={() => onSubmit(returning)}
-        >
+        <Pill tone="red" className="flex-1" disabled={left !== 0 || submitting} onClick={() => onSubmit(returning)}>
           {submitting ? "Sending…" : "Return the excess tokens"}
-        </Button>
+        </Pill>
       </DialogFooter>
     </>
   );
@@ -246,33 +242,58 @@ function ChooseLocationDialog({
   return (
     <Dialog open={Boolean(pending)}>
       <DialogContent
-        className="theme-cosmos dark border-2 border-gold-400 max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto"
+        className="max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto sm:max-w-md"
         showCloseButton={false}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            {timer}
-            Choose a Location
-          </DialogTitle>
-          <DialogDescription>
-            You qualify for more than one Location tile — pick the one to claim.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-wrap justify-center gap-3">
-          {pending?.options.map((id) => (
-            <LocationTile
-              key={id}
-              className="w-28"
-              location={getLocation(id)}
-              selectable
-              onClick={() => !submitting && onSubmit(id)}
-            />
-          ))}
-        </div>
+        {/* Keyed so a new choice starts with nothing picked. */}
+        {pending ? <ChooseLocation key={pending.options.join()} options={pending.options} submitting={submitting} timer={timer} onSubmit={onSubmit} /> : null}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Tap a tile to pick it, then confirm; a mis-tap on a phone can be changed. */
+function ChooseLocation({
+  options,
+  submitting,
+  timer,
+  onSubmit,
+}: {
+  options: string[];
+  submitting?: boolean;
+  timer: ReactNode;
+  onSubmit: (locationId: string) => void;
+}) {
+  const [picked, setPicked] = useState<string | null>(null);
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-3">
+          {timer}
+          Choose a Location
+        </DialogTitle>
+        <DialogDescription>You qualify for more than one Location tile. Tap the one to claim, then confirm.</DialogDescription>
+      </DialogHeader>
+
+      <div className="flex flex-wrap justify-center gap-3">
+        {options.map((id) => (
+          <LocationTile
+            key={id}
+            className={cn("w-28 transition", picked === id ? "scale-105 ring-4 ring-gold-400" : picked ? "opacity-50" : "")}
+            location={getLocation(id)}
+            selectable
+            onClick={() => setPicked(id)}
+          />
+        ))}
+      </div>
+
+      <DialogFooter>
+        <Pill tone="gold" className="flex-1" disabled={!picked || submitting} onClick={() => picked && onSubmit(picked)}>
+          {submitting ? "Sending…" : "Claim it"}
+        </Pill>
+      </DialogFooter>
+    </>
   );
 }

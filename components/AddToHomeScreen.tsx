@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import { Share, SquarePlus } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pill } from "@/components/ui/pill";
 
 /** In sessionStorage once closed, so it asks once a visit; in localStorage once ticked off for good. */
 const KEY = "home-screen-prompt";
@@ -51,12 +52,10 @@ export function AddToHomeScreen() {
 
   return (
     <Dialog open={open && !answered} onOpenChange={close}>
-      <DialogContent className="theme-cosmos dark gap-4 border-2 border-gold-400 sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
-            Add to your Home Screen
-          </DialogTitle>
-          <DialogDescription className="text-sm text-white/70">
+          <DialogTitle>Add to your Home Screen</DialogTitle>
+          <DialogDescription>
             Opens full screen like an app, with no browser bars over the board.
           </DialogDescription>
         </DialogHeader>
@@ -74,13 +73,7 @@ export function AddToHomeScreen() {
           <input type="checkbox" onChange={(e) => toggleHidden(e.target.checked)} className="size-4 accent-gold-400" />
           Don&apos;t show this again
         </label>
-        <button
-          type="button"
-          onClick={close}
-          className="flex h-12 items-center justify-center rounded-full bg-cosmos-700 text-base font-bold ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
-        >
-          Got it
-        </button>
+        <Pill onClick={close}>Got it</Pill>
       </DialogContent>
     </Dialog>
   );

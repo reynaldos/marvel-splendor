@@ -74,7 +74,8 @@ export function HowToPlay({ badge }: { badge?: boolean }) {
             if (e.key === "ArrowRight") go(at + 1);
             else if (e.key === "ArrowLeft") go(at - 1);
           }}
-          className="stage theme-cosmos dark top-0 left-0 flex h-(--screen-h) w-dvw max-w-none sm:max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center gap-0 rounded-none bg-cosmos p-0 text-base text-white ring-0"
+          full
+          className="stage gap-0 p-0 text-base"
         >
           <div className="absolute inset-0 bg-black/55" />
           <DialogTitle className="sr-only">How to play</DialogTitle>

@@ -8,7 +8,7 @@ import { Grid, Reminders } from "@/components/duel/TokenBoard";
 import { tokenMeta } from "@/components/game/stone-colors";
 import { TokenChip } from "@/components/game/TokenChip";
 import { TurnTimer } from "@/components/game/TurnTimer";
-import { Button } from "@/components/ui/button";
+import { Pill } from "@/components/ui/pill";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getDuelCard } from "@/lib/duel/data";
 import { GOLD, STONES, TOKEN_COLORS, type DuelPending, type Stone, type TokenColor } from "@/lib/duel/types";
@@ -38,14 +38,14 @@ const TITLES: Record<Choice["type"], [string, string]> = {
   PICK_TOKEN: ["Take a stone", "Tap any one stone on the board, then confirm. S.H.I.E.L.D. cannot be taken this way."],
   PICK_OPPONENT_TOKEN: ["Take a stone from your rival", "Tap one of the stones they hold, then confirm. It goes into your hand. S.H.I.E.L.D. cannot be taken."],
   PICK_JOIN_COLOR: ["Which color does the wild card join?", "It counts as one more card of that color from now on, and stays there."],
-  PICK_ROYAL: ["Claim a Location", "Your Avengers badges have earned one. Each gives points, some a power as well."],
+  PICK_ROYAL: ["Claim a Location", "Your Avengers badges have earned one. Each gives points, some a power as well. Tap one, then confirm."],
 };
 
 /** The popups for the choices a Duel turn can leave. Any can be closed to look at the board, and reopened from the turn button. */
 export function DuelChoices({ view, pending, open, onOpenChange, submitting, turnEndsAt, ...picks }: DuelChoicesProps) {
   return (
     <Dialog open={pending !== null && open} onOpenChange={onOpenChange}>
-      <DialogContent className="theme-cosmos dark max-h-[calc(var(--screen-h)*0.9)] gap-4 overflow-y-auto border-2 border-gold-400 sm:max-w-fit" showCloseButton={false}>
+      <DialogContent className="max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto sm:max-w-fit" showCloseButton={false}>
         {pending ? <ChoiceBody key={`${pending.type}-${view.moveCount}`} view={view} pending={pending} submitting={submitting} turnEndsAt={turnEndsAt} onClose={() => onOpenChange(false)} {...picks} /> : null}
       </DialogContent>
     </Dialog>
@@ -64,19 +64,19 @@ function ChoiceBody({
   onPickJoinColor,
   onPickRoyal,
 }: Picks & { view: DuelView; pending: Choice; submitting: boolean; turnEndsAt: number | null; onClose: () => void }) {
-  const [picked, setPicked] = useState<number | Stone | null>(null);
+  const [picked, setPicked] = useState<number | string | null>(null);
   const opponent = view.players[1 - view.viewerSeat];
   const viewer = view.players[view.viewerSeat];
   const [title, description] = TITLES[pending.type];
 
   let body: ReactNode = null;
-  // Set for the choices that take a pick and a confirm; null until something is picked.
-  let confirm: (() => void) | null | undefined;
+  // Null until something is picked.
+  let confirm: (() => void) | null = null;
   if (pending.type === "PICK_TOKEN") {
     const wanted = pending.color;
     body = (
       // The same frame as the board opened large, so the stones sit where the player knows them.
-      <div className="flex items-start gap-5 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-gold-400">
+      <div className="flex items-start gap-5 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-cosmos-500 ring-inset">
         <Grid
           board={view.board}
           size="lg"
@@ -91,7 +91,7 @@ function ChoiceBody({
   } else if (pending.type === "PICK_OPPONENT_TOKEN") {
     // Every color the rival could hold, large; the ones they have none of are dimmed and cannot be picked.
     body = (
-      <div className="flex justify-center gap-3 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-gold-400">
+      <div className="flex justify-center gap-3 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-cosmos-500 ring-inset">
         {TOKEN_COLORS.filter((t) => t !== GOLD).map((t) => {
           const held = opponent.tokens[t];
           return (
@@ -113,7 +113,7 @@ function ChoiceBody({
         })}
       </div>
     );
-    confirm = typeof picked === "string" ? () => onPickOpponentToken(picked) : null;
+    confirm = typeof picked === "string" ? () => onPickOpponentToken(picked as Stone) : null;
   } else if (pending.type === "PICK_JOIN_COLOR") {
     // Each color the player owns, with the cards and points it already holds.
     const colorOf = (c: (typeof viewer.cards)[number]) => c.joined ?? getDuelCard(c.cardId).bonus;
@@ -145,15 +145,24 @@ function ChoiceBody({
         })}
       </div>
     );
-    confirm = typeof picked === "string" ? () => onPickJoinColor(picked) : null;
+    confirm = typeof picked === "string" ? () => onPickJoinColor(picked as Stone) : null;
   } else {
+    // Picked then confirmed, like the others: a mis-tap on a phone can be changed.
     body = (
       <div className="flex flex-wrap justify-center gap-3">
         {view.royals.map((id) => (
-          <RoyalCard key={id} royalId={id} tiles={view.royalTiles} className="w-28" selectable onClick={() => !submitting && onPickRoyal(id)} />
+          <RoyalCard
+            key={id}
+            royalId={id}
+            tiles={view.royalTiles}
+            className={cn("w-28 transition", picked === id ? "scale-105 ring-4 ring-gold-400" : picked ? "opacity-50" : "")}
+            selectable
+            onClick={() => setPicked(id)}
+          />
         ))}
       </div>
     );
+    confirm = typeof picked === "string" ? () => onPickRoyal(picked) : null;
   }
 
   return (
@@ -166,15 +175,13 @@ function ChoiceBody({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       {body}
-      <DialogFooter className="sm:justify-between">
-        <Button type="button" variant="secondary" onClick={onClose}>
+      <DialogFooter>
+        <Pill className="flex-1" onClick={onClose}>
           View board
-        </Button>
-        {confirm !== undefined ? (
-          <Button type="button" disabled={submitting || !confirm} onClick={() => confirm?.()}>
-            {submitting ? "Sending…" : "Confirm"}
-          </Button>
-        ) : null}
+        </Pill>
+        <Pill tone="gold" className="flex-1" disabled={submitting || !confirm} onClick={() => confirm?.()}>
+          {submitting ? "Sending…" : "Confirm"}
+        </Pill>
       </DialogFooter>
     </>
   );

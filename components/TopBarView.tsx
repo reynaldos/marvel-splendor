@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trash2, Trophy } from "lucide-react";
+import { ChevronLeft, Coins, LogOut, Medal, Menu, MessageSquareText, ScrollText, Shield, Trophy } from "lucide-react";
 
 import { DailyBonus } from "@/components/DailyBonus";
 import { FeedbackForm } from "@/components/FeedbackForm";
@@ -11,19 +11,18 @@ import { Logo } from "@/components/home/Logo";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { SoundToggles } from "@/components/SoundToggles";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pill } from "@/components/ui/pill";
 import { markUpdatesSeen, NewDot, unseenCount, UpdateLog, useSeenUpdate } from "@/components/UpdateLog";
 import { useNotchSide } from "@/components/use-notch-side";
 import type { DailyBonusState } from "@/lib/daily-bonus";
 import { FRAME_STYLE, type FrameTier } from "@/lib/frame-tier";
 
 const PILL = "flex h-12 items-center gap-2 rounded-full bg-cosmos-700 px-4 ring-2 ring-cosmos-500 ring-inset";
-const TITLE = "font-display text-base font-black tracking-widest text-gold-400 uppercase";
 /** A round picture button with its name under it, in the row along the top of the menu. */
 const CHOICE =
   "group flex w-20 flex-col items-center gap-1.5 text-xs font-bold tracking-wide uppercase outline-none [&>span]:focus-visible:ring-gold-400";
 const CHOICE_ICON =
   "relative flex size-14 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset group-hover:bg-cosmos-500";
-const WIDE = "flex h-12 flex-1 items-center justify-center gap-2 rounded-full text-base font-bold outline-none focus-visible:ring-2 focus-visible:ring-gold-400";
 
 interface TopBarViewProps {
   username: string;
@@ -139,10 +138,26 @@ export function TopBarView({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
-          className={`theme-cosmos dark border-2 border-gold-400 ${
-            view === "updates" ? "flex max-h-[calc(var(--screen-h)*0.9)] flex-col gap-0 sm:max-w-lg" : view === "daily" ? "gap-4 sm:max-w-lg" : "gap-4 sm:max-w-md"
-          }`}
+          className={
+            view === "updates"
+              ? "flex max-h-[calc(var(--screen-h)*0.9)] flex-col gap-0 sm:max-w-lg"
+              : view === "feedback"
+                ? "flex max-h-[calc(var(--screen-h)*0.9)] min-h-[calc(var(--screen-h)*0.75)] flex-col sm:max-w-lg"
+                : view === "daily"
+                  ? "sm:max-w-lg"
+                  : "sm:max-w-md"
+          }
         >
+          {view !== "menu" ? (
+            <button
+              type="button"
+              onClick={() => setView("menu")}
+              className="-mt-1 mb-2 flex w-fit items-center gap-1 text-xs font-bold tracking-wide text-cosmos-300 uppercase outline-none hover:text-gold-200 focus-visible:text-gold-200"
+            >
+              <ChevronLeft className="size-4" />
+              Menu
+            </button>
+          ) : null}
           {view === "updates" ? (
             <UpdateLog since={since} />
           ) : view === "feedback" ? (
@@ -152,31 +167,27 @@ export function TopBarView({
           ) : view === "delete" ? (
             <>
               <DialogHeader>
-                <DialogTitle className={TITLE}>Delete your account?</DialogTitle>
-                <DialogDescription className="text-sm text-white/70">
+                <DialogTitle>Delete your account?</DialogTitle>
+                <DialogDescription>
                   Your profile, stats, rank, coins and collection go for good. Games you played stay, with no name on
                   your seat.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setView("menu")}
-                  className={`${WIDE} bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500`}
-                >
+                <Pill className="flex-1" onClick={() => setView("menu")}>
                   Keep it
-                </button>
+                </Pill>
                 <form action={onDeleteAccount} className="flex flex-1">
-                  <button type="submit" className={`${WIDE} bg-marvel text-white hover:bg-red-500`}>
+                  <Pill tone="red" type="submit" className="flex-1">
                     Delete for good
-                  </button>
+                  </Pill>
                 </form>
               </div>
             </>
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle className={TITLE}>Menu</DialogTitle>
+                <DialogTitle>Menu</DialogTitle>
                 <DialogDescription className="sr-only">
                   What&apos;s new, feedback, sound, and signing out.
                 </DialogDescription>
@@ -216,21 +227,21 @@ export function TopBarView({
               <hr className="border-cosmos-500" />
               <SoundToggles />
               <hr className="border-cosmos-500" />
-              <div className="flex gap-3">
-                {/* A plain link: signing out is a trip to the server, not a page of the app. */}
-                <a href="/auth/logout" className={`${WIDE} bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500`}>
+              {/* A plain link: signing out is a trip to the server, not a page of the app. */}
+              <Pill asChild>
+                <a href="/auth/logout">
                   <LogOut className="size-5 text-gold-200" />
                   Sign out
                 </a>
-                <button
-                  type="button"
-                  onClick={() => setView("delete")}
-                  className={`${WIDE} bg-marvel text-white hover:bg-red-500`}
-                >
-                  <Trash2 className="size-5" />
-                  Delete
-                </button>
-              </div>
+              </Pill>
+              {/* Small on purpose: it should never be hit by mistake. The red check comes next. */}
+              <button
+                type="button"
+                onClick={() => setView("delete")}
+                className="mx-auto -mt-1 text-xs text-white/50 underline underline-offset-2 outline-none hover:text-red-300 focus-visible:text-red-300"
+              >
+                Delete account
+              </button>
             </>
           )}
         </DialogContent>
