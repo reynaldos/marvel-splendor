@@ -142,14 +142,14 @@ export function GamesTable({ games, recent = false }: { games: GameSummary[]; re
       ) : null}
 
       <Dialog open={open !== undefined} onOpenChange={(next) => !next && setOpenId(null)}>
-        <DialogContent className="theme-cosmos dark gap-4 border-2 border-gold-400 sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg">
           {open ? (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
+                <DialogTitle>
                   {open.duel ? "Duel" : "Original"} · {open.kind} · {statusLabel(open)}
                 </DialogTitle>
-                <DialogDescription className="text-sm text-white/70">
+                <DialogDescription>
                   Opened {timeAgo(open.createdAt)}, last change {timeAgo(open.updatedAt)}.
                   {open.playedMs ? ` Played for ${formatDuration(open.playedMs)} over ${open.moves} moves.` : " No moves yet."}
                 </DialogDescription>

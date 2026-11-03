@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Pill } from "@/components/ui/pill";
 import { AVATAR_LIBRARY } from "@/lib/avatars";
 import type { FrameTier } from "@/lib/frame-tier";
 import { checkUsername, NAME_MAX, USERNAME_MAX } from "@/lib/username";
@@ -29,7 +30,6 @@ import type { ProfileChanges, SaveState } from "@/app/settings/actions";
 const HEADING = "font-display text-base font-bold tracking-wide text-gold-400 uppercase";
 const PILL_BUTTON =
   "h-11 rounded-full px-6 text-base font-black uppercase disabled:bg-cosmos-700 disabled:text-cosmos-300";
-const GOLD_BUTTON = cn(PILL_BUTTON, "bg-gold-400 text-cosmos-950 hover:bg-gold-200");
 const BLUE_BUTTON = cn(PILL_BUTTON, "bg-cosmos-500 hover:bg-cosmos-300 hover:text-cosmos-950");
 const BIG_BUTTON =
   "h-11 w-60 rounded-full bg-gold-400 indent-[0.025em] font-display text-base font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200 disabled:bg-cosmos-700 disabled:text-cosmos-300";
@@ -358,22 +358,18 @@ export function SettingsScreen({
       </StageRows>
 
       <Dialog open={leaving} onOpenChange={setLeaving}>
-        <DialogContent showCloseButton={false} className="theme-cosmos dark border-2 border-gold-400">
+        <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Leave without saving?</DialogTitle>
             <DialogDescription>Your changes have not been saved and will be lost.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <button type="button" onClick={() => setLeaving(false)} className={GOLD_BUTTON}>
+            <Pill tone="gold" className="flex-1" onClick={() => setLeaving(false)}>
               Keep editing
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className={cn(PILL_BUTTON, "bg-cosmos-700 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500")}
-            >
+            </Pill>
+            <Pill className="flex-1" onClick={() => router.push("/")}>
               Leave
-            </button>
+            </Pill>
           </DialogFooter>
         </DialogContent>
       </Dialog>

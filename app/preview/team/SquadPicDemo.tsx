@@ -143,7 +143,7 @@ export function SquadPicDemo({ cards, initial, initialSetting }: SquadPicDemoPro
       </div>
 
       <Dialog open={picking} onOpenChange={setPicking}>
-        <DialogContent className="theme-cosmos dark max-h-[calc(var(--screen-h)*0.9)] gap-3 overflow-y-auto border-2 border-gold-400 sm:max-w-3xl">
+        <DialogContent className="max-h-[calc(var(--screen-h)*0.9)] gap-3 overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Pick the team</DialogTitle>
             <DialogDescription>

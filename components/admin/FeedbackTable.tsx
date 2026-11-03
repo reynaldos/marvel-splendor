@@ -104,14 +104,14 @@ export function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
       </div>
 
       <Dialog open={open !== undefined} onOpenChange={(next) => !next && setOpenId(null)}>
-        <DialogContent className="theme-cosmos dark gap-4 border-2 border-gold-400 sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg">
           {open ? (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
+                <DialogTitle>
                   {FEEDBACK_KIND_LABEL[open.kind]}
                 </DialogTitle>
-                <DialogDescription className="text-sm text-white/70">
+                <DialogDescription>
                   From{" "}
                   <Link href={`/profile/${open.username}`} className="font-bold text-gold-200 hover:underline">
                     {open.username}

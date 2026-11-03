@@ -27,6 +27,7 @@ const PAGES = [
   { name: "Pack", href: "/preview/pack" },
   { name: "Squad pic", href: "/preview/team" },
   { name: "Duel", href: "/preview/duel" },
+  { name: "Popups", href: "/preview/modals" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
@@ -172,9 +173,9 @@ export function PreviewMenu({ children }: { children?: ReactNode }) {
       >
         <Settings className="size-6" />
       </DialogTrigger>
-      <DialogContent className="theme-cosmos dark max-h-[calc(var(--screen-h)*0.9)] gap-5 overflow-y-auto border-2 border-gold-400 sm:max-w-2xl">
+      <DialogContent className="max-h-[calc(var(--screen-h)*0.9)] gap-5 overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="font-display tracking-wide text-gold-400 uppercase">Preview menu</DialogTitle>
+          <DialogTitle>Preview menu</DialogTitle>
           <DialogDescription>Screens to look at without signing in. Nothing here is read or saved.</DialogDescription>
         </DialogHeader>
 

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bot, DoorOpen, Flag, History, Hourglass, Menu, Pause, Settings, Star, UsersRound } from "lucide-react";
+import { Award, Bot, DoorOpen, Flag, History, Hourglass, Menu, Palette, Pause, Settings, Star, UsersRound } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Pill } from "@/components/ui/pill";
 import {
   Dialog,
   DialogContent,
@@ -43,9 +43,10 @@ interface GameMenuProps {
   royalTiles?: RoyalTiles;
 }
 
-const HEADING = "font-display text-xl font-black tracking-wide text-gold-400 uppercase";
 const RULE_ICON = "size-8";
-const PILL = "flex h-11 flex-1 items-center justify-center rounded-full font-display text-sm font-black tracking-wide uppercase";
+/** A row of the menu. The menu is drawn outside the board, so it sets its own size. */
+const ITEM = "h-12 gap-3 rounded-xl px-4 text-base font-bold focus:bg-cosmos-700";
+const ITEM_ICON = "size-5 text-gold-400";
 
 function capitalize(s: string): string {
   return s[0].toUpperCase() + s.slice(1);
@@ -60,36 +61,40 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button type="button" variant="outline" size="icon" aria-label="Menu">
-            <Menu />
-          </Button>
+          <button
+            type="button"
+            aria-label="Menu"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-1 ring-cosmos-500 ring-inset hover:bg-cosmos-500"
+          >
+            <Menu className="size-4" />
+          </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="theme-cosmos dark w-44 border-2 border-gold-400">
-          <DropdownMenuItem onSelect={() => setOpen("moves")}>
-            <History className="size-4 text-gold-400" />
+        <DropdownMenuContent align="end" className="theme-cosmos dark frame-gold w-60 rounded-2xl p-2 [--frame-glow:rgb(246_201_69/0.3)]">
+          <DropdownMenuItem className={ITEM} onSelect={() => setOpen("moves")}>
+            <History className={ITEM_ICON} />
             Moves
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setOpen("settings")}>
-            <Settings className="size-4 text-gold-400" />
+          <DropdownMenuItem className={ITEM} onSelect={() => setOpen("settings")}>
+            <Settings className={ITEM_ICON} />
             Game settings
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-2 bg-cosmos-500" />
           {onPause && !finished ? (
-            <DropdownMenuItem disabled={busy} onSelect={onPause}>
-              <Pause className="size-4 text-gold-400" />
+            <DropdownMenuItem className={ITEM} disabled={busy} onSelect={onPause}>
+              <Pause className={ITEM_ICON} />
               Pause game
             </DropdownMenuItem>
           ) : null}
           {finished ? (
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem className={ITEM} asChild>
               <Link href="/">
-                <DoorOpen className="size-4" />
+                <DoorOpen className={ITEM_ICON} />
                 Close game
               </Link>
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem variant="destructive" disabled={busy} onSelect={() => setOpen("forfeit")}>
-              <Flag className="size-4" />
+            <DropdownMenuItem className={ITEM} variant="destructive" disabled={busy} onSelect={() => setOpen("forfeit")}>
+              <Flag className="size-5" />
               Forfeit game
             </DropdownMenuItem>
           )}
@@ -97,11 +102,11 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
       </DropdownMenu>
 
       <Dialog open={open !== null} onOpenChange={(next) => !next && setOpen(null)}>
-        <DialogContent className={`theme-cosmos dark border-2 border-gold-400 max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto ${open === "moves" ? "sm:max-w-lg" : ""}`}>
+        <DialogContent className={`max-h-[calc(var(--screen-h)*0.9)] overflow-y-auto ${open === "moves" ? "sm:max-w-lg" : "sm:max-w-md"}`}>
           {open === "moves" ? (
             <>
               <DialogHeader>
-                <DialogTitle className={HEADING}>Move log</DialogTitle>
+                <DialogTitle>Move log</DialogTitle>
               </DialogHeader>
               <MoveLog entries={moveLog} players={players} viewerSeat={viewerSeat} royalTiles={royalTiles} />
             </>
@@ -110,7 +115,7 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
           {open === "settings" ? (
             <>
               <DialogHeader>
-                <DialogTitle className={HEADING}>Game settings</DialogTitle>
+                <DialogTitle>Game settings</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4">
                 <Rule
@@ -120,9 +125,16 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
                 />
                 <Rule
                   icon={<Star className={`${RULE_ICON} fill-gold-400 text-gold-600`} />}
-                  label={settings.rules === "duel" ? "To win" : "Points to win"}
-                  value={settings.rules === "duel" ? "20 pts, 10 badges or 10 in a color, with every color" : `${settings.targetPoints}`}
+                  label="Points to win"
+                  value={settings.rules === "duel" ? "20" : `${settings.targetPoints}`}
                 />
+                {/* A Duel has two more ways to win; each gets its own tile so nothing wraps. */}
+                {settings.rules === "duel" ? (
+                  <>
+                    <Rule icon={<Award className={`${RULE_ICON} text-gold-400`} />} label="Badges to win" value="10" />
+                    <Rule icon={<Palette className={`${RULE_ICON} text-gold-400`} />} label="One color to win" value="10 pts" />
+                  </>
+                ) : null}
                 <Rule
                   icon={<TimerIcon className={RULE_ICON} />}
                   label="Turn timer"
@@ -148,28 +160,24 @@ export function GameMenu({ moveLog, players, viewerSeat, settings, finished, bus
           {open === "forfeit" ? (
             <>
               <DialogHeader>
-                <DialogTitle className={HEADING}>Forfeit this game?</DialogTitle>
+                <DialogTitle>Forfeit this game?</DialogTitle>
                 <DialogDescription>You will lose and the game ends now. This can&apos;t be undone.</DialogDescription>
               </DialogHeader>
-              <DialogFooter className="flex-row gap-3">
-                <button
-                  type="button"
-                  onClick={() => setOpen(null)}
-                  className={`${PILL} bg-cosmos-800 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-700`}
-                >
+              <DialogFooter>
+                <Pill className="flex-1" onClick={() => setOpen(null)}>
                   Keep playing
-                </button>
-                <button
-                  type="button"
+                </Pill>
+                <Pill
+                  tone="red"
+                  className="flex-1"
                   disabled={busy}
                   onClick={() => {
                     setOpen(null);
                     onForfeit();
                   }}
-                  className={`${PILL} bg-marvel text-white hover:bg-red-500 disabled:bg-cosmos-700 disabled:text-cosmos-300`}
                 >
                   Forfeit
-                </button>
+                </Pill>
               </DialogFooter>
             </>
           ) : null}

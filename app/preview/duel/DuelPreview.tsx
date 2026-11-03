@@ -49,6 +49,10 @@ export function DuelPreview({ show }: { show?: string }) {
     return line ? { kind: "line", spaces: line } : null;
   });
   const noop = () => {};
+  // The choice popup closes and confirms as on the table, so a look at it never traps the viewer.
+  const [open, setOpen] = useState(true);
+  const [chosen, setChosen] = useState(false);
+  const choose = () => setChosen(true);
 
   return (
     <div className="game-board theme-cosmos dark relative flex w-full items-end overflow-hidden bg-cosmos">
@@ -79,15 +83,15 @@ export function DuelPreview({ show }: { show?: string }) {
       </TracedMoveProvider>
       <DuelChoices
         view={view}
-        pending={view.pending && view.pending.type !== "RETURN_TOKENS" ? view.pending : null}
-        open
-        onOpenChange={noop}
+        pending={view.pending && view.pending.type !== "RETURN_TOKENS" && !chosen ? view.pending : null}
+        open={open}
+        onOpenChange={setOpen}
         submitting={false}
         turnEndsAt={null}
-        onPickToken={noop}
-        onPickOpponentToken={noop}
-        onPickJoinColor={noop}
-        onPickRoyal={noop}
+        onPickToken={choose}
+        onPickOpponentToken={choose}
+        onPickJoinColor={choose}
+        onPickRoyal={choose}
       />
     </div>
   );

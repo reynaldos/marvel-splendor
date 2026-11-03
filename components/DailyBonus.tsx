@@ -59,7 +59,7 @@ export function DailyBonus({ state, onClaim }: { state: DailyBonusState; onClaim
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">Daily bonus</DialogTitle>
+        <DialogTitle>Daily bonus</DialogTitle>
         <DialogDescription className="sr-only">Collect coins every day to climb the streak. Miss a day and it starts over.</DialogDescription>
       </DialogHeader>
       <ol className="grid grid-cols-4 gap-3">

@@ -3,10 +3,16 @@
 import * as React from "react"
 import { cn } from "cn"
 import { Dialog as DialogPrimitive } from "radix-ui"
+import { X } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Cancel01Icon } from "@hugeicons/core-free-icons"
+/** How a popup lands: a short pop with a little overshoot, as the game's other pieces arrive. */
+const POP =
+  "duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-90 data-open:ease-[cubic-bezier(0.2,0.9,0.3,1.2)] data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-closed:ease-in"
+/** The box's gold frame round a popup, lit from behind. */
+const FRAME =
+  "frame-gold rounded-3xl p-5 [--frame-glow:rgb(246_201_69/0.3)] w-full max-w-[calc(100%-2rem)] sm:max-w-sm sm:p-6"
+/** A popup that takes the whole screen: the night sky, no frame. */
+const FULL = "inset-0 flex h-(--screen-h) w-dvw max-w-none flex-col items-center justify-center rounded-none bg-cosmos p-4"
 
 function Dialog({
   ...props
@@ -40,7 +46,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/80 duration-100 min-h-(--screen-h) pointer-fine:supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-black/80 duration-200 min-h-(--screen-h) pointer-fine:supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -48,13 +54,20 @@ function DialogOverlay({
   )
 }
 
+/**
+ * A popup in the cosmos theme: the gold frame in the middle of the screen, or
+ * with `full` the whole screen. The close button is round and big enough for a
+ * thumb; `showCloseButton={false}` leaves it out.
+ */
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  full = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  full?: boolean
 }) {
   return (
     <DialogPortal>
@@ -62,22 +75,23 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-xs/relaxed text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "theme-cosmos dark fixed z-50 grid gap-4 text-sm text-white outline-none",
+          // Centred from both edges, not from the middle: a popup sized to fit its content then gets the whole width to fit in.
+          full ? FULL : cn(FRAME, "inset-x-0 top-1/2 mx-auto -translate-y-1/2"),
+          showCloseButton && "[&_[data-slot=dialog-header]]:pr-10",
+          POP,
           className
         )}
         {...props}
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-2 right-2"
-              size="icon-sm"
-            >
-              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-              <span className="sr-only">Close</span>
-            </Button>
+          <DialogPrimitive.Close
+            data-slot="dialog-close"
+            className="absolute top-3 right-3 flex size-10 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-500 focus-visible:ring-gold-400"
+          >
+            <X className="size-5" />
+            <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -95,30 +109,13 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function DialogFooter({
-  className,
-  showCloseButton = false,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}) {
+function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
+      className={cn("flex gap-3", className)}
       {...props}
-    >
-      {children}
-      {showCloseButton && (
-        <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
-        </DialogPrimitive.Close>
-      )}
-    </div>
+    />
   )
 }
 
@@ -129,7 +126,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-sm font-medium", className)}
+      className={cn("font-display text-xl font-black tracking-wide text-gold-400 uppercase", className)}
       {...props}
     />
   )
@@ -143,7 +140,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-xs/relaxed text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "text-sm text-white/70 *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
         className
       )}
       {...props}

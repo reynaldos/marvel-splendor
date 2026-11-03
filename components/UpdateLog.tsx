@@ -45,10 +45,8 @@ export function UpdateLog({ since }: { since: string | null }) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="font-display text-base font-black tracking-widest text-gold-400 uppercase">
-          What&apos;s new
-        </DialogTitle>
-        <DialogDescription className="text-sm text-white/60">
+        <DialogTitle>What&apos;s new</DialogTitle>
+        <DialogDescription>
           {unseen ? "New since you were last here, in gold." : "You're all caught up."}
         </DialogDescription>
       </DialogHeader>
