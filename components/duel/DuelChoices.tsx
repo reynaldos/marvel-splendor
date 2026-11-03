@@ -75,8 +75,8 @@ function ChoiceBody({
   if (pending.type === "PICK_TOKEN") {
     const wanted = pending.color;
     body = (
-      // The same frame as the board opened large, so the stones sit where the player knows them.
-      <div className="flex items-start gap-5 rounded-2xl bg-cosmos-950/90 p-4 ring-2 ring-cosmos-500 ring-inset">
+      // The board as the player knows it, in its own frame beside the words and buttons.
+      <div className="self-center rounded-2xl bg-cosmos-950/90 p-3 ring-2 ring-cosmos-500 ring-inset">
         <Grid
           board={view.board}
           size="lg"
@@ -84,7 +84,6 @@ function ChoiceBody({
           onTap={(space) => setPicked(space)}
           canTap={(space) => view.board[space] !== GOLD && (!wanted || view.board[space] === wanted)}
         />
-        <Reminders className="my-auto w-56 flex-col" labeled />
       </div>
     );
     confirm = typeof picked === "number" ? () => onPickToken(picked) : null;
@@ -165,24 +164,29 @@ function ChoiceBody({
     confirm = typeof picked === "string" ? () => onPickRoyal(picked) : null;
   }
 
+  // The board choice sits beside its words, reminders and buttons, so the whole popup fits a phone held sideways.
+  const beside = pending.type === "PICK_TOKEN";
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-3">
-          <TurnTimer endsAt={turnEndsAt} seconds={view.settings.turnTimeSeconds} className="size-9 shrink-0 text-sm" />
-          {title}
-        </DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
-      {body}
-      <DialogFooter>
-        <Pill className="flex-1" onClick={onClose}>
-          View board
-        </Pill>
-        <Pill tone="gold" className="flex-1" disabled={submitting || !confirm} onClick={() => confirm?.()}>
-          {submitting ? "Sending…" : "Confirm"}
-        </Pill>
-      </DialogFooter>
-    </>
+    <div className={cn("flex gap-4", beside ? "items-stretch gap-5" : "flex-col")}>
+      {beside ? body : null}
+      <div className={cn("flex flex-col gap-4", beside && "w-72")}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <TurnTimer endsAt={turnEndsAt} seconds={view.settings.turnTimeSeconds} className="size-9 shrink-0 text-sm" />
+            {title}
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        {beside ? <Reminders className="flex-col" labeled /> : body}
+        <DialogFooter className="mt-auto">
+          <Pill className="flex-1" onClick={onClose}>
+            View board
+          </Pill>
+          <Pill tone="gold" className="flex-1" disabled={submitting || !confirm} onClick={() => confirm?.()}>
+            {submitting ? "Sending…" : "Confirm"}
+          </Pill>
+        </DialogFooter>
+      </div>
+    </div>
   );
 }

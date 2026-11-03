@@ -76,7 +76,8 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "theme-cosmos dark fixed z-50 grid gap-4 text-sm text-white outline-none",
-          full ? FULL : cn(FRAME, "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"),
+          // Centred from both edges, not from the middle: a popup sized to fit its content then gets the whole width to fit in.
+          full ? FULL : cn(FRAME, "inset-x-0 top-1/2 mx-auto -translate-y-1/2"),
           showCloseButton && "[&_[data-slot=dialog-header]]:pr-10",
           POP,
           className
