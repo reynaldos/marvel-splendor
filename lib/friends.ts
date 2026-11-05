@@ -90,49 +90,53 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
   if ("error" in checked) return { error: FRIEND_MESSAGES.noSuchPlayer };
 
   const target = await db.user.findUnique({ where: { username: checked.username }, select: { id: true, blockedAt: true } });
+  if (!target) return { error: FRIEND_MESSAGES.noSuchPlayer };
   const now = new Date();
-  const facts = target
-    ? await loadSendFacts(db, userId, target.id, now)
-    : { targetBlockedMe: false, iBlockedTarget: false, alreadyFriends: false, mySent: null, theirSent: null, myFriendCount: 0, theirFriendCount: 0, myPendingSent: 0, mySentInWindow: 0 };
-  const decision = decideSendRequest({ selfId: userId, target, ...facts }, now.getTime());
-
-  if (decision.kind === "error") return { error: decision.message };
-  const toUserId = target!.id;
   try {
-    if (decision.kind === "accept-cross") {
-      await db.$transaction((tx) => makeFriends(tx, userId, toUserId));
-      return { ok: true, message: "You're now friends." };
-    }
-    await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx): Promise<FriendResult> => {
+      // Counted and written under one lock, so two sends at once can't both pass a limit.
+      await lockPlayers(tx, userId);
+      const facts = await loadSendFacts(tx, userId, target.id, now);
+      const decision = decideSendRequest({ selfId: userId, target, ...facts }, now.getTime());
+      if (decision.kind === "error") return { error: decision.message };
+      if (decision.kind === "accept-cross") {
+        await makeFriends(tx, userId, target.id);
+        return { ok: true, message: "You're now friends." };
+      }
       if (decision.kind === "revive") {
         await tx.friendRequest.update({
-          where: { fromUserId_toUserId: { fromUserId: userId, toUserId } },
+          where: { fromUserId_toUserId: { fromUserId: userId, toUserId: target.id } },
           data: { status: "PENDING", createdAt: now, respondedAt: null },
         });
       } else {
-        await tx.friendRequest.create({ data: { fromUserId: userId, toUserId } });
+        await tx.friendRequest.create({ data: { fromUserId: userId, toUserId: target.id } });
       }
       // The log outlives the request, so cancelling or accepting can't reset the daily limit.
       await tx.friendRequestSend.create({ data: { fromUserId: userId, createdAt: now } });
+      return { ok: true, message: "Request sent." };
     });
   } catch (error) {
     // Two taps at once: the second finds the first one's row.
     if (isUniqueViolation(error, "toUserId")) return { error: FRIEND_MESSAGES.alreadySent };
     throw error;
   }
-  return { ok: true, message: "Request sent." };
 }
 
-async function loadSendFacts(db: Db, userId: string, targetId: string, now: Date) {
+/** Holds a lock on each player until the transaction ends, always in the same order so two changes can't wait on each other. */
+async function lockPlayers(tx: Tx, ...ids: string[]) {
+  for (const id of [...new Set(ids)].sort()) await tx.$queryRaw`select pg_advisory_xact_lock(hashtext(${id}))`;
+}
+
+async function loadSendFacts(tx: Tx, userId: string, targetId: string, now: Date) {
   const [blocks, friendship, mySent, theirSent, myFriendCount, theirFriendCount, myPendingSent, mySentInWindow] = await Promise.all([
-    db.userBlock.findMany({ where: betweenBlocks(userId, targetId), select: { blockerId: true } }),
-    db.friendship.findUnique({ where: { userId_friendId: { userId, friendId: targetId } }, select: { userId: true } }),
-    db.friendRequest.findUnique({ where: { fromUserId_toUserId: { fromUserId: userId, toUserId: targetId } }, select: { status: true, respondedAt: true } }),
-    db.friendRequest.findUnique({ where: { fromUserId_toUserId: { fromUserId: targetId, toUserId: userId } }, select: { status: true } }),
-    db.friendship.count({ where: { userId } }),
-    db.friendship.count({ where: { userId: targetId } }),
-    db.friendRequest.count({ where: { fromUserId: userId, status: "PENDING" } }),
-    db.friendRequestSend.count({ where: { fromUserId: userId, createdAt: { gte: new Date(now.getTime() - REQUEST_WINDOW_MS) } } }),
+    tx.userBlock.findMany({ where: betweenBlocks(userId, targetId), select: { blockerId: true } }),
+    tx.friendship.findUnique({ where: { userId_friendId: { userId, friendId: targetId } }, select: { userId: true } }),
+    tx.friendRequest.findUnique({ where: { fromUserId_toUserId: { fromUserId: userId, toUserId: targetId } }, select: { status: true, respondedAt: true } }),
+    tx.friendRequest.findUnique({ where: { fromUserId_toUserId: { fromUserId: targetId, toUserId: userId } }, select: { status: true } }),
+    tx.friendship.count({ where: { userId } }),
+    tx.friendship.count({ where: { userId: targetId } }),
+    tx.friendRequest.count({ where: { fromUserId: userId, status: "PENDING" } }),
+    tx.friendRequestSend.count({ where: { fromUserId: userId, createdAt: { gte: new Date(now.getTime() - REQUEST_WINDOW_MS) } } }),
   ]);
   return {
     targetBlockedMe: blocks.some((b) => b.blockerId === targetId),
@@ -157,12 +161,19 @@ export async function respondFriendRequest(userId: string, requestId: string, ac
     return count === 0 ? { error: NOT_FOUND } : { ok: true };
   }
 
-  const request = await db.friendRequest.findFirst({ where: { id: requestId, toUserId: userId, status: "PENDING" }, select: { fromUserId: true } });
-  if (!request) return { error: NOT_FOUND };
-  const [mine, theirs] = await Promise.all([db.friendship.count({ where: { userId } }), db.friendship.count({ where: { userId: request.fromUserId } })]);
-  if (mine >= MAX_FRIENDS || theirs >= MAX_FRIENDS) return { error: FRIEND_MESSAGES.listFull };
-  await db.$transaction((tx) => makeFriends(tx, userId, request.fromUserId));
-  return { ok: true, message: "You're now friends." };
+  const waiting = { id: requestId, toUserId: userId, status: "PENDING" as const };
+  return db.$transaction(async (tx): Promise<FriendResult> => {
+    const request = await tx.friendRequest.findFirst({ where: waiting, select: { fromUserId: true } });
+    if (!request) return { error: NOT_FOUND };
+    await lockPlayers(tx, userId, request.fromUserId);
+    // Looked up again under the lock: a block or an earlier tap may have taken it away meanwhile.
+    if (!(await tx.friendRequest.findFirst({ where: waiting, select: { id: true } }))) return { error: NOT_FOUND };
+    const mine = await tx.friendship.count({ where: { userId } });
+    const theirs = await tx.friendship.count({ where: { userId: request.fromUserId } });
+    if (mine >= MAX_FRIENDS || theirs >= MAX_FRIENDS) return { error: FRIEND_MESSAGES.listFull };
+    await makeFriends(tx, userId, request.fromUserId);
+    return { ok: true, message: "You're now friends." };
+  });
 }
 
 /** Takes back a request this player sent, declined or not. */

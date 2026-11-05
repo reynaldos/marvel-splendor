@@ -61,6 +61,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     userVisit: seed.visits ?? [],
   };
   let nextId = 1;
+  const locks = new Map<string, Promise<void>>();
 
   const table = (name: keyof typeof tables) => ({
     findUnique: vi.fn(async ({ where, select }: { where: Where; select?: Record<string, unknown> }) => {
@@ -127,8 +128,29 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     friendship: table("friendship"),
     userBlock: table("userBlock"),
     userVisit: table("userVisit"),
-    // Both forms the code uses: a callback with the same client, or a list of already-started calls.
-    $transaction: vi.fn(async (work: unknown) => (typeof work === "function" ? work(db) : Promise.all(work as Promise<unknown>[]))),
+    // Both forms the code uses: a callback with a client that can take advisory locks, or a list of already-started calls.
+    $transaction: vi.fn(async (work: unknown) => {
+      if (typeof work !== "function") return Promise.all(work as Promise<unknown>[]);
+      const release: Array<() => void> = [];
+      const tx = {
+        ...db,
+        // `select pg_advisory_xact_lock(hashtext(${id}))`: one holder per id, kept until this transaction ends.
+        $queryRaw: vi.fn(async (_sql: TemplateStringsArray, id: string) => {
+          const before = locks.get(id) ?? Promise.resolve();
+          let done!: () => void;
+          const mine = new Promise<void>((resolve) => (done = resolve));
+          locks.set(id, before.then(() => mine));
+          release.push(done);
+          await before;
+          return [];
+        }),
+      };
+      try {
+        return await work(tx);
+      } finally {
+        for (const done of release) done();
+      }
+    }),
     tables,
   };
   return db;
@@ -238,6 +260,15 @@ describe("sendFriendRequest", () => {
     expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ ok: true, message: "Request sent." });
     expect(db.tables.friendRequestSend).toHaveLength(1);
   });
+
+  it("two sends at the same moment can't both squeeze under the daily limit", async () => {
+    for (let i = 0; i < MAX_REQUESTS_PER_DAY - 1; i++) db.tables.friendRequestSend.push({ id: `s${i}`, fromUserId: "a", createdAt: new Date() });
+    const results = await Promise.all([sendFriendRequest("a", "bob", as(db)), sendFriendRequest("a", "cat", as(db))]);
+    expect(results).toContainEqual({ ok: true, message: "Request sent." });
+    expect(results).toContainEqual({ error: FRIEND_MESSAGES.tooManyToday });
+    expect(db.tables.friendRequest).toHaveLength(1);
+    expect(db.tables.friendRequestSend).toHaveLength(MAX_REQUESTS_PER_DAY);
+  });
 });
 
 describe("respondFriendRequest", () => {
@@ -273,6 +304,17 @@ describe("respondFriendRequest", () => {
     const friendships = Array.from({ length: MAX_FRIENDS }, (_, i) => ({ userId: "b", friendId: `x${i}`, createdAt: new Date() }));
     const db = fakeDb({ users: [A, B], requests: [waiting()], friendships });
     expect(await respondFriendRequest("b", "r1", true, as(db))).toEqual({ error: FRIEND_MESSAGES.listFull });
+    expect(db.tables.friendRequest).toHaveLength(1);
+  });
+
+  it("two accepts at the same moment can't take a list past the limit", async () => {
+    const friendships = Array.from({ length: MAX_FRIENDS - 1 }, (_, i) => ({ userId: "b", friendId: `x${i}`, createdAt: new Date() }));
+    const fromC = { id: "r2", fromUserId: "c", toUserId: "b", status: "PENDING", createdAt: new Date(), respondedAt: null };
+    const db = fakeDb({ users: [A, B, C], requests: [waiting(), fromC], friendships });
+    const results = await Promise.all([respondFriendRequest("b", "r1", true, as(db)), respondFriendRequest("b", "r2", true, as(db))]);
+    expect(results).toContainEqual({ ok: true, message: "You're now friends." });
+    expect(results).toContainEqual({ error: FRIEND_MESSAGES.listFull });
+    expect(db.tables.friendship.filter((f) => f.userId === "b")).toHaveLength(MAX_FRIENDS);
     expect(db.tables.friendRequest).toHaveLength(1);
   });
 });
