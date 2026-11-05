@@ -3,6 +3,7 @@ import { HomeScreen, WelcomeScreen } from "@/components/home/HomeScreen";
 import { TopBar } from "@/components/TopBar";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { waitingRequestCount } from "@/lib/friends";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 import { openGameFor, openLobbyFor } from "@/lib/lobby";
 
@@ -18,11 +19,13 @@ export default async function Home() {
   const duelsPlayed = await prisma.game.count({
     where: { status: "FINISHED", players: { some: { userId: user.id } }, settings: { path: ["rules"], equals: "duel" } },
   });
+  // Friend requests waiting light the Friends button.
+  const friendRequests = await waitingRequestCount(user.id);
 
   return (
     <>
       <TopBar />
-      <HomeScreen lobbyId={lobbyId} gameId={gameId} duelPlayed={duelsPlayed > 0} />
+      <HomeScreen lobbyId={lobbyId} gameId={gameId} duelPlayed={duelsPlayed > 0} friendRequests={friendRequests} />
       <AddToHomeScreen />
     </>
   );
