@@ -37,32 +37,43 @@ enum FeedbackStatus {
   COMPLETED
 }
 
+enum FriendRequestStatus {
+  PENDING
+  DECLINED
+}
+
 model User {
-  id                  String            @id @default(cuid())
-  auth0Sub            String            @unique
-  username            String            @unique
-  name                String?
+  id                     String            @id @default(cuid())
+  auth0Sub               String            @unique
+  username               String            @unique
+  name                   String?
   // As last seen at sign-in. One account per email, kept so at sign-in rather than by a unique index.
-  email               String?
+  email                  String?
   // An uploaded picture's storage key, or "library/<id>" for one from the library.
-  avatarKey           String?
+  avatarKey              String?
   // Whether the account-level frame is drawn on their picture, and on the card that carries their name.
-  xpAvatarStyle       Boolean           @default(false)
-  xpCardStyle         Boolean           @default(false)
+  xpAvatarStyle          Boolean           @default(false)
+  xpCardStyle            Boolean           @default(false)
   // Whether they have asked to be left off the leaderboard.
-  hideFromLeaderboard Boolean           @default(false)
+  hideFromLeaderboard    Boolean           @default(false)
   // Set by an admin: the account is signed out and cannot play until it is cleared.
-  blockedAt           DateTime?
-  createdAt           DateTime          @default(now())
-  players             GamePlayer[]
-  stats               UserStats?
-  visits              UserVisit[]
-  collected           CollectedCard[]
-  rating              UserRating?
-  coins               UserCoins?
-  coinTransactions    CoinTransaction[]
-  feedback            Feedback[]
-  purchases           Purchase[]
+  blockedAt              DateTime?
+  createdAt              DateTime          @default(now())
+  players                GamePlayer[]
+  stats                  UserStats?
+  visits                 UserVisit[]
+  collected              CollectedCard[]
+  rating                 UserRating?
+  coins                  UserCoins?
+  coinTransactions       CoinTransaction[]
+  feedback               Feedback[]
+  purchases              Purchase[]
+  friendRequestsSent     FriendRequest[]   @relation("FriendRequestsSent")
+  friendRequestsReceived FriendRequest[]   @relation("FriendRequestsReceived")
+  friendships            Friendship[]      @relation("Friendships")
+  friendOf               Friendship[]      @relation("FriendOf")
+  blocks                 UserBlock[]       @relation("Blocks")
+  blockedBy              UserBlock[]       @relation("BlockedBy")
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -220,4 +231,41 @@ model Purchase {
 
   @@unique([userId, kind, itemId])
   @@index([createdAt])
+}
+
+// A friend request one way. Accepting deletes it and makes the friendship; cancelling deletes it.
+model FriendRequest {
+  id          String              @id @default(cuid())
+  fromUserId  String
+  from        User                @relation("FriendRequestsSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  to          User                @relation("FriendRequestsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  status      FriendRequestStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  respondedAt DateTime?
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId, status])
+}
+
+// Two rows per friendship, one each way, so a player's list is one indexed read.
+model Friendship {
+  userId    String
+  user      User     @relation("Friendships", fields: [userId], references: [id], onDelete: Cascade)
+  friendId  String
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, friendId])
+}
+
+// A player another player has blocked: no requests pass between them, and the blocked one can't tell.
+model UserBlock {
+  blockerId String
+  blocker   User     @relation("Blocks", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("BlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
 }
