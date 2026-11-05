@@ -94,8 +94,8 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
   const now = new Date();
   try {
     return await db.$transaction(async (tx): Promise<FriendResult> => {
-      // Counted and written under one lock, so two sends at once can't both pass a limit.
-      await lockPlayers(tx, userId);
+      // Both players locked: two sends at once can't both pass a limit, and one sent each way becomes the friendship.
+      await lockPlayers(tx, userId, target.id);
       const facts = await loadSendFacts(tx, userId, target.id, now);
       const decision = decideSendRequest({ selfId: userId, target, ...facts }, now.getTime());
       if (decision.kind === "error") return { error: decision.message };

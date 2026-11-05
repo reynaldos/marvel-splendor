@@ -194,6 +194,17 @@ describe("sendFriendRequest", () => {
     ]);
   });
 
+  it("two players sending to each other at the same moment end up friends, with no request left", async () => {
+    const results = await Promise.all([sendFriendRequest("a", "bob", as(db)), sendFriendRequest("b", "amy", as(db))]);
+    expect(results).toContainEqual({ ok: true, message: "Request sent." });
+    expect(results).toContainEqual({ ok: true, message: "You're now friends." });
+    expect(db.tables.friendRequest).toHaveLength(0);
+    expect(db.tables.friendship.map((f) => [f.userId, f.friendId]).sort()).toEqual([
+      ["a", "b"],
+      ["b", "a"],
+    ]);
+  });
+
   it("looks sent for 7 days after a decline, then is set back to waiting", async () => {
     const declined = { id: "r1", fromUserId: "a", toUserId: "b", status: "DECLINED", createdAt: new Date(0), respondedAt: new Date() };
     db.tables.friendRequest.push(declined);
