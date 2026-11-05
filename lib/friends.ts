@@ -196,11 +196,13 @@ export async function blockPlayer(userId: string, blockedId: string, db: Db = pr
   if (blockedId === userId) return { error: NOT_FOUND };
   const other = await db.user.findUnique({ where: { id: blockedId }, select: { id: true } });
   if (!other) return { error: NOT_FOUND };
-  await db.$transaction([
-    db.userBlock.createMany({ data: [{ blockerId: userId, blockedId }], skipDuplicates: true }),
-    db.friendship.deleteMany({ where: betweenFriendships(userId, blockedId) }),
-    db.friendRequest.deleteMany({ where: betweenRequests(userId, blockedId) }),
-  ]);
+  await db.$transaction(async (tx) => {
+    // Locked like a send or an accept: an accept in flight can't commit the friendship after this has cleared the rows.
+    await lockPlayers(tx, userId, blockedId);
+    await tx.userBlock.createMany({ data: [{ blockerId: userId, blockedId }], skipDuplicates: true });
+    await tx.friendship.deleteMany({ where: betweenFriendships(userId, blockedId) });
+    await tx.friendRequest.deleteMany({ where: betweenRequests(userId, blockedId) });
+  });
   return { ok: true };
 }
 

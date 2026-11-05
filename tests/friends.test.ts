@@ -130,7 +130,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     friendship: table("friendship"),
     userBlock: table("userBlock"),
     userVisit: table("userVisit"),
-    // A callback with a client that can take advisory locks; the list form is kept for code that may still use it.
+    // A callback with a client that can take advisory locks. The list form is still accepted, though the friends code no longer uses it.
     $transaction: vi.fn(async (work: unknown) => {
       if (typeof work !== "function") return Promise.all(work as Promise<unknown>[]);
       const release: Array<() => void> = [];
@@ -401,6 +401,23 @@ describe("blockPlayer and unblockPlayer", () => {
     expect(db.tables.userBlock).toHaveLength(0);
     expect(db.tables.friendship).toHaveLength(0);
     expect(await sendFriendRequest("b", "amy", as(db))).toEqual({ ok: true, message: "Request sent." });
+  });
+
+  it("takes the pair lock like a send or an accept, so an accept running at the same moment can't leave them friends", async () => {
+    const db = fakeDb({ users: [A, B], requests: [{ id: "r1", fromUserId: "a", toUserId: "b", status: "PENDING", createdAt: new Date(), respondedAt: null }] });
+    const [, blocked] = await Promise.all([respondFriendRequest("b", "r1", true, as(db)), blockPlayer("a", "b", as(db))]);
+    expect(blocked).toEqual({ ok: true });
+    expect(db.tables.friendship).toHaveLength(0);
+    expect(db.tables.friendRequest).toHaveLength(0);
+    expect(db.tables.userBlock).toHaveLength(1);
+    // Each transaction locked both players, in id order, through $executeRaw.
+    expect(db.rawLog.map((r) => [r.via, r.id]).sort()).toEqual([
+      ["executeRaw", "a"],
+      ["executeRaw", "a"],
+      ["executeRaw", "b"],
+      ["executeRaw", "b"],
+    ]);
+    expect(db.rawLog.filter((r) => r.via === "executeRaw").map((r) => r.sql)).toEqual(Array(4).fill(LOCK_SQL));
   });
 
   it("refuses yourself and an unknown player", async () => {
