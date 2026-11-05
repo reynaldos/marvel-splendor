@@ -17,7 +17,6 @@ import {
 import { NOT_FOUND } from "@/lib/friend-rules";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
 
-/** A row id as the browser sent it; anything odd is treated as a row that isn't there. */
 const idSchema = z.string().min(1).max(64);
 const usernameSchema = z.string().max(100);
 
@@ -27,7 +26,7 @@ async function signedInUser() {
   return getOrCreateUser(session.user);
 }
 
-/** Runs one friends change for the signed-in player and tells the page to reload its data. */
+/** Checks the session first, then runs one friends change for the player and tells the page to reload its data. */
 async function change(run: (userId: string) => Promise<FriendResult>): Promise<FriendResult> {
   const user = await signedInUser();
   const result = await run(user.id);
@@ -35,44 +34,43 @@ async function change(run: (userId: string) => Promise<FriendResult>): Promise<F
   return result;
 }
 
+/** Runs a change on a row id as the browser sent it; an odd id is a row that isn't there. */
+function withId(raw: string, run: (userId: string, id: string) => Promise<FriendResult>): Promise<FriendResult> {
+  return change(async (userId) => {
+    const id = idSchema.safeParse(raw);
+    return id.success ? run(userId, id.data) : { error: NOT_FOUND };
+  });
+}
+
 /** Sends a request to the player with this username. */
 export async function sendFriendRequestAction(username: string): Promise<FriendResult> {
-  const typed = usernameSchema.safeParse(username);
-  if (!typed.success) return { error: "No player has that username." };
-  return change((userId) => sendFriendRequest(userId, typed.data));
+  return change(async (userId) => {
+    const typed = usernameSchema.safeParse(username);
+    return typed.success ? sendFriendRequest(userId, typed.data) : { error: "No player has that username." };
+  });
 }
 
 /** Accepts or declines a request sent to the signed-in player. */
 export async function respondFriendRequestAction(requestId: string, accept: boolean): Promise<FriendResult> {
-  const id = idSchema.safeParse(requestId);
-  if (!id.success || typeof accept !== "boolean") return { error: NOT_FOUND };
-  return change((userId) => respondFriendRequest(userId, id.data, accept));
+  return withId(requestId, async (userId, id) => (typeof accept === "boolean" ? respondFriendRequest(userId, id, accept) : { error: NOT_FOUND }));
 }
 
 /** Takes back a request the signed-in player sent. */
 export async function cancelFriendRequestAction(requestId: string): Promise<FriendResult> {
-  const id = idSchema.safeParse(requestId);
-  if (!id.success) return { error: NOT_FOUND };
-  return change((userId) => cancelFriendRequest(userId, id.data));
+  return withId(requestId, cancelFriendRequest);
 }
 
 /** Ends a friendship. */
 export async function removeFriendAction(friendId: string): Promise<FriendResult> {
-  const id = idSchema.safeParse(friendId);
-  if (!id.success) return { error: NOT_FOUND };
-  return change((userId) => removeFriend(userId, id.data));
+  return withId(friendId, removeFriend);
 }
 
 /** Blocks a player. */
 export async function blockPlayerAction(blockedId: string): Promise<FriendResult> {
-  const id = idSchema.safeParse(blockedId);
-  if (!id.success) return { error: NOT_FOUND };
-  return change((userId) => blockPlayer(userId, id.data));
+  return withId(blockedId, blockPlayer);
 }
 
 /** Lifts a block. */
 export async function unblockPlayerAction(blockedId: string): Promise<FriendResult> {
-  const id = idSchema.safeParse(blockedId);
-  if (!id.success) return { error: NOT_FOUND };
-  return change((userId) => unblockPlayer(userId, id.data));
+  return withId(blockedId, unblockPlayer);
 }
