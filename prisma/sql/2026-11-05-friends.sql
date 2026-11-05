@@ -1,4 +1,4 @@
--- Adds friends: requests one way, friendships two rows each, and who has blocked whom. It changes no existing table.
+-- Adds friends: requests one way, a log of every request sent for the daily limit, friendships two rows each, and who has blocked whom. It changes no existing table.
 -- Written by Prisma from prisma/schema.prisma (prisma migrate diff), so the database matches it exactly.
 -- Safe to run once; a second run stops at the first line, as the type is already there.
 BEGIN;
@@ -13,6 +13,13 @@ CREATE TABLE "FriendRequest" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "respondedAt" TIMESTAMP(3),
     CONSTRAINT "FriendRequest_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "FriendRequestSend" (
+    "id" TEXT NOT NULL,
+    "fromUserId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "FriendRequestSend_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "Friendship" (
@@ -33,9 +40,13 @@ CREATE INDEX "FriendRequest_toUserId_status_idx" ON "FriendRequest"("toUserId", 
 
 CREATE UNIQUE INDEX "FriendRequest_fromUserId_toUserId_key" ON "FriendRequest"("fromUserId", "toUserId");
 
+CREATE INDEX "FriendRequestSend_fromUserId_createdAt_idx" ON "FriendRequestSend"("fromUserId", "createdAt");
+
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_toUserId_fkey" FOREIGN KEY ("toUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "FriendRequestSend" ADD CONSTRAINT "FriendRequestSend_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "Friendship" ADD CONSTRAINT "Friendship_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -47,4 +58,4 @@ ALTER TABLE "UserBlock" ADD CONSTRAINT "UserBlock_blockedId_fkey" FOREIGN KEY ("
 
 COMMIT;
 
--- To undo:  DROP TABLE "UserBlock"; DROP TABLE "Friendship"; DROP TABLE "FriendRequest"; DROP TYPE "FriendRequestStatus";
+-- To undo:  DROP TABLE "UserBlock"; DROP TABLE "Friendship"; DROP TABLE "FriendRequestSend"; DROP TABLE "FriendRequest"; DROP TYPE "FriendRequestStatus";

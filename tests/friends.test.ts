@@ -5,7 +5,7 @@ vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/generated/prisma/client", () => ({ Prisma: {} }));
 vi.mock("@/lib/r2", () => ({ publicAvatarUrl: (key: string | null) => (key ? `https://img/${key}` : null) }));
 
-import { FRIEND_MESSAGES, MAX_FRIENDS, MAX_PENDING_SENT, MAX_REQUESTS_PER_DAY, NOT_FOUND, ONLINE_WINDOW_MS } from "@/lib/friend-rules";
+import { FRIEND_MESSAGES, MAX_FRIENDS, MAX_PENDING_SENT, MAX_REQUESTS_PER_DAY, NOT_FOUND, ONLINE_WINDOW_MS, REQUEST_WINDOW_MS } from "@/lib/friend-rules";
 import {
   blockPlayer,
   cancelFriendRequest,
@@ -51,10 +51,11 @@ function shape(row: Row, select: Record<string, unknown> | undefined, users: Row
 }
 
 /** Just enough of Prisma, in memory, for the friends code: the four tables and the calls it makes. */
-function fakeDb(seed: { users?: Row[]; requests?: Row[]; friendships?: Row[]; blocks?: Row[]; visits?: Row[] } = {}) {
+function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendships?: Row[]; blocks?: Row[]; visits?: Row[] } = {}) {
   const users = seed.users ?? [];
   const tables = {
     friendRequest: seed.requests ?? [],
+    friendRequestSend: seed.sends ?? [],
     friendship: seed.friendships ?? [],
     userBlock: seed.blocks ?? [],
     userVisit: seed.visits ?? [],
@@ -122,6 +123,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; friendships?: Row[]; bl
       }),
     },
     friendRequest: table("friendRequest"),
+    friendRequestSend: table("friendRequestSend"),
     friendship: table("friendship"),
     userBlock: table("userBlock"),
     userVisit: table("userVisit"),
@@ -198,15 +200,43 @@ describe("sendFriendRequest", () => {
     expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ error: FRIEND_MESSAGES.tooManyWaiting });
 
     db.tables.friendRequest.length = 0;
-    for (let i = 0; i < MAX_REQUESTS_PER_DAY; i++) {
-      db.tables.friendRequest.push({ id: `d${i}`, fromUserId: "a", toUserId: `x${i}`, status: "DECLINED", createdAt: now, respondedAt: new Date(0) });
-    }
+    for (let i = 0; i < MAX_REQUESTS_PER_DAY; i++) db.tables.friendRequestSend.push({ id: `s${i}`, fromUserId: "a", createdAt: now });
     expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ error: FRIEND_MESSAGES.tooManyToday });
+    expect(db.tables.friendRequestSend).toHaveLength(MAX_REQUESTS_PER_DAY);
 
-    db.tables.friendRequest.length = 0;
+    db.tables.friendRequestSend.length = 0;
     for (let i = 0; i < MAX_FRIENDS; i++) db.tables.friendship.push({ userId: "b", friendId: `x${i}`, createdAt: now });
     expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ error: FRIEND_MESSAGES.listFull });
     expect(db.tables.friendRequest).toHaveLength(0);
+    expect(db.tables.friendRequestSend).toHaveLength(0);
+  });
+
+  it("counts the day's sends even after each request is cancelled: the 31st is refused", async () => {
+    const others = Array.from({ length: MAX_REQUESTS_PER_DAY + 1 }, (_, i) => ({ id: `x${i}`, username: `user${i}`, name: null, avatarKey: null, blockedAt: null }));
+    db = fakeDb({ users: [A, ...others] });
+    for (let i = 0; i < MAX_REQUESTS_PER_DAY; i++) {
+      expect(await sendFriendRequest("a", `user${i}`, as(db))).toEqual({ ok: true, message: "Request sent." });
+      expect(await cancelFriendRequest("a", db.tables.friendRequest[0].id as string, as(db))).toEqual({ ok: true });
+    }
+    expect(db.tables.friendRequest).toHaveLength(0);
+    expect(await sendFriendRequest("a", `user${MAX_REQUESTS_PER_DAY}`, as(db))).toEqual({ error: FRIEND_MESSAGES.tooManyToday });
+    expect(db.tables.friendRequest).toHaveLength(0);
+    expect(db.tables.friendRequestSend).toHaveLength(MAX_REQUESTS_PER_DAY);
+  });
+
+  it("counts a send the receiver accepted, and one older than a day no longer", async () => {
+    db.tables.friendRequestSend.push({ id: "old", fromUserId: "a", createdAt: new Date(Date.now() - REQUEST_WINDOW_MS - 1000) });
+    for (let i = 0; i < MAX_REQUESTS_PER_DAY - 1; i++) db.tables.friendRequestSend.push({ id: `s${i}`, fromUserId: "a", createdAt: new Date() });
+    expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ ok: true, message: "Request sent." });
+    expect(await respondFriendRequest("b", db.tables.friendRequest[0].id as string, true, as(db))).toEqual({ ok: true, message: "You're now friends." });
+    expect(db.tables.friendRequest).toHaveLength(0);
+    expect(await sendFriendRequest("a", "cat", as(db))).toEqual({ error: FRIEND_MESSAGES.tooManyToday });
+  });
+
+  it("a revived declined request counts as a new send", async () => {
+    db.tables.friendRequest.push({ id: "r1", fromUserId: "a", toUserId: "b", status: "DECLINED", createdAt: new Date(0), respondedAt: new Date(0) });
+    expect(await sendFriendRequest("a", "bob", as(db))).toEqual({ ok: true, message: "Request sent." });
+    expect(db.tables.friendRequestSend).toHaveLength(1);
   });
 });
 

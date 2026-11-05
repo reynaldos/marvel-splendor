@@ -91,7 +91,7 @@ On someone else's profile (`app/profile/[username]`), for a signed-in viewer, on
 
 ### Data model
 
-Four new tables and two enums, nothing changed or removed. Every relation to `User` deletes with it (`onDelete: Cascade`), so `deleteAccountAction` keeps working without a change. The SQL goes in `prisma/sql/<date>-friends.sql` beside the earlier ones, plus the back-relations on `User` in `schema.prisma`.
+Five new tables and two enums, nothing changed or removed. Every relation to `User` deletes with it (`onDelete: Cascade`), so `deleteAccountAction` keeps working without a change. The SQL goes in `prisma/sql/<date>-friends.sql` beside the earlier ones, plus the back-relations on `User` in `schema.prisma`.
 
 ```prisma
 enum FriendRequestStatus {
@@ -118,6 +118,16 @@ model FriendRequest {
 
   @@unique([fromUserId, toUserId])
   @@index([toUserId, status])
+}
+
+// One row per request sent. It stays when the request is cancelled or accepted, so the daily limit still counts it.
+model FriendRequestSend {
+  id         String   @id @default(cuid())
+  fromUserId String
+  from       User     @relation("FriendRequestSends", fields: [fromUserId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([fromUserId, createdAt])
 }
 
 // Two rows per friendship, one each way, so a player's list is one indexed read.
@@ -158,7 +168,7 @@ model GameInvite {
 }
 ```
 
-- `Game` gains `invites GameInvite[]`; `User` gains the eight back-relations named above.
+- `Game` gains `invites GameInvite[]`; `User` gains the nine back-relations named above.
 - The two `Friendship` rows are written and deleted together in one transaction.
 - Applying the SQL to any database, including production, is the Commander's call, as with every schema change.
 
@@ -190,7 +200,7 @@ In `lib/friends.ts`, with the parts that need no database in a pure file (`lib/f
 
 - At most **200 friends**. A request that would pass it, for either player: "Friends list is full."
 - At most **20 sent requests waiting** at once.
-- At most **30 friend requests sent in a day** (rolling 24 hours, counted from `createdAt`).
+- At most **30 friend requests sent in a day** (rolling 24 hours, counted from the `FriendRequestSend` log, which cancelling or accepting a request does not touch).
 - At most **10 invites from one player to one room**.
 - Every action checks the session first and returns the same "Not found" whether a row is missing or belongs to someone else.
 

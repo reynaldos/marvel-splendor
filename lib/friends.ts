@@ -103,14 +103,18 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
       await db.$transaction((tx) => makeFriends(tx, userId, toUserId));
       return { ok: true, message: "You're now friends." };
     }
-    if (decision.kind === "revive") {
-      await db.friendRequest.update({
-        where: { fromUserId_toUserId: { fromUserId: userId, toUserId } },
-        data: { status: "PENDING", createdAt: now, respondedAt: null },
-      });
-    } else {
-      await db.friendRequest.create({ data: { fromUserId: userId, toUserId } });
-    }
+    await db.$transaction(async (tx) => {
+      if (decision.kind === "revive") {
+        await tx.friendRequest.update({
+          where: { fromUserId_toUserId: { fromUserId: userId, toUserId } },
+          data: { status: "PENDING", createdAt: now, respondedAt: null },
+        });
+      } else {
+        await tx.friendRequest.create({ data: { fromUserId: userId, toUserId } });
+      }
+      // The log outlives the request, so cancelling or accepting can't reset the daily limit.
+      await tx.friendRequestSend.create({ data: { fromUserId: userId, createdAt: now } });
+    });
   } catch (error) {
     // Two taps at once: the second finds the first one's row.
     if (isUniqueViolation(error, "toUserId")) return { error: FRIEND_MESSAGES.alreadySent };
@@ -128,7 +132,7 @@ async function loadSendFacts(db: Db, userId: string, targetId: string, now: Date
     db.friendship.count({ where: { userId } }),
     db.friendship.count({ where: { userId: targetId } }),
     db.friendRequest.count({ where: { fromUserId: userId, status: "PENDING" } }),
-    db.friendRequest.count({ where: { fromUserId: userId, createdAt: { gte: new Date(now.getTime() - REQUEST_WINDOW_MS) } } }),
+    db.friendRequestSend.count({ where: { fromUserId: userId, createdAt: { gte: new Date(now.getTime() - REQUEST_WINDOW_MS) } } }),
   ]);
   return {
     targetBlockedMe: blocks.some((b) => b.blockerId === targetId),

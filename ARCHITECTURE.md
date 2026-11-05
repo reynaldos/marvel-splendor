@@ -152,6 +152,7 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 | `UserVisit` | One row per stretch of activity, with IP address, browser and times, for the admin page |
 | `Feedback` | Feature requests and bug reports from the menu, with a status the admins move along |
 | `FriendRequest` | A friend request one way, waiting or declined; accepting or cancelling deletes it. One per sender and receiver |
+| `FriendRequestSend` | One row per request sent, kept when the request is accepted or cancelled, so the 30-a-day limit counts every send |
 | `Friendship` | Two rows per friendship, one each way, so a player's list is one indexed read |
 | `UserBlock` | A player another player has blocked: no requests pass between them, and the blocked one can't tell |
 | `Game` | A table: status, mode, seed, frozen settings, the current state snapshot, a `version` for optimistic concurrency, and the winning seat |

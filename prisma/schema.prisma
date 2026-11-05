@@ -43,22 +43,22 @@ enum FriendRequestStatus {
 }
 
 model User {
-  id                     String            @id @default(cuid())
-  auth0Sub               String            @unique
-  username               String            @unique
+  id                     String              @id @default(cuid())
+  auth0Sub               String              @unique
+  username               String              @unique
   name                   String?
   // As last seen at sign-in. One account per email, kept so at sign-in rather than by a unique index.
   email                  String?
   // An uploaded picture's storage key, or "library/<id>" for one from the library.
   avatarKey              String?
   // Whether the account-level frame is drawn on their picture, and on the card that carries their name.
-  xpAvatarStyle          Boolean           @default(false)
-  xpCardStyle            Boolean           @default(false)
+  xpAvatarStyle          Boolean             @default(false)
+  xpCardStyle            Boolean             @default(false)
   // Whether they have asked to be left off the leaderboard.
-  hideFromLeaderboard    Boolean           @default(false)
+  hideFromLeaderboard    Boolean             @default(false)
   // Set by an admin: the account is signed out and cannot play until it is cleared.
   blockedAt              DateTime?
-  createdAt              DateTime          @default(now())
+  createdAt              DateTime            @default(now())
   players                GamePlayer[]
   stats                  UserStats?
   visits                 UserVisit[]
@@ -68,12 +68,13 @@ model User {
   coinTransactions       CoinTransaction[]
   feedback               Feedback[]
   purchases              Purchase[]
-  friendRequestsSent     FriendRequest[]   @relation("FriendRequestsSent")
-  friendRequestsReceived FriendRequest[]   @relation("FriendRequestsReceived")
-  friendships            Friendship[]      @relation("Friendships")
-  friendOf               Friendship[]      @relation("FriendOf")
-  blocks                 UserBlock[]       @relation("Blocks")
-  blockedBy              UserBlock[]       @relation("BlockedBy")
+  friendRequestsSent     FriendRequest[]     @relation("FriendRequestsSent")
+  friendRequestsReceived FriendRequest[]     @relation("FriendRequestsReceived")
+  friendRequestSends     FriendRequestSend[] @relation("FriendRequestSends")
+  friendships            Friendship[]        @relation("Friendships")
+  friendOf               Friendship[]        @relation("FriendOf")
+  blocks                 UserBlock[]         @relation("Blocks")
+  blockedBy              UserBlock[]         @relation("BlockedBy")
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -246,6 +247,16 @@ model FriendRequest {
 
   @@unique([fromUserId, toUserId])
   @@index([toUserId, status])
+}
+
+// One row per request sent. It stays when the request is cancelled or accepted, so the daily limit still counts it.
+model FriendRequestSend {
+  id         String   @id @default(cuid())
+  fromUserId String
+  from       User     @relation("FriendRequestSends", fields: [fromUserId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([fromUserId, createdAt])
 }
 
 // Two rows per friendship, one each way, so a player's list is one indexed read.
