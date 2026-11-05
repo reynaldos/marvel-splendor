@@ -25,6 +25,8 @@ The version we are in. It opened with the two-player game and the foil frames.
 
 Written 2026-11-05 on branch `feature/ops-1105-friends`. Lines marked **(assumption)** were decided for this plan and were not asked for; any of them can be overturned.
 
+**Status, 2026-11-05.** Phase 1 (criteria 1 to 17) is built on this branch: the schema and `prisma/sql/2026-11-05-friends.sql`, the rules in `lib/friend-rules.ts`, the data layer in `lib/friends.ts`, the actions in `app/friends/actions.ts`, the Friends screen, the home button and the button on a profile, with unit tests in `tests/friend-rules.test.ts` and `tests/friends.test.ts`. The SQL has not been applied to any database; that is the Commander's call. Phase 2 (room invites and a live channel) is not started.
+
 **What it is for.** A signed-in player can keep a list of the people they play with, see which of them are online, and pull one into their room with a tap instead of sending a room code by text. It works when a player invites a friend from the lobby and the friend lands in that lobby, seated, without typing a code.
 
 ### Decided
