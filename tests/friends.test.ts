@@ -62,6 +62,8 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
   };
   let nextId = 1;
   const locks = new Map<string, Promise<void>>();
+  /** Every raw statement a transaction ran, so a test can check how the lock was taken. */
+  const rawLog: Array<{ via: "executeRaw" | "queryRaw"; sql: string; id: string }> = [];
 
   const table = (name: keyof typeof tables) => ({
     findUnique: vi.fn(async ({ where, select }: { where: Where; select?: Record<string, unknown> }) => {
@@ -128,20 +130,29 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     friendship: table("friendship"),
     userBlock: table("userBlock"),
     userVisit: table("userVisit"),
-    // Both forms the code uses: a callback with a client that can take advisory locks, or a list of already-started calls.
+    // A callback with a client that can take advisory locks; the list form is kept for code that may still use it.
     $transaction: vi.fn(async (work: unknown) => {
       if (typeof work !== "function") return Promise.all(work as Promise<unknown>[]);
       const release: Array<() => void> = [];
       const tx = {
         ...db,
         // `select pg_advisory_xact_lock(hashtext(${id}))`: one holder per id, kept until this transaction ends.
-        $queryRaw: vi.fn(async (_sql: TemplateStringsArray, id: string) => {
+        // Only $executeRaw works for it on the real driver: it returns a row count and never reads the lock's `void` column.
+        $executeRaw: vi.fn(async (sql: TemplateStringsArray, id: string) => {
+          rawLog.push({ via: "executeRaw", sql: sql.join("$"), id });
           const before = locks.get(id) ?? Promise.resolve();
           let done!: () => void;
           const mine = new Promise<void>((resolve) => (done = resolve));
           locks.set(id, before.then(() => mine));
           release.push(done);
           await before;
+          return 1;
+        }),
+        // What @prisma/adapter-neon 7.10.0 does with the lock through $queryRaw: it has no mapping for Postgres type `void`.
+        $queryRaw: vi.fn(async (sql: TemplateStringsArray, ...values: unknown[]) => {
+          const text = sql.join("$");
+          rawLog.push({ via: "queryRaw", sql: text, id: String(values[0]) });
+          if (text.includes("pg_advisory_xact_lock")) throw Object.assign(new Error("DriverAdapterError"), { cause: { kind: "UnsupportedNativeDataType", type: "void" } });
           return [];
         }),
       };
@@ -152,6 +163,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
       }
     }),
     tables,
+    rawLog,
   };
   return db;
 }
@@ -164,6 +176,8 @@ const C = { id: "c", username: "cat", name: null, avatarKey: null, blockedAt: nu
 type AnyDb = ReturnType<typeof fakeDb>;
 const as = (db: AnyDb) => db as unknown as Parameters<typeof sendFriendRequest>[2];
 
+const LOCK_SQL = "select pg_advisory_xact_lock(hashtext($))";
+
 describe("sendFriendRequest", () => {
   let db: AnyDb;
   beforeEach(() => {
@@ -174,6 +188,14 @@ describe("sendFriendRequest", () => {
     expect(await sendFriendRequest("a", "  BoB ", as(db))).toEqual({ ok: true, message: "Request sent." });
     expect(db.tables.friendRequest).toHaveLength(1);
     expect(db.tables.friendRequest[0]).toMatchObject({ fromUserId: "a", toUserId: "b", status: "PENDING" });
+  });
+
+  it("locks both players through $executeRaw, in id order, and never through $queryRaw, which can't read the lock's void reply", async () => {
+    expect(await sendFriendRequest("b", "amy", as(db))).toEqual({ ok: true, message: "Request sent." });
+    expect(db.rawLog).toEqual([
+      { via: "executeRaw", sql: LOCK_SQL, id: "a" },
+      { via: "executeRaw", sql: LOCK_SQL, id: "b" },
+    ]);
   });
 
   it("refuses an empty, your own and an unknown username, and makes no row", async () => {

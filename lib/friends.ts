@@ -122,9 +122,12 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
   }
 }
 
-/** Holds a lock on each player until the transaction ends, always in the same order so two changes can't wait on each other. */
+/**
+ * Holds a lock on each player until the transaction ends, always in the same order so two changes can't wait on each other.
+ * Through $executeRaw on purpose: the lock returns Postgres type `void`, which the Neon adapter can't read as a $queryRaw column.
+ */
 async function lockPlayers(tx: Tx, ...ids: string[]) {
-  for (const id of [...new Set(ids)].sort()) await tx.$queryRaw`select pg_advisory_xact_lock(hashtext(${id}))`;
+  for (const id of [...new Set(ids)].sort()) await tx.$executeRaw`select pg_advisory_xact_lock(hashtext(${id}))`;
 }
 
 async function loadSendFacts(tx: Tx, userId: string, targetId: string, now: Date) {
