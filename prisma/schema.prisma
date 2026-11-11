@@ -42,6 +42,12 @@ enum FriendRequestStatus {
   DECLINED
 }
 
+enum GameInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model User {
   id                     String              @id @default(cuid())
   auth0Sub               String              @unique
@@ -75,6 +81,8 @@ model User {
   friendOf               Friendship[]        @relation("FriendOf")
   blocks                 UserBlock[]         @relation("Blocks")
   blockedBy              UserBlock[]         @relation("BlockedBy")
+  invitesSent            GameInvite[]        @relation("InvitesSent")
+  invitesReceived        GameInvite[]        @relation("InvitesReceived")
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -160,6 +168,7 @@ model Game {
   players    GamePlayer[]
   moves      Move[]
   messages   ChatMessage[]
+  invites    GameInvite[]
 }
 
 model GamePlayer {
@@ -279,4 +288,21 @@ model UserBlock {
   createdAt DateTime @default(now())
 
   @@id([blockerId, blockedId])
+}
+
+// A friend asked to a room. Open only while its game is a room with a free seat; the game's status is the expiry.
+model GameInvite {
+  id          String           @id @default(cuid())
+  gameId      String
+  game        Game             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  fromUserId  String
+  from        User             @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  to          User             @relation("InvitesReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  status      GameInviteStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  @@unique([gameId, toUserId])
+  @@index([toUserId, status])
 }

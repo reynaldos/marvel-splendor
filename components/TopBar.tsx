@@ -1,3 +1,5 @@
+import { declineInviteAction, respondFriendRequestAction } from "@/app/friends/actions";
+import { FriendNotices } from "@/components/friends/FriendNotices";
 import { TopBarView } from "@/components/TopBarView";
 import { claimDailyBonusAction } from "@/app/daily-bonus/actions";
 import { deleteAccountAction } from "@/app/settings/actions";
@@ -35,19 +37,22 @@ export async function TopBar() {
   const xp = accountXp.get(user.id) ?? 0;
 
   return (
-    <TopBarView
-      username={user.username}
-      avatarUrl={publicAvatarUrl(user.avatarKey)}
-      tier={accountTierFor(xp)}
-      progress={progressForScore(xp)}
-      rating={rating?.rating ?? null}
-      wins={stats?.wins ?? 0}
-      coins={coins?.balance ?? 0}
-      isAdmin={admin}
-      newFeedback={newFeedback > 0}
-      dailyBonus={dailyBonusState(dailyClaim)}
-      onClaimDailyBonus={claimDailyBonusAction}
-      onDeleteAccount={deleteAccountAction}
-    />
+    <>
+      <FriendNotices userId={user.id} declineInvite={declineInviteAction} respondRequest={respondFriendRequestAction} />
+      <TopBarView
+        username={user.username}
+        avatarUrl={publicAvatarUrl(user.avatarKey)}
+        tier={accountTierFor(xp)}
+        progress={progressForScore(xp)}
+        rating={rating?.rating ?? null}
+        wins={stats?.wins ?? 0}
+        coins={coins?.balance ?? 0}
+        isAdmin={admin}
+        newFeedback={newFeedback > 0}
+        dailyBonus={dailyBonusState(dailyClaim)}
+        onClaimDailyBonus={claimDailyBonusAction}
+        onDeleteAccount={deleteAccountAction}
+      />
+    </>
   );
 }

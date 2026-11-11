@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/generated/prisma/client", () => ({ Prisma: {} }));
 vi.mock("@/lib/r2", () => ({ publicAvatarUrl: (key: string | null) => (key ? `https://img/${key}` : null) }));
+vi.mock("@/lib/pusher", () => ({ notifyUser: vi.fn(async () => {}), notifyGame: vi.fn(async () => {}) }));
 
 import { FRIEND_MESSAGES, MAX_FRIENDS, MAX_PENDING_SENT, MAX_REQUESTS_PER_DAY, NOT_FOUND, ONLINE_WINDOW_MS, REQUEST_WINDOW_MS } from "@/lib/friend-rules";
 import {
@@ -17,6 +18,7 @@ import {
   unblockPlayer,
   waitingRequestCount,
 } from "@/lib/friends";
+import { notifyUser } from "@/lib/pusher";
 
 type Row = Record<string, unknown>;
 type Where = Record<string, unknown>;
@@ -51,7 +53,7 @@ function shape(row: Row, select: Record<string, unknown> | undefined, users: Row
 }
 
 /** Just enough of Prisma, in memory, for the friends code: the four tables and the calls it makes. */
-function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendships?: Row[]; blocks?: Row[]; visits?: Row[] } = {}) {
+function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendships?: Row[]; blocks?: Row[]; visits?: Row[]; invites?: Row[] } = {}) {
   const users = seed.users ?? [];
   const tables = {
     friendRequest: seed.requests ?? [],
@@ -59,6 +61,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     friendship: seed.friendships ?? [],
     userBlock: seed.blocks ?? [],
     userVisit: seed.visits ?? [],
+    gameInvite: seed.invites ?? [],
   };
   let nextId = 1;
   const locks = new Map<string, Promise<void>>();
@@ -130,6 +133,7 @@ function fakeDb(seed: { users?: Row[]; requests?: Row[]; sends?: Row[]; friendsh
     friendship: table("friendship"),
     userBlock: table("userBlock"),
     userVisit: table("userVisit"),
+    gameInvite: table("gameInvite"),
     // A callback with a client that can take advisory locks. The list form is still accepted, though the friends code no longer uses it.
     $transaction: vi.fn(async (work: unknown) => {
       if (typeof work !== "function") return Promise.all(work as Promise<unknown>[]);
@@ -385,11 +389,18 @@ describe("blockPlayer and unblockPlayer", () => {
         { userId: "b", friendId: "a", createdAt: new Date() },
       ],
       requests: [{ id: "r1", fromUserId: "b", toUserId: "a", status: "PENDING", createdAt: new Date(), respondedAt: null }],
+      invites: [
+        { id: "i1", gameId: "g1", fromUserId: "b", toUserId: "a", status: "PENDING" },
+        { id: "i2", gameId: "g2", fromUserId: "a", toUserId: "c", status: "PENDING" },
+      ],
     });
     expect(await blockPlayer("a", "b", as(db))).toEqual({ ok: true });
     expect(db.tables.friendship).toHaveLength(0);
     expect(db.tables.friendRequest).toHaveLength(0);
     expect(db.tables.userBlock).toHaveLength(1);
+    // Open invites between the pair are declined; others are left alone.
+    expect(db.tables.gameInvite.map((i) => i.status)).toEqual(["DECLINED", "PENDING"]);
+    expect(notifyUser).toHaveBeenCalledWith("b");
     // Blocking again adds nothing.
     expect(await blockPlayer("a", "b", as(db))).toEqual({ ok: true });
     expect(db.tables.userBlock).toHaveLength(1);
@@ -461,13 +472,14 @@ describe("loadFriends", () => {
     expect(view.sent.map((r) => r.id)).toEqual(["r2"]);
     expect(view.received[0].from.username).toBe("xan");
     expect(view.blocked.map((p) => p.username)).toEqual(["zed"]);
+    expect(view.invites).toEqual([]);
     expect(view.waiting).toBe(1);
     expect(await waitingRequestCount("a", as(db))).toBe(1);
   });
 
   it("is empty for a player with nothing", async () => {
     const db = fakeDb({ users: [A] });
-    expect(await loadFriends("a", as(db))).toEqual({ friends: [], received: [], sent: [], blocked: [], waiting: 0 });
+    expect(await loadFriends("a", as(db))).toEqual({ friends: [], received: [], sent: [], blocked: [], invites: [], waiting: 0 });
     expect(db.userVisit.groupBy).not.toHaveBeenCalled();
   });
 });
@@ -488,5 +500,30 @@ describe("standingWith", () => {
 
     db.tables.userBlock.push({ blockerId: "c", blockedId: "a", createdAt: new Date() });
     expect(await standingWith("a", C, as(db))).toEqual({ standing: "hidden", requestId: null });
+  });
+});
+
+describe("live notices", () => {
+  it("tells the other player after a send, an accept, a cancel and a remove, never after a decline", async () => {
+    const notify = vi.mocked(notifyUser);
+    notify.mockClear();
+    const db = fakeDb({ users: [A, B] });
+    await sendFriendRequest("a", "bob", as(db));
+    expect(notify).toHaveBeenLastCalledWith("b");
+    const id = db.tables.friendRequest[0].id as string;
+    await cancelFriendRequest("a", id, as(db));
+    expect(notify).toHaveBeenLastCalledWith("b");
+
+    await sendFriendRequest("a", "bob", as(db));
+    notify.mockClear();
+    await respondFriendRequest("b", db.tables.friendRequest[0].id as string, false, as(db));
+    expect(notify).not.toHaveBeenCalled();
+    await sendFriendRequest("b", "amy", as(db));
+    expect(notify).toHaveBeenLastCalledWith("a");
+    const theirs = db.tables.friendRequest.find((r) => r.fromUserId === "b")!.id as string;
+    await respondFriendRequest("a", theirs, true, as(db));
+    expect(notify).toHaveBeenLastCalledWith("b");
+    await removeFriend("b", "a", as(db));
+    expect(notify).toHaveBeenLastCalledWith("a");
   });
 });

@@ -17,6 +17,9 @@ import {
 } from "@/lib/friend-rules";
 import { isUniqueViolation } from "@/lib/game-server";
 import type { Prisma } from "@/lib/generated/prisma/client";
+import { inviteClosedReason, roomLine } from "@/lib/invite-rules";
+import { hostAwayUntil, seatsOf } from "@/lib/lobby";
+import { notifyUser } from "@/lib/pusher";
 import { publicAvatarUrl } from "@/lib/r2";
 import { checkUsername } from "@/lib/username";
 
@@ -40,17 +43,43 @@ export interface FriendsView {
   /** Declined requests stay here, looking sent, until the sender cancels them. */
   sent: Array<{ id: string; to: FriendPlayer }>;
   blocked: FriendPlayer[];
-  /** Requests waiting for this player: what lights the home screen's dot. */
+  /** Room invites still open, newest first. */
+  invites: InviteEntry[];
+  /** Requests and invites waiting for this player: what lights the home screen's dot. */
   waiting: number;
+}
+
+export interface InviteEntry {
+  id: string;
+  gameId: string;
+  from: FriendPlayer;
+  /** "Marvel game, 2 of 4 seats taken". */
+  line: string;
+  /** When it was last sent, in ms; a resend is a new notice. */
+  sentAt: number;
 }
 
 type Db = typeof prisma;
 type Tx = Prisma.TransactionClient;
 
-const PLAYER_SELECT = { id: true, username: true, name: true, avatarKey: true, blockedAt: true } as const;
+export const PLAYER_SELECT = { id: true, username: true, name: true, avatarKey: true, blockedAt: true } as const;
 type PlayerRow = { id: string; username: string; name: string | null; avatarKey: string | null; blockedAt: Date | null };
 
-const toPlayer = (row: PlayerRow): FriendPlayer => ({ id: row.id, username: row.username, name: row.name, avatarUrl: publicAvatarUrl(row.avatarKey) });
+/** What a room needs for an invite's open check and its line. */
+export const ROOM_SELECT = { status: true, state: true, settings: true, _count: { select: { players: true } } } as const;
+type RoomRow = { status: string; state: unknown; settings: unknown; _count: { players: number } };
+
+export function roomOf(game: RoomRow) {
+  return {
+    status: game.status,
+    hostAwayUntil: hostAwayUntil(game),
+    taken: game._count.players,
+    seats: seatsOf(game.settings),
+    duel: (game.settings as { rules?: string } | null)?.rules === "duel",
+  };
+}
+
+export const toPlayer = (row: PlayerRow): FriendPlayer => ({ id: row.id, username: row.username, name: row.name, avatarUrl: publicAvatarUrl(row.avatarKey) });
 
 const betweenRequests = (a: string, b: string) => ({
   OR: [
@@ -93,7 +122,7 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
   if (!target) return { error: FRIEND_MESSAGES.noSuchPlayer };
   const now = new Date();
   try {
-    return await db.$transaction(async (tx): Promise<FriendResult> => {
+    const result = await db.$transaction(async (tx): Promise<FriendResult> => {
       // Both players locked: two sends at once can't both pass a limit, and one sent each way becomes the friendship.
       await lockPlayers(tx, userId, target.id);
       const facts = await loadSendFacts(tx, userId, target.id, now);
@@ -115,6 +144,8 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
       await tx.friendRequestSend.create({ data: { fromUserId: userId, createdAt: now } });
       return { ok: true, message: "Request sent." };
     });
+    if ("ok" in result) await notifyUser(target.id);
+    return result;
   } catch (error) {
     // Two taps at once: the second finds the first one's row.
     if (isUniqueViolation(error, "toUserId")) return { error: FRIEND_MESSAGES.alreadySent };
@@ -165,7 +196,8 @@ export async function respondFriendRequest(userId: string, requestId: string, ac
   }
 
   const waiting = { id: requestId, toUserId: userId, status: "PENDING" as const };
-  return db.$transaction(async (tx): Promise<FriendResult> => {
+  let sender = "";
+  const result = await db.$transaction(async (tx): Promise<FriendResult> => {
     const request = await tx.friendRequest.findFirst({ where: waiting, select: { fromUserId: true } });
     if (!request) return { error: NOT_FOUND };
     await lockPlayers(tx, userId, request.fromUserId);
@@ -175,23 +207,31 @@ export async function respondFriendRequest(userId: string, requestId: string, ac
     const theirs = await tx.friendship.count({ where: { userId: request.fromUserId } });
     if (mine >= MAX_FRIENDS || theirs >= MAX_FRIENDS) return { error: FRIEND_MESSAGES.listFull };
     await makeFriends(tx, userId, request.fromUserId);
+    sender = request.fromUserId;
     return { ok: true, message: "You're now friends." };
   });
+  if (sender) await notifyUser(sender);
+  return result;
 }
 
 /** Takes back a request this player sent, declined or not. */
 export async function cancelFriendRequest(userId: string, requestId: string, db: Db = prisma): Promise<FriendResult> {
+  const request = await db.friendRequest.findFirst({ where: { id: requestId, fromUserId: userId }, select: { toUserId: true } });
   const { count } = await db.friendRequest.deleteMany({ where: { id: requestId, fromUserId: userId } });
-  return count === 0 ? { error: NOT_FOUND } : { ok: true };
+  if (count === 0) return { error: NOT_FOUND };
+  if (request) await notifyUser(request.toUserId);
+  return { ok: true };
 }
 
 /** Ends a friendship, both rows at once. The other player is not told. */
 export async function removeFriend(userId: string, friendId: string, db: Db = prisma): Promise<FriendResult> {
   const { count } = await db.friendship.deleteMany({ where: betweenFriendships(userId, friendId) });
-  return count === 0 ? { error: NOT_FOUND } : { ok: true };
+  if (count === 0) return { error: NOT_FOUND };
+  await notifyUser(friendId);
+  return { ok: true };
 }
 
-/** Blocks a player: the friendship and any requests between them go too. Safe to repeat. */
+/** Blocks a player: the friendship, any requests and open room invites between them go too. Safe to repeat. */
 export async function blockPlayer(userId: string, blockedId: string, db: Db = prisma): Promise<FriendResult> {
   if (blockedId === userId) return { error: NOT_FOUND };
   const other = await db.user.findUnique({ where: { id: blockedId }, select: { id: true } });
@@ -202,7 +242,9 @@ export async function blockPlayer(userId: string, blockedId: string, db: Db = pr
     await tx.userBlock.createMany({ data: [{ blockerId: userId, blockedId }], skipDuplicates: true });
     await tx.friendship.deleteMany({ where: betweenFriendships(userId, blockedId) });
     await tx.friendRequest.deleteMany({ where: betweenRequests(userId, blockedId) });
+    await tx.gameInvite.updateMany({ where: { status: "PENDING", ...betweenRequests(userId, blockedId) }, data: { status: "DECLINED", respondedAt: new Date() } });
   });
+  await notifyUser(blockedId);
   return { ok: true };
 }
 
@@ -212,24 +254,29 @@ export async function unblockPlayer(userId: string, blockedId: string, db: Db = 
   return count === 0 ? { error: NOT_FOUND } : { ok: true };
 }
 
-/** How many requests wait for this player; the home screen's dot. */
+/** How many requests and open invites wait for this player; the home screen's dot. */
 export async function waitingRequestCount(userId: string, db: Db = prisma): Promise<number> {
-  return db.friendRequest.count({ where: { toUserId: userId, status: "PENDING" } });
+  const [requests, invites] = await Promise.all([db.friendRequest.count({ where: { toUserId: userId, status: "PENDING" } }), openInvitesFor(userId, db)]);
+  return requests + invites.length;
 }
 
-/** Everything on the Friends screen for this player. */
-export async function loadFriends(userId: string, db: Db = prisma, now = Date.now()): Promise<FriendsView> {
-  const [friendRows, received, sent, blocks] = await Promise.all([
-    db.friendship.findMany({ where: { userId }, select: { friend: { select: PLAYER_SELECT } } }),
-    db.friendRequest.findMany({
-      where: { toUserId: userId, status: "PENDING" },
-      select: { id: true, from: { select: PLAYER_SELECT } },
-      orderBy: { createdAt: "desc" },
-    }),
-    db.friendRequest.findMany({ where: { fromUserId: userId }, select: { id: true, to: { select: PLAYER_SELECT } }, orderBy: { createdAt: "desc" } }),
-    db.userBlock.findMany({ where: { blockerId: userId }, select: { blocked: { select: PLAYER_SELECT } }, orderBy: { createdAt: "desc" } }),
-  ]);
+/** Room invites waiting for this player whose room is still open and who isn't seated there yet. */
+export async function openInvitesFor(userId: string, db: Db = prisma, now = Date.now()): Promise<InviteEntry[]> {
+  const rows = await db.gameInvite.findMany({
+    where: { toUserId: userId, status: "PENDING", game: { status: "LOBBY", players: { none: { userId } } } },
+    select: { id: true, gameId: true, createdAt: true, from: { select: PLAYER_SELECT }, game: { select: ROOM_SELECT } },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.flatMap((row) => {
+    const room = roomOf(row.game);
+    if (inviteClosedReason(room, now)) return [];
+    return [{ id: row.id, gameId: row.gameId, from: toPlayer(row.from), line: roomLine(room), sentAt: row.createdAt.getTime() }];
+  });
+}
 
+/** This player's friends with who is online, online first. */
+export async function friendsOf(userId: string, db: Db = prisma, now = Date.now()): Promise<FriendEntry[]> {
+  const friendRows = await db.friendship.findMany({ where: { userId }, select: { friend: { select: PLAYER_SELECT } } });
   const friendIds = friendRows.map((r) => r.friend.id);
   const lastSeen = new Map<string, Date>();
   if (friendIds.length > 0) {
@@ -240,13 +287,30 @@ export async function loadFriends(userId: string, db: Db = prisma, now = Date.no
     });
     for (const v of visits) if (v._max.lastSeenAt) lastSeen.set(v.userId, v._max.lastSeenAt);
   }
+  return sortFriends(friendRows.map(({ friend }) => ({ ...toPlayer(friend), online: isOnline(lastSeen.get(friend.id), friend.blockedAt, now) })));
+}
+
+/** Everything on the Friends screen for this player. */
+export async function loadFriends(userId: string, db: Db = prisma, now = Date.now()): Promise<FriendsView> {
+  const [friends, received, sent, blocks, invites] = await Promise.all([
+    friendsOf(userId, db, now),
+    db.friendRequest.findMany({
+      where: { toUserId: userId, status: "PENDING" },
+      select: { id: true, from: { select: PLAYER_SELECT } },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.friendRequest.findMany({ where: { fromUserId: userId }, select: { id: true, to: { select: PLAYER_SELECT } }, orderBy: { createdAt: "desc" } }),
+    db.userBlock.findMany({ where: { blockerId: userId }, select: { blocked: { select: PLAYER_SELECT } }, orderBy: { createdAt: "desc" } }),
+    openInvitesFor(userId, db, now),
+  ]);
 
   return {
-    friends: sortFriends(friendRows.map(({ friend }) => ({ ...toPlayer(friend), online: isOnline(lastSeen.get(friend.id), friend.blockedAt, now) }))),
+    friends,
     received: received.map((r) => ({ id: r.id, from: toPlayer(r.from) })),
     sent: sent.map((r) => ({ id: r.id, to: toPlayer(r.to) })),
     blocked: blocks.map((b) => toPlayer(b.blocked)),
-    waiting: received.length,
+    invites,
+    waiting: received.length + invites.length,
   };
 }
 

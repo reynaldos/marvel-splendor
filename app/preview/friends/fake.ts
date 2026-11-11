@@ -1,6 +1,6 @@
 // Made-up friends for the preview page, and a store whose actions follow the real send rules.
 import { decideSendRequest, NOT_FOUND, sortFriends } from "@/lib/friend-rules";
-import type { FriendEntry, FriendPlayer, FriendResult, FriendsView } from "@/lib/friends";
+import type { FriendEntry, FriendPlayer, FriendResult, FriendsView, InviteEntry } from "@/lib/friends";
 import { AVATAR_LIBRARY } from "@/lib/avatars";
 
 /** The viewer, named as in the preview's top bar, so adding "preview" shows "That's you." */
@@ -30,7 +30,7 @@ const [tony, cap, thor, hulk, nat, peter, strange, wanda] = PLAYERS;
 
 /** The lists the page opens on: full, or every tab empty. */
 export function fakeView(empty: boolean): FriendsView {
-  if (empty) return { friends: [], received: [], sent: [], blocked: [], waiting: 0 };
+  if (empty) return { friends: [], received: [], sent: [], blocked: [], invites: [], waiting: 0 };
   const friends: FriendEntry[] = sortFriends([
     { ...tony, online: true },
     { ...cap, online: false },
@@ -46,9 +46,16 @@ export function fakeView(empty: boolean): FriendsView {
     ],
     sent: [{ id: `out-${wanda.id}`, to: wanda }],
     blocked: [PLAYERS[9]],
-    waiting: 2,
+    invites: INVITES,
+    waiting: 2 + INVITES.length,
   };
 }
+
+/** One invite to a Marvel room and one to a Duel. */
+export const INVITES: InviteEntry[] = [
+  { id: "inv-1", gameId: "preview-room", from: tony, line: "Marvel game, 2 of 4 seats taken", sentAt: 0 },
+  { id: "inv-2", gameId: "preview-duel", from: thor, line: "Duel, 1 of 2 seats taken", sentAt: 0 },
+];
 
 const wait = () => new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -56,7 +63,7 @@ const wait = () => new Promise((resolve) => setTimeout(resolve, 300));
 export function fakeStore(start: FriendsView) {
   let view = start;
   const save = (next: Omit<FriendsView, "waiting">, message?: string): FriendResult => {
-    view = { ...next, friends: sortFriends(next.friends), waiting: next.received.length };
+    view = { ...next, friends: sortFriends(next.friends), waiting: next.received.length + next.invites.length };
     return { ok: true, message };
   };
   const without = <T extends { id: string }>(rows: T[], id: string) => rows.filter((row) => row.id !== id);
@@ -116,6 +123,7 @@ export function fakeStore(start: FriendsView) {
       received: view.received.filter((r) => r.from.id !== userId),
       sent: view.sent.filter((r) => r.to.id !== userId),
       blocked: [who, ...without(view.blocked, userId)],
+      invites: view.invites.filter((i) => i.from.id !== userId),
     });
   };
 
@@ -124,5 +132,16 @@ export function fakeStore(start: FriendsView) {
     return view.blocked.some((p) => p.id === userId) ? save({ ...view, blocked: without(view.blocked, userId) }) : { error: NOT_FOUND };
   };
 
-  return { load: async () => view, actions: { send, respond, cancel, remove, block, unblock } };
+  const declineInvite = async (inviteId: string): Promise<FriendResult> => {
+    await wait();
+    return view.invites.some((i) => i.id === inviteId) ? save({ ...view, invites: without(view.invites, inviteId) }) : { error: NOT_FOUND };
+  };
+
+  // In the game this opens the room and goes there; the preview only says so.
+  const inviteToRoom = async (): Promise<FriendResult> => {
+    await wait();
+    return { ok: true, message: "In the game, Send opens the room, goes there and invites them." };
+  };
+
+  return { load: async () => view, actions: { send, respond, cancel, remove, block, unblock, declineInvite, inviteToRoom } };
 }

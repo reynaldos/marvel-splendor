@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
@@ -9,7 +10,10 @@ import { BOT_DIFFICULTIES, DEFAULT_SETTINGS, type GameSettings } from "@/lib/eng
 import { createAny, rulesOf } from "@/lib/game-rules";
 import { runServerTurnLoop } from "@/lib/game-server";
 import { Prisma } from "@/lib/generated/prisma/client";
+import { NOT_FOUND } from "@/lib/friend-rules";
+import type { FriendResult } from "@/lib/friends";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { respondInvite, sendInvite } from "@/lib/invites";
 import { MAX_SEATS, nextFreeSeat, seatsOf, withCheat } from "@/lib/lobby";
 import { ownedPacks } from "@/lib/record-purchase";
 import { dealSeats } from "@/lib/lobby-rules";
@@ -164,4 +168,23 @@ export async function startGameAction(gameId: string, cheat: boolean) {
 
   if (started) await notifyGame(gameId);
   redirect(withCheat(`/play/${gameId}`, cheat));
+}
+
+const idSchema = z.string().min(1).max(64);
+
+/** Invites a friend to this room, from its Invite friends dialog. */
+export async function inviteFriendAction(gameId: string, friendId: string): Promise<FriendResult> {
+  const { me } = await requireLobbySeat(gameId);
+  const id = idSchema.safeParse(friendId);
+  return id.success && me.userId ? sendInvite(me.userId, gameId, id.data) : { error: NOT_FOUND };
+}
+
+/** Join or Decline on the invite view. The dialog moves the player on; a refusal comes back to show. */
+export async function respondInviteAction(gameId: string, inviteId: string, accept: boolean): Promise<FriendResult> {
+  const session = await auth0.getSession();
+  if (!session) redirect(`/auth/login?returnTo=/lobby/${gameId}`);
+  const user = await getOrCreateUser(session.user);
+  const id = idSchema.safeParse(inviteId);
+  if (!id.success || typeof accept !== "boolean") return { error: NOT_FOUND };
+  return respondInvite(user.id, id.data, accept);
 }

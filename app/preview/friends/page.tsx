@@ -10,5 +10,5 @@ export default async function FriendsPreviewPage({ searchParams }: { searchParam
   const query = new URLSearchParams(Object.entries({ tab, state, show }).filter((entry): entry is [string, string] => !!entry[1])).toString();
   const here = query ? `/preview/friends?${query}` : "/preview/friends";
   // Keyed by the address, so moving between views starts a fresh fake store.
-  return <FriendsPreview key={here} tab={tab} empty={state === "empty"} buttons={show === "buttons"} here={here} />;
+  return <FriendsPreview key={here} tab={tab} empty={state === "empty"} show={show} here={here} />;
 }

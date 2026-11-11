@@ -16,6 +16,9 @@ import {
 } from "@/lib/friends";
 import { NOT_FOUND } from "@/lib/friend-rules";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { respondInvite, sendInvite } from "@/lib/invites";
+import { createLobby, OPEN_GAMES_REASON, openLobbyFor } from "@/lib/lobby";
+import { roomSettings } from "@/lib/lobby-rules";
 
 const idSchema = z.string().min(1).max(64);
 const usernameSchema = z.string().max(100);
@@ -73,4 +76,35 @@ export async function blockPlayerAction(blockedId: string): Promise<FriendResult
 /** Lifts a block. */
 export async function unblockPlayerAction(blockedId: string): Promise<FriendResult> {
   return withId(blockedId, unblockPlayer);
+}
+
+/** Declines a room invite from the Requests tab. */
+export async function declineInviteAction(inviteId: string): Promise<FriendResult> {
+  return withId(inviteId, (userId, id) => respondInvite(userId, id, false));
+}
+
+/** What inviting from the Friends screen gives back: the room to go to, once there is one. */
+export type RoomInviteResult = FriendResult & { gameId?: string };
+
+/**
+ * Opens a room with these rules and invites the friend to it; the screen then goes to the room.
+ * A player already waiting in a room invites them to that one instead of opening a second.
+ */
+export async function inviteToNewRoomAction(friendId: string, duel: boolean, form: FormData): Promise<RoomInviteResult> {
+  const user = await signedInUser();
+  const id = idSchema.safeParse(friendId);
+  if (!id.success || typeof duel !== "boolean" || !(form instanceof FormData)) return { error: NOT_FOUND };
+
+  const open = await openLobbyFor(user.id);
+  let gameId = open;
+  if (!gameId) {
+    try {
+      gameId = await createLobby(user.id, roomSettings(duel, form));
+    } catch (error) {
+      return { error: error instanceof Error && error.message === OPEN_GAMES_REASON ? OPEN_GAMES_REASON : "That didn't go through. Try again." };
+    }
+  }
+  const sent = await sendInvite(user.id, gameId, id.data);
+  if ("error" in sent) return { ...sent, gameId };
+  return { ok: true, gameId, message: open ? "Invited to the room you already have open." : undefined };
 }

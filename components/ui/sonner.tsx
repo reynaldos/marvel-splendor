@@ -12,7 +12,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       // Drawn like the game's dialogs: night sky behind, gold edge, bold white text.
-      className="toaster group theme-cosmos dark"
+      // The top-centre group holds the friend notices: wider, for a name, a line and two buttons on one row.
+      className="toaster group theme-cosmos dark data-[y-position=top]:[--width:30rem]!"
       icons={{
         success: (
           <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4" />
@@ -40,7 +41,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast border-2! font-bold shadow-lg [&_[data-icon]]:text-gold-400",
+          // Plain toasts only; a custom one (the friend notices) draws its own frame.
+          toast: "cn-toast data-[styled=true]:border-2! data-[styled=true]:font-bold data-[styled=true]:shadow-lg [&_[data-icon]]:text-gold-400",
           description: "text-cosmos-300!",
         },
       }}

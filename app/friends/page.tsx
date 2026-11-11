@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import {
   blockPlayerAction,
   cancelFriendRequestAction,
+  declineInviteAction,
+  inviteToNewRoomAction,
   removeFriendAction,
   respondFriendRequestAction,
   sendFriendRequestAction,
@@ -27,6 +29,7 @@ export default async function FriendsPage() {
     <>
       <TopBar />
       <FriendsScreen
+        userId={user.id}
         initial={view}
         actions={{
           send: sendFriendRequestAction,
@@ -35,6 +38,8 @@ export default async function FriendsPage() {
           remove: removeFriendAction,
           block: blockPlayerAction,
           unblock: unblockPlayerAction,
+          declineInvite: declineInviteAction,
+          inviteToRoom: inviteToNewRoomAction,
         }}
       />
     </>

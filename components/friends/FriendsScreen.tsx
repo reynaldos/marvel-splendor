@@ -1,20 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ComponentType, type FormEvent } from "react";
+import { useCallback, useState, type ComponentType, type FormEvent } from "react";
 import Link from "next/link";
 import { Ban, Inbox, Users } from "lucide-react";
 import { cn } from "cn";
 import { toast } from "sonner";
 
 import { BackLink } from "@/components/BackLink";
+import { InviteToRoom, type SendToRoom } from "@/components/friends/InviteToRoom";
+import { useFriendUpdates } from "@/components/friends/use-friend-updates";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Stage } from "@/components/Stage";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pill } from "@/components/ui/pill";
 import type { FriendEntry, FriendPlayer, FriendResult, FriendsView } from "@/lib/friends";
-
-/** The safety net for a request that arrived while the screen was open. */
-const POLL_MS = 30_000;
 
 export type Tab = "friends" | "requests" | "blocked";
 export const TAB_NAMES: Tab[] = ["friends", "requests", "blocked"];
@@ -40,9 +39,13 @@ export interface FriendsActions {
   remove: (friendId: string) => Promise<FriendResult>;
   block: (userId: string) => Promise<FriendResult>;
   unblock: (userId: string) => Promise<FriendResult>;
+  declineInvite: (inviteId: string) => Promise<FriendResult>;
+  inviteToRoom: SendToRoom;
 }
 
 interface FriendsScreenProps {
+  /** The signed-in player, for their live channel; null keeps the screen off it, as on the preview. */
+  userId: string | null;
   initial: FriendsView;
   actions: FriendsActions;
   initialTab?: Tab;
@@ -51,7 +54,7 @@ interface FriendsScreenProps {
 }
 
 /** A player on a row: picture, username, their name if set. */
-function Who({ player, online }: { player: FriendPlayer; online?: boolean }) {
+export function Who({ player, online }: { player: FriendPlayer; online?: boolean }) {
   return (
     <>
       <PlayerAvatar src={player.avatarUrl} name={player.username} className="size-10" />
@@ -70,7 +73,7 @@ function Who({ player, online }: { player: FriendPlayer; online?: boolean }) {
  * The Friends screen: Friends, Requests and Blocked down the left; the chosen tab's list in the middle,
  * scrolling in its own box; and the chosen friend on the right with the ways to view, remove and block them.
  */
-export function FriendsScreen({ initial, actions, initialTab = "friends", load }: FriendsScreenProps) {
+export function FriendsScreen({ userId, initial, actions, initialTab = "friends", load }: FriendsScreenProps) {
   const [view, setView] = useState(initial);
   const [tab, setTab] = useState<Tab>(initialTab);
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -89,17 +92,8 @@ export function FriendsScreen({ initial, actions, initialTab = "friends", load }
     }
   }, [load]);
 
-  useEffect(() => {
-    const poll = setInterval(() => void refetch(), POLL_MS);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void refetch();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      clearInterval(poll);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [refetch]);
+  // A request or invite that arrives while the screen is open shows without a reload.
+  useFriendUpdates(userId, () => void refetch());
 
   const chosen = view.friends.find((f) => f.id === chosenId) ?? null;
 
@@ -135,7 +129,7 @@ export function FriendsScreen({ initial, actions, initialTab = "friends", load }
     if (await run(() => (what === "remove" ? actions.remove(friend.id) : actions.block(friend.id)))) setChosenId(null);
   };
 
-  const waiting = view.received.length;
+  const waiting = view.waiting;
 
   return (
     <Stage>
@@ -208,7 +202,23 @@ export function FriendsScreen({ initial, actions, initialTab = "friends", load }
             </>
           ) : tab === "requests" ? (
             <ul className={LIST}>
-              {view.received.length > 0 ? <li className={HEADING}>Received</li> : null}
+              {view.invites.length > 0 ? <li className={HEADING}>Room invites</li> : null}
+              {view.invites.map((invite) => (
+                <li key={invite.id} className={cn(TILE, UNLIT)}>
+                  <PlayerAvatar src={invite.from.avatarUrl} name={invite.from.username} className="size-10" />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-black">{invite.from.username} invited you</span>
+                    <span className="truncate text-xs text-cosmos-300">{invite.line}</span>
+                  </span>
+                  <Pill tone="gold" asChild className={ROW_BUTTON}>
+                    <Link href={`/lobby/${invite.gameId}?invite=${invite.id}`}>View room</Link>
+                  </Pill>
+                  <Pill disabled={busy} onClick={() => void run(() => actions.declineInvite(invite.id))} className={ROW_BUTTON}>
+                    Decline
+                  </Pill>
+                </li>
+              ))}
+              {view.received.length > 0 ? <li className={cn(HEADING, view.invites.length > 0 && "mt-2")}>Received</li> : null}
               {view.received.map((request) => (
                 <li key={request.id} className={cn(TILE, UNLIT)}>
                   <Who player={request.from} />
@@ -229,7 +239,7 @@ export function FriendsScreen({ initial, actions, initialTab = "friends", load }
                   </Pill>
                 </li>
               ))}
-              {view.received.length === 0 && view.sent.length === 0 ? <li className={EMPTY}>Nothing waiting.</li> : null}
+              {view.invites.length === 0 && view.received.length === 0 && view.sent.length === 0 ? <li className={EMPTY}>Nothing waiting.</li> : null}
             </ul>
           ) : (
             <ul className={LIST}>
@@ -247,14 +257,15 @@ export function FriendsScreen({ initial, actions, initialTab = "friends", load }
         </section>
 
         {/* The chosen friend. */}
-        <section className="flex w-64 shrink-0 flex-col items-center gap-3 rounded-2xl bg-cosmos-950/80 p-4 text-center ring-3 ring-cosmos-500 ring-inset">
+        <section className="flex w-64 shrink-0 flex-col items-center gap-2.5 rounded-2xl bg-cosmos-950/80 p-4 text-center ring-3 ring-cosmos-500 ring-inset">
           {chosen ? (
             <>
-              <PlayerAvatar src={chosen.avatarUrl} name={chosen.username} className="size-20 text-3xl" />
-              <p className="w-full truncate text-lg font-black text-gold-400">{chosen.name ?? chosen.username}</p>
-              {chosen.name ? <p className="-mt-2 w-full truncate text-sm font-bold">@{chosen.username}</p> : null}
-              <p className={cn("text-xs font-bold tracking-wide uppercase", chosen.online ? "text-emerald-400" : "text-cosmos-300")}>{chosen.online ? "Online" : "Offline"}</p>
-              <Pill tone="gold" asChild className="mt-auto w-full">
+              {/* Where their picture was: the way to play with them. */}
+              <InviteToRoom friendId={chosen.id} username={chosen.username} onSend={actions.inviteToRoom} />
+              <p className="w-full shrink-0 truncate text-lg font-black text-gold-400">{chosen.name ?? chosen.username}</p>
+              {chosen.name ? <p className="-mt-2 w-full shrink-0 truncate text-sm font-bold">@{chosen.username}</p> : null}
+              <p className={cn("shrink-0 text-xs font-bold tracking-wide uppercase", chosen.online ? "text-emerald-400" : "text-cosmos-300")}>{chosen.online ? "Online" : "Offline"}</p>
+              <Pill asChild className="mt-auto w-full">
                 <Link href={`/profile/${chosen.username}`}>View profile</Link>
               </Pill>
               <Pill disabled={busy} onClick={() => setConfirm({ what: "remove", friend: chosen })} className="w-full">

@@ -163,7 +163,7 @@ function AddressHelp() {
           <a href="/preview/friends?state=empty" className={OPTION}>empty</a> opens every tab with nothing in it.
         </Entry>
         <Entry option="?show=">
-          <a href="/preview/friends?show=buttons" className={OPTION}>buttons</a> shows the home Friends button and the profile button in each state.
+          <a href="/preview/friends?show=buttons" className={OPTION}>buttons</a> shows the home Friends button, the profile button in each state, the lobby&apos;s Invite friends and the toasts; <a href="/preview/friends?show=invite" className={OPTION}>invite</a> shows an invite over a made-up room.
         </Entry>
       </dl>
 

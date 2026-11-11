@@ -42,6 +42,26 @@ export function clockOf(value: FormDataEntryValue | null): number | null {
   return GAME_CLOCK_OPTIONS.find((o) => o === Number(value)) ?? null;
 }
 
+/** The submitted number if it is one of the choices on offer, else the first choice. */
+const pick = (options: number[], value: FormDataEntryValue | null): number => options.find((o) => o === Number(value)) ?? options[0];
+
+/** A new room's rules from the setup form, each value one of the choices on offer. */
+export function roomSettings(duel: boolean, form: FormData) {
+  const clock = clockOf(form.get("gameTimeMinutes"));
+  if (!duel) return { targetPoints: pick(POINT_OPTIONS, form.get("targetPoints")), turnTimeSeconds: pick(TURN_TIME_OPTIONS, form.get("turnTimeSeconds")), gameTimeMinutes: clock };
+  const sent = form.get("turnTimeSeconds");
+  return {
+    rules: "duel" as const,
+    // Dealt from the Marvel cards, with the packs the table owns, not the box's 67.
+    cardSet: "marvel" as const,
+    // Duel ends on its own three conditions; the points field is not read.
+    targetPoints: 20,
+    // "off" is a game with no turn clock.
+    turnTimeSeconds: sent === "off" ? null : pick(DUEL_TURN_TIME_OPTIONS, sent),
+    gameTimeMinutes: clock,
+  };
+}
+
 /** People first, then bots, each in the order they sat down. */
 export function tableOrder<T extends { seat: number; isBot: boolean }>(players: T[]): T[] {
   return [...players].sort((a, b) => Number(a.isBot) - Number(b.isBot) || a.seat - b.seat);
