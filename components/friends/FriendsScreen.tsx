@@ -260,12 +260,14 @@ export function FriendsScreen({ userId, initial, actions, initialTab = "friends"
         <section className="flex w-64 shrink-0 flex-col items-center gap-2.5 rounded-2xl bg-cosmos-950/80 p-4 text-center ring-3 ring-cosmos-500 ring-inset">
           {chosen ? (
             <>
-              {/* Where their picture was: the way to play with them. */}
-              <InviteToRoom friendId={chosen.id} username={chosen.username} onSend={actions.inviteToRoom} />
               <p className="w-full shrink-0 truncate text-lg font-black text-gold-400">{chosen.name ?? chosen.username}</p>
               {chosen.name ? <p className="-mt-2 w-full shrink-0 truncate text-sm font-bold">@{chosen.username}</p> : null}
               <p className={cn("shrink-0 text-xs font-bold tracking-wide uppercase", chosen.online ? "text-emerald-400" : "text-cosmos-300")}>{chosen.online ? "Online" : "Offline"}</p>
-              <Pill asChild className="mt-auto w-full">
+              {/* The way to play with them leads the buttons. */}
+              <div className="mt-auto w-full">
+                <InviteToRoom friendId={chosen.id} username={chosen.username} onSend={actions.inviteToRoom} />
+              </div>
+              <Pill asChild className="w-full">
                 <Link href={`/profile/${chosen.username}`}>View profile</Link>
               </Pill>
               <Pill disabled={busy} onClick={() => setConfirm({ what: "remove", friend: chosen })} className="w-full">

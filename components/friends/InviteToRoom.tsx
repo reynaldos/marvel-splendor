@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Hourglass, Send, Star } from "lucide-react";
 import { toast } from "sonner";
 
-import { WinTile } from "@/components/duel/TokenBoard";
-import { AssetImage } from "@/components/game/assets";
+import { CardFanArt, DuelArt } from "@/components/home/art";
+import { ModeTile } from "@/components/home/ModeTile";
 import { Option } from "@/components/lobby/Option";
 import { TimerIcon } from "@/components/lobby/TimerIcon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,8 +19,6 @@ export type SendToRoom = (friendId: string, duel: boolean, form: FormData) => Pr
 const CLOCKS = [null, ...GAME_CLOCK_OPTIONS];
 /** A Duel's turn times on offer, and no turn clock. */
 const DUEL_TIMES = [...DUEL_TURN_TIME_OPTIONS, null];
-const GAME_TILE = "flex flex-1 flex-col items-center gap-3 rounded-2xl bg-cosmos-950 p-4 ring-2 ring-cosmos-500 ring-inset outline-none hover:bg-cosmos-700 focus-visible:ring-gold-400";
-const GAME_NAME = "font-display text-base font-black tracking-wide text-gold-400 uppercase";
 
 /**
  * Send invite on the Friends screen: pick the game, set it up as on Play Game or Duel, and Send.
@@ -64,19 +62,10 @@ export function InviteToRoom({ friendId, username, onSend }: { friendId: string;
         </DialogHeader>
 
         {game === null ? (
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setGame("marvel")} className={GAME_TILE}>
-              <span className="relative aspect-[1404/688] w-full overflow-hidden rounded-xl ring-2 ring-gold-400">
-                <AssetImage src="/assets/infinity-gauntlet.jpg" alt="" sizes="200px" />
-              </span>
-              <span className={GAME_NAME}>Original</span>
-            </button>
-            <button type="button" onClick={() => setGame("duel")} className={GAME_TILE}>
-              <span className="flex w-full [&>*]:w-full [&>*]:ring-2 [&>*]:ring-gold-400">
-                <WinTile still />
-              </span>
-              <span className={GAME_NAME}>Duel</span>
-            </button>
+          // The same tiles as the help's choice of game.
+          <div className="flex h-56 gap-4">
+            <ModeTile label="Original" tone="from-orange-400 to-red-700" art={<CardFanArt />} onClick={() => setGame("marvel")} />
+            <ModeTile label="Duel" tone="from-sky-400 to-blue-800" art={<DuelArt />} onClick={() => setGame("duel")} />
           </div>
         ) : (
           <form onSubmit={(event) => void send(event)} className="flex flex-col gap-4">
