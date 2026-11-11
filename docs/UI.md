@@ -151,6 +151,8 @@ Reached from the round Friends button directly right of Shop at the bottom left 
 
 Every change goes through the actions in `app/friends/actions.ts` and nothing on screen changes until the server has; a refusal shows as a toast with the reason (no such player, already friends, the list is full, too many waiting, too many today). While open the screen refetches `GET /api/friends` every 30 seconds and when the tab comes back, so a request that arrives while it is open shows without reloading. On someone else's profile, a signed-in viewer sees one button beside Back (`components/friends/FriendButton.tsx`): Add friend, Request sent (tap to cancel), Accept request, or Friends (tap to remove, which asks first). It is not there on your own page, for a visitor who isn't signed in, or when either player has blocked the other.
 
+To look at it without two accounts, open `/preview/friends`: the real screen on made-up players, whose actions follow the real send rules and change only the page (`app/preview/friends/fake.ts`). `?tab=requests` or `blocked` opens that tab, `?state=empty` empties every tab, and `?show=buttons` shows the home button with and without its dot and the profile button in each state.
+
 ## iPhone launch image
 
 An installed iPhone app shows a launch picture every time it opens: Thanos over the game's name on the night sky, with the stones adrift all round.

@@ -16,7 +16,8 @@ import type { FriendEntry, FriendPlayer, FriendResult, FriendsView } from "@/lib
 /** The safety net for a request that arrived while the screen was open. */
 const POLL_MS = 30_000;
 
-type Tab = "friends" | "requests" | "blocked";
+export type Tab = "friends" | "requests" | "blocked";
+export const TAB_NAMES: Tab[] = ["friends", "requests", "blocked"];
 const TABS: Array<{ tab: Tab; label: string; icon: ComponentType<{ className?: string }> }> = [
   { tab: "friends", label: "Friends", icon: Users },
   { tab: "requests", label: "Requests", icon: Inbox },
@@ -44,6 +45,9 @@ export interface FriendsActions {
 interface FriendsScreenProps {
   initial: FriendsView;
   actions: FriendsActions;
+  initialTab?: Tab;
+  /** Reads the lists in place of GET /api/friends; the preview hands in its fake store. */
+  load?: () => Promise<FriendsView>;
 }
 
 /** A player on a row: picture, username, their name if set. */
@@ -66,9 +70,9 @@ function Who({ player, online }: { player: FriendPlayer; online?: boolean }) {
  * The Friends screen: Friends, Requests and Blocked down the left; the chosen tab's list in the middle,
  * scrolling in its own box; and the chosen friend on the right with the ways to view, remove and block them.
  */
-export function FriendsScreen({ initial, actions }: FriendsScreenProps) {
+export function FriendsScreen({ initial, actions, initialTab = "friends", load }: FriendsScreenProps) {
   const [view, setView] = useState(initial);
-  const [tab, setTab] = useState<Tab>("friends");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [chosenId, setChosenId] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
@@ -77,12 +81,13 @@ export function FriendsScreen({ initial, actions }: FriendsScreenProps) {
 
   const refetch = useCallback(async () => {
     try {
+      if (load) return setView(await load());
       const response = await fetch("/api/friends", { cache: "no-store" });
       if (response.ok) setView((await response.json()) as FriendsView);
     } catch {
       // Offline: what is on screen stays until the next try.
     }
-  }, []);
+  }, [load]);
 
   useEffect(() => {
     const poll = setInterval(() => void refetch(), POLL_MS);
