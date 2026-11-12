@@ -52,6 +52,17 @@ export async function notifyUser(...userIds: string[]): Promise<void> {
   await Promise.all(userIds.map((id) => send(userChannel(id), FRIENDS_UPDATED_EVENT, {})));
 }
 
+/** Whether the player has the app open somewhere: their private channel has a subscriber. False when it can't tell. */
+export async function userIsOnline(userId: string): Promise<boolean> {
+  try {
+    const response = await getClient()?.get({ path: `/channels/${userChannel(userId)}` });
+    if (!response?.ok) return false;
+    return ((await response.json()) as { occupied?: boolean }).occupied === true;
+  } catch {
+    return false;
+  }
+}
+
 /** Signs a subscription to the player's own private channel; null for any other channel or without Pusher. */
 export function authorizeUserChannel(socketId: string, channel: string, userId: string) {
   const pusher = getClient();

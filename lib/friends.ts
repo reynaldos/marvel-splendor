@@ -19,6 +19,7 @@ import { isUniqueViolation } from "@/lib/game-server";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { inviteClosedReason, roomLine } from "@/lib/invite-rules";
 import { hostAwayUntil, seatsOf } from "@/lib/lobby";
+import { pushFriendRequest } from "@/lib/push";
 import { notifyUser } from "@/lib/pusher";
 import { publicAvatarUrl } from "@/lib/r2";
 import { checkUsername } from "@/lib/username";
@@ -121,6 +122,7 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
   const target = await db.user.findUnique({ where: { username: checked.username }, select: { id: true, blockedAt: true } });
   if (!target) return { error: FRIEND_MESSAGES.noSuchPlayer };
   const now = new Date();
+  let requested = false;
   try {
     const result = await db.$transaction(async (tx): Promise<FriendResult> => {
       // Both players locked: two sends at once can't both pass a limit, and one sent each way becomes the friendship.
@@ -142,9 +144,12 @@ export async function sendFriendRequest(userId: string, typed: string, db: Db = 
       }
       // The log outlives the request, so cancelling or accepting can't reset the daily limit.
       await tx.friendRequestSend.create({ data: { fromUserId: userId, createdAt: now } });
+      requested = true;
       return { ok: true, message: "Request sent." };
     });
     if ("ok" in result) await notifyUser(target.id);
+    // A request waiting reaches their phone; becoming friends at once does not.
+    if (requested) pushFriendRequest(userId, target.id, db);
     return result;
   } catch (error) {
     // Two taps at once: the second finds the first one's row.

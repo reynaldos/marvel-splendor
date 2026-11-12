@@ -154,6 +154,7 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 | `FriendRequest` | A friend request one way, waiting or declined; accepting or cancelling deletes it. One per sender and receiver |
 | `FriendRequestSend` | One row per request sent, kept when the request is accepted or cancelled, so the 30-a-day limit counts every send |
 | `Friendship` | Two rows per friendship, one each way, so a player's list is one indexed read |
+| `PushSubscription` | One device that allowed push, by its endpoint: the newest 5 per player. A device the push service reports gone (404 or 410) is deleted on the next send. `User.pushEnabled`, on by default, is the account's switch |
 | `GameInvite` | A friend asked to a room: waiting, taken up or declined. One per room and invited player. Open only while the room waits with a free seat; the game's status is the expiry |
 | `UserBlock` | A player another player has blocked: no requests pass between them, and the blocked one can't tell |
 | `Game` | A table: status, mode, seed, frozen settings, the current state snapshot, a `version` for optimistic concurrency, and the winning seat |
@@ -193,7 +194,9 @@ interface GameSettings {
 
 vs-Bot games skip Pusher entirely: the move POST response contains the bot's reply move(s) and new view.
 
-**Friends and invites** use one private channel per player, `private-user-{id}` (`lib/user-channel.ts`). After a request, an accept, a cancel, a remove, a block or an invite is saved, the server triggers `friends-updated` on the other player's channel with **no data** (`notifyUser`); a decline tells nobody. `POST /api/pusher/auth` signs only the signed-in player's own channel (403 for any other, 401 signed out). The hook `components/friends/use-friend-updates.ts` refetches `GET /api/friends` on the signal, on `visibilitychange`, when the connection comes back, and every 30 seconds; the Friends screen and `FriendNotices` (rendered by the top bar, so on every menu screen) use it. `FriendNotices` shows a toast for a new invite or request once per tab, and refreshes the page when the waiting count changes, which keeps the home dot current. Without Pusher keys it all works on the poll. Online means a `UserVisit.lastSeenAt` inside the last 5 minutes, which `lib/record-visit.ts` already writes.
+**Friends and invites** use one private channel per player, `private-user-{id}` (`lib/user-channel.ts`). After a request, an accept, a cancel, a remove, a block or an invite is saved, the server triggers `friends-updated` on the other player's channel with **no data** (`notifyUser`); a decline tells nobody. `POST /api/pusher/auth` signs only the signed-in player's own channel (403 for any other, 401 signed out). The hook `components/friends/use-friend-updates.ts` refetches `GET /api/friends` on the signal, on `visibilitychange`, when the connection comes back, and every 30 seconds; the Friends screen and `FriendNotices` (rendered by the top bar, so on every menu screen) use it. `FriendNotices` shows a toast for a new invite or request once per tab, and refreshes the page when the waiting count changes, which keeps the home dot current. Without Pusher keys it all works on the poll.
+
+**Push** (`lib/push.ts`, `web-push` with VAPID keys) reaches a player whose app is closed: a new friend request and a new or resent room invite, nothing else. It runs in `after()`, so the action never waits on it. Before sending it asks Pusher whether the player's private channel is occupied (`userIsOnline`): occupied means the app is open and the toast covers it, so no push goes out. `public/sw.js` shows the notification and, on a tap, moves an open window of the game to its address or opens one; it caches nothing. Devices are added from the Friends screen's one-time prompt or Profile settings (`app/push/actions.ts`). Without the keys nothing about push shows. Online means a `UserVisit.lastSeenAt` inside the last 5 minutes, which `lib/record-visit.ts` already writes.
 
 ---
 
@@ -224,6 +227,7 @@ app/
     games/[id]/presence/route.ts    # POST the host has left the lobby page, or is back
     friends/route.ts                # GET the signed-in player's friends, requests, blocks, open invites and waiting count
     pusher/auth/route.ts            # POST: signs the player's own private channel
+  push/actions.ts                   # keep this device for push; the account's Notifications switch
     avatar/upload/route.ts          # presigned R2 PUT + confirm
 components/
   game/      the board and everything on it, the end-of-game dialog and rewards
@@ -243,6 +247,7 @@ lib/
   friends.ts, friend-rules.ts   requests, friendships and blocks; the rules that need no database are in the second
   invites.ts, invite-rules.ts   room invites: send from the lobby, Join or Decline; the open check and limits in the second
   user-channel.ts               the private friends channel's name and event
+  push.ts                       push to a closed app: send, skip when open, drop gone devices
   game-replay.ts, game-server.ts, game-view.ts, game-record.ts, board-events.ts, pusher.ts, r2.ts, auth0.ts, db.ts
 data/        cards.json, locations.json, assets.json, updates.json, launch-screens.json, image-versions.json
 docs/        this doc's companions, and xp-lab.html built by `pnpm xp:lab`

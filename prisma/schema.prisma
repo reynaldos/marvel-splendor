@@ -62,6 +62,8 @@ model User {
   xpCardStyle            Boolean             @default(false)
   // Whether they have asked to be left off the leaderboard.
   hideFromLeaderboard    Boolean             @default(false)
+  // Whether friend requests and room invites reach their devices as push notifications.
+  pushEnabled            Boolean             @default(true)
   // Set by an admin: the account is signed out and cannot play until it is cleared.
   blockedAt              DateTime?
   createdAt              DateTime            @default(now())
@@ -83,6 +85,7 @@ model User {
   blockedBy              UserBlock[]         @relation("BlockedBy")
   invitesSent            GameInvite[]        @relation("InvitesSent")
   invitesReceived        GameInvite[]        @relation("InvitesReceived")
+  pushSubscriptions      PushSubscription[]
 }
 
 // A card a player has recruited themselves, in a game played to the end.
@@ -305,4 +308,17 @@ model GameInvite {
 
   @@unique([gameId, toUserId])
   @@index([toUserId, status])
+}
+
+// One browser or installed app that allowed push; deleted when the push service says it is gone.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

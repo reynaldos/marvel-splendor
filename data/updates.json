@@ -1,7 +1,7 @@
 [
   {
     "version": "3.3.0",
-    "date": "2026-11-11",
+    "date": "2026-11-12",
     "title": "Friends",
     "summary": "Add the people you play with, see who is online, and invite them to your room.",
     "pulls": [],
@@ -11,10 +11,10 @@
       "Add, accept or remove a friend from their profile page",
       "Block a player to keep them from sending you requests",
       "Invite friends to your room from the lobby, no code needed",
-      "An invite shows you the room first, then Join or Decline"
+      "An invite shows you the room first, then Join or Decline",
+      "Notifications: a friend request or a room invite reaches your phone with the game closed, and a tap opens it. The switch is in Profile settings; on an iPhone, add the game to your Home Screen first"
     ],
     "improved": [
-      "Friend requests and invites show up within seconds while the game is open"
     ],
     "fixed": []
   },

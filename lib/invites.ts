@@ -3,8 +3,9 @@ import { prisma } from "@/lib/db";
 import { NOT_FOUND } from "@/lib/friend-rules";
 import { type FriendEntry, type FriendPlayer, type FriendResult, friendsOf, PLAYER_SELECT, ROOM_SELECT, roomOf, toPlayer } from "@/lib/friends";
 import { isUniqueViolation } from "@/lib/game-server";
-import { canResend, INVITE_MESSAGES, inviteClosedReason, MAX_INVITES_PER_ROOM } from "@/lib/invite-rules";
+import { canResend, INVITE_MESSAGES, inviteClosedReason, MAX_INVITES_PER_ROOM, roomLine } from "@/lib/invite-rules";
 import { joinLobby } from "@/lib/lobby";
+import { pushInvite } from "@/lib/push";
 import { notifyGame, notifyUser } from "@/lib/pusher";
 
 type Db = typeof prisma;
@@ -16,7 +17,8 @@ export type InvitableFriend = FriendEntry & { invite: { status: "PENDING" | "DEC
 export async function sendInvite(userId: string, gameId: string, friendId: string, db: Db = prisma): Promise<FriendResult> {
   const game = await db.game.findUnique({ where: { id: gameId }, select: { ...ROOM_SELECT, players: { select: { userId: true } } } });
   if (!game?.players.some((p) => p.userId === userId)) return { error: NOT_FOUND };
-  const reason = inviteClosedReason(roomOf(game));
+  const room = roomOf(game);
+  const reason = inviteClosedReason(room);
   if (reason) return { error: reason };
   if (game.players.some((p) => p.userId === friendId)) return { error: INVITE_MESSAGES.seated };
 
@@ -24,19 +26,20 @@ export async function sendInvite(userId: string, gameId: string, friendId: strin
   const friendship = await db.friendship.findUnique({ where: { userId_friendId: { userId, friendId } }, select: { friend: { select: { blockedAt: true } } } });
   if (!friendship || friendship.friend.blockedAt) return { error: NOT_FOUND };
 
+  let invite: { id: string };
   const existing = await db.gameInvite.findUnique({ where: { gameId_toUserId: { gameId, toUserId: friendId } }, select: { status: true, createdAt: true } });
   if (existing) {
     if (existing.status === "DECLINED") return { error: INVITE_MESSAGES.theyDeclined };
     if (existing.status === "PENDING" && !canResend(existing.createdAt.getTime())) return { error: INVITE_MESSAGES.tooSoon };
     // A resend, or one taken up before they left: waiting again, as new.
-    await db.gameInvite.update({
+    invite = await db.gameInvite.update({
       where: { gameId_toUserId: { gameId, toUserId: friendId } },
       data: { status: "PENDING", fromUserId: userId, createdAt: new Date(), respondedAt: null },
     });
   } else {
     if ((await db.gameInvite.count({ where: { gameId, fromUserId: userId } })) >= MAX_INVITES_PER_ROOM) return { error: INVITE_MESSAGES.tooMany };
     try {
-      await db.gameInvite.create({ data: { gameId, fromUserId: userId, toUserId: friendId } });
+      invite = await db.gameInvite.create({ data: { gameId, fromUserId: userId, toUserId: friendId } });
     } catch (error) {
       // Two taps at once: the second finds the first one's row.
       if (isUniqueViolation(error, "toUserId")) return { error: INVITE_MESSAGES.tooSoon };
@@ -44,6 +47,7 @@ export async function sendInvite(userId: string, gameId: string, friendId: strin
     }
   }
   await notifyUser(friendId);
+  pushInvite(userId, friendId, { id: invite.id, gameId, line: roomLine(room) }, db);
   return { ok: true };
 }
 

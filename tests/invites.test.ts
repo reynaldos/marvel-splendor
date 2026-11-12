@@ -4,12 +4,14 @@ vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/generated/prisma/client", () => ({ Prisma: {} }));
 vi.mock("@/lib/r2", () => ({ publicAvatarUrl: (key: string | null) => (key ? `https://img/${key}` : null) }));
 vi.mock("@/lib/pusher", () => ({ notifyUser: vi.fn(async () => {}), notifyGame: vi.fn(async () => {}) }));
+vi.mock("@/lib/push", () => ({ pushFriendRequest: vi.fn(), pushInvite: vi.fn() }));
 vi.mock("@/lib/lobby", async (original) => ({ ...(await original<typeof import("@/lib/lobby")>()), joinLobby: vi.fn() }));
 
 import { NOT_FOUND } from "@/lib/friend-rules";
 import { INVITE_MESSAGES, MAX_INVITES_PER_ROOM, RESEND_AFTER_MS } from "@/lib/invite-rules";
 import { invitableFriends, inviteFor, respondInvite, sendInvite } from "@/lib/invites";
 import { joinLobby } from "@/lib/lobby";
+import { pushInvite } from "@/lib/push";
 import { notifyGame, notifyUser } from "@/lib/pusher";
 
 type Invite = { id: string; gameId: string; fromUserId: string; toUserId: string; status: string; createdAt?: Date };
@@ -53,7 +55,11 @@ function fakeDb(opts: { status?: string; seated?: string[]; friends?: string[]; 
         invites.filter((i) => i.gameId === where.gameId && where.status.in.includes(i.status)).map((i) => ({ ...i, createdAt: i.createdAt ?? LONG_AGO })),
       ),
       count: vi.fn(async ({ where }: { where: Partial<Invite> }) => invites.filter((i) => i.gameId === where.gameId && i.fromUserId === where.fromUserId).length),
-      create: vi.fn(async ({ data }: { data: Omit<Invite, "id" | "status"> }) => invites.push({ id: `i${invites.length + 1}`, status: "PENDING", createdAt: new Date(), ...data })),
+      create: vi.fn(async ({ data }: { data: Omit<Invite, "id" | "status"> }) => {
+        const row = { id: `i${invites.length + 1}`, status: "PENDING", createdAt: new Date(), ...data };
+        invites.push(row);
+        return row;
+      }),
       update: vi.fn(async ({ where, data }: { where: Parameters<typeof find>[0]; data: Partial<Invite> }) => Object.assign(find(where)!, data)),
       updateMany: vi.fn(async ({ where, data }: { where: Partial<Invite>; data: Partial<Invite> }) => {
         const row = find(where);
@@ -75,7 +81,9 @@ describe("sendInvite", () => {
     expect(await sendInvite("a", "g", "b", as(db))).toEqual({ ok: true });
     expect(db.invites).toHaveLength(1);
     expect(notifyUser).toHaveBeenCalledWith("b");
+    expect(pushInvite).toHaveBeenCalledWith("a", "b", { id: "i1", gameId: "g", line: "Marvel game, 1 of 4 seats taken" }, expect.anything());
     expect(await sendInvite("a", "g", "b", as(db))).toEqual({ error: INVITE_MESSAGES.tooSoon });
+    expect(pushInvite).toHaveBeenCalledTimes(1);
     expect(db.invites).toHaveLength(1);
   });
 

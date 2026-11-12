@@ -11,6 +11,7 @@ import {
   unblockPlayerAction,
 } from "@/app/friends/actions";
 import { FriendsScreen } from "@/components/friends/FriendsScreen";
+import { PushPrompt } from "@/components/PushPrompt";
 import { TopBar } from "@/components/TopBar";
 import { auth0 } from "@/lib/auth0";
 import { loadFriends } from "@/lib/friends";
@@ -28,6 +29,8 @@ export default async function FriendsPage() {
   return (
     <>
       <TopBar />
+      {/* Asked once, and only of a player who has someone to hear from. */}
+      <PushPrompt wanted={user.pushEnabled && view.friends.length + view.received.length > 0} />
       <FriendsScreen
         userId={user.id}
         initial={view}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useFriendUpdates } from "@/components/friends/use-friend-updates";
+import { registerWorker } from "@/components/push-device";
 import { PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { Pill } from "@/components/ui/pill";
 import type { FriendPlayer, FriendResult, FriendsView, InviteEntry } from "@/lib/friends";
@@ -156,6 +157,8 @@ export function FriendNotices({
   useEffect(() => {
     void check();
   }, [check]);
+  // On every menu screen, so the push worker is active long before Turn on is tapped.
+  useEffect(registerWorker, []);
   useFriendUpdates(userId, () => void check());
 
   return null;

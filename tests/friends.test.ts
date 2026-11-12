@@ -5,6 +5,7 @@ vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/generated/prisma/client", () => ({ Prisma: {} }));
 vi.mock("@/lib/r2", () => ({ publicAvatarUrl: (key: string | null) => (key ? `https://img/${key}` : null) }));
 vi.mock("@/lib/pusher", () => ({ notifyUser: vi.fn(async () => {}), notifyGame: vi.fn(async () => {}) }));
+vi.mock("@/lib/push", () => ({ pushFriendRequest: vi.fn(), pushInvite: vi.fn() }));
 
 import { FRIEND_MESSAGES, MAX_FRIENDS, MAX_PENDING_SENT, MAX_REQUESTS_PER_DAY, NOT_FOUND, ONLINE_WINDOW_MS, REQUEST_WINDOW_MS } from "@/lib/friend-rules";
 import {
@@ -19,6 +20,7 @@ import {
   waitingRequestCount,
 } from "@/lib/friends";
 import { notifyUser } from "@/lib/pusher";
+import { pushFriendRequest } from "@/lib/push";
 
 type Row = Record<string, unknown>;
 type Where = Record<string, unknown>;
@@ -510,6 +512,7 @@ describe("live notices", () => {
     const db = fakeDb({ users: [A, B] });
     await sendFriendRequest("a", "bob", as(db));
     expect(notify).toHaveBeenLastCalledWith("b");
+    expect(pushFriendRequest).toHaveBeenLastCalledWith("a", "b", expect.anything());
     const id = db.tables.friendRequest[0].id as string;
     await cancelFriendRequest("a", id, as(db));
     expect(notify).toHaveBeenLastCalledWith("b");
@@ -518,8 +521,11 @@ describe("live notices", () => {
     notify.mockClear();
     await respondFriendRequest("b", db.tables.friendRequest[0].id as string, false, as(db));
     expect(notify).not.toHaveBeenCalled();
+    vi.mocked(pushFriendRequest).mockClear();
     await sendFriendRequest("b", "amy", as(db));
     expect(notify).toHaveBeenLastCalledWith("a");
+    // A's declined request doesn't turn this into an instant friendship, so it is pushed.
+    expect(pushFriendRequest).toHaveBeenCalledWith("b", "a", expect.anything());
     const theirs = db.tables.friendRequest.find((r) => r.fromUserId === "b")!.id as string;
     await respondFriendRequest("a", theirs, true, as(db));
     expect(notify).toHaveBeenLastCalledWith("b");
