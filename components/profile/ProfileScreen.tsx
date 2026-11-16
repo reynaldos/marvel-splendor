@@ -2,8 +2,10 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 
+import { cancelFriendRequestAction, removeFriendAction, respondFriendRequestAction, sendFriendRequestAction } from "@/app/friends/actions";
 import { BackLink } from "@/components/BackLink";
 import { FoilLayer } from "@/components/Foil";
+import { FriendButton, type FriendStandingProps } from "@/components/friends/FriendButton";
 import { LevelBadge } from "@/components/profile/LevelBadge";
 import { ownFrame, PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { RankBadge } from "@/components/profile/RankBadge";
@@ -40,6 +42,8 @@ interface ProfileScreenProps {
   isOwn: boolean;
   /** An admin may edit any profile; the link then names whose. */
   canEdit: boolean;
+  /** The viewer's friend standing with this player, when one button should show; null on your own page, for visitors and across a block. */
+  friend?: (FriendStandingProps & { userId: string }) | null;
 }
 
 /** A player's page: who they are on a card, beside how they have played. */
@@ -57,6 +61,7 @@ export function ProfileScreen({
   games,
   isOwn,
   canEdit,
+  friend = null,
 }: ProfileScreenProps) {
   const level = accountLevel(xp);
   const tier = accountFrameTier(level);
@@ -102,6 +107,16 @@ export function ProfileScreen({
 
         <footer className="flex items-center justify-between">
           <BackLink />
+          {friend ? (
+            <FriendButton
+              {...friend}
+              username={username}
+              onSend={sendFriendRequestAction}
+              onRespond={respondFriendRequestAction}
+              onCancel={cancelFriendRequestAction}
+              onRemove={removeFriendAction}
+            />
+          ) : null}
           <Link
             href={`/profile/${username}/collection`}
             className="flex h-11 items-center justify-center rounded-full bg-gold-400 px-10 indent-[0.025em] font-display text-base font-black tracking-wide text-cosmos-950 uppercase shadow-lg hover:bg-gold-200"

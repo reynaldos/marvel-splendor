@@ -2,6 +2,8 @@ import { TopBar } from "@/components/TopBar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { InviteDialog } from "@/components/friends/InviteDialog";
+import { InviteFriends } from "@/components/lobby/InviteFriends";
 import { LobbyLive } from "@/components/lobby/LobbyLive";
 import { LobbyScreen } from "@/components/lobby/LobbyScreen";
 import { NOTICE_BUTTON, NoticeScreen } from "@/components/lobby/NoticeScreen";
@@ -9,7 +11,10 @@ import { auth0 } from "@/lib/auth0";
 import { botAvatarKeys } from "@/lib/avatars";
 import { prisma } from "@/lib/db";
 import { DEFAULT_SETTINGS, type GameSettings } from "@/lib/engine/types";
+import { roomOf } from "@/lib/friends";
 import { getOrCreateUser } from "@/lib/get-or-create-user";
+import { INVITE_MESSAGES, inviteClosedReason, roomLine } from "@/lib/invite-rules";
+import { inviteFor, invitableFriends } from "@/lib/invites";
 import { closeIfHostGone, hostAwayUntil, seatsOf, withCheat } from "@/lib/lobby";
 import { botName, tableOrder } from "@/lib/lobby-rules";
 import { publicAvatarUrl } from "@/lib/r2";
@@ -17,8 +22,10 @@ import { pageMetadata } from "@/lib/site";
 
 import {
   addBotAction,
+  inviteFriendAction,
   leaveAction,
   removeBotAction,
+  respondInviteAction,
   setBotDifficultyAction,
   startGameAction,
 } from "./actions";
@@ -31,11 +38,12 @@ export default async function LobbyPage({
   searchParams,
 }: {
   params: Promise<{ gameId: string }>;
-  searchParams: Promise<{ cheat?: string }>;
+  searchParams: Promise<{ cheat?: string; invite?: string }>;
 }) {
   const { gameId } = await params;
+  const query = await searchParams;
   // Carried from the lobby on to the board.
-  const cheat = (await searchParams).cheat === "true";
+  const cheat = query.cheat === "true";
 
   const session = await auth0.getSession();
   if (!session) {
@@ -60,9 +68,60 @@ export default async function LobbyPage({
     );
   }
 
+  const settings = { ...DEFAULT_SETTINGS, ...(game.settings as unknown as Partial<GameSettings>) };
+  const botAvatars = botAvatarKeys(game.seed, game.players);
+  const seats = Array.from({ length: seatsOf(game.settings) }, (_, i) => {
+    const player = tableOrder(game.players)[i];
+    if (!player) return null;
+    return {
+      seat: player.seat,
+      name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
+      avatarUrl: publicAvatarUrl(player.isBot ? botAvatars.get(player.seat) : player.user?.avatarKey),
+      isBot: player.isBot,
+      isHost: player.seat === 0,
+      isYou: player.userId === user.id,
+      difficulty: player.isBot ? (settings.botDifficultyBySeat?.[player.seat] ?? "normal") : undefined,
+    };
+  });
+  const table = {
+    joinCode: game.joinCode,
+    seats,
+    targetPoints: settings.targetPoints,
+    duel: settings.rules === "duel",
+    turnTimeSeconds: settings.turnTimeSeconds,
+    gameTimeMinutes: settings.gameTimeMinutes,
+    onAddBot: addBotAction.bind(null, game.id),
+    onRemoveBot: (seat: number) => removeBotAction.bind(null, game.id, seat),
+    onSetBotDifficulty: (seat: number) => setBotDifficultyAction.bind(null, game.id, seat),
+    onStart: startGameAction.bind(null, game.id, cheat),
+    onLeave: leaveAction.bind(null, game.id),
+  };
+
   const mySeat = game.players.find((p) => p.userId === user.id);
-  // Not seated yet: the join page seats you, or explains why it can't.
-  if (!mySeat) redirect(`/join/${game.joinCode}`);
+  if (!mySeat) {
+    // Invited: the room as it is, under the Join or Decline question. Anyone else goes to the join page, which seats them or says why not.
+    const invite = query.invite ? await inviteFor(user.id, query.invite, game.id) : null;
+    if (!invite) redirect(`/join/${game.joinCode}`);
+    const room = roomOf({ ...game, _count: { players: game.players.length } });
+    const reason = invite.status === "DECLINED" ? INVITE_MESSAGES.declined : invite.status === "ACCEPTED" ? "You already joined this room." : inviteClosedReason(room);
+    if (reason) {
+      return (
+        <NoticeScreen title="Invite" message={reason}>
+          <Link href="/" className={NOTICE_BUTTON}>
+            Back to home
+          </Link>
+        </NoticeScreen>
+      );
+    }
+    return (
+      <>
+        <TopBar />
+        <LobbyLive gameId={game.id} isHost={false} hostAwayUntil={room.hostAwayUntil} />
+        <LobbyScreen {...table} hostAwayUntil={room.hostAwayUntil} isHost={false} />
+        <InviteDialog gameId={game.id} from={invite.from} line={roomLine(room)} onRespond={respondInviteAction.bind(null, game.id, query.invite!)} />
+      </>
+    );
+  }
   // A room whose host stayed away too long closes on everyone in it; the state still says they left.
   const awayUntil = hostAwayUntil(game);
   if (awayUntil !== null && (await closeIfHostGone(game))) {
@@ -76,39 +135,18 @@ export default async function LobbyPage({
   }
   if (game.status !== "LOBBY") redirect(withCheat(`/play/${game.id}`, cheat));
 
-  const settings = { ...DEFAULT_SETTINGS, ...(game.settings as unknown as Partial<GameSettings>) };
-  const botAvatars = botAvatarKeys(game.seed, game.players);
+  const seatedIds = game.players.flatMap((p) => (p.userId ? [p.userId] : []));
+  const friends = await invitableFriends(user.id, game.id, seatedIds);
 
   return (
     <>
       <TopBar />
       <LobbyLive gameId={game.id} isHost={mySeat.seat === 0} hostAwayUntil={awayUntil} />
       <LobbyScreen
-        joinCode={game.joinCode}
+        {...table}
         hostAwayUntil={awayUntil}
-        seats={Array.from({ length: seatsOf(game.settings) }, (_, i) => {
-          const player = tableOrder(game.players)[i];
-          if (!player) return null;
-          return {
-            seat: player.seat,
-            name: player.isBot ? botName(game.players, player.seat) : (player.user?.username ?? "Player"),
-            avatarUrl: publicAvatarUrl(player.isBot ? botAvatars.get(player.seat) : player.user?.avatarKey),
-            isBot: player.isBot,
-            isHost: player.seat === 0,
-            isYou: player.userId === user.id,
-            difficulty: player.isBot ? (settings.botDifficultyBySeat?.[player.seat] ?? "normal") : undefined,
-          };
-        })}
         isHost={mySeat.seat === 0}
-        targetPoints={settings.targetPoints}
-        duel={settings.rules === "duel"}
-        turnTimeSeconds={settings.turnTimeSeconds}
-        gameTimeMinutes={settings.gameTimeMinutes}
-        onAddBot={addBotAction.bind(null, game.id)}
-        onRemoveBot={(seat) => removeBotAction.bind(null, game.id, seat)}
-        onSetBotDifficulty={(seat) => setBotDifficultyAction.bind(null, game.id, seat)}
-        onStart={startGameAction.bind(null, game.id, cheat)}
-        onLeave={leaveAction.bind(null, game.id)}
+        besideCode={<InviteFriends friends={friends} full={game.players.length >= seats.length} onInvite={inviteFriendAction.bind(null, game.id)} />}
       />
     </>
   );

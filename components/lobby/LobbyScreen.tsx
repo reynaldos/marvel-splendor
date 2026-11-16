@@ -44,6 +44,8 @@ interface LobbyScreenProps {
   onSetBotDifficulty: (seat: number) => Action;
   onStart: Action;
   onLeave: Action;
+  /** Shown after the room code's buttons: Invite friends. */
+  besideCode?: ReactNode;
 }
 
 const NAME_PILL = "flex h-8 w-full items-center justify-center rounded-full px-3 text-sm font-bold";
@@ -121,6 +123,7 @@ export function LobbyScreen({
   onSetBotDifficulty,
   onStart,
   onLeave,
+  besideCode,
 }: LobbyScreenProps) {
   const seated = seats.filter(Boolean).length;
   const canStart = seated >= 2;
@@ -128,8 +131,9 @@ export function LobbyScreen({
   return (
     <Stage>
       <StageRows>
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-3">
           <ShareCode code={joinCode} />
+          {besideCode}
         </div>
 
         <ol className="flex items-start justify-evenly">

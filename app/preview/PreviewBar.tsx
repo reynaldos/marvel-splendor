@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { TAB_NAMES } from "@/components/friends/FriendsScreen";
 
 import { CARD_LEVEL_UPS, RESULTS } from "./game-over/standings";
 
@@ -28,6 +29,7 @@ const PAGES = [
   { name: "Squad pic", href: "/preview/team" },
   { name: "Duel", href: "/preview/duel" },
   { name: "Popups", href: "/preview/modals" },
+  { name: "Friends", href: "/preview/friends" },
 ];
 
 /** What `?show=` takes on the board, by what it plays. */
@@ -148,6 +150,20 @@ function AddressHelp() {
       <dl className="flex flex-col gap-3">
         <Entry option="?game=">
           The board&apos;s loading screen, held still; <a href="/preview/loading?game=duel" className={OPTION}>duel</a> shows the Duel board&apos;s.
+        </Entry>
+      </dl>
+
+      <h4 className={cn(HEADING, "mt-3")}>Friends</h4>
+      <dl className="flex flex-col gap-3">
+        <Entry option="?tab=">
+          The Friends screen&apos;s tab it opens on. Friends when left out.
+          <Options to={(tab) => `/preview/friends?tab=${tab}`} values={TAB_NAMES} />
+        </Entry>
+        <Entry option="?state=">
+          <a href="/preview/friends?state=empty" className={OPTION}>empty</a> opens every tab with nothing in it.
+        </Entry>
+        <Entry option="?show=">
+          <a href="/preview/friends?show=buttons" className={OPTION}>buttons</a> shows the home Friends button, the profile button in each state, the lobby&apos;s Invite friends and the toasts; <a href="/preview/friends?show=invite" className={OPTION}>invite</a> shows an invite over a made-up room.
         </Entry>
       </dl>
 

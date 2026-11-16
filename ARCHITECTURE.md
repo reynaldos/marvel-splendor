@@ -151,6 +151,12 @@ The schema is `prisma/schema.prisma`; this is what each table is for. Columns ad
 | `Purchase` | What a player has bought in the shop: the kind of thing, its id, the price paid and when; one of each per player |
 | `UserVisit` | One row per stretch of activity, with IP address, browser and times, for the admin page |
 | `Feedback` | Feature requests and bug reports from the menu, with a status the admins move along |
+| `FriendRequest` | A friend request one way, waiting or declined; accepting or cancelling deletes it. One per sender and receiver |
+| `FriendRequestSend` | One row per request sent, kept when the request is accepted or cancelled, so the 30-a-day limit counts every send |
+| `Friendship` | Two rows per friendship, one each way, so a player's list is one indexed read |
+| `PushSubscription` | One device that allowed push, by its endpoint: the newest 5 per player. A device the push service reports gone (404 or 410) is deleted on the next send. `User.pushEnabled`, on by default, is the account's switch |
+| `GameInvite` | A friend asked to a room: waiting, taken up or declined. One per room and invited player. Open only while the room waits with a free seat; the game's status is the expiry |
+| `UserBlock` | A player another player has blocked: no requests pass between them, and the blocked one can't tell |
 | `Game` | A table: status, mode, seed, frozen settings, the current state snapshot, a `version` for optimistic concurrency, and the winning seat |
 | `GamePlayer` | A seat: the user or guest or bot in it, and `rewards`, what the game gave them when it finished (`GameRewards` in `lib/game-record.ts`) |
 | `Move` | The move log, one row per move in order |
@@ -179,14 +185,18 @@ interface GameSettings {
 
 - **Create game** → row in `LOBBY` status with generated `joinCode`; host shares the code/link (`/join/CODE`).
 - **Join** → signed-in users join as themselves; guests pick a display name and get an httpOnly `guestToken` cookie tied to their `GamePlayer` row.
-- **Lobby** → presence channel `presence-game-{id}` shows seats filling live; host starts the game (2–4 seats, bots can fill empty seats).
-- **In game** → moves POST to the server; on success the server triggers `move-applied` on private channel `private-game-{id}` with `{ordinal, redactedStatePerSeat…}` (per-seat redaction handled by clients fetching their own view, event carries the public delta). Pusher auth endpoint verifies session/guest cookie before channel subscription.
-- **Reconnect** → client refetches `GET /api/games/[id]/view` (redacted for the viewer) and resumes from the live channel; missed events are irrelevant because state is snapshot-based.
-- **Chat & reactions** → `POST /api/games/[id]/chat` persists a `ChatMessage` (text length-capped, basic rate-limited per seat) and triggers `chat` on the game channel. Reactions are the same pipeline with `kind: REACTION` and a curated emote set (Marvel-flavored quick reactions), rendered as transient bubbles over the sender's plaque. Chat history loads with the game view so reconnects/spectators see context.
+- **One channel per game, public and signal-only** → `game-{id}` (`lib/game-channel.ts`). After a lobby or game change is saved, the server triggers `updated` on it with **no data** (`notifyGame` in `lib/pusher.ts`): it only says "fetch again", so nothing hidden (blind reserves, deck order) can leak through it and the channel needs no per-user authorization. There is no presence channel. `POST /api/games/[id]/presence` is not Pusher: it is the host's lobby page saying they left it or are back (`setHostAway`).
+- **Lobby and in game** → the same hook, `components/game/use-game-updates.ts`, refetches `GET /api/games/[id]` (redacted for the viewer) on the `updated` signal, when the tab becomes visible, when the Pusher connection comes back, and every 15 seconds as the safety net. Without Pusher keys everything works on the poll. Moves POST to the server; the host starts the game (2–4 seats, bots can fill empty seats).
+- **Reconnect** → the next refetch has the whole view; missed signals are irrelevant because state is snapshot-based.
+- **Chat & reactions** → `POST /api/games/[id]/chat` persists a `ChatMessage` (text length-capped, basic rate-limited per seat) and triggers `chat` on the game channel. The bubble travels in the signal, as it is meant for everyone at the table. Reactions are the same pipeline with `kind: REACTION` and a curated emote set (Marvel-flavored quick reactions), rendered as transient bubbles over the sender's plaque. Chat history loads with the game view so reconnects/spectators see context.
 - **Turn timer enforcement (serverless-safe)** → turn ends are worked out from the last move's time (`lib/game-replay.ts`). The active player's device submits a `TIMEOUT_SKIP` move at zero; every other device does the same about three seconds later as a backstop, and the server checks the clock before accepting it. Three consecutive missed turns marks the seat away and a bot takes it over. The game clock runs from `settings.startedAt` and is checked on every move. Section 10 has the cases these rules do and don't cover.
 - **Timeouts/abandonment** → a daily Vercel cron (`vercel.json`, `GET /api/cron/sweep-games` with `CRON_SECRET`) marks games left open as `ABANDONED`: a multiplayer game or lobby idle for a day, a game against bots idle for a week (`lib/sweep-games.ts`). The admin page runs the same sweep on a button.
 
 vs-Bot games skip Pusher entirely: the move POST response contains the bot's reply move(s) and new view.
+
+**Friends and invites** use one private channel per player, `private-user-{id}` (`lib/user-channel.ts`). After a request, an accept, a cancel, a remove, a block or an invite is saved, the server triggers `friends-updated` on the other player's channel with **no data** (`notifyUser`); a decline tells nobody. `POST /api/pusher/auth` signs only the signed-in player's own channel (403 for any other, 401 signed out). The hook `components/friends/use-friend-updates.ts` refetches `GET /api/friends` on the signal, on `visibilitychange`, when the connection comes back, and every 30 seconds; the Friends screen and `FriendNotices` (rendered by the top bar, so on every menu screen) use it. `FriendNotices` shows a toast for a new invite or request once per tab, and refreshes the page when the waiting count changes, which keeps the home dot current. Without Pusher keys it all works on the poll.
+
+**Push** (`lib/push.ts`, `web-push` with VAPID keys) reaches a player whose app is closed: a new friend request and a new or resent room invite, nothing else. It runs in `after()`, so the action never waits on it. Before sending it asks Pusher whether the player's private channel is occupied (`userIsOnline`): occupied means the app is open and the toast covers it, so no push goes out. `public/sw.js` shows the notification and, on a tap, moves an open window of the game to its address or opens one; it caches nothing. Devices are added from the Friends screen's one-time prompt or Profile settings (`app/push/actions.ts`). Without the keys nothing about push shows. Online means a `UserVisit.lastSeenAt` inside the last 5 minutes, which `lib/record-visit.ts` already writes.
 
 ---
 
@@ -202,23 +212,28 @@ app/
   lobby/[gameId]/                   # pre-game lobby
   play/[gameId]/                    # the board (both modes)
   profile/[username]/               # public profile, stats, game record; /collection under it
+  friends/                          # friends, requests both ways, blocked players
   settings/                         # own profile edit, avatar, level-frame switches
   leaderboard/                      # top 100 by rating
   admin/users/                      # owner's dashboard: users, tables, messages, feedback
   preview/{board,loading,game-over,tiers}/   # screens to look at without playing
   launch-art/                       # the page the iPhone launch pictures are photographed from
-  daily-bonus/actions.ts, feedback/actions.ts, settings/actions.ts, lobby/[gameId]/actions.ts, private/actions.ts, admin/actions.ts
+  daily-bonus/actions.ts, feedback/actions.ts, friends/actions.ts, settings/actions.ts, lobby/[gameId]/actions.ts, private/actions.ts, admin/actions.ts
   api/
     games/route.ts                  # POST create
     games/[id]/route.ts             # GET view (redacted for the viewer)
     games/[id]/moves/route.ts       # POST move; bots reply in the same request; rewards recorded when the game finishes
     games/[id]/chat/route.ts        # POST emoji or message
-    games/[id]/presence/route.ts    # Pusher channel auth
+    games/[id]/presence/route.ts    # POST the host has left the lobby page, or is back
+    friends/route.ts                # GET the signed-in player's friends, requests, blocks, open invites and waiting count
+    pusher/auth/route.ts            # POST: signs the player's own private channel
+  push/actions.ts                   # keep this device for push; the account's Notifications switch
     avatar/upload/route.ts          # presigned R2 PUT + confirm
 components/
   game/      the board and everything on it, the end-of-game dialog and rewards
   lobby/     vs-computer setup, private room, lobby
   home/      main menu
+  friends/   the Friends screen, the home button and the button on a profile
   profile/   profile, settings, collection, leaderboard, frames and badges
   admin/     dashboard tables
   ui/        shadcn/ui generated
@@ -229,6 +244,10 @@ lib/
   record-*.ts   what a finished game writes: stats, rating, coins, rewards, visits, the daily bonus
   load-*.ts     reads for the pages: game history, XP, feedback
   xp.ts, coins.ts, rating.ts, card-level.ts, frame-tier.ts, daily-bonus.ts   the progression rules (docs/PROGRESSION.md)
+  friends.ts, friend-rules.ts   requests, friendships and blocks; the rules that need no database are in the second
+  invites.ts, invite-rules.ts   room invites: send from the lobby, Join or Decline; the open check and limits in the second
+  user-channel.ts               the private friends channel's name and event
+  push.ts                       push to a closed app: send, skip when open, drop gone devices
   game-replay.ts, game-server.ts, game-view.ts, game-record.ts, board-events.ts, pusher.ts, r2.ts, auth0.ts, db.ts
 data/        cards.json, locations.json, assets.json, updates.json, launch-screens.json, image-versions.json
 docs/        this doc's companions, and xp-lab.html built by `pnpm xp:lab`

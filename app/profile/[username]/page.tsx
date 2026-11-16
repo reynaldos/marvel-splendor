@@ -5,6 +5,7 @@ import { ProfileScreen } from "@/components/profile/ProfileScreen";
 import { isAdmin } from "@/lib/admin";
 import { auth0 } from "@/lib/auth0";
 import { prisma } from "@/lib/db";
+import { standingWith } from "@/lib/friends";
 import { accountXpByUser } from "@/lib/load-xp";
 import { loadGameHistory } from "@/lib/load-game-history";
 import { defaultUserStatsSnapshot } from "@/lib/record-stats";
@@ -25,6 +26,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const [session, history, xp] = await Promise.all([auth0.getSession(), loadGameHistory(user.id), accountXpByUser([user.id])]);
   const isOwn = session?.user.sub === user.auth0Sub;
   const admin = Boolean(session && isAdmin(session.user));
+  const friend = session && !isOwn ? await friendStanding(session.user.sub, user) : null;
 
   return (
     <>
@@ -44,7 +46,16 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         games={isOwn || admin ? history.games : null}
         isOwn={isOwn}
         canEdit={isOwn || admin}
+        friend={friend}
       />
     </>
   );
+}
+
+/** The friend button's state for a signed-in viewer on someone else's page; null when no button should show. */
+async function friendStanding(viewerSub: string, other: { id: string; blockedAt: Date | null }) {
+  const viewer = await prisma.user.findUnique({ where: { auth0Sub: viewerSub }, select: { id: true } });
+  if (!viewer) return null;
+  const { standing, requestId } = await standingWith(viewer.id, other);
+  return standing === "hidden" ? null : { standing, requestId, userId: other.id };
 }

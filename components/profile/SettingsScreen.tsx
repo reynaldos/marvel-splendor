@@ -12,6 +12,7 @@ import { FoilLayer, hasGyro, setMotionFrames, useMotionFrames } from "@/componen
 import { ownFrame, PlayerAvatar } from "@/components/profile/PlayerAvatar";
 import { AVATAR_TYPES, checkAvatarFile, checkAvatarType, uploadAvatar } from "@/components/profile/upload-avatar";
 import { Stage, StageRows } from "@/components/Stage";
+import { PushToggle } from "@/components/PushToggle";
 import { Toggle } from "@/components/Toggle";
 import {
   Dialog,
@@ -50,6 +51,8 @@ interface SettingsScreenProps {
   xpAvatarStyle: boolean;
   xpCardStyle: boolean;
   hideFromLeaderboard: boolean;
+  /** The account's Notifications switch; left out when an admin edits another player. */
+  pushEnabled?: boolean;
   /** Set when an admin is editing another player's profile: their username. */
   forUser: string | null;
   onCheckUsername: (typed: string, forUser: string | null) => Promise<SaveState>;
@@ -68,6 +71,7 @@ export function SettingsScreen({
   xpAvatarStyle,
   xpCardStyle,
   hideFromLeaderboard,
+  pushEnabled,
   forUser,
   onCheckUsername,
   onSave,
@@ -233,7 +237,7 @@ export function SettingsScreen({
             </button>
           </div>
 
-          <div className="flex w-130 flex-col gap-3">
+          <div className="flex w-130 flex-col gap-4">
             {cropping ? (
               <>
                 <h2 className={HEADING}>Place your picture</h2>
@@ -281,9 +285,19 @@ export function SettingsScreen({
               <>
                 <div className="flex gap-4">
                   <div className="flex flex-1 flex-col gap-2">
-                    <label htmlFor="username" className={HEADING}>
-                      Username
-                    </label>
+                    {/* Note sits beside the label, so no empty row is reserved under the fields. */}
+                    <div className="flex items-baseline justify-between gap-2">
+                      <label htmlFor="username" className={HEADING}>
+                        Username
+                      </label>
+                      <p
+                        id="username-note"
+                        aria-live="polite"
+                        className={cn("truncate text-xs font-bold", nameNote?.ok ? "text-gold-200" : "text-red-300")}
+                      >
+                        {nameNote?.message}
+                      </p>
+                    </div>
                     <input
                       id="username"
                       value={name}
@@ -296,13 +310,6 @@ export function SettingsScreen({
                       aria-invalid={nameNote ? !nameNote.ok : undefined}
                       className={FIELD}
                     />
-                    <p
-                      id="username-note"
-                      aria-live="polite"
-                      className={cn("h-4 px-5 text-xs font-bold", nameNote?.ok ? "text-gold-200" : "text-red-300")}
-                    >
-                      {nameNote?.message}
-                    </p>
                   </div>
                   <div className="flex flex-1 flex-col gap-2">
                     <label htmlFor="name" className={HEADING}>
@@ -324,6 +331,7 @@ export function SettingsScreen({
                   <Toggle on={xpCard} onChange={set(setXpCard)} label="PFP border" />
                   <Toggle on={onBoard} onChange={set(setOnBoard)} label="Leaderboard" />
                   {tiltable ? <Toggle on={motion} onChange={setMotionFrames} label="Tilt with the phone" /> : null}
+                  {pushEnabled !== undefined ? <PushToggle enabled={pushEnabled} /> : null}
                 </div>
               </>
             )}

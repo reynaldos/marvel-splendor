@@ -34,6 +34,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         xpAvatarStyle={user.xpAvatarStyle}
         xpCardStyle={user.xpCardStyle}
         hideFromLeaderboard={user.hideFromLeaderboard}
+        // Only on your own settings: an admin's view of another player leaves it out.
+        pushEnabled={forUser ? undefined : user.pushEnabled}
         forUser={forUser ?? null}
         onCheckUsername={checkUsernameAction}
         onSave={saveProfileAction}

@@ -51,7 +51,8 @@ You need Node 22 and pnpm.
    |---|---|
    | `DATABASE_URL` | Everything |
    | `AUTH0_*`, `APP_BASE_URL` | Signing in |
-   | `PUSHER_*`, `NEXT_PUBLIC_PUSHER_*` | Private games |
+   | `PUSHER_*`, `NEXT_PUBLIC_PUSHER_*` | Private games, and live friend updates |
+   | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_*` | Push notifications for friend requests and invites. Make them with `pnpm exec web-push generate-vapid-keys`; to try push locally, run `next dev --experimental-https` |
    | `R2_*` | Uploading a profile picture |
    | `OPENAI_API_KEY` | Bot banter (not built yet) |
 

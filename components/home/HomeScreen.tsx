@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Medal } from "lucide-react";
 
+import { FriendsButton } from "@/components/friends/FriendsButton";
 import { CardFanArt, DuelArt, WelcomeArt } from "@/components/home/art";
 import { HowToPlay } from "@/components/home/HowToPlay";
 import { Logo } from "@/components/home/Logo";
@@ -39,9 +40,20 @@ export function WelcomeScreen() {
 
 /**
  * The main menu: the two games. With a room waiting (`lobbyId`), the Play Game tile goes straight back to it;
- * with a game against bots in play (`gameId`), the footer's line is the way back to it.
+ * with a game against bots in play (`gameId`), the footer's line is the way back to it. `friendRequests` is how
+ * many requests wait for the player, which lights the Friends button.
  */
-export function HomeScreen({ lobbyId, gameId, duelPlayed }: { lobbyId: string | null; gameId: string | null; duelPlayed: boolean }) {
+export function HomeScreen({
+  lobbyId,
+  gameId,
+  duelPlayed,
+  friendRequests,
+}: {
+  lobbyId: string | null;
+  gameId: string | null;
+  duelPlayed: boolean;
+  friendRequests: number;
+}) {
   return (
     <Stage>
       <StageRows>
@@ -59,8 +71,8 @@ export function HomeScreen({ lobbyId, gameId, duelPlayed }: { lobbyId: string | 
 
         <footer className="flex items-center gap-4">
           <ShopButton />
-          {/* Keeps the line centred, with two buttons on the right. */}
-          <span aria-hidden className="w-14" />
+          {/* Two round buttons each side keep the middle line centred. */}
+          <FriendsButton waiting={friendRequests} />
           {gameId ? (
             <span className="flex flex-1 justify-center">
               <Link

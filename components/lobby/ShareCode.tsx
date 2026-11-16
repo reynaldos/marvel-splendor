@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Check, Copy, Share } from "lucide-react";
 
-const BUTTON =
+/** The round button beside the room code; Invite friends wears it too. */
+export const ROUND_BUTTON =
   "flex size-12 items-center justify-center rounded-full bg-cosmos-700 text-gold-200 ring-2 ring-cosmos-500 ring-inset hover:bg-cosmos-500";
 
 /**
@@ -44,11 +45,11 @@ export function ShareCode({ code }: { code: string }) {
         type="button"
         onClick={() => copy(code)}
         aria-label={copied ? "Copied" : "Copy room code"}
-        className={BUTTON}
+        className={ROUND_BUTTON}
       >
         {copied ? <Check className="size-5" /> : <Copy className="size-5" />}
       </button>
-      <button type="button" onClick={share} aria-label="Share invite" className={BUTTON}>
+      <button type="button" onClick={share} aria-label="Share invite" className={ROUND_BUTTON}>
         <Share className="size-5" />
       </button>
     </div>
